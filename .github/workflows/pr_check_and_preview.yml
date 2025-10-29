@@ -92,3 +92,11 @@ jobs:
         with:
           message: |
             ✅ Preview ${{ steps.deploy.outputs.preview_url }}
+
+permissions:
+  contents: read
+  pages: write
+  deployments: write
+  id-token: write
+  issues: write
+  pull-requests: write
