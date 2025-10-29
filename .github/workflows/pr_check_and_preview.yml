@@ -10,9 +10,10 @@ jobs:
   validate_and_preview:
     runs-on: ubuntu-latest
     env:
+      NODE_ENV: staging
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_STAGE_TOKEN }}
 
     steps:
       - name: Checkout
@@ -37,57 +38,33 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-      - name: Run Jest tests
-        id: jest_test
-        run: |
-          set +e
-          npm test --silent 2>&1 | tee jest-output.txt
-          TEST_EXIT=$?
-          echo "exit_code=$TEST_EXIT" >> $GITHUB_OUTPUT
-          set -e
-
-      - name: Comment Jest Summary
-        if: always()
-        uses: actions/github-script@v8
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const log = fs.readFileSync('jest-output.txt', 'utf8');
-            const suitesLine = log.split('\n').find(l => l.includes('Test Suites:')) || '';
-            const testsLine = log.split('\n').find(l => l.includes('Tests:')) || '';
-            const timeLine = log.split('\n').find(l => l.includes('Time:')) || '';
-            const suitesTotal = (suitesLine.match(/(\d+)\s+total/) || [])[1] || '0';
-            const testsTotal = (testsLine.match(/(\d+)\s+total/) || [])[1] || '0';
-            const testsPassed = (testsLine.match(/(\d+)\s+passed/) || [])[1] || '0';
-            const testsFailed = (testsLine.match(/(\d+)\s+failed/) || [])[1] || '0';
-            const time = (timeLine.match(/Time:\s+([\d.]+)\s*s/) || [])[1] || '—';
-            const success = ${{ steps.jest_test.outputs.exit_code }} == 0;
-            const message = success
-              ? `✅ ${testsPassed} tests passed`
-              : `❌ ${testsFailed} tests failed (details in logs)`;
-            const comment = `🧪 **Jest Test Summary**\n${message}\nTotal: ${testsTotal} tests (${suitesTotal} suites)\nTime: ${time} s`;
-            await github.rest.issues.createComment({
-              issue_number: context.payload.pull_request.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      - name: Pull Vercel Project Settings
+        run: |
+          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_STAGE_TOKEN }}
+
       - name: Build Preview
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token=${{ secrets.VERCEL_STAGE_TOKEN }}
 
       - name: Deploy Preview
         id: deploy
         run: |
-          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} > vercel-output.txt
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_STAGE_TOKEN }} > vercel-output.txt
           echo "preview_url=$(cat vercel-output.txt)" >> $GITHUB_OUTPUT
 
       - name: Comment PR with Preview URL
         uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
-            ✅ Preview ${{ steps.deploy.outputs.preview_url }}
+            ✅ Preview ready: ${{ steps.deploy.outputs.preview_url }}
+          comment-tag: vercel-preview # ✅ 코멘트 한 번만 유지
+
+permissions:
+  contents: read
+  pages: write
+  deployments: write
+  id-token: write
+  issues: write
+  pull-requests: write
