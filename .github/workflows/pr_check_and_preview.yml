@@ -58,7 +58,8 @@ jobs:
         uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
-            ✅ Preview ${{ steps.deploy.outputs.preview_url }}
+            ✅ Preview ready: ${{ steps.deploy.outputs.preview_url }}
+          comment-tag: vercel-preview # ✅ 코멘트 한 번만 유지
 
 permissions:
   contents: read
