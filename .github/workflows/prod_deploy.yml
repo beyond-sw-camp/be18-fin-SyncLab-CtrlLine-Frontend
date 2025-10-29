@@ -5,29 +5,25 @@ on:
       - main
 
 jobs:
-  build:
+  deployment:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: production
-    container: pandoc/latex
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PROD }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_PROD_TOKEN }}
 
     steps:
       - uses: actions/checkout@v5
-
-      - name: Install mustache (to update the date)
-        run: apk add ruby && gem install mustache
-
-      - name: Build production output
-        run: sh ./build.sh
-
-      - name: Push build to production repository
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.KIMEODML_GITHUB_KEY }}
-        with:
-          source-directory: "output"
-          destination-github-username: kimeodml
-          destination-repository-name: be18-fin-SyncLab-CtrlLine-Frontend
-          user-email: ${{ secrets.KIMEODML_ACCOUNT_EMAIL }}
-          commit-message: "🚀 Production release: ${{ github.sha }}"
-          target-branch: main
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel Project Settings
+        run: |
+          vercel pull --yes --environment=production \
+            --token=${{ secrets.VERCEL_PROD_TOKEN }} \
+            --org-id=${{ secrets.VERCEL_ORG_ID }} \
+            --project-id=${{ secrets.VERCEL_PROJECT_ID_PROD }}
+      - name: Build and Deploy to Production
+        run: |
+          vercel build --prod --token=${{ secrets.VERCEL_PROD_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_PROD_TOKEN }}
