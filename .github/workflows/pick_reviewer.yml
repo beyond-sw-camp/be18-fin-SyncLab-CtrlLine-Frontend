@@ -39,7 +39,7 @@ jobs:
       - name: Comment PR
         uses: mshick/add-pr-comment@v2
         with:
-          message: ${{ steps.pick_random_reviwer.outputs.comment }}
+          message: ${{ steps.pick_random_reviewer.outputs.comment }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Add PR Reviewer
