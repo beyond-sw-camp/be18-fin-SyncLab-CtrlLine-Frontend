@@ -1,23 +1,26 @@
-name: stage deploy
+name: prod deploy
 on:
   push:
     branches:
-      - develop
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      NODE_ENV: staging
+      NODE_ENV: production
     container: pandoc/latex
+
     steps:
       - uses: actions/checkout@v5
+
       - name: Install mustache (to update the date)
         run: apk add ruby && gem install mustache
-      - name: creates output
+
+      - name: Build production output
         run: sh ./build.sh
-      - name: Pushes to another repository
-        id: push_directory
+
+      - name: Push build to production repository
         uses: cpina/github-action-push-to-another-repository@main
         env:
           API_TOKEN_GITHUB: ${{ secrets.KIMEODML_GITHUB_KEY }}
@@ -26,7 +29,5 @@ jobs:
           destination-github-username: kimeodml
           destination-repository-name: be18-fin-SyncLab-CtrlLine-Frontend
           user-email: ${{ secrets.KIMEODML_ACCOUNT_EMAIL }}
-          commit-message: ${{ github.event.commits[0].message }}
-          target-branch: develop
-      - name: Test get variable exported by push-to-another-repository
-        run: echo $DESTINATION_CLONED_DIRECTORY
+          commit-message: "🚀 Production release: ${{ github.sha }}"
+          target-branch: main
