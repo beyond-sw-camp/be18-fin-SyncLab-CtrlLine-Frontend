@@ -79,7 +79,7 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Build Preview
-        run: vercel build --token=${{ secrets.VERCEL__STAGE_TOKEN }}
+        run: vercel build --token=${{ secrets.VERCEL_STAGE_TOKEN }}
 
       - name: Deploy Preview
         id: deploy
