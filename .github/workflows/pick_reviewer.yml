@@ -21,7 +21,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const fs = require('fs');
-            const candidate = JSON.parse(fs.readFileSync(`${{ github.workspace }}/reviewers.json`));
+            const candidate = JSON.parse(fs.readFileSync(`${{ github.workspace }}/.github/workflows/reviewers.json`));
             const me = '${{ github.event.pull_request.user.login }}';
             const candidateWithoutMe = candidate.filter(id => id !== me);
 
