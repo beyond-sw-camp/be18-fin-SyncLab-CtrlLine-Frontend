@@ -19,10 +19,7 @@ jobs:
         run: npm install --global vercel@latest
       - name: Pull Vercel Project Settings
         run: |
-          vercel pull --yes --environment=production \
-            --token=${{ secrets.VERCEL_PROD_TOKEN }} \
-            --org-id=${{ secrets.VERCEL_ORG_ID }} \
-            --project-id=${{ secrets.VERCEL_PROJECT_ID_PROD }}
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_PROD_TOKEN }}
       - name: Build and Deploy to Production
         run: |
           vercel build --prod --token=${{ secrets.VERCEL_PROD_TOKEN }}
