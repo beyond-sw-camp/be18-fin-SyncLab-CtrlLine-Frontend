@@ -26,7 +26,8 @@
     "eslint-plugin-vue": "^10.5.1",
     "globals": "^16.4.0",
     "prettier": "^3.6.2",
-    "vite": "npm:rolldown-vite@7.1.14"
+    "vite": "npm:rolldown-vite@7.1.14",
+    "vitest": "^4.0.4"
   },
   "overrides": {
     "vite": "npm:rolldown-vite@7.1.14"

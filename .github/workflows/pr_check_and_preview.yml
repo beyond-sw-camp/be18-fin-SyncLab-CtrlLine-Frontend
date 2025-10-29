@@ -38,43 +38,6 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-      - name: Run Jest tests
-        id: jest_test
-        run: |
-          set +e
-          npm test --silent 2>&1 | tee jest-output.txt
-          TEST_EXIT=$?
-          echo "exit_code=$TEST_EXIT" >> $GITHUB_OUTPUT
-          set -e
-
-      - name: Comment Jest Summary
-        if: always()
-        uses: actions/github-script@v8
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const log = fs.readFileSync('jest-output.txt', 'utf8');
-            const suitesLine = log.split('\n').find(l => l.includes('Test Suites:')) || '';
-            const testsLine = log.split('\n').find(l => l.includes('Tests:')) || '';
-            const timeLine = log.split('\n').find(l => l.includes('Time:')) || '';
-            const suitesTotal = (suitesLine.match(/(\d+)\s+total/) || [])[1] || '0';
-            const testsTotal = (testsLine.match(/(\d+)\s+total/) || [])[1] || '0';
-            const testsPassed = (testsLine.match(/(\d+)\s+passed/) || [])[1] || '0';
-            const testsFailed = (testsLine.match(/(\d+)\s+failed/) || [])[1] || '0';
-            const time = (timeLine.match(/Time:\s+([\d.]+)\s*s/) || [])[1] || '—';
-            const success = ${{ steps.jest_test.outputs.exit_code }} == 0;
-            const message = success
-              ? `✅ ${testsPassed} tests passed`
-              : `❌ ${testsFailed} tests failed (details in logs)`;
-            const comment = `🧪 **Jest Test Summary**\n${message}\nTotal: ${testsTotal} tests (${suitesTotal} suites)\nTime: ${time} s`;
-            await github.rest.issues.createComment({
-              issue_number: context.payload.pull_request.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
-
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
