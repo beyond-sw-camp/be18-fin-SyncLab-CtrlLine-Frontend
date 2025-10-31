@@ -19,13 +19,21 @@ export default defineConfig([
         ...globals.node,
       },
     },
+    settings: {
+      'import-x/resolver': {
+        alias: {
+          map: [['@', './src']],
+          extensions: ['.vue', '.js', '.json'],
+        },
+      },
+    },
     rules: {
       'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
       'vue/no-undef-components': [
         'error',
         {
-          ignorePatterns: ['custom(\\-\\w+)+'],
+          ignorePatterns: ['custom(\\-\\w+)+', 'g-gantt-chart', 'g-gantt-row'],
         },
       ],
     },
