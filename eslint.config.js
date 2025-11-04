@@ -33,7 +33,7 @@ export default defineConfig([
       'vue/no-undef-components': [
         'error',
         {
-          ignorePatterns: ['custom(\\-\\w+)+', 'g-gantt-chart', 'g-gantt-row'],
+          ignorePatterns: ['router-view'],
         },
       ],
       'vue/multi-word-component-names': 'off',
