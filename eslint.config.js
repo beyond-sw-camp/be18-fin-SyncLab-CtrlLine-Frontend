@@ -36,6 +36,7 @@ export default defineConfig([
           ignorePatterns: ['custom(\\-\\w+)+', 'g-gantt-chart', 'g-gantt-row'],
         },
       ],
+      'vue/multi-word-component-names': 'off',
     },
   },
 ]);
