@@ -1,5 +1,10 @@
-<template>안녕</template>
+<template>
+  안녕
+  <Button variant="secondary">Click me</Button>
+</template>
 
-<script setup></script>
+<script setup>
+import { Button } from '@/components/ui/button';
+</script>
 
 <style scoped></style>
