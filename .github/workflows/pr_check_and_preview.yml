@@ -1,0 +1,70 @@
+name: pr check and preview
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate_and_preview:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: staging
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_STAGE_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Project Settings
+        run: |
+          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_STAGE_TOKEN }}
+
+      - name: Build Preview
+        run: vercel build --token=${{ secrets.VERCEL_STAGE_TOKEN }}
+
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_STAGE_TOKEN }} > vercel-output.txt
+          echo "preview_url=$(cat vercel-output.txt)" >> $GITHUB_OUTPUT
+
+      - name: Comment PR with Preview URL
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          message: |
+            ✅ Preview ready: ${{ steps.deploy.outputs.preview_url }}
+          comment-tag: vercel-preview # ✅ 코멘트 한 번만 유지
+
+permissions:
+  contents: read
+  pages: write
+  deployments: write
+  id-token: write
+  issues: write
+  pull-requests: write
