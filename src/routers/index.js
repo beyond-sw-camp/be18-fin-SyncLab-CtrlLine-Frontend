@@ -132,7 +132,7 @@ router.beforeEach((to, from, next) => {
   const isLoggedIn = true;
   // const isLoggedIn = !!localStorage.getItem('accessToken'); // or 쿠키/스토어에서 체크
   // 로그인 페이지로 접근했는데 이미 로그인된 경우 → /dashboard로 리다이렉트
-  if (to.path === '/login' && isLoggedIn) {
+  if (!to.meta.requiresAuth && isLoggedIn) {
     next('/dashboard');
     return;
   }
