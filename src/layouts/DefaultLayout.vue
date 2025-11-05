@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { Separator } from '@/components/ui/separator';
 import Sidebar from '@/components/sidebar/Sidebar.vue';
 import TopNav from '@/components/topnav/TopNav.vue';
+import { Separator } from '@/components/ui/separator';
 </script>

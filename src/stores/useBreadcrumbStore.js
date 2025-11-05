@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+
 import { baseManagement, productionManagement, productionReport } from '@/constants/category';
 
 export const useBreadcrumbStore = defineStore('breadcrumb', {

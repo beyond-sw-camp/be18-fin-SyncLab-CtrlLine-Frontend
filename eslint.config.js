@@ -5,9 +5,11 @@ import pluginVue from 'eslint-plugin-vue';
 import globals from 'globals';
 
 export default defineConfig([
+  {
+    ignores: ['node_modules/**', 'dist/**', 'src/components/ui/**']
+  },
   pluginVue.configs['flat/essential'],
   {
-    ignores: ['node_modules/**', 'dist/**'],
     files: ['**/*.{js,mjs,cjs,vue}'],
     plugins: { js },
     extends: ['js/recommended', importX.flatConfigs.recommended],
