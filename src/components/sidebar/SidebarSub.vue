@@ -22,8 +22,9 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import SidebarLink from '@/components/sidebar/SidebarLink.vue';
 import { useRoute } from 'vue-router';
+
+import SidebarLink from '@/components/sidebar/SidebarLink.vue';
 
 const props = defineProps({
   icon: String,

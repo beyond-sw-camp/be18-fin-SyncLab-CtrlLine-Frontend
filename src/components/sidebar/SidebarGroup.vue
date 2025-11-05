@@ -26,8 +26,9 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import SidebarSub from '@/components/sidebar/SidebarSub.vue';
+
 import SidebarLink from '@/components/sidebar/SidebarLink.vue';
+import SidebarSub from '@/components/sidebar/SidebarSub.vue';
 
 const props = defineProps({
   title: String,

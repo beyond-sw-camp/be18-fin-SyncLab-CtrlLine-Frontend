@@ -10,9 +10,10 @@
 </template>
 
 <script setup>
-import { RouterLink, useRoute } from 'vue-router';
-import { useBreadcrumbStore } from '@/stores/useBreadcrumbStore';
 import { onMounted, watch } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
+
+import { useBreadcrumbStore } from '@/stores/useBreadcrumbStore';
 
 const props = defineProps({
   label: String,

@@ -8,9 +8,10 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import DefaultLayout from '@/layouts/DefaultLayout.vue';
-import AuthLayout from '@/layouts/AuthLayout.vue';
 import { useRoute } from 'vue-router';
+
+import AuthLayout from '@/layouts/AuthLayout.vue';
+import DefaultLayout from '@/layouts/DefaultLayout.vue';
 
 const route = useRoute();
 // 로그인 상태 (실제로는 store나 cookie 기반으로 관리)

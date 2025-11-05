@@ -19,6 +19,8 @@
 </template>
 
 <script setup>
+import { storeToRefs } from 'pinia';
+
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -28,7 +30,6 @@ import {
   BreadcrumbPage,
 } from '@/components/ui/breadcrumb';
 import { useBreadcrumbStore } from '@/stores/useBreadcrumbStore';
-import { storeToRefs } from 'pinia';
 
 const { list } = storeToRefs(useBreadcrumbStore());
 </script>

@@ -18,6 +18,23 @@
     </div>
 
     <div class="flex items-center gap-4">
+      <Sheet>
+        <SheetTrigger>
+          <div class="relative rounded-full p-2 hover:bg-muted transition">
+            <Bell class="h-5 w-5 text-foreground" />
+            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"></span>
+          </div>
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Are you absolutely sure?</SheetTitle>
+            <SheetDescription>
+              This action cannot be undone. This will permanently delete your account and remove
+              your data from our servers.
+            </SheetDescription>
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>
       <button
         class="relative rounded-full p-2 hover:bg-muted transition"
         aria-label="notifications"
@@ -45,14 +62,23 @@
 </template>
 
 <script setup>
+import { Bell } from 'lucide-vue-next';
+
+import BreadcrumbBar from '@/components/topnav/BreadcrumbBar.vue';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   NavigationMenu,
   NavigationMenuList,
   NavigationMenuItem,
   NavigationMenuLink,
 } from '@/components/ui/navigation-menu';
-import BreadcrumbBar from '@/components/topnav/BreadcrumbBar.vue';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Bell } from 'lucide-vue-next';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 </script>
