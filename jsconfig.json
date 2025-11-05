@@ -5,11 +5,11 @@
     "module": "esnext",
     "baseUrl": ".",
     "moduleResolution": "bundler",
-    "checkJs": true,
+    "checkJs": false,
     "paths": {
       "@/*": ["./src/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
-  "exclude": ["typed-router.d.ts"]
+  "exclude": ["typed-router.d.ts", "node_modules"]
 }

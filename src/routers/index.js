@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import Login from '@/pages/auth/Login.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
@@ -25,6 +23,7 @@ const routes = [
     name: 'BaseManagement',
     meta: { requiresAuth: true },
     children: [
+      // 등록 경로 추가 필요
       {
         path: 'users',
         name: 'UserList',
@@ -36,7 +35,7 @@ const routes = [
         component: () => import('@/pages/base-management/item/ItemList.vue'),
       },
       {
-        path: 'factorys',
+        path: 'factories',
         name: 'FactoryList',
         component: () => import('@/pages/base-management/factory/FactoryList.vue'),
       },
@@ -87,7 +86,7 @@ const routes = [
         component: () => import('@/pages/production-management/defective/DefectiveList.vue'),
       },
       {
-        path: 'lot',
+        path: 'lots',
         name: 'LotList',
         component: () => import('@/pages/production-management/lot/LotList.vue'),
       },
