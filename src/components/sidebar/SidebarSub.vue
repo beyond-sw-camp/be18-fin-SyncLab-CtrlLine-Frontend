@@ -8,7 +8,7 @@
     <div
       class="flex items-center justify-between py-1.5 px-2 cursor-pointer rounded hover:bg-primary-400 transition"
     >
-      <span>{{ label }}</span>
+      <span>{{ icon }} {{ label }}</span>
       <span>{{ showChildren ? '▾' : '▸' }}</span>
     </div>
 
@@ -26,6 +26,7 @@ import SidebarLink from '@/components/sidebar/SidebarLink.vue';
 import { useRoute } from 'vue-router';
 
 const props = defineProps({
+  icon: String,
   label: String,
   children: Array,
 });

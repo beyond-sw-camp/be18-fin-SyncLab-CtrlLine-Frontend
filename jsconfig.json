@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "checkJs": true,
     "target": "es2024",
     "module": "esnext",
     "baseUrl": ".",
-    "moduleResolution": "bundler",
-    "checkJs": false,
+    "moduleResolution": "node",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+    "jsx": "preserve"
   },
-  "exclude": ["typed-router.d.ts", "node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["typed-router.d.ts", "dist", "node_modules"]
 }
