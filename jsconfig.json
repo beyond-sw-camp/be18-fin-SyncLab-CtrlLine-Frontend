@@ -13,5 +13,5 @@
     "jsx": "preserve"
   },
   "include": ["src/**/*"],
-  "exclude": ["typed-router.d.ts", "dist", "node_modules"]
+  "exclude": ["dist", "node_modules"]
 }
