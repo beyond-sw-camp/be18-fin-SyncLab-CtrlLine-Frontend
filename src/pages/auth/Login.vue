@@ -13,7 +13,7 @@
                   <div class="flex items-center gap-1"><InfoIcon />가입문의</div>
                 </DialogTitle>
                 <DialogDescription class="flex flex-col items-center gap-2 text-black">
-                  <p>SyncLab</p>
+                  <p>CtrlLine</p>
                   <p>02-111-1234</p>
                   <p>beyond@synclab.com</p>
                 </DialogDescription>
@@ -28,7 +28,7 @@
           </Dialog>
         </div>
 
-        <h1 class="scroll-m-20 text-4xl font-bold tracking-tight lg:text-5xl">Synclab</h1>
+        <h1 class="scroll-m-20 text-4xl font-bold tracking-tight lg:text-5xl">CtrlLine</h1>
         <h2 class="text-2xl mt-6">환영합니다</h2>
         <h3 class="text-xl">로그인</h3>
       </div>

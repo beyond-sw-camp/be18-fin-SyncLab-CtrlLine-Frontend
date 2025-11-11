@@ -6,7 +6,7 @@
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuLink href="/" class="flex items-center gap-2">
-              <span class="text-lg font-bold tracking-tight">SyncLab</span>
+              <span class="text-lg font-bold tracking-tight">CtrlLine</span>
             </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
@@ -21,7 +21,7 @@
       <Sheet>
         <SheetTrigger>
           <div class="relative rounded-full p-2 hover:bg-muted transition">
-            <Bell class="h-5 w-5 text-foreground cursor-pointer" />
+            <BellIcon class="h-5 w-5 text-foreground cursor-pointer" />
             <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"></span>
           </div>
         </SheetTrigger>
@@ -45,6 +45,11 @@
               <span class="font-medium">SyncLab</span>
             </NavigationMenuLink>
           </NavigationMenuItem>
+          <NavigationMenuItem>
+            <Button class="cursor-pointer" @click="logout">
+              <LogOutIcon />
+            </Button>
+          </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
     </div>
@@ -52,10 +57,14 @@
 </template>
 
 <script setup>
-import { Bell } from 'lucide-vue-next';
+import { BellIcon, LogOutIcon } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { toast } from 'vue-sonner';
 
 import BreadcrumbBar from '@/components/topnav/BreadcrumbBar.vue';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -71,4 +80,14 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { useAuthStore } from '@/stores/useAuthStore';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const logout = () => {
+  authStore.clearAuth();
+  toast.success('로그아웃 되었습니다.');
+  router.push('/login');
+};
 </script>
