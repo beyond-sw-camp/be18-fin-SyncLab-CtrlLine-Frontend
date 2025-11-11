@@ -58,7 +58,6 @@
 
 <script setup>
 import { BellIcon, LogOutIcon } from 'lucide-vue-next';
-import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
