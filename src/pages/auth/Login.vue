@@ -41,6 +41,7 @@
                 type="email"
                 placeholder="이메일을 입력해주세요."
                 v-bind="componentField"
+                autocomplete="email"
                 class="w-full"
               />
               <p class="text-red-500 text-sm">{{ errorMessage }}</p>
@@ -56,6 +57,7 @@
                 type="password"
                 placeholder="비밀번호를 입력해주세요."
                 v-bind="componentField"
+                autocomplete="password"
                 class="w-full"
               />
               <p class="text-red-500 text-sm">{{ errorMessage }}</p>
@@ -63,7 +65,7 @@
           </FormItem>
         </FormField>
 
-        <Button type="submit" class="mt-8 w-full cursor-pointer"> 로그인 </Button>
+        <Button type="submit" class="mt-8 w-full cursor-pointer" variant="outline"> 로그인 </Button>
       </Form>
     </div>
     <div class="flex justify-center items-center">
@@ -77,6 +79,7 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { InfoIcon } from 'lucide-vue-next';
 import { z } from 'zod';
 
+import useLogin from '@/apis/query-hooks/useLogin';
 import LoginSideIllustration from '@/assets/login-side-illustration.svg';
 import { Button } from '@/components/ui/button';
 import {
@@ -103,8 +106,10 @@ const formSchema = toTypedSchema(
   }),
 );
 
+const { mutate: login } = useLogin();
+
 const onSubmit = values => {
-  console.log('submit', values);
+  login(values);
 };
 </script>
 

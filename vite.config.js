@@ -3,24 +3,28 @@ import path from 'node:path';
 
 import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
-import { defineConfig } from 'vite';
-import svgLoader from 'vite-svg-loader'
+import { defineConfig, loadEnv } from 'vite';
+import svgLoader from 'vite-svg-loader';
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [vue(), tailwindcss(), svgLoader()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-    },
-  },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080', // 실제 백엔드 서버
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, ''),
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd());
+
+  return {
+    plugins: [vue(), tailwindcss(), svgLoader()],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
       },
     },
-  },
+    server: {
+      proxy: {
+        '/api': {
+          target: env.VITE_API_BASE_URL,
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/api/, ''),
+        },
+      },
+    },
+  };
 });

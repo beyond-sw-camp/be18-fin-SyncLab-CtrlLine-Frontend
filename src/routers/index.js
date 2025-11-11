@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import Login from '@/pages/auth/Login.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const routes = [
   {
     path: '/',
-    redirect: '/login',
+    redirect: '/dashboard',
   },
   {
     path: '/login',
@@ -129,16 +130,17 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  // 로그인 로직으로 경로 보호
-  const isLoggedIn = true;
-  // const isLoggedIn = !!localStorage.getItem('accessToken'); // or 쿠키/스토어에서 체크
-  // 로그인 페이지로 접근했는데 이미 로그인된 경우 → /dashboard로 리다이렉트
-  if (!to.meta.requiresAuth && isLoggedIn) {
+  if (to.fullPath.match(/\/{2,}/)) next(to.fullPath.replace(/\/{2,}/g, '/'));
+
+  const authStore = useAuthStore();
+  authStore.getToken();
+
+  if (!to.meta.requiresAuth && authStore.isLoggedIn) {
     next('/dashboard');
     return;
   }
   // 로그인 필요한 페이지인데 로그인 안 된 경우 → /login으로 이동
-  if (to.meta.requiresAuth && !isLoggedIn) {
+  if (to.meta.requiresAuth && !authStore.isLoggedIn) {
     next('/login');
     return;
   }

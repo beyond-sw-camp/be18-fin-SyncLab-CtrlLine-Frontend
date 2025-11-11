@@ -4,26 +4,27 @@
       <router-view />
     </component>
   </div>
+  <Toaster richColors />
+  <VueQueryDevtools />
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
+import { computed } from 'vue';
 
+import { Toaster } from '@/components/ui/sonner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
-
-const route = useRoute();
-// 로그인 상태 (실제로는 store나 cookie 기반으로 관리)
-const isLoggedIn = ref(false);
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const layout = computed(() => {
-  if (route.meta.requiresAuth === false) {
+  const { isLoggedIn } = useAuthStore();
+  if (isLoggedIn === false) {
     return AuthLayout;
   }
 
-  if (route.meta.requiresAuth && !isLoggedIn.value) return AuthLayout;
+  if (isLoggedIn === true) return DefaultLayout;
 
-  return DefaultLayout;
+  return AuthLayout;
 });
 </script>

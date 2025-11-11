@@ -6,7 +6,7 @@ import globals from 'globals';
 
 export default defineConfig([
   {
-    ignores: ['node_modules/**', 'dist/**', 'src/components/ui/**']
+    ignores: ['node_modules/**', 'dist/**', 'src/components/ui/**'],
   },
   pluginVue.configs['flat/essential'],
   {
@@ -23,6 +23,9 @@ export default defineConfig([
     },
     settings: {
       'import-x/resolver': {
+        node: {
+          extensions: ['.js', '.vue'],
+        },
         alias: {
           map: [['@', './src']],
           extensions: ['.vue', '.js', '.json'],
