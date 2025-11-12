@@ -51,7 +51,7 @@
 
         <FormField v-slot="{ componentField, errorMessage }" name="password">
           <FormItem>
-            <FormLabel>Password</FormLabel>
+            <FormLabel>비밀번호</FormLabel>
             <FormControl>
               <Input
                 type="password"
@@ -84,7 +84,7 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { InfoIcon } from 'lucide-vue-next';
 import { z } from 'zod';
 
-import useLogin from '@/apis/query-hooks/useLogin';
+import useLogin from '@/apis/query-hooks/auth/useLogin';
 import LoginSideIllustration from '@/assets/login-side-illustration.svg';
 import { Button } from '@/components/ui/button';
 import {
