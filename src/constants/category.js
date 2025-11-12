@@ -3,7 +3,16 @@ export const baseManagement = [
     icon: '👤',
     label: '사용자 관리',
     children: [
-      { label: '사용자 목록 조회', to: '/base-management/users' },
+      {
+        label: '사용자 목록 조회',
+        to: '/base-management/users',
+        children: [
+          {
+            label: '사용자 상세 조회',
+            to: '/base-management/users/:empNo',
+          },
+        ],
+      },
       { label: '사용자 등록', to: '/base-management/users/new' },
     ],
   },
@@ -11,7 +20,16 @@ export const baseManagement = [
     icon: '📦',
     label: '품목 관리',
     children: [
-      { label: '품목 목록 조회', to: '/base-management/items' },
+      {
+        label: '품목 목록 조회',
+        to: '/base-management/items',
+        children: [
+          {
+            label: '품목 상세 조회',
+            to: '/base-management/items/:itemCode',
+          },
+        ],
+      },
       { label: '품목 등록', to: '/base-management/items/new' },
     ],
   },
@@ -19,7 +37,16 @@ export const baseManagement = [
     icon: '🏭',
     label: '공장 관리',
     children: [
-      { label: '공장 목록 조회', to: '/base-management/factories' },
+      {
+        label: '공장 목록 조회',
+        to: '/base-management/factories',
+        children: [
+          {
+            label: '공정 상세 조회',
+            to: '/base-management/factories/:factoryCode',
+          },
+        ],
+      },
       { label: '공장 등록', to: '/base-management/factories/new' },
     ],
   },
@@ -27,7 +54,16 @@ export const baseManagement = [
     icon: '🔧',
     label: '라인 관리',
     children: [
-      { label: '라인 목록 조회', to: '/base-management/lines' },
+      {
+        label: '라인 목록 조회',
+        to: '/base-management/lines',
+        children: [
+          {
+            label: '라인 상세 조회',
+            to: '/base-management/lines/:lineCode',
+          },
+        ],
+      },
       { label: '라인 등록', to: '/base-management/lines/new' },
     ],
   },
@@ -35,7 +71,16 @@ export const baseManagement = [
     icon: '🧰',
     label: '설비 관리',
     children: [
-      { label: '설비 목록 조회', to: '/base-management/equipments' },
+      {
+        label: '설비 목록 조회',
+        to: '/base-management/equipments',
+        children: [
+          {
+            label: '설비 상세 조회',
+            to: '/base-management/equipments/:equipmentCode',
+          },
+        ],
+      },
       { label: '설비 등록', to: '/base-management/equipments/new' },
     ],
   },
@@ -43,7 +88,16 @@ export const baseManagement = [
     icon: '⚙️',
     label: '공정 관리',
     children: [
-      { label: '공정 목록 조회', to: '/base-management/processes' },
+      {
+        label: '공정 목록 조회',
+        to: '/base-management/processes',
+        children: [
+          {
+            label: '공정 상세 조회',
+            to: '/base-management/processes/:processesCode',
+          },
+        ],
+      },
       { label: '공정 등록', to: '/base-management/processes/new' },
     ],
   },
@@ -55,7 +109,16 @@ export const productionManagement = [
     icon: '🗓',
     label: '생산계획 관리',
     children: [
-      { label: '생산계획 목록 조회', to: '/production-management/production-plans' },
+      {
+        label: '생산계획 목록 조회',
+        to: '/production-management/production-plans',
+        children: [
+          {
+            label: '공정 상세 조회',
+            to: '/production-management/production-plans/:documentNo',
+          },
+        ],
+      },
       { label: '생산계획 등록', to: '/production-management/production-plans/new' },
     ],
   },
@@ -63,18 +126,49 @@ export const productionManagement = [
     icon: '📦',
     label: '생산실적 관리',
     children: [
-      { label: '생산실적 목록 조회', to: '/production-management/production-performances' },
+      {
+        label: '생산실적 목록 조회',
+        to: '/production-management/production-performances',
+        children: [
+          {
+            label: '공정 상세 조회',
+            to: '/production-management/production-performances/:documentNo',
+          },
+        ],
+      },
     ],
   },
   {
     icon: '🚨',
     label: '불량 관리',
-    children: [{ label: '불량 목록 조회', to: '/production-management/defectives' }],
+    children: [
+      {
+        label: '불량 목록 조회',
+        to: '/production-management/defectives',
+        children: [
+          {
+            label: '공정 상세 조회',
+            to: '/production-management/defectives/:documentNo',
+          },
+        ],
+      },
+    ],
   },
   {
     icon: '#️⃣',
     label: 'Lot No. 관리',
-    children: [{ label: 'Lot No. 목록 조회', to: '/production-management/lots' }],
+    children: [
+      {
+        label: 'Lot No. 목록 조회',
+        to: '/production-management/lots',
+        children: [
+          {
+            label: '공정 상세 조회',
+            to: '/production-management/lots/:lotNo',
+          },
+        ],
+      },
+    ],
   },
 ];
 

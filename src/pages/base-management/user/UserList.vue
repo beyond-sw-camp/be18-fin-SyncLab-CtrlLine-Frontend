@@ -24,7 +24,8 @@
           <TableRow
             v-for="(user, index) in userList.content"
             :key="index"
-            class="hover:bg-gray-50 hover:font-medium text-center transition-all border-b border-dotted border-gray-300"
+            class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
+            @click="goToDetail(user.empNo)"
           >
             <TableCell class="py-3">{{ user.userName }}</TableCell>
             <TableCell>{{ user.userEmail }}</TableCell>
@@ -52,7 +53,7 @@
 
 <script setup>
 import { ChevronRightIcon } from 'lucide-vue-next';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -67,13 +68,12 @@ import {
 } from '@/components/ui/table';
 import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 
+const router = useRouter();
 const { data: userList, page } = useGetUserList();
+
+const goToDetail = empNo => {
+  router.push(`/base-management/users/${empNo}`);
+};
 </script>
 
-<style scoped>
-:deep(th),
-:deep(td) {
-  text-align: center;
-  vertical-align: middle;
-}
-</style>
+<style scoped></style>

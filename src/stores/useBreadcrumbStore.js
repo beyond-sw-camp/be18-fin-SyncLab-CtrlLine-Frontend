@@ -9,13 +9,15 @@ export const useBreadcrumbStore = defineStore('breadcrumb', {
 
   actions: {
     setBreadcrumbByPath(path) {
+      const normalizedPath = normalizeDynamicPath(path);
+
       const allGroups = [
         { label: '기초 관리', children: baseManagement },
         { label: '생산계획 관리', children: productionManagement },
         { label: '출력물', children: productionReport },
       ];
 
-      const result = findTrailRecursive(allGroups, path);
+      const result = findTrailRecursive(allGroups, normalizedPath);
       this.list = result;
     },
   },
@@ -44,4 +46,50 @@ function findTrailRecursive(nodes, targetPath, trail = []) {
     }
   }
   return [];
+}
+
+/**
+ * 동적 path를 패턴 형태로 정규화
+ * 예: '/base-management/users/17' -> '/base-management/users/:empNo'
+ */
+export function normalizeDynamicPath(path) {
+  const allGroups = [
+    ...flattenMenus(baseManagement),
+    ...flattenMenus(productionManagement),
+    ...flattenMenus(productionReport),
+  ];
+
+  // 정확히 일치하는 경우 (정적 경로)
+  const exactMatch = allGroups.find(item => item.to === path);
+  if (exactMatch) return path;
+
+  // 동적 매칭 시도
+  for (const { to } of allGroups) {
+    if (!to.includes(':')) continue;
+
+    // '/base-management/users/:empNo' → /^\/base-management\/users\/[^/]+$/
+    const pattern = new RegExp('^' + to.replace(/:[^/]+/g, '[^/]+') + '$');
+    if (pattern.test(path)) {
+      return to; // '/base-management/users/:empNo' 반환
+    }
+  }
+
+  // 매칭 실패 시 원본 반환
+  return path;
+}
+
+/**
+ * 메뉴 트리를 1차원 배열로 평탄화
+ * 각 항목은 { label, to } 형태
+ */
+function flattenMenus(nodes, acc = []) {
+  for (const node of nodes) {
+    if (node.to) {
+      acc.push({ label: node.label, to: node.to });
+    }
+    if (node.children) {
+      flattenMenus(node.children, acc);
+    }
+  }
+  return acc;
 }

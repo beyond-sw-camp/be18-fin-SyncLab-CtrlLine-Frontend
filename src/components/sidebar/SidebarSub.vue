@@ -14,7 +14,12 @@
 
     <transition name="fade">
       <div v-if="showChildren" class="ml-3 mt-1 space-y-1">
-        <SidebarLink v-for="child in children" :key="child.label" v-bind="child" />
+        <SidebarLink
+          v-for="child in filteredChildren"
+          :key="child.label"
+          :label="child.label"
+          :to="child.to"
+        />
       </div>
     </transition>
   </div>
@@ -34,6 +39,9 @@ const props = defineProps({
 
 const route = useRoute();
 const isHovered = ref(false);
+
+// ":param" 포함된 path 제외
+const filteredChildren = computed(() => props.children?.filter(c => !c.to.includes(':')));
 
 // 현재 route가 하위 children 중 하나라도 포함하면 강조
 const isActiveSub = computed(() => props.children?.some(c => route.path.startsWith(c.to)));

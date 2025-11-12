@@ -5,12 +5,16 @@
         <BreadcrumbItem>
           <BreadcrumbLink
             v-if="i < list.length - 1"
-            :href="item.to || '#'"
+            as-child
             class="text-muted-foreground hover:text-foreground"
           >
-            {{ item.label }}
+            <RouterLink :to="item.to || '#'">
+              {{ item.label }}
+            </RouterLink>
           </BreadcrumbLink>
-          <BreadcrumbPage v-else>{{ item.label }}</BreadcrumbPage>
+          <BreadcrumbPage v-else class="font-semibold text-foreground">
+            {{ item.label }}
+          </BreadcrumbPage>
         </BreadcrumbItem>
         <BreadcrumbSeparator v-if="i < list.length - 1" />
       </template>
@@ -20,6 +24,7 @@
 
 <script setup>
 import { storeToRefs } from 'pinia';
+import { RouterLink } from 'vue-router';
 
 import {
   Breadcrumb,

@@ -1,11 +1,10 @@
 <template>
   <header class="flex items-center justify-between h-14 border-b bg-background px-6">
     <div class="flex items-center gap-3">
-      <!-- 로고 -->
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuLink href="/" class="flex items-center gap-2">
+            <NavigationMenuLink href="/" class="flex items-center gap-2 hover:bg-transparent">
               <span class="text-lg font-bold tracking-tight">CtrlLine</span>
             </NavigationMenuLink>
           </NavigationMenuItem>
