@@ -17,7 +17,6 @@ axios.interceptors.request.use(
 
     if (authStore.accessToken) {
       config.headers.Authorization = `Bearer ${authStore.accessToken}`;
-      console.log('20', authStore.accessToken);
     }
     return config;
   },
