@@ -6,44 +6,47 @@
     </RouterLink>
   </div>
 
-  <div>
-    <Table class="w-full">
-      <TableHeader class="border-b-2 border-primary">
-        <TableRow>
-          <TableHead>사원명</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>부서명</TableHead>
-          <TableHead>연락처</TableHead>
-          <TableHead>상태</TableHead>
-          <TableHead>권한</TableHead>
-        </TableRow>
-      </TableHeader>
+  <div class="flex flex-col">
+    <div class="min-h-[550px] flex-1">
+      <Table class="w-full">
+        <TableHeader class="border-b-2 border-primary">
+          <TableRow>
+            <TableHead>사원명</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>부서명</TableHead>
+            <TableHead>연락처</TableHead>
+            <TableHead>상태</TableHead>
+            <TableHead>권한</TableHead>
+          </TableRow>
+        </TableHeader>
 
-      <TableBody>
-        <TableRow
-          v-for="(user, index) in users"
-          :key="index"
-          class="hover:bg-gray-50 hover:font-medium text-center transition-all border-b border-dotted border-gray-300"
-        >
-          <TableCell class="py-3">{{ user.name }}</TableCell>
-          <TableCell>{{ user.email }}</TableCell>
-          <TableCell>{{ user.department }}</TableCell>
-          <TableCell>{{ user.phone }}</TableCell>
-          <TableCell>
-            <span
-              :class="{
-                'text-[#095A8C]': user.status === '재직',
-                'text-[#8B5401]': user.status === '휴직',
-                'text-[#969696]': user.status === '퇴사',
-              }"
-            >
-              {{ user.status }}
-            </span>
-          </TableCell>
-          <TableCell>{{ user.role }}</TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+        <TableBody v-if="userList && userList.content">
+          <TableRow
+            v-for="(user, index) in userList.content"
+            :key="index"
+            class="hover:bg-gray-50 hover:font-medium text-center transition-all border-b border-dotted border-gray-300"
+          >
+            <TableCell class="py-3">{{ user.userName }}</TableCell>
+            <TableCell>{{ user.userEmail }}</TableCell>
+            <TableCell>{{ user.userDepartment }}</TableCell>
+            <TableCell>{{ user.userPhoneNumber }}</TableCell>
+            <TableCell>
+              <span
+                :class="{
+                  'text-[#095A8C]': EMPLOYMENT_STATUS_LABELS[user.userStatus] === '재직',
+                  'text-[#8B5401]': EMPLOYMENT_STATUS_LABELS[user.userStatus] === '휴직',
+                  'text-[#969696]': EMPLOYMENT_STATUS_LABELS[user.userStatus] === '퇴사',
+                }"
+              >
+                {{ EMPLOYMENT_STATUS_LABELS[user.userStatus] }}
+              </span>
+            </TableCell>
+            <TableCell>{{ ROLE_LABELS[user.userRole] }}</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+    <BasePagination v-model="page" :total-pages="userList?.pageInfo?.totalPages ?? 1" />
   </div>
 </template>
 
@@ -51,6 +54,8 @@
 import { ChevronRightIcon } from 'lucide-vue-next';
 import { RouterLink } from 'vue-router';
 
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
+import BasePagination from '@/components/pagination/BasePagination.vue';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -60,89 +65,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 
-const users = [
-  {
-    name: '김택곤',
-    email: 'abc@naver.com',
-    department: '생산 1팀',
-    phone: '010-1111-1111',
-    status: '재직',
-    role: '관리자',
-  },
-  {
-    name: '서현원',
-    email: 'abc@naver.com',
-    department: '생산 1팀',
-    phone: '010-1111-1111',
-    status: '휴직',
-    role: '담당자',
-  },
-  {
-    name: '이인화',
-    email: 'abc@naver.com',
-    department: '생산 1팀',
-    phone: '010-1111-1111',
-    status: '퇴사',
-    role: '유저',
-  },
-  {
-    name: '육세윤',
-    email: 'abc@naver.com',
-    department: '생산 2팀',
-    phone: '010-1111-1111',
-    status: '퇴사',
-    role: '유저',
-  },
-  {
-    name: '김대의',
-    email: 'abc@naver.com',
-    department: '생산 2팀',
-    phone: '010-1111-1111',
-    status: '재직',
-    role: '유저',
-  },
-  {
-    name: '최정필',
-    email: 'abc@naver.com',
-    department: '생산 3팀',
-    phone: '010-1111-1111',
-    status: '재직',
-    role: '유저',
-  },
-  {
-    name: '박채연',
-    email: 'abc@naver.com',
-    department: '생산 4팀',
-    phone: '010-1111-1111',
-    status: '퇴사',
-    role: '유저',
-  },
-  {
-    name: '윤동기',
-    email: 'abc@naver.com',
-    department: '생산 1팀',
-    phone: '010-1111-1111',
-    status: '재직',
-    role: '유저',
-  },
-  {
-    name: '김민준',
-    email: 'abc@naver.com',
-    department: '생산 2팀',
-    phone: '010-1111-1111',
-    status: '재직',
-    role: '유저',
-  },
-  {
-    name: '박종원',
-    email: 'abc@naver.com',
-    department: '생산 1팀',
-    phone: '010-1111-1111',
-    status: '재직',
-    role: '담당자',
-  },
-];
+const { data: userList, page } = useGetUserList();
 </script>
 
 <style scoped>

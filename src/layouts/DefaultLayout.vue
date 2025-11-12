@@ -5,7 +5,7 @@
     <div class="flex flex-1">
       <Sidebar />
       <main class="flex-1 bg-muted/20 p-4 overflow-auto">
-        <div class="space-y-4">
+        <div class="space-y-10">
           <slot />
         </div>
       </main>
