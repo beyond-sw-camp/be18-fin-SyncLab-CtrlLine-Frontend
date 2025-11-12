@@ -5,7 +5,7 @@
       variant="ghost"
       size="xs"
       type="button"
-      class="cursor-pointer h-6 w-6 text-sm flex items-center justify-center rounded-md"
+      class="cursor-pointer w-6"
       @click="firstPage"
       :disabled="props.modelValue === 1"
     >
@@ -17,7 +17,7 @@
       variant="ghost"
       type="button"
       size="xs"
-      class="cursor-pointer h-6 w-6 text-sm flex items-center justify-center rounded-md"
+      class="cursor-pointer w-6"
       @click="prevPage"
       :disabled="props.modelValue === 1"
     >
@@ -30,9 +30,9 @@
         v-for="p in visiblePages"
         :key="p"
         variant="ghost"
-        size="xs"
         type="button"
-        class="cursor-pointer h-6 w-6 text-sm flex items-center justify-center rounded-md"
+        size="xs"
+        class="w-6"
         :class="{
           'bg-primary text-white font-semibold': p === props.modelValue,
           'text-gray-600': p !== props.modelValue,
@@ -47,8 +47,8 @@
     <Button
       variant="ghost"
       type="button"
-      size="sx"
-      class="cursor-pointer h-6 w-6 text-sm flex items-center justify-center rounded-md"
+      size="xs"
+      class="cursor-pointer w-6"
       @click="nextPage"
       :disabled="props.modelValue >= props.totalPages"
     >
@@ -60,7 +60,7 @@
       variant="ghost"
       type="button"
       size="xs"
-      class="cursor-pointer h-6 w-6 text-sm flex items-center justify-center rounded-md"
+      class="cursor-pointer w-6"
       @click="lastPage"
       :disabled="props.modelValue >= props.totalPages"
     >
