@@ -1,0 +1,286 @@
+<template>
+  <div class="flex justify-between items-center mb-6">
+    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">사용자 등록</h3>
+
+    <Button
+      type="submit"
+      form="userCreateForm"
+      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
+      size="sm"
+    >
+      Save
+    </Button>
+  </div>
+
+  <div>
+    <Form
+      id="userCreateForm"
+      @submit="onSubmit"
+      :validation-schema="formSchema"
+      class="flex flex-col gap-10"
+    >
+      <div>
+        <h4 class="text-base font-semibold mb-4 border-b pb-2">기본 정보</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField v-slot="{ componentField, errorMessage }" name="name">
+            <FormItem>
+              <FormLabel>이름</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="이름을 입력해주세요."
+                  v-bind="componentField"
+                  autocomplete="name"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="email">
+            <FormItem>
+              <FormLabel>이메일</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="이메일을 입력해주세요."
+                  v-bind="componentField"
+                  autocomplete="email"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="phoneNumber">
+            <FormItem>
+              <FormLabel>연락처</FormLabel>
+              <FormControl>
+                <Input
+                  type="tel"
+                  placeholder="010-1234-5678"
+                  pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
+                  v-bind="componentField"
+                  autocomplete="tel"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="address">
+            <FormItem>
+              <FormLabel>주소</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="주소를 입력해주세요."
+                  v-bind="componentField"
+                  autocomplete="street-address"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-base font-semibold mb-4 border-b pb-2">소속 정보</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField v-slot="{ componentField, errorMessage }" name="department">
+            <FormItem>
+              <FormLabel>부서</FormLabel>
+              <FormControl>
+                <Select v-bind="componentField">
+                  <SelectTrigger class="custom-input w-full">
+                    <SelectValue placeholder="부서를 선택하세요." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SALES_1">영업 1팀</SelectItem>
+                    <SelectItem value="SALES_2">영업 2팀</SelectItem>
+                    <SelectItem value="PRODUCTION_1">생산 1팀</SelectItem>
+                    <SelectItem value="PRODUCTION_2">생산 2팀</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="position">
+            <FormItem>
+              <FormLabel>직급</FormLabel>
+              <FormControl>
+                <Select v-bind="componentField">
+                  <SelectTrigger class="custom-input w-full">
+                    <SelectValue placeholder="직급을 선택하세요." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ASSISTANT">주임</SelectItem>
+                    <SelectItem value="ASSISTANT_MANAGER">대리</SelectItem>
+                    <SelectItem value="MANAGER">과장</SelectItem>
+                    <SelectItem value="GENERAL_MANAGER">부장</SelectItem>
+                    <SelectItem value="DIRECTOR">이사</SelectItem>
+                    <SelectItem value="CEO">대표</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="role">
+            <FormItem>
+              <FormLabel>권한</FormLabel>
+              <FormControl>
+                <Select v-bind="componentField">
+                  <SelectTrigger class="custom-input w-full">
+                    <SelectValue placeholder="권한을 선택하세요." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USER">유저</SelectItem>
+                    <SelectItem value="MANAGER">담당자</SelectItem>
+                    <SelectItem value="ADMIN">관리자</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="status">
+            <FormItem>
+              <FormLabel>상태</FormLabel>
+              <FormControl>
+                <Select v-bind="componentField">
+                  <SelectTrigger class="custom-input w-full">
+                    <SelectValue placeholder="재직 상태를 선택하세요" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ACTIVE">재직</SelectItem>
+                    <SelectItem value="LEAVE">휴직</SelectItem>
+                    <SelectItem value="RESIGNED">퇴사</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-base font-semibold mb-4 border-b pb-2">입사 정보</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField v-slot="{ componentField, errorMessage }" name="hiredDate">
+            <FormItem>
+              <FormLabel>입사일</FormLabel>
+              <FormControl>
+                <Input type="date" v-bind="componentField" />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="terminationDate">
+            <FormItem>
+              <FormLabel>퇴사일</FormLabel>
+              <FormControl>
+                <Input type="date" v-bind="componentField" disabled />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-base font-semibold mb-4 border-b pb-2">보안 설정</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField v-slot="{ componentField, errorMessage }" name="password">
+            <FormItem>
+              <FormLabel>비밀번호</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="비밀번호를 입력해주세요."
+                  v-bind="componentField"
+                  autocomplete="new-password"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="passwordConfirm">
+            <FormItem>
+              <FormLabel>비밀번호 확인</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="비밀번호를 다시 입력해주세요."
+                  v-bind="componentField"
+                  autocomplete="new-password"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+      </div>
+    </Form>
+  </div>
+</template>
+
+<script setup>
+import { toTypedSchema } from '@vee-validate/zod';
+import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+const formSchema = toTypedSchema(
+  z
+    .object({
+      name: z.string({ required_error: '이메일은 필수입니다.' }),
+      email: z
+        .string({ required_error: '이메일은 필수입니다.' })
+        .email('이메일 형식이 올바르지 않습니다.'),
+      phoneNumber: z
+        .string({ required_error: '연락처는 필수입니다.' })
+        .min(8, '연락처는 필수입니다.'),
+      address: z.string({ required_error: '주소는 필수입니다.' }),
+      department: z.string({ required_error: '부서는 필수입니다.' }),
+      position: z.string({ required_error: '직급 필수입니다.' }),
+      role: z.string({ required_error: '권한 설정은 필수입니다.' }),
+      status: z.string({ required_error: '재직 상태 설정은 필수입니다.' }),
+      hiredDate: z.string({ required_error: '입사일 필수입니다.' }),
+      terminationDate: z.string().optional(),
+      password: z
+        .string({ required_error: '비밀번호 필수입니다.' })
+        .min(8, '비밀번호는 8자 이상이어야 합니다.'),
+      passwordConfirm: z
+        .string({ required_error: '비밀번호 확인은 필수입니다.' })
+        .min(8, '비밀번호 확인을 입력해주세요.'),
+    })
+    .refine(data => data.password === data.passwordConfirm, {
+      path: ['passwordConfirm'],
+      message: '비밀번호가 일치하지 않습니다.',
+    }),
+);
+
+const onSubmit = values => {
+  console.log(values);
+};
+</script>
+
+<style scoped></style>

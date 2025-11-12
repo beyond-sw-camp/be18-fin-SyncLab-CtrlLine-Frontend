@@ -32,6 +32,16 @@ const routes = [
         component: () => import('@/pages/base-management/user/UserList.vue'),
       },
       {
+        path: 'users/:empNo',
+        name: 'UserDetail',
+        component: () => import('@/pages/base-management/user/UserDetail.vue'),
+      },
+      {
+        path: 'users/new',
+        name: 'CreateUser',
+        component: () => import('@/pages/base-management/user/CreateUser.vue'),
+      },
+      {
         path: 'items',
         name: 'ItemList',
         component: () => import('@/pages/base-management/item/ItemList.vue'),

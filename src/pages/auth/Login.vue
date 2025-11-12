@@ -35,7 +35,7 @@
       <Form @submit="onSubmit" :validation-schema="formSchema" class="flex flex-col gap-8">
         <FormField v-slot="{ componentField, errorMessage }" name="email">
           <FormItem>
-            <FormLabel>Email</FormLabel>
+            <FormLabel>이메일</FormLabel>
             <FormControl>
               <Input
                 type="email"
@@ -44,7 +44,7 @@
                 autocomplete="email"
                 class="w-full"
               />
-              <p class="text-red-500 text-sm">{{ errorMessage }}</p>
+              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
         </FormField>
@@ -60,12 +60,17 @@
                 autocomplete="password"
                 class="w-full"
               />
-              <p class="text-red-500 text-sm">{{ errorMessage }}</p>
+              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
         </FormField>
 
-        <Button type="submit" class="mt-8 w-full cursor-pointer" variant="outline"> 로그인 </Button>
+        <Button
+          type="submit"
+          class="mt-8 w-full bg-primary text-white hover:bg-primary-600 cursor-pointer"
+        >
+          로그인
+        </Button>
       </Form>
     </div>
     <div class="flex justify-center items-center">

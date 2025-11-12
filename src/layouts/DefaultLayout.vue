@@ -4,8 +4,10 @@
     <Separator />
     <div class="flex flex-1">
       <Sidebar />
-      <main class="flex-1 bg-muted/20 p-3 overflow-auto">
-        <slot />
+      <main class="flex-1 bg-muted/20 p-4 overflow-auto">
+        <div class="space-y-4">
+          <slot />
+        </div>
       </main>
     </div>
   </div>
