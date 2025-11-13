@@ -59,7 +59,7 @@
                 <Input
                   type="tel"
                   placeholder="010-1234-5678"
-                  pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
+                  pattern="[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}"
                   v-bind="componentField"
                   autocomplete="tel"
                 />
@@ -97,12 +97,27 @@
                     <SelectValue placeholder="부서를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="SALES_1">영업 1팀</SelectItem>
-                    <SelectItem value="SALES_2">영업 2팀</SelectItem>
-                    <SelectItem value="PRODUCTION_1">생산 1팀</SelectItem>
-                    <SelectItem value="PRODUCTION_2">생산 2팀</SelectItem>
+                    <SelectItem value="영업 1팀">영업 1팀</SelectItem>
+                    <SelectItem value="영업 2팀">영업 2팀</SelectItem>
+                    <SelectItem value="생산 1팀">생산 1팀</SelectItem>
+                    <SelectItem value="생산 2팀">생산 2팀</SelectItem>
                   </SelectContent>
                 </Select>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="extension">
+            <FormItem>
+              <FormLabel>내선번호</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  placeholder="내선번호를 입력하세요."
+                  v-bind="componentField"
+                  class="custom-input w-full"
+                />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -234,9 +249,11 @@
 </template>
 
 <script setup>
+// @ts-nocheck
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
 
+import useCreateUser from '@/apis/query-hooks/user/useCreateUser';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -251,15 +268,19 @@ import {
 const formSchema = toTypedSchema(
   z
     .object({
-      name: z.string({ required_error: '이메일은 필수입니다.' }),
+      name: z.string({ required_error: '이름은 필수입니다.' }).nonempty('이름은 필수입니다.'),
       email: z
         .string({ required_error: '이메일은 필수입니다.' })
         .email('이메일 형식이 올바르지 않습니다.'),
       phoneNumber: z
         .string({ required_error: '연락처는 필수입니다.' })
-        .min(8, '연락처는 필수입니다.'),
-      address: z.string({ required_error: '주소는 필수입니다.' }),
+        .min(8, '연락처는 필수입니다.')
+        .regex(/^010-\d{4}-\d{4}$/, '유효하지 않은 전화번호 형식입니다. (예: 010-1234-5678)'),
+      address: z.string({ required_error: '주소는 필수입니다.' }).nonempty('주소는 필수입니다.'),
       department: z.string({ required_error: '부서는 필수입니다.' }),
+      extension: z
+        .string({ required_error: '내선 번호는 필수입니다.' })
+        .length(5, '내선 번호는 5자리여야 합니다.'),
       position: z.string({ required_error: '직급 필수입니다.' }),
       role: z.string({ required_error: '권한 설정은 필수입니다.' }),
       status: z.string({ required_error: '재직 상태 설정은 필수입니다.' }),
@@ -278,8 +299,24 @@ const formSchema = toTypedSchema(
     }),
 );
 
+const { mutate: createUser } = useCreateUser();
+
 const onSubmit = values => {
-  console.log(values);
+  const params = {
+    userName: values.email,
+    userEmail: values.email,
+    userPassword: values.password,
+    userPhoneNumber: values.phoneNumber,
+    userDepartment: values.department,
+    userExtension: values.extension,
+    userPosition: values.position,
+    userRole: values.role,
+    userAddress: values.address,
+    userHiredDate: values.hiredDate,
+    userStatus: values.status,
+    userTerminationDate: values.terminationDate,
+  };
+  createUser(params);
 };
 </script>
 
