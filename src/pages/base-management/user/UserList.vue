@@ -7,7 +7,7 @@
   </div>
 
   <div class="flex flex-col">
-    <div class="min-h-[550px] flex-1">
+    <div class="min-h-[600px] flex-1">
       <Table class="w-full">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
