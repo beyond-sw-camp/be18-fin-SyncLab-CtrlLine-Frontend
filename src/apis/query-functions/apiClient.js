@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
+import router from '@/routers';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 const apiClient = axios.create({
@@ -19,6 +19,8 @@ apiClient.interceptors.request.use(
 
     if (authStore.accessToken) {
       config.headers.Authorization = `Bearer ${authStore.accessToken}`;
+
+      console.log('accessToken', authStore.accessToken);
     }
     return config;
   },
@@ -30,26 +32,12 @@ apiClient.interceptors.request.use(
 // 응답 인터셉터
 apiClient.interceptors.response.use(
   response => {
-    const authStore = useAuthStore();
-    const authHeader = response.headers['authorization'];
-
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.split(' ')[1];
-
-      authStore.setToken(token);
-    }
-
     return response;
   },
   async error => {
     const authStore = useAuthStore();
-    const router = useRouter();
 
-    if (
-      error.response?.status === 401 &&
-      !error.config._retry &&
-      !error.config.url.includes('/auth/token/refresh')
-    ) {
+    if (error.response?.status === 401 && !error.config._retry) {
       error.config._retry = true;
 
       try {
@@ -59,19 +47,17 @@ apiClient.interceptors.response.use(
         if (newToken) {
           authStore.setToken(newToken);
           error.config.headers['Authorization'] = `Bearer ${newToken}`;
+          console.log('newToken', newToken);
           return apiClient(error.config);
         }
       } catch (refreshError) {
         if (refreshError.response.data.code === 'INVALID_REFRESH_TOKEN') {
-          toast.error({
-            description: `
-              로그인 세션이 만료되었습니다.'\\n
-              다시 로그인을 진행해 주세요.
-            `,
-          });
+          toast.error('로그인 세션이 만료되었습니다. 다시 로그인 해주세요.');
         }
+
         authStore.clearAuth();
-        router.push('/login');
+        await router.push('/login');
+
         return Promise.reject(refreshError);
       }
     }
