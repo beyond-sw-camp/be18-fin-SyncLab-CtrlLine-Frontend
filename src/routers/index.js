@@ -143,7 +143,6 @@ router.beforeEach((to, from, next) => {
   if (to.fullPath.match(/\/{2,}/)) next(to.fullPath.replace(/\/{2,}/g, '/'));
 
   const authStore = useAuthStore();
-  authStore.getToken();
 
   if (!to.meta.requiresAuth && authStore.isLoggedIn) {
     next('/dashboard');

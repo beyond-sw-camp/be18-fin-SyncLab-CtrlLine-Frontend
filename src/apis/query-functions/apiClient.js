@@ -1,7 +1,7 @@
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
-import router from '@/routers';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 const apiClient = axios.create({
@@ -19,8 +19,6 @@ apiClient.interceptors.request.use(
 
     if (authStore.accessToken) {
       config.headers.Authorization = `Bearer ${authStore.accessToken}`;
-
-      console.log('accessToken', authStore.accessToken);
     }
     return config;
   },
@@ -36,6 +34,7 @@ apiClient.interceptors.response.use(
   },
   async error => {
     const authStore = useAuthStore();
+    const router = useRouter();
 
     if (error.response?.status === 401 && !error.config._retry) {
       error.config._retry = true;
@@ -56,7 +55,7 @@ apiClient.interceptors.response.use(
         }
 
         authStore.clearAuth();
-        await router.push('/login');
+        router.push('/login');
 
         return Promise.reject(refreshError);
       }
