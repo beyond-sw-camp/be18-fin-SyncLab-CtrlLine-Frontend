@@ -18,6 +18,9 @@
       @submit="onSubmit"
       :validation-schema="formSchema"
       class="flex flex-col gap-10"
+      :initial-values="{
+        status: 'ACTIVE',
+      }"
     >
       <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">기본 정보</h4>
@@ -168,7 +171,7 @@
             <FormItem>
               <FormLabel>상태</FormLabel>
               <FormControl>
-                <Select v-bind="componentField">
+                <Select v-bind="componentField" disabled>
                   <SelectTrigger class="custom-input w-full">
                     <SelectValue placeholder="재직 상태를 선택하세요" />
                   </SelectTrigger>
@@ -283,7 +286,7 @@ const formSchema = toTypedSchema(
         .length(5, '내선 번호는 5자리여야 합니다.'),
       position: z.string({ required_error: '직급 필수입니다.' }),
       role: z.string({ required_error: '권한 설정은 필수입니다.' }),
-      status: z.string({ required_error: '재직 상태 설정은 필수입니다.' }),
+      status: z.string().optional(),
       hiredDate: z.string({ required_error: '입사일 필수입니다.' }),
       terminationDate: z.string().optional(),
       password: z
@@ -303,7 +306,7 @@ const { mutate: createUser } = useCreateUser();
 
 const onSubmit = values => {
   const params = {
-    userName: values.email,
+    userName: values.name,
     userEmail: values.email,
     userPassword: values.password,
     userPhoneNumber: values.phoneNumber,
@@ -316,6 +319,7 @@ const onSubmit = values => {
     userStatus: values.status,
     userTerminationDate: values.terminationDate,
   };
+  console.log(params);
   createUser(params);
 };
 </script>

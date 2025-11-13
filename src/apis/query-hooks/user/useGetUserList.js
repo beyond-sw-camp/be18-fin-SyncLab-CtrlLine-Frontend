@@ -2,8 +2,10 @@ import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { computed, ref } from 'vue';
 
 import { getUserList } from '@/apis/query-functions/user';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export default function useGetUserList(initialFilters = {}) {
+  const authStore = useAuthStore();
   const page = ref(1);
   const pageSize = ref(10);
   const filters = ref(initialFilters);
@@ -19,6 +21,7 @@ export default function useGetUserList(initialFilters = {}) {
   const { isPending, isError, data, error, isFetching, isPlaceholderData } = useQuery({
     queryKey: ['userList', queryParams],
     queryFn: () => getUserList(queryParams.value),
+    enabled: computed(() => authStore.isLoggedIn),
     placeholderData: keepPreviousData,
   });
 
