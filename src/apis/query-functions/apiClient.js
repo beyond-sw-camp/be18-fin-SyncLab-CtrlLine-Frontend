@@ -56,8 +56,6 @@ apiClient.interceptors.response.use(
         const response = await apiClient.post('/auth/token/refresh');
         const newToken = response.headers['authorization']?.split(' ')[1];
 
-        console.log('newToken', newToken);
-
         if (newToken) {
           authStore.setToken(newToken);
           error.config.headers['Authorization'] = `Bearer ${newToken}`;
@@ -65,7 +63,12 @@ apiClient.interceptors.response.use(
         }
       } catch (refreshError) {
         if (refreshError.response.data.code === 'INVALID_REFRESH_TOKEN') {
-          toast.error('로그인 세션이 만료되었습니다.\n다시 로그인을 진행해 주세요.');
+          toast.error({
+            description: `
+              로그인 세션이 만료되었습니다.'\\n
+              다시 로그인을 진행해 주세요.
+            `,
+          });
         }
         authStore.clearAuth();
         router.push('/login');

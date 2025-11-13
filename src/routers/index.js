@@ -32,7 +32,7 @@ const routes = [
         component: () => import('@/pages/base-management/user/UserList.vue'),
       },
       {
-        path: 'users/:empNo',
+        path: 'users/:userId',
         name: 'UserDetail',
         component: () => import('@/pages/base-management/user/UserDetail.vue'),
       },

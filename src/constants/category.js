@@ -9,7 +9,7 @@ export const baseManagement = [
         children: [
           {
             label: '사용자 상세 조회',
-            to: '/base-management/users/:empNo',
+            to: '/base-management/users/:userId',
           },
         ],
       },

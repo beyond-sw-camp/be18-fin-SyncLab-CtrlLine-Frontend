@@ -50,7 +50,7 @@ function findTrailRecursive(nodes, targetPath, trail = []) {
 
 /**
  * 동적 path를 패턴 형태로 정규화
- * 예: '/base-management/users/17' -> '/base-management/users/:empNo'
+ * 예: '/base-management/users/17' -> '/base-management/users/:userId'
  */
 export function normalizeDynamicPath(path) {
   const allGroups = [
@@ -67,10 +67,10 @@ export function normalizeDynamicPath(path) {
   for (const { to } of allGroups) {
     if (!to.includes(':')) continue;
 
-    // '/base-management/users/:empNo' → /^\/base-management\/users\/[^/]+$/
+    // '/base-management/users/:userId' → /^\/base-management\/users\/[^/]+$/
     const pattern = new RegExp('^' + to.replace(/:[^/]+/g, '[^/]+') + '$');
     if (pattern.test(path)) {
-      return to; // '/base-management/users/:empNo' 반환
+      return to; // '/base-management/users/:userId' 반환
     }
   }
 

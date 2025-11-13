@@ -21,11 +21,12 @@
         </TableHeader>
 
         <TableBody v-if="userList && userList.content">
+          <!-- 유저는 semibold로 변경 goToDetail 이벤트 동작 못하게 막기 -->
           <TableRow
             v-for="(user, index) in userList.content"
             :key="index"
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
-            @click="goToDetail(user.empNo)"
+            @click="goToDetail(user.id)"
           >
             <TableCell class="py-3">{{ user.userName }}</TableCell>
             <TableCell>{{ user.userEmail }}</TableCell>
@@ -71,8 +72,8 @@ import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 const router = useRouter();
 const { data: userList, page } = useGetUserList();
 
-const goToDetail = empNo => {
-  router.push(`/base-management/users/${empNo}`);
+const goToDetail = userId => {
+  router.push(`/base-management/users/${userId}`);
 };
 </script>
 

@@ -23,7 +23,7 @@ export async function getUserList(params) {
   return data.data;
 }
 
-export async function getUser(empNo) {
-  const { data } = await apiClient.get(`/users/${empNo}`);
+export async function getUser(userId) {
+  const { data } = await apiClient.get(`/users/${userId}`);
   return data.data;
 }
