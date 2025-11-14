@@ -311,8 +311,6 @@ const route = useRoute();
 
 const { data: userDetail } = useGetUser(route.params.userId);
 
-console.log(userDetail);
-
 const userInfo = computed(() => [
   { label: '사번', value: userDetail.value.empNo },
   { label: '이름', value: userDetail.value.userName },

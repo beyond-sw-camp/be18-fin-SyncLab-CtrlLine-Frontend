@@ -10,9 +10,9 @@ export async function getUserList(params) {
 
   for (const [key, value] of Object.entries(params)) {
     if (key === 'sort' && Array.isArray(value)) {
+      // sort 배열 그대로 append
       value.forEach(sortItem => {
-        query.append('sortBy', sortItem.sortBy);
-        query.append('direction', sortItem.direction);
+        query.append('sort', sortItem);
       });
     } else if (value !== undefined && value !== null && value !== '') {
       query.append(key, value);

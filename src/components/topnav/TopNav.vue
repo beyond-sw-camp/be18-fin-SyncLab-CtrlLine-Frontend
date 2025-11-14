@@ -12,8 +12,6 @@
       </NavigationMenu>
 
       <BreadcrumbBar />
-
-      <Separator orientation="vertical" class="mx-3 h-5" />
     </div>
 
     <div class="flex items-center gap-4">
@@ -69,7 +67,6 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from '@/components/ui/navigation-menu';
-import { Separator } from '@/components/ui/separator';
 import {
   Sheet,
   SheetContent,

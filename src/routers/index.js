@@ -21,6 +21,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/users/me',
+    name: 'MyInfo',
+    component: () => import('@/pages/profile/MyInfo.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/base-management',
     name: 'BaseManagement',
     meta: { requiresAuth: true },

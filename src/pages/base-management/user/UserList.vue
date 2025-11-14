@@ -6,6 +6,8 @@
     </RouterLink>
   </div>
 
+  <FilterTab :filters="filters" @search="onSearch" />
+
   <div class="flex flex-col">
     <div class="min-h-[600px] flex-1">
       <Table class="w-full">
@@ -68,9 +70,17 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
+import FilterTab from '@/pages/base-management/user/FilterTab.vue';
 
 const router = useRouter();
-const { data: userList, page } = useGetUserList();
+
+const { data: userList, refetch, page, filters } = useGetUserList();
+
+const onSearch = newFilters => {
+  Object.assign(filters, newFilters);
+  page.value = 1; // 첫 페이지 부터 조회
+  refetch();
+};
 
 const goToDetail = userId => {
   router.push(`/base-management/users/${userId}`);
