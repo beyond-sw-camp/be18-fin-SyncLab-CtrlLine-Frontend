@@ -10,15 +10,15 @@
 
   <div class="flex flex-col">
     <div class="min-h-[600px] flex-1">
-      <Table class="w-full">
+      <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead>사원명</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>부서명</TableHead>
-            <TableHead>연락처</TableHead>
-            <TableHead>상태</TableHead>
-            <TableHead>권한</TableHead>
+            <TableHead class="text-center">사원명</TableHead>
+            <TableHead class="text-center">Email</TableHead>
+            <TableHead class="text-center">부서명</TableHead>
+            <TableHead class="text-center">연락처</TableHead>
+            <TableHead class="text-center">상태</TableHead>
+            <TableHead class="text-center">권한</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -30,10 +30,18 @@
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(user.id)"
           >
-            <TableCell class="py-3">{{ user.userName }}</TableCell>
-            <TableCell>{{ user.userEmail }}</TableCell>
-            <TableCell>{{ user.userDepartment }}</TableCell>
-            <TableCell>{{ user.userPhoneNumber }}</TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ user.userName }}
+            </TableCell>
+            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ user.userEmail }}
+            </TableCell>
+            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ user.userDepartment }}
+            </TableCell>
+            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ user.userPhoneNumber }}
+            </TableCell>
             <TableCell>
               <span
                 :class="{
