@@ -86,6 +86,41 @@
       </div>
 
       <div>
+        <h4 class="text-base font-semibold mb-4 border-b pb-2">보안 설정</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField v-slot="{ componentField, errorMessage }" name="password">
+            <FormItem>
+              <FormLabel>비밀번호</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="비밀번호를 입력해주세요."
+                  v-bind="componentField"
+                  autocomplete="new-password"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="passwordConfirm">
+            <FormItem>
+              <FormLabel>비밀번호 확인</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  placeholder="비밀번호를 다시 입력해주세요."
+                  v-bind="componentField"
+                  autocomplete="new-password"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+      </div>
+
+      <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">소속 정보</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField v-slot="{ componentField, errorMessage }" name="department">
@@ -203,41 +238,6 @@
               <FormLabel>퇴사일</FormLabel>
               <FormControl>
                 <Input type="date" v-bind="componentField" />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
-        </div>
-      </div>
-
-      <div>
-        <h4 class="text-base font-semibold mb-4 border-b pb-2">보안 설정</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField v-slot="{ componentField, errorMessage }" name="password">
-            <FormItem>
-              <FormLabel>비밀번호</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="비밀번호를 입력해주세요."
-                  v-bind="componentField"
-                  autocomplete="new-password"
-                />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
-
-          <FormField v-slot="{ componentField, errorMessage }" name="passwordConfirm">
-            <FormItem>
-              <FormLabel>비밀번호 확인</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="비밀번호를 다시 입력해주세요."
-                  v-bind="componentField"
-                  autocomplete="new-password"
-                />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
