@@ -1,15 +1,6 @@
 <template>
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">사용자 등록</h3>
-
-    <Button
-      type="submit"
-      form="userCreateForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
-      size="sm"
-    >
-      Save
-    </Button>
   </div>
 
   <div>
@@ -248,6 +239,15 @@
         </div>
       </div>
     </Form>
+  </div>
+  <div class="flex justify-end pt-6 pb-5">
+    <Button
+      type="submit"
+      form="userCreateForm"
+      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
+    >
+      Save
+    </Button>
   </div>
 </template>
 

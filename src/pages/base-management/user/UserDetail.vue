@@ -1,27 +1,25 @@
 <template>
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">사용자 상세 조회</h3>
-
-    <Button
-      type="submit"
-      form="userUpdateForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
-      size="sm"
-    >
-      Save
-    </Button>
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row">
     <Card v-if="userDetail" class="w-full md:w-[260px] h-fit">
       <CardContent class="flex flex-col gap-8 md:h-[500px] items-center">
-        <div class="flex justify-center"><UserProfile /></div>
-        <ul class="flex flex-col gap-4">
-          <li v-for="item in userInfo" :key="item.label" class="flex">
-            <span class="pr-2 w-15 text-right text-gray-600 text-sm">{{ item.label }}</span>
-            <span
-              class="block overflow-hidden text-ellipsis whitespace-nowrap max-w-[200px] md:max-w-[150px] text-sm"
-            >
+        <div class="flex justify-center">
+          <UserProfile />
+        </div>
+
+        <ul class="flex flex-col gap-4 w-full px-4">
+          <li
+            v-for="item in userInfo"
+            :key="item.label"
+            class="flex items-center justify-center gap-4 md:justify-between"
+          >
+            <span class="text-gray-600 text-sm whitespace-nowrap text-right w-10">
+              {{ item.label }}
+            </span>
+            <span class="text-sm truncate max-w-[250px] md:flex-1">
               {{ item.value }}
             </span>
           </li>
@@ -247,6 +245,15 @@
         </div>
       </div>
     </Form>
+  </div>
+  <div class="flex justify-end pt-6 pb-5">
+    <Button
+      type="submit"
+      form="userUpdateForm"
+      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
+    >
+      Save
+    </Button>
   </div>
 </template>
 
