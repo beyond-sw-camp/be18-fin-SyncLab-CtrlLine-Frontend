@@ -41,12 +41,11 @@
         position: userDetail.userPosition,
         role: userDetail.userRole,
         status: userDetail.userStatus,
-        // 상세 정보에 내선 번호, 입사일, 퇴사일, 주소, 비밀번호 없음
-        // password: userDetail.userPassword,
-        // address: userDetail.userAddress,
-        // hiredDate: userDetail.hiredDate,
-        // terminationDate: userDetail.terminationDate,
-        // extension: userDetail.userExtension,
+        password: userDetail.userPassword,
+        address: userDetail.userAddress,
+        hiredDate: userDetail.hiredDate,
+        terminationDate: userDetail.terminationDate,
+        extension: userDetail.userExtension,
       }"
     >
       <div>
@@ -264,6 +263,7 @@ import { useRoute } from 'vue-router';
 import { z } from 'zod';
 
 import useGetUser from '@/apis/query-hooks/user/useGetUser';
+import useUpdateUser from '@/apis/query-hooks/user/useUpdateUser';
 import UserProfile from '@/assets/user-profile.svg';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -285,21 +285,27 @@ const formSchema = toTypedSchema(
         .string({ required_error: '연락처는 필수입니다.' })
         .min(8, '연락처는 필수입니다.')
         .regex(/^010-\d{4}-\d{4}$/, '유효하지 않은 전화번호 형식입니다. (예: 010-1234-5678)'),
-      address: z.string({ required_error: '주소는 필수입니다.' }).nonempty('주소는 필수입니다.'),
+      address: z
+        .string({ required_error: '주소는 필수입니다.' })
+        .nonempty('주소는 필수입니다.')
+        .optional(),
       department: z.string({ required_error: '부서는 필수입니다.' }),
       extension: z
         .string({ required_error: '내선 번호는 필수입니다.' })
-        .length(5, '내선 번호는 5자리여야 합니다.'),
-      position: z.string({ required_error: '직급 필수입니다.' }),
-      role: z.string({ required_error: '권한 설정은 필수입니다.' }),
-      status: z.string({ required_error: '재직 상태 설정은 필수입니다.' }),
-      terminationDate: z.string().optional(),
+        .length(5, '내선 번호는 5자리여야 합니다.')
+        .optional(),
+      position: z.string({ required_error: '직급 필수입니다.' }).optional(),
+      role: z.string({ required_error: '권한 설정은 필수입니다.' }).optional(),
+      status: z.string({ required_error: '재직 상태 설정은 필수입니다.' }).optional(),
+      terminationDate: z.string().optional().optional(),
       password: z
         .string({ required_error: '비밀번호 필수입니다.' })
-        .min(8, '비밀번호는 8자 이상이어야 합니다.'),
+        .min(8, '비밀번호는 8자 이상이어야 합니다.')
+        .optional(),
       passwordConfirm: z
         .string({ required_error: '비밀번호 확인은 필수입니다.' })
-        .min(8, '비밀번호 확인을 입력해주세요.'),
+        .min(8, '비밀번호 확인을 입력해주세요.')
+        .optional(),
     })
     .refine(data => data.password === data.passwordConfirm, {
       path: ['passwordConfirm'],
@@ -310,6 +316,7 @@ const formSchema = toTypedSchema(
 const route = useRoute();
 
 const { data: userDetail } = useGetUser(route.params.userId);
+const { mutate: updateUser } = useUpdateUser(route.params.userId);
 
 const userInfo = computed(() => [
   { label: '사번', value: userDetail.value.empNo },
@@ -330,7 +337,7 @@ const onSubmit = values => {
     userTerminationDate: values.terminationDate,
   };
   console.log(params);
-  // createUser(params);
+  updateUser(params);
 };
 </script>
 

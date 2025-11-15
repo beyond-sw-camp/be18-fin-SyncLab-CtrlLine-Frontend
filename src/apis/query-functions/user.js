@@ -27,3 +27,9 @@ export async function getUser(userId) {
   const { data } = await apiClient.get(`/users/${userId}`);
   return data.data;
 }
+
+export async function updateUser(userId, params) {
+  const { data } = await apiClient.patch(`/users/${userId}`, params);
+
+  return data.data;
+}
