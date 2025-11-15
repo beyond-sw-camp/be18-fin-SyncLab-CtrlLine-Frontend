@@ -36,7 +36,17 @@
               {{ factory.name }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ factory.isActive }}
+              <!-- <Badge class="w-[50px]" :variant="factory.isActive ? 'default' : 'outline'"> -->
+              <Badge
+                class="w-[50px]"
+                :class="
+                  factory.isActive
+                    ? 'bg-green-100 text-green-700 border-green-300'
+                    : 'bg-red-100 text-red-700 border-red-300'
+                "
+              >
+                {{ factory.isActive ? '사용' : '미사용' }}
+              </Badge>
             </TableCell>
           </TableRow>
         </TableBody>
@@ -51,6 +61,7 @@ import { useRouter } from 'vue-router';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList.js';
 import BasePagination from '@/components/pagination/BasePagination.vue';
+import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,
