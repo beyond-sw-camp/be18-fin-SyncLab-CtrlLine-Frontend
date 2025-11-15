@@ -52,6 +52,11 @@ const routes = [
         component: () => import('@/pages/base-management/factory/FactoryList.vue'),
       },
       {
+        path: 'factories/:factoryCode',
+        name: 'FactoryDetail',
+        component: () => import('@/pages/base-management/factory/FactoryDetail.vue'),
+      },
+      {
         path: 'lines',
         name: 'LineList',
         component: () => import('@/pages/base-management/line/LineList.vue'),
@@ -143,7 +148,6 @@ router.beforeEach((to, from, next) => {
   if (to.fullPath.match(/\/{2,}/)) next(to.fullPath.replace(/\/{2,}/g, '/'));
 
   const authStore = useAuthStore();
-  authStore.getToken();
 
   if (!to.meta.requiresAuth && authStore.isLoggedIn) {
     next('/dashboard');
