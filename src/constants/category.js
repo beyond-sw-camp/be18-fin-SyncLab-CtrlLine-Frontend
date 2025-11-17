@@ -47,7 +47,7 @@ export const baseManagement = [
           },
         ],
       },
-      { label: '공장 등록', to: '/base-management/factories/new' },
+      // { label: '공장 등록', to: '/base-management/factories/new' },
     ],
   },
   {
@@ -64,7 +64,7 @@ export const baseManagement = [
           },
         ],
       },
-      { label: '라인 등록', to: '/base-management/lines/new' },
+      // { label: '라인 등록', to: '/base-management/lines/new' },
     ],
   },
   {
@@ -81,7 +81,7 @@ export const baseManagement = [
           },
         ],
       },
-      { label: '설비 등록', to: '/base-management/equipments/new' },
+      // { label: '설비 등록', to: '/base-management/equipments/new' },
     ],
   },
   {
@@ -98,7 +98,7 @@ export const baseManagement = [
           },
         ],
       },
-      { label: '공정 등록', to: '/base-management/processes/new' },
+      // { label: '공정 등록', to: '/base-management/processes/new' },
     ],
   },
   { label: '공장 계층 구조도', to: '/base-management/factory-structure' },
