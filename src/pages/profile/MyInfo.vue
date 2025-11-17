@@ -1,13 +1,20 @@
 <template>
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">내 정보</h3>
+    <Button
+      type="submit"
+      form="myInfoUpdateForm"
+      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
+      size="sm"
+    >
+      Save
+    </Button>
   </div>
 
-  <div>
+  <div class="pb-10">
     <Form
       v-if="myInfo"
       id="myInfoUpdateForm"
-      @submit="onSubmit"
       :validation-schema="formSchema"
       class="flex flex-col gap-10"
       :initial-values="{
@@ -24,10 +31,10 @@
         hiredDate: myInfo.hiredDate,
         terminationDate: myInfo.terminationDate,
       }"
+      @submit="onSubmit"
     >
       <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">기본 정보</h4>
-
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField v-slot="{ componentField, errorMessage }" name="name">
             <FormItem>
@@ -279,23 +286,14 @@
       </div>
     </Form>
   </div>
-  <div class="flex justify-end pt-6 pb-5">
-    <Button
-      type="submit"
-      form="myInfoUpdateForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
-    >
-      Save
-    </Button>
-  </div>
 </template>
 
 <script setup>
-// @ts-nocheck
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
 
 import useGetMyInfo from '@/apis/query-hooks/user/useGetMyInfo';
+import useUpdateMyInfo from '@/apis/query-hooks/user/useUpdateMyInfo';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -354,17 +352,25 @@ const formSchema = toTypedSchema(
 
 const { data: myInfo } = useGetMyInfo();
 
+const { mutate: updateMyInfo } = useUpdateMyInfo();
+
 // 이름, 주소, 패스워드, 연락처 수정 가능
-const onSubmit = values => {
+const onSubmit = (values, { setFieldValue }) => {
   const params = {
     userName: values.name,
     userEmail: values.email,
     userPassword: values.password,
+    userPasswordConfirm: values.passwordConfirm,
     userPhoneNumber: values.phoneNumber,
     userAddress: values.address,
   };
-  console.log(params);
-  // createUser(params);
+
+  updateMyInfo(params, {
+    onSuccess: () => {
+      setFieldValue('password', undefined);
+      setFieldValue('passwordConfirm', undefined);
+    },
+  });
 };
 </script>
 
