@@ -9,3 +9,19 @@ export const ROLE_LABELS = {
   MANAGER: '담당자',
   USER: '유저',
 };
+
+export const DEPARTMENT_LABELS = {
+  '영업 1팀': '영업 1팀',
+  '영업 2팀': '영업 2팀',
+  '생산 1팀': '생산 1팀',
+  '생산 2팀': '생산 2팀',
+};
+
+export const POSITION_LABELS = {
+  'ASSISTANT_MANAGER': '대리',
+  'MANAGER': '과장',
+  'GENERAL_MANAGER': '부장',
+  'DIRECTOR': '이사',
+  'CEO': '대표'
+}
+

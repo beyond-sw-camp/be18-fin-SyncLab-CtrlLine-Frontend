@@ -33,3 +33,10 @@ export async function updateUser(userId, params) {
 
   return data.data;
 }
+
+// ============ 내 정보 ============
+
+export async function getMyInfo() {
+  const { data } = await apiClient.get(`/users/me`);
+  return data.data;
+}
