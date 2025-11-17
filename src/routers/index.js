@@ -58,6 +58,11 @@ const routes = [
         component: () => import('@/pages/base-management/factory/FactoryList.vue'),
       },
       {
+        path: 'factories/:factoryCode',
+        name: 'FactoryDetail',
+        component: () => import('@/pages/base-management/factory/FactoryDetail.vue'),
+      },
+      {
         path: 'lines',
         name: 'LineList',
         component: () => import('@/pages/base-management/line/LineList.vue'),
