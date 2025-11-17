@@ -254,6 +254,7 @@
   </div>
   <div class="flex justify-end pt-6 pb-5">
     <Button
+      v-if="userStore.userRole === 'ADMIN'"
       type="submit"
       form="userUpdateForm"
       class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
@@ -289,6 +290,7 @@ import {
   POSITION_LABELS,
   ROLE_LABELS,
 } from '@/constants/enumLabels';
+import { useUserStore } from '@/stores/useUserStore';
 import formatDate from '@/utils/formatDate';
 
 const formSchema = toTypedSchema(
@@ -328,6 +330,7 @@ const formSchema = toTypedSchema(
 );
 
 const route = useRoute();
+const userStore = useUserStore();
 
 const { data: userDetail } = useGetUser(route.params.userId);
 const { mutate: updateUser } = useUpdateUser(route.params.userId);

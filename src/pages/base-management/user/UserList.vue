@@ -60,14 +60,40 @@
     </div>
     <BasePagination v-model="page" :total-pages="userList?.pageInfo?.totalPages ?? 1" />
   </div>
+  <AlertDialog v-model:open="deniedModal">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>
+          <div class="flex items-center gap-2"><InfoIcon :size="20" />접근 권한</div>
+        </AlertDialogTitle>
+        <AlertDialogDescription>
+          매니저 이상만 사용자 상세 페이지에 접근할 수 있습니다.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+
+      <AlertDialogFooter>
+        <AlertDialogAction @click="deniedModal = false"> 확인 </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>
 
 <script setup>
-import { ChevronRightIcon } from 'lucide-vue-next';
+import { ChevronRightIcon, InfoIcon } from 'lucide-vue-next';
+import { ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -79,8 +105,11 @@ import {
 } from '@/components/ui/table';
 import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 import FilterTab from '@/pages/base-management/user/FilterTab.vue';
+import { useUserStore } from '@/stores/useUserStore';
 
 const router = useRouter();
+const userStore = useUserStore();
+const deniedModal = ref(false);
 
 const { data: userList, refetch, page, filters } = useGetUserList();
 
@@ -91,6 +120,10 @@ const onSearch = newFilters => {
 };
 
 const goToDetail = userId => {
+  if (userStore.userRole === 'USER') {
+    deniedModal.value = true;
+    return;
+  }
   router.push(`/base-management/users/${userId}`);
 };
 </script>

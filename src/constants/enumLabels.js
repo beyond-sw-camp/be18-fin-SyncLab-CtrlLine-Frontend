@@ -18,10 +18,10 @@ export const DEPARTMENT_LABELS = {
 };
 
 export const POSITION_LABELS = {
-  'ASSISTANT_MANAGER': '대리',
-  'MANAGER': '과장',
-  'GENERAL_MANAGER': '부장',
-  'DIRECTOR': '이사',
-  'CEO': '대표'
-}
-
+  ASSISTANT: '주임',
+  ASSISTANT_MANAGER: '대리',
+  MANAGER: '과장',
+  GENERAL_MANAGER: '부장',
+  DIRECTOR: '이사',
+  CEO: '대표',
+};

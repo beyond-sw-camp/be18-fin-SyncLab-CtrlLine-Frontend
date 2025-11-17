@@ -1,5 +1,6 @@
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import { createApp } from 'vue';
 import 'vue-sonner/style.css';
 
@@ -15,6 +16,7 @@ const queryClient = new QueryClient({
       retry: false,
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
+      staleTime: 1000 * 60 * 5, // 5분 캐싱
     },
   },
 });
@@ -22,6 +24,7 @@ const queryClient = new QueryClient({
 const app = createApp(App);
 const pinia = createPinia();
 
+pinia.use(piniaPluginPersistedstate);
 app.use(pinia);
 app.use(router);
 app.use(VueQueryPlugin, {
