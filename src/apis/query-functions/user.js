@@ -40,3 +40,8 @@ export async function getMyInfo() {
   const { data } = await apiClient.get(`/users/me`);
   return data.data;
 }
+
+export async function updateMyInfo(params) {
+  const { data } = await apiClient.patch(`/users/me`, params);
+  return data.data;
+}
