@@ -1,22 +1,17 @@
 <template>
   <div class="flex justify-between items-center mb-6">
-    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">품목 상세 조회</h3>
+    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">품목 등록</h3>
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row">
     <Form
       v-if="itemDetail"
-      id="itemUpdateForm"
+      id="itemCreateForm"
       :validation-schema="formSchema"
       @submit="onSubmit"
       class="flex-1 flex flex-col gap-10"
       :initial-values="{
-        itemCode: itemDetail.itemCode,
-        itemName: itemDetail.itemName,
-        itemSpecification: itemDetail.itemSpecification,
-        itemUnit: itemDetail.itemUnit,
-        itemStatus: itemDetail.itemStatus,
-        isActive: itemDetail.isActive ? 'true' : 'false',
+        isActive: 'true',
       }"
     >
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -66,7 +61,7 @@
             <FormControl>
               <Select v-bind="componentField">
                 <SelectTrigger class="custom-input w-full">
-                  <SelectValue placeholder="품목 구분을 선택하세요." />
+                  <SelectValue placeholder="품목구분을 선택하세요." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem
@@ -87,7 +82,7 @@
           <FormItem>
             <FormLabel>품목사용여부</FormLabel>
             <FormControl>
-              <RadioGroup v-bind="componentField" class="flex">
+              <RadioGroup v-bind="componentField" class="flex" disabled>
                 <div class="flex items-center space-x-2">
                   <RadioGroupItem value="true" id="r1" />
                   <Label for="r1" class="font-normal">품목 사용</Label>
@@ -108,7 +103,7 @@
   <div class="flex justify-end pt-6 pb-5">
     <Button
       type="submit"
-      form="itemUpdateForm"
+      form="itemCreateForm"
       class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
     >
       Save

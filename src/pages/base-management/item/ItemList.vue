@@ -13,7 +13,7 @@
             <TableHead class="text-center">규격</TableHead>
             <TableHead class="text-center">단위</TableHead>
             <TableHead class="text-center">품목구분</TableHead>
-            <TableHead class="text-center">사용 여부</TableHead>
+            <TableHead class="text-center">사용여부</TableHead>
           </TableRow>
         </TableHeader>
 

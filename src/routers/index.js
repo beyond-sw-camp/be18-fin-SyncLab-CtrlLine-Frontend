@@ -52,6 +52,11 @@ const routes = [
         component: () => import('@/pages/base-management/item/ItemDetail.vue'),
       },
       {
+        path: 'items/new',
+        name: 'CreateItem',
+        component: () => import('@/pages/base-management/item/CreateItem.vue'),
+      },
+      {
         path: 'factories',
         name: 'FactoryList',
         component: () => import('@/pages/base-management/factory/FactoryList.vue'),
