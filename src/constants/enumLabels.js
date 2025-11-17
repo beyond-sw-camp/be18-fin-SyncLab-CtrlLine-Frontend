@@ -9,3 +9,10 @@ export const ROLE_LABELS = {
   MANAGER: '담당자',
   USER: '유저',
 };
+
+export const ITEM_STATUS_LABELS = {
+  RAW_MATERIAL: '원재료',
+  SUB_MATERIAL: '부재료',
+  SEMI_FINISHED_PRODUCT: '반제품',
+  FINISHED_PRODUCT: '완제품',
+};
