@@ -77,6 +77,11 @@ const routes = [
         component: () => import('@/pages/base-management/equipment/EquipmentList.vue'),
       },
       {
+        path: 'equipments/:equipmentCode',
+        name: 'EquipmentDetail',
+        component: () => import('@/pages/base-management/equipment/EquipmentDetail.vue'),
+      },
+      {
         path: 'processes',
         name: 'ProcessList',
         component: () => import('@/pages/base-management/process/ProcessList.vue'),

@@ -10,6 +10,13 @@ export const ROLE_LABELS = {
   USER: '유저',
 };
 
+export const DEPARTMENT_LABELS = {
+  '영업 1팀': '영업 1팀',
+  '영업 2팀': '영업 2팀',
+  '생산 1팀': '생산 1팀',
+  '생산 2팀': '생산 2팀',
+};
+
 export const ITEM_STATUS_LABELS = {
   RAW_MATERIAL: '원재료',
   SUB_MATERIAL: '부재료',
