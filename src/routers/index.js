@@ -53,6 +53,16 @@ const routes = [
         component: () => import('@/pages/base-management/item/ItemList.vue'),
       },
       {
+        path: 'items/:itemId',
+        name: 'ItemDetail',
+        component: () => import('@/pages/base-management/item/ItemDetail.vue'),
+      },
+      {
+        path: 'items/new',
+        name: 'CreateItem',
+        component: () => import('@/pages/base-management/item/CreateItem.vue'),
+      },
+      {
         path: 'factories',
         name: 'FactoryList',
         component: () => import('@/pages/base-management/factory/FactoryList.vue'),
@@ -71,6 +81,11 @@ const routes = [
         path: 'equipments',
         name: 'EquipmentList',
         component: () => import('@/pages/base-management/equipment/EquipmentList.vue'),
+      },
+      {
+        path: 'equipments/:equipmentCode',
+        name: 'EquipmentDetail',
+        component: () => import('@/pages/base-management/equipment/EquipmentDetail.vue'),
       },
       {
         path: 'processes',
