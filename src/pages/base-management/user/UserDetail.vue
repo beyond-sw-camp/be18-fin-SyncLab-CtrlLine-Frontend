@@ -4,7 +4,10 @@
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row">
-    <Card v-if="userDetail" class="w-full md:w-[260px] h-fit">
+    <Card
+      v-if="userDetail && canView(['USER', 'MANAGER', 'ADMIN'])"
+      class="w-full md:w-[260px] h-fit"
+    >
       <CardContent class="flex flex-col gap-8 md:h-[500px] items-center">
         <div class="flex justify-center">
           <UserProfile />
@@ -47,7 +50,7 @@
         extension: userDetail.userExtension,
       }"
     >
-      <div>
+      <div v-if="canView(['ADMIN'])">
         <h4 class="text-base font-semibold mb-4 border-b pb-2">기본 정보</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField v-slot="{ componentField, errorMessage }" name="phoneNumber">
@@ -83,7 +86,7 @@
         </div>
       </div>
 
-      <div>
+      <div v-if="canView(['ADMIN'])">
         <h4 class="text-base font-semibold mb-4 border-b pb-2">보안 설정</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField v-slot="{ componentField, errorMessage }" name="password">
@@ -118,115 +121,117 @@
         </div>
       </div>
 
-      <div>
-        <h4 class="text-base font-semibold mb-4 border-b pb-2">소속 정보</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField v-slot="{ componentField, errorMessage }" name="department">
-            <FormItem>
-              <FormLabel>부서</FormLabel>
-              <FormControl>
-                <Select v-bind="componentField">
-                  <SelectTrigger class="custom-input w-full">
-                    <SelectValue placeholder="부서를 선택하세요." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="(label, value) in DEPARTMENT_LABELS"
-                      :key="value"
-                      :value="value"
-                    >
-                      {{ label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+      <fieldset :disabled="!isEditableInput">
+        <div>
+          <h4 class="text-base font-semibold mb-4 border-b pb-2">소속 정보</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField v-slot="{ componentField, errorMessage }" name="department">
+              <FormItem>
+                <FormLabel>부서</FormLabel>
+                <FormControl>
+                  <Select v-bind="componentField">
+                    <SelectTrigger class="custom-input w-full">
+                      <SelectValue placeholder="부서를 선택하세요." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="(label, value) in DEPARTMENT_LABELS"
+                        :key="value"
+                        :value="value"
+                      >
+                        {{ label }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="extension">
-            <FormItem>
-              <FormLabel>내선번호</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder="내선번호를 입력하세요."
-                  v-bind="componentField"
-                  class="custom-input w-full"
-                />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField, errorMessage }" name="extension">
+              <FormItem>
+                <FormLabel>내선번호</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="내선번호를 입력하세요."
+                    v-bind="componentField"
+                    class="custom-input w-full"
+                  />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="position">
-            <FormItem>
-              <FormLabel>직급</FormLabel>
-              <FormControl>
-                <Select v-bind="componentField">
-                  <SelectTrigger class="custom-input w-full">
-                    <SelectValue placeholder="직급을 선택하세요." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="(label, value) in POSITION_LABELS"
-                      :key="value"
-                      :value="value"
-                    >
-                      {{ label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField, errorMessage }" name="position">
+              <FormItem>
+                <FormLabel>직급</FormLabel>
+                <FormControl>
+                  <Select v-bind="componentField">
+                    <SelectTrigger class="custom-input w-full">
+                      <SelectValue placeholder="직급을 선택하세요." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="(label, value) in POSITION_LABELS"
+                        :key="value"
+                        :value="value"
+                      >
+                        {{ label }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="role">
-            <FormItem>
-              <FormLabel>권한</FormLabel>
-              <FormControl>
-                <Select v-bind="componentField">
-                  <SelectTrigger class="custom-input w-full">
-                    <SelectValue placeholder="권한을 선택하세요." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="(label, value) in ROLE_LABELS" :key="value" :value="value">
-                      {{ label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField, errorMessage }" name="role">
+              <FormItem>
+                <FormLabel>권한</FormLabel>
+                <FormControl>
+                  <Select v-bind="componentField">
+                    <SelectTrigger class="custom-input w-full">
+                      <SelectValue placeholder="권한을 선택하세요." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem v-for="(label, value) in ROLE_LABELS" :key="value" :value="value">
+                        {{ label }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="status">
-            <FormItem>
-              <FormLabel>상태</FormLabel>
-              <FormControl>
-                <Select v-bind="componentField">
-                  <SelectTrigger class="custom-input w-full">
-                    <SelectValue placeholder="재직 상태를 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="(label, value) in EMPLOYMENT_STATUS_LABELS"
-                      :key="value"
-                      :value="value"
-                    >
-                      {{ label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField, errorMessage }" name="status">
+              <FormItem>
+                <FormLabel>상태</FormLabel>
+                <FormControl>
+                  <Select v-bind="componentField">
+                    <SelectTrigger class="custom-input w-full">
+                      <SelectValue placeholder="재직 상태를 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="(label, value) in EMPLOYMENT_STATUS_LABELS"
+                        :key="value"
+                        :value="value"
+                      >
+                        {{ label }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
         </div>
-      </div>
+      </fieldset>
 
-      <div>
+      <div v-if="canView(['ADMIN'])">
         <h4 class="text-base font-semibold mb-4 border-b pb-2">입사 정보</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField v-slot="{ componentField, errorMessage }" name="hiredDate">
@@ -254,7 +259,7 @@
   </div>
   <div class="flex justify-end pt-6 pb-5">
     <Button
-      v-if="userStore.userRole === 'ADMIN'"
+      v-if="canView(['ADMIN'])"
       type="submit"
       form="userUpdateForm"
       class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
@@ -290,7 +295,7 @@ import {
   POSITION_LABELS,
   ROLE_LABELS,
 } from '@/constants/enumLabels';
-import { useUserStore } from '@/stores/useUserStore';
+import { canView } from '@/utils/canView';
 import formatDate from '@/utils/formatDate';
 
 const formSchema = toTypedSchema(
@@ -313,7 +318,8 @@ const formSchema = toTypedSchema(
       position: z.string({ required_error: '직급 필수입니다.' }).optional(),
       role: z.string({ required_error: '권한 설정은 필수입니다.' }).optional(),
       status: z.string({ required_error: '재직 상태 설정은 필수입니다.' }).optional(),
-      terminationDate: z.string().optional().optional(),
+      hiredDate: z.string().optional(),
+      terminationDate: z.string().optional(),
       password: z
         .string({ required_error: '비밀번호 필수입니다.' })
         .min(8, '비밀번호는 8자 이상이어야 합니다.')
@@ -330,10 +336,10 @@ const formSchema = toTypedSchema(
 );
 
 const route = useRoute();
-const userStore = useUserStore();
 
 const { data: userDetail } = useGetUser(route.params.userId);
 const { mutate: updateUser } = useUpdateUser(route.params.userId);
+const isEditableInput = canView(['ADMIN']);
 
 const userInfo = computed(() => [
   { label: '사번', value: userDetail.value.empNo },

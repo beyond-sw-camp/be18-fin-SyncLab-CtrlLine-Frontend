@@ -23,7 +23,6 @@
         </TableHeader>
 
         <TableBody v-if="userList && userList.content">
-          <!-- 유저는 semibold로 변경 goToDetail 이벤트 동작 못하게 막기 -->
           <TableRow
             v-for="(user, index) in userList.content"
             :key="index"
@@ -105,10 +104,8 @@ import {
 } from '@/components/ui/table';
 import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 import FilterTab from '@/pages/base-management/user/FilterTab.vue';
-import { useUserStore } from '@/stores/useUserStore';
 
 const router = useRouter();
-const userStore = useUserStore();
 const deniedModal = ref(false);
 
 const { data: userList, refetch, page, filters } = useGetUserList();
@@ -120,10 +117,6 @@ const onSearch = newFilters => {
 };
 
 const goToDetail = userId => {
-  if (userStore.userRole === 'USER') {
-    deniedModal.value = true;
-    return;
-  }
   router.push(`/base-management/users/${userId}`);
 };
 </script>

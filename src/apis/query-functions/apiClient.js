@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
+import router from '@/routers';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 const apiClient = axios.create({
@@ -34,7 +34,6 @@ apiClient.interceptors.response.use(
   },
   async error => {
     const authStore = useAuthStore();
-    const router = useRouter();
 
     if (error.response?.status === 401 && !error.config._retry) {
       error.config._retry = true;
@@ -55,7 +54,8 @@ apiClient.interceptors.response.use(
         }
 
         authStore.clearAuth();
-        router.push('/login');
+        await router.push('/login');
+        console.log('로그아웃 완료');
 
         return Promise.reject(refreshError);
       }

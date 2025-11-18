@@ -36,7 +36,7 @@
             <NavigationMenuLink href="/users/me" class="flex flex-row items-center gap-2">
               <Avatar>
                 <AvatarFallback class="bg-primary/10 text-primary font-semibold">
-                  {{ userStore.userEmail[0] || '?' }}
+                  {{ userStore.userEmail?.[0] ?? '?' }}
                 </AvatarFallback>
               </Avatar>
               <span class="font-medium">{{ userStore.userName || '사용자' }}</span>
