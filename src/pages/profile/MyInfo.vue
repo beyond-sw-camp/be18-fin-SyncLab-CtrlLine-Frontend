@@ -1,17 +1,37 @@
 <template>
   <div class="flex justify-between items-center mb-6">
-    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">사용자 등록</h3>
+    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">내 정보</h3>
+    <Button
+      type="submit"
+      form="myInfoUpdateForm"
+      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
+      size="sm"
+    >
+      Save
+    </Button>
   </div>
 
-  <div>
+  <div class="pb-10">
     <Form
-      id="userCreateForm"
-      @submit="onSubmit"
+      v-if="myInfo"
+      id="myInfoUpdateForm"
       :validation-schema="formSchema"
       class="flex flex-col gap-10"
       :initial-values="{
-        status: 'ACTIVE',
+        empNo: myInfo.empNo,
+        name: myInfo.userName,
+        department: myInfo.userDepartment,
+        status: myInfo.userStatus,
+        role: myInfo.userRole,
+        position: myInfo.userPosition,
+        phoneNumber: myInfo.userPhoneNumber,
+        email: myInfo.userEmail,
+        address: myInfo.userAddress,
+        extension: myInfo.userExtension,
+        hiredDate: myInfo.hiredDate,
+        terminationDate: myInfo.terminationDate,
       }"
+      @submit="onSubmit"
     >
       <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">기본 정보</h4>
@@ -22,7 +42,7 @@
               <FormControl>
                 <Input
                   type="text"
-                  placeholder="이름을 입력해주세요."
+                  placeholder="홍길동"
                   v-bind="componentField"
                   autocomplete="name"
                 />
@@ -31,15 +51,16 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="email">
+          <FormField v-slot="{ componentField, errorMessage }" name="empNo">
             <FormItem>
-              <FormLabel>이메일</FormLabel>
+              <FormLabel>사번</FormLabel>
               <FormControl>
                 <Input
-                  type="email"
-                  placeholder="이메일을 입력해주세요."
+                  type="text"
+                  placeholder="20250001"
                   v-bind="componentField"
-                  autocomplete="email"
+                  autocomplete="off"
+                  disabled
                 />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
@@ -62,8 +83,24 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="address">
+          <FormField v-slot="{ componentField, errorMessage }" name="email">
             <FormItem>
+              <FormLabel>이메일</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="email@example.com"
+                  v-bind="componentField"
+                  autocomplete="email"
+                  disabled
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField, errorMessage }" name="address">
+            <FormItem class="md:col-span-2">
               <FormLabel>주소</FormLabel>
               <FormControl>
                 <Input
@@ -82,6 +119,7 @@
       <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">보안 설정</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- 비밀번호 -->
           <FormField v-slot="{ componentField, errorMessage }" name="password">
             <FormItem>
               <FormLabel>비밀번호</FormLabel>
@@ -90,7 +128,6 @@
                   type="password"
                   placeholder="비밀번호를 입력해주세요."
                   v-bind="componentField"
-                  autocomplete="new-password"
                 />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
@@ -105,7 +142,6 @@
                   type="password"
                   placeholder="비밀번호를 다시 입력해주세요."
                   v-bind="componentField"
-                  autocomplete="new-password"
                 />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
@@ -121,15 +157,18 @@
             <FormItem>
               <FormLabel>부서</FormLabel>
               <FormControl>
-                <Select v-bind="componentField">
+                <Select v-bind="componentField" disabled>
                   <SelectTrigger class="custom-input w-full">
                     <SelectValue placeholder="부서를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="영업 1팀">영업 1팀</SelectItem>
-                    <SelectItem value="영업 2팀">영업 2팀</SelectItem>
-                    <SelectItem value="생산 1팀">생산 1팀</SelectItem>
-                    <SelectItem value="생산 2팀">생산 2팀</SelectItem>
+                    <SelectItem
+                      v-for="(label, value) in DEPARTMENT_LABELS"
+                      :key="value"
+                      :value="value"
+                    >
+                      {{ label }}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -146,6 +185,7 @@
                   placeholder="내선번호를 입력하세요."
                   v-bind="componentField"
                   class="custom-input w-full"
+                  disabled
                 />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
@@ -157,16 +197,17 @@
               <FormLabel>직급</FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
-                  <SelectTrigger class="custom-input w-full">
+                  <SelectTrigger class="custom-input w-full" disabled>
                     <SelectValue placeholder="직급을 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ASSISTANT">주임</SelectItem>
-                    <SelectItem value="ASSISTANT_MANAGER">대리</SelectItem>
-                    <SelectItem value="MANAGER">과장</SelectItem>
-                    <SelectItem value="GENERAL_MANAGER">부장</SelectItem>
-                    <SelectItem value="DIRECTOR">이사</SelectItem>
-                    <SelectItem value="CEO">대표</SelectItem>
+                    <SelectItem
+                      v-for="(label, value) in POSITION_LABELS"
+                      :key="value"
+                      :value="value"
+                    >
+                      {{ label }}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -178,14 +219,14 @@
             <FormItem>
               <FormLabel>권한</FormLabel>
               <FormControl>
-                <Select v-bind="componentField">
+                <Select v-bind="componentField" disabled>
                   <SelectTrigger class="custom-input w-full">
                     <SelectValue placeholder="권한을 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USER">유저</SelectItem>
-                    <SelectItem value="MANAGER">담당자</SelectItem>
-                    <SelectItem value="ADMIN">관리자</SelectItem>
+                    <SelectItem v-for="(label, value) in ROLE_LABELS" :key="value" :value="value">
+                      {{ label }}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -199,12 +240,16 @@
               <FormControl>
                 <Select v-bind="componentField" disabled>
                   <SelectTrigger class="custom-input w-full">
-                    <SelectValue placeholder="재직 상태를 선택하세요" />
+                    <SelectValue placeholder="재직 상태를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ACTIVE">재직</SelectItem>
-                    <SelectItem value="LEAVE">휴직</SelectItem>
-                    <SelectItem value="RESIGNED">퇴사</SelectItem>
+                    <SelectItem
+                      v-for="(label, value) in EMPLOYMENT_STATUS_LABELS"
+                      :key="value"
+                      :value="value"
+                    >
+                      {{ label }}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -216,12 +261,13 @@
 
       <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">입사 정보</h4>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField v-slot="{ componentField, errorMessage }" name="hiredDate">
             <FormItem>
               <FormLabel>입사일</FormLabel>
               <FormControl>
-                <Input type="date" v-bind="componentField" />
+                <Input type="date" v-bind="componentField" disabled />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -240,23 +286,14 @@
       </div>
     </Form>
   </div>
-  <div class="flex justify-end pt-6 pb-5">
-    <Button
-      type="submit"
-      form="userCreateForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
-    >
-      Save
-    </Button>
-  </div>
 </template>
 
 <script setup>
-// @ts-nocheck
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
 
-import useCreateUser from '@/apis/query-hooks/user/useCreateUser';
+import useGetMyInfo from '@/apis/query-hooks/user/useGetMyInfo';
+import useUpdateMyInfo from '@/apis/query-hooks/user/useUpdateMyInfo';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -267,34 +304,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DEPARTMENT_LABELS,
+  EMPLOYMENT_STATUS_LABELS,
+  POSITION_LABELS,
+  ROLE_LABELS,
+} from '@/constants/enumLabels';
 
 const formSchema = toTypedSchema(
   z
     .object({
-      name: z.string({ required_error: '이름은 필수입니다.' }).nonempty('이름은 필수입니다.'),
-      email: z
-        .string({ required_error: '이메일은 필수입니다.' })
-        .email('이메일 형식이 올바르지 않습니다.'),
+      name: z
+        .string({ required_error: '이름은 필수입니다.' })
+        .nonempty('이름은 필수입니다.')
+        .optional(),
+      email: z.string().optional(),
       phoneNumber: z
         .string({ required_error: '연락처는 필수입니다.' })
         .min(8, '연락처는 필수입니다.')
-        .regex(/^010-\d{4}-\d{4}$/, '유효하지 않은 전화번호 형식입니다. (예: 010-1234-5678)'),
-      address: z.string({ required_error: '주소는 필수입니다.' }).nonempty('주소는 필수입니다.'),
-      department: z.string({ required_error: '부서는 필수입니다.' }),
-      extension: z
-        .string({ required_error: '내선 번호는 필수입니다.' })
-        .length(5, '내선 번호는 5자리여야 합니다.'),
-      position: z.string({ required_error: '직급 필수입니다.' }),
-      role: z.string({ required_error: '권한 설정은 필수입니다.' }),
+        .regex(/^010-\d{4}-\d{4}$/, '유효하지 않은 전화번호 형식입니다. (예: 010-1234-5678)')
+        .optional(),
+      address: z
+        .string({ required_error: '주소는 필수입니다.' })
+        .nonempty('주소는 필수입니다.')
+        .optional(),
+      department: z.string().optional(),
+      extension: z.string().optional(),
+      position: z.string().optional(),
+      role: z.string().optional(),
       status: z.string().optional(),
-      hiredDate: z.string({ required_error: '입사일 필수입니다.' }),
+      hiredDate: z.string().optional(),
       terminationDate: z.string().optional(),
       password: z
         .string({ required_error: '비밀번호 필수입니다.' })
-        .min(8, '비밀번호는 8자 이상이어야 합니다.'),
+        .min(8, '비밀번호는 8자 이상이어야 합니다.')
+        .optional(),
       passwordConfirm: z
         .string({ required_error: '비밀번호 확인은 필수입니다.' })
-        .min(8, '비밀번호 확인을 입력해주세요.'),
+        .min(8, '비밀번호 확인을 입력해주세요.')
+        .optional(),
     })
     .refine(data => data.password === data.passwordConfirm, {
       path: ['passwordConfirm'],
@@ -302,25 +350,27 @@ const formSchema = toTypedSchema(
     }),
 );
 
-const { mutate: createUser } = useCreateUser();
+const { data: myInfo } = useGetMyInfo();
 
-const onSubmit = values => {
+const { mutate: updateMyInfo } = useUpdateMyInfo();
+
+// 이름, 주소, 패스워드, 연락처 수정 가능
+const onSubmit = (values, { setFieldValue }) => {
   const params = {
     userName: values.name,
     userEmail: values.email,
     userPassword: values.password,
+    userPasswordConfirm: values.passwordConfirm,
     userPhoneNumber: values.phoneNumber,
-    userDepartment: values.department,
-    userExtension: values.extension,
-    userPosition: values.position,
-    userRole: values.role,
     userAddress: values.address,
-    userHiredDate: values.hiredDate,
-    userStatus: values.status,
-    userTerminationDate: values.terminationDate,
   };
-  console.log(params);
-  createUser(params);
+
+  updateMyInfo(params, {
+    onSuccess: () => {
+      setFieldValue('password', undefined);
+      setFieldValue('passwordConfirm', undefined);
+    },
+  });
 };
 </script>
 

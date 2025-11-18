@@ -10,9 +10,9 @@ export async function getUserList(params) {
 
   for (const [key, value] of Object.entries(params)) {
     if (key === 'sort' && Array.isArray(value)) {
+      // sort 배열 그대로 append
       value.forEach(sortItem => {
-        query.append('sortBy', sortItem.sortBy);
-        query.append('direction', sortItem.direction);
+        query.append('sort', sortItem);
       });
     } else if (value !== undefined && value !== null && value !== '') {
       query.append(key, value);
@@ -25,5 +25,23 @@ export async function getUserList(params) {
 
 export async function getUser(userId) {
   const { data } = await apiClient.get(`/users/${userId}`);
+  return data.data;
+}
+
+export async function updateUser(userId, params) {
+  const { data } = await apiClient.patch(`/users/${userId}`, params);
+
+  return data.data;
+}
+
+// ============ 내 정보 ============
+
+export async function getMyInfo() {
+  const { data } = await apiClient.get(`/users/me`);
+  return data.data;
+}
+
+export async function updateMyInfo(params) {
+  const { data } = await apiClient.patch(`/users/me`, params);
   return data.data;
 }

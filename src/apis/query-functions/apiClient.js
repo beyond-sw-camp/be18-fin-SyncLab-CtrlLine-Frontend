@@ -19,8 +19,6 @@ apiClient.interceptors.request.use(
 
     if (authStore.accessToken) {
       config.headers.Authorization = `Bearer ${authStore.accessToken}`;
-
-      console.log('accessToken', authStore.accessToken);
     }
     return config;
   },
@@ -57,6 +55,7 @@ apiClient.interceptors.response.use(
 
         authStore.clearAuth();
         await router.push('/login');
+        console.log('로그아웃 완료');
 
         return Promise.reject(refreshError);
       }

@@ -17,6 +17,15 @@ export const DEPARTMENT_LABELS = {
   '생산 2팀': '생산 2팀',
 };
 
+export const POSITION_LABELS = {
+  ASSISTANT: '주임',
+  ASSISTANT_MANAGER: '대리',
+  MANAGER: '과장',
+  GENERAL_MANAGER: '부장',
+  DIRECTOR: '이사',
+  CEO: '대표',
+};
+
 export const ITEM_STATUS_LABELS = {
   RAW_MATERIAL: '원재료',
   SUB_MATERIAL: '부재료',

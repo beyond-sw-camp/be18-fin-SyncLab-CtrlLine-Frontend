@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/vue-query';
 import { computed } from 'vue';
 
-import { getUser } from '@/apis/query-functions/user';
+import { getMyInfo } from '@/apis/query-functions/user';
 import { useAuthStore } from '@/stores/useAuthStore';
 
-export default function useGetUser(userId) {
+export default function useGetMyInfo() {
   const authStore = useAuthStore();
   return useQuery({
-    queryKey: ['user', userId],
-    queryFn: () => getUser(userId),
+    queryKey: ['myInfo'],
+    queryFn: () => getMyInfo(),
     enabled: computed(() => authStore.isLoggedIn),
   });
 }

@@ -13,7 +13,7 @@ export const baseManagement = [
           },
         ],
       },
-      { label: '사용자 등록', to: '/base-management/users/new' },
+      { label: '사용자 등록', to: '/base-management/users/new', role: 'ADMIN' },
     ],
   },
   {
@@ -30,7 +30,7 @@ export const baseManagement = [
           },
         ],
       },
-      { label: '품목 등록', to: '/base-management/items/new' },
+      { label: '품목 등록', to: '/base-management/items/new', role: 'ADMIN' },
     ],
   },
   {
@@ -47,7 +47,6 @@ export const baseManagement = [
           },
         ],
       },
-      // { label: '공장 등록', to: '/base-management/factories/new' },
     ],
   },
   {
@@ -64,7 +63,6 @@ export const baseManagement = [
           },
         ],
       },
-      // { label: '라인 등록', to: '/base-management/lines/new' },
     ],
   },
   {
@@ -81,7 +79,6 @@ export const baseManagement = [
           },
         ],
       },
-      // { label: '설비 등록', to: '/base-management/equipments/new' },
     ],
   },
   {
@@ -98,7 +95,6 @@ export const baseManagement = [
           },
         ],
       },
-      // { label: '공정 등록', to: '/base-management/processes/new' },
     ],
   },
   { label: '공장 계층 구조도', to: '/base-management/factory-structure' },

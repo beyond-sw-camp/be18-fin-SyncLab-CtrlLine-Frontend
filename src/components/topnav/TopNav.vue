@@ -12,8 +12,6 @@
       </NavigationMenu>
 
       <BreadcrumbBar />
-
-      <Separator orientation="vertical" class="mx-3 h-5" />
     </div>
 
     <div class="flex items-center gap-4">
@@ -38,10 +36,10 @@
             <NavigationMenuLink href="/users/me" class="flex flex-row items-center gap-2">
               <Avatar>
                 <AvatarFallback class="bg-primary/10 text-primary font-semibold">
-                  S
+                  {{ userStore.userEmail?.[0] ?? '?' }}
                 </AvatarFallback>
               </Avatar>
-              <span class="font-medium">SyncLab</span>
+              <span class="font-medium">{{ userStore.userName || '사용자' }}</span>
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
@@ -56,6 +54,7 @@
 </template>
 
 <script setup>
+import { useQueryClient } from '@tanstack/vue-query';
 import { BellIcon, LogOutIcon } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
@@ -69,7 +68,6 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from '@/components/ui/navigation-menu';
-import { Separator } from '@/components/ui/separator';
 import {
   Sheet,
   SheetContent,
@@ -79,12 +77,17 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useUserStore } from '@/stores/useUserStore';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const userStore = useUserStore();
+const queryClient = useQueryClient();
 
 const logout = () => {
   authStore.clearAuth();
+  userStore.clearUser();
+  queryClient.clear();
   toast.success('로그아웃 되었습니다.');
   router.push('/login');
 };

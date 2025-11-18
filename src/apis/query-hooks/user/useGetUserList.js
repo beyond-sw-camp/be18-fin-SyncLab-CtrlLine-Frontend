@@ -1,24 +1,43 @@
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
-import { computed, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 import { getUserList } from '@/apis/query-functions/user';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export default function useGetUserList(initialFilters = {}) {
+  const authStore = useAuthStore();
   const page = ref(1);
   const pageSize = ref(10);
-  const filters = ref(initialFilters);
-  const fixedSort = [{ sortBy: 'empNo', direction: 'asc' }];
 
-  const queryParams = computed(() => ({
-    ...filters.value,
-    page: page.value - 1,
-    size: pageSize.value,
-    sort: fixedSort,
-  }));
+  const filters = reactive({
+    userEmail: initialFilters.userEmail ?? '',
+    userDepartment: initialFilters.userDepartment ?? null,
+    userPhoneNumber: initialFilters.userPhoneNumber ?? '',
+    userStatus: initialFilters.userStatus ?? null,
+    userRole: initialFilters.userRole ?? null,
+  });
+  const fixedSort = ['empNo,asc', 'name,asc'];
 
-  const { isPending, isError, data, error, isFetching, isPlaceholderData } = useQuery({
+  const queryParams = computed(() => {
+    const cleaned = {};
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== '') {
+        cleaned[key] = value;
+      }
+    });
+
+    cleaned.page = page.value - 1;
+    cleaned.size = pageSize.value;
+    cleaned.sort = fixedSort;
+
+    return cleaned;
+  });
+
+  const { data, isPlaceholderData, refetch } = useQuery({
     queryKey: ['userList', queryParams],
     queryFn: () => getUserList(queryParams.value),
+    enabled: computed(() => authStore.isLoggedIn),
     placeholderData: keepPreviousData,
   });
 
@@ -45,12 +64,8 @@ export default function useGetUserList(initialFilters = {}) {
   };
 
   return {
-    isPending,
-    isError,
     data,
-    error,
-    isFetching,
-    isPlaceholderData,
+    refetch,
     page,
     pageSize,
     filters,

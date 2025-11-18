@@ -6,32 +6,41 @@
     </RouterLink>
   </div>
 
+  <FilterTab :filters="filters" @search="onSearch" />
+
   <div class="flex flex-col">
     <div class="min-h-[600px] flex-1">
-      <Table class="w-full">
+      <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead>사원명</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>부서명</TableHead>
-            <TableHead>연락처</TableHead>
-            <TableHead>상태</TableHead>
-            <TableHead>권한</TableHead>
+            <TableHead class="text-center">사원명</TableHead>
+            <TableHead class="text-center">Email</TableHead>
+            <TableHead class="text-center">부서명</TableHead>
+            <TableHead class="text-center">연락처</TableHead>
+            <TableHead class="text-center">상태</TableHead>
+            <TableHead class="text-center">권한</TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody v-if="userList && userList.content">
-          <!-- 유저는 semibold로 변경 goToDetail 이벤트 동작 못하게 막기 -->
           <TableRow
             v-for="(user, index) in userList.content"
             :key="index"
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(user.id)"
           >
-            <TableCell class="py-3">{{ user.userName }}</TableCell>
-            <TableCell>{{ user.userEmail }}</TableCell>
-            <TableCell>{{ user.userDepartment }}</TableCell>
-            <TableCell>{{ user.userPhoneNumber }}</TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ user.userName }}
+            </TableCell>
+            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ user.userEmail }}
+            </TableCell>
+            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ user.userDepartment }}
+            </TableCell>
+            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ user.userPhoneNumber }}
+            </TableCell>
             <TableCell>
               <span
                 :class="{
@@ -50,14 +59,40 @@
     </div>
     <BasePagination v-model="page" :total-pages="userList?.pageInfo?.totalPages ?? 1" />
   </div>
+  <AlertDialog v-model:open="deniedModal">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>
+          <div class="flex items-center gap-2"><InfoIcon :size="20" />접근 권한</div>
+        </AlertDialogTitle>
+        <AlertDialogDescription>
+          매니저 이상만 사용자 상세 페이지에 접근할 수 있습니다.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+
+      <AlertDialogFooter>
+        <AlertDialogAction @click="deniedModal = false"> 확인 </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>
 
 <script setup>
-import { ChevronRightIcon } from 'lucide-vue-next';
+import { ChevronRightIcon, InfoIcon } from 'lucide-vue-next';
+import { ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -68,9 +103,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
+import FilterTab from '@/pages/base-management/user/FilterTab.vue';
 
 const router = useRouter();
-const { data: userList, page } = useGetUserList();
+const deniedModal = ref(false);
+
+const { data: userList, refetch, page, filters } = useGetUserList();
+
+const onSearch = newFilters => {
+  Object.assign(filters, newFilters);
+  page.value = 1; // 첫 페이지 부터 조회
+  refetch();
+};
 
 const goToDetail = userId => {
   router.push(`/base-management/users/${userId}`);
