@@ -3,6 +3,7 @@ import { toast } from 'vue-sonner';
 
 import router from '@/routers';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useUserStore } from '@/stores/useUserStore';
 
 const apiClient = axios.create({
   baseURL: `${import.meta.env.VITE_API_BASE_URL}/api/v1`,
@@ -34,6 +35,7 @@ apiClient.interceptors.response.use(
   },
   async error => {
     const authStore = useAuthStore();
+    const userStore = useUserStore();
 
     if (error.response?.status === 401 && !error.config._retry) {
       error.config._retry = true;
@@ -54,6 +56,7 @@ apiClient.interceptors.response.use(
         }
 
         authStore.clearAuth();
+        userStore.clearUser();
         await router.push('/login');
         console.log('로그아웃 완료');
 
