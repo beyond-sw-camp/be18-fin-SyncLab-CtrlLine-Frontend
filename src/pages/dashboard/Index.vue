@@ -1,20 +1,23 @@
 <template>
-  <Tabs v-model="currentTab" default-value="scheduler">
+  <Tabs v-model="currentTab" default-value="scheduler" v-if="factoryList">
     <TabsList>
       <TabsTrigger value="scheduler">전체 일정</TabsTrigger>
-      <TabsTrigger v-for="factory in data" :key="factory.factoryCode" :value="factory.factoryCode">
+      <TabsTrigger
+        v-for="factory in factoryList.content"
+        :key="factory.factoryCode"
+        :value="factory.factoryCode"
+      >
         {{ factory.factoryName }}
       </TabsTrigger>
     </TabsList>
 
     <TabsContent value="scheduler"> 전체 일정 콘텐츠 </TabsContent>
-
     <TabsContent
-      v-for="factory in data"
+      v-for="(factory, index) in factoryList.content"
       :key="factory.factoryCode + '-content'"
       :value="factory.factoryCode"
     >
-      <component :is="FACTORY_COMPONENT_MAP[factory.factoryCode]" />
+      <component :is="FACTORY_COMPONENT_LIST[index]" />
     </TabsContent>
   </Tabs>
 </template>
@@ -23,7 +26,7 @@
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-// import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
+import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import FirstFactory from '@/pages/dashboard/FirstFactory.vue';
 import SecondFactory from '@/pages/dashboard/SecondFactory.vue';
@@ -32,30 +35,11 @@ import ThirdFactory from '@/pages/dashboard/ThirdFactory.vue';
 const route = useRoute();
 const router = useRouter();
 
-// const { data: factoryList } = useGetFactoryList();
+const { data: factoryList } = useGetFactoryList();
 
 const currentTab = ref(route.query.tab ?? 'scheduler');
 
-const FACTORY_COMPONENT_MAP = {
-  F0001: FirstFactory,
-  F0002: SecondFactory,
-  F0003: ThirdFactory,
-};
-
-const data = [
-  {
-    factoryCode: 'F0001',
-    factoryName: '제 1공장',
-  },
-  {
-    factoryCode: 'F0002',
-    factoryName: '제 2공장',
-  },
-  {
-    factoryCode: 'F0003',
-    factoryName: '제 3공장',
-  },
-];
+const FACTORY_COMPONENT_LIST = [FirstFactory, SecondFactory, ThirdFactory];
 
 // 탭이 바뀌면 URL 업데이트
 watch(currentTab, value => {
