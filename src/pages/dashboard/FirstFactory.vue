@@ -9,7 +9,7 @@
     <PowerUsageGauge :usagePercent="70" :currentUsage="333.39" :peakUsage="221.2" />
   </div>
 
-  <div class="grid gap-4">
+  <div class="grid gap-4 pt-4">
     <LineEquipmentStatus :lines="lines" />
 
     <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -20,13 +20,13 @@
 </template>
 
 <script setup>
-import ChartNgType from './ChartNgType.vue';
-import DefectRateChart from './DefectRateChart.vue';
-import LineEquipmentStatus from './LineEquipmentStatus.vue';
-import PowerUsageGauge from './PowerUsageGauge.vue';
-import ProductionChart from './ProductionChart.vue';
-import ProductionProgress from './ProductionProgress.vue';
-import VerticalProgress from './VerticalProgress.vue';
+import ChartNgType from '@/pages/dashboard/ChartNgType.vue';
+import DefectRateChart from '@/pages/dashboard/DefectRateChart.vue';
+import LineEquipmentStatus from '@/pages/dashboard/LineEquipmentStatus.vue';
+import PowerUsageGauge from '@/pages/dashboard/PowerUsageGauge.vue';
+import ProductionChart from '@/pages/dashboard/ProductionChart.vue';
+import ProductionProgress from '@/pages/dashboard/ProductionProgress.vue';
+import VerticalProgress from '@/pages/dashboard/VerticalProgress.vue';
 
 const chartData1 = [
   { browser: 'chrome', visitors: 275, fill: 'var(--color-chrome)' },

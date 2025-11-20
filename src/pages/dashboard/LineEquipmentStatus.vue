@@ -1,7 +1,7 @@
 <template>
   <Card class="flex w-full">
     <CardContent class="flex-1 pb-0 overflow-x-auto">
-      <div class="flex flex-col gap-3 min-w-[600px]">
+      <div class="flex flex-col gap-3">
         <div v-for="line in lines.lines" :key="line.lineId" class="flex items-center gap-3">
           <div class="w-20 font-medium">{{ line.lineCode }}</div>
 
@@ -11,7 +11,7 @@
               :key="eq.equipmentId"
               class="flex items-center justify-center border text-sm font-medium rounded-sm w-full"
               :style="{
-                height: '26px',
+                maxHeight: '26px',
                 backgroundColor: STATUS_COLORS[eq.status],
               }"
             >
