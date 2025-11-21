@@ -117,9 +117,9 @@ const routes = [
       },
       {
         path: 'production-plans/new',
-        name: 'ProductionPlanNew',
+        name: 'CreateProductionPlan',
         component: () =>
-          import('@/pages/production-management/production-plan/ProductionPlanNew.vue'),
+          import('@/pages/production-management/production-plan/CreateProductionPlan.vue'),
       },
       {
         path: 'production-performances',
