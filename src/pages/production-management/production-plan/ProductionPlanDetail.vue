@@ -8,7 +8,7 @@
       <Button variant="outline" size="sm" class="cursor-pointer w-[60px]"> Delete </Button>
       <Button
         type="submit"
-        form="productionPlanUpdate"
+        form="productionPlanUpdateForm"
         class="bg-primary text-white hover:bg-primary-600 cursor-pointer w-[60px]"
         size="sm"
       >
@@ -20,7 +20,7 @@
   <div class="flex flex-col gap-8 md:flex-row">
     <Form
       v-if="productionPlanDetail"
-      id="productionPlanUpdate"
+      id="productionPlanUpdateForm"
       :validation-schema="formSchema"
       @submit="onSubmit"
       class="flex-1 flex flex-col gap-2"
@@ -42,7 +42,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
         <FormField v-slot="{ componentField, errorMessage }" name="factoryCode">
           <FormItem>
-            <FormLabel>공장</FormLabel>
+            <FormLabel>공장명</FormLabel>
             <FormControl>
               <Select v-bind="componentField">
                 <SelectTrigger class="custom-input w-full">
@@ -210,16 +210,6 @@
       <ItemTable :itemDetail="productionPlanDetail" />
     </Form>
   </div>
-
-  <div class="flex justify-end pt-6 pb-5">
-    <Button
-      type="submit"
-      form="itemUpdateForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
-    >
-      Save
-    </Button>
-  </div>
 </template>
 
 <script setup>
@@ -238,8 +228,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
-
-import ItemTable from './ItemTable.vue';
+import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
 
 const productionPlanDetail = {
   id: 8,
@@ -271,7 +260,7 @@ const formSchema = toTypedSchema(
     startTime: z.string({ required_error: '생산시작시간은 필수입니다.' }),
     salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }),
     lineCode: z.string({ required_error: '라인명은 필수입니다.' }),
-    endTime: z.string(),
+    endTime: z.string().optional(),
     status: z.string({ required_error: '상태는 필수입니다.' }),
     plannedQty: z.coerce
       .number({ required_error: '생산계획수량은 필수입니다.' })

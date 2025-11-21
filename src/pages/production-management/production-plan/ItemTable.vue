@@ -12,12 +12,12 @@
 
     <TableBody v-if="itemDetail">
       <TableRow class="text-center border-b border-dotted border-gray-300">
-        <TableCell>{{ itemDetail.itemCode }}</TableCell>
+        <TableCell>{{ itemDetail.itemCode ?? '' }}</TableCell>
 
-        <TableCell>{{ itemDetail.itemName }}</TableCell>
+        <TableCell>{{ itemDetail.itemName ?? '' }}</TableCell>
 
         <!--규격-->
-        <TableCell>{{ itemDetail.itemName }}</TableCell>
+        <TableCell>{{ itemDetail.itemName ?? '' }}</TableCell>
 
         <TableCell>
           <FormField name="plannedQty" v-slot="{ componentField, errorMessage }">
@@ -27,7 +27,7 @@
         </TableCell>
         <!--단위-->
         <TableCell>
-          {{ itemDetail.salesManagerName }}
+          {{ itemDetail.salesManagerName ?? '' }}
         </TableCell>
       </TableRow>
     </TableBody>
@@ -49,7 +49,8 @@ import {
 defineProps({
   itemDetail: {
     type: Object,
-    required: true,
+    required: false,
+    default: () => ({}),
   },
 });
 </script>
