@@ -207,54 +207,7 @@
           </FormField>
         </div>
       </div>
-      <Table class="w-full table-fixed">
-        <TableHeader class="border-b-2 border-primary">
-          <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >품목코드</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >품목명</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >규격</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >생산계획수량</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >단위</TableHead
-            >
-          </TableRow>
-        </TableHeader>
-
-        <TableBody v-if="productionPlanDetail && productionPlanDetail">
-          <TableRow
-            v-bind="productionPlanDetail"
-            class="text-center transition-all border-b border-dotted border-gray-300"
-          >
-            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ productionPlanDetail.itemCode }}
-            </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ productionPlanDetail.itemName }}
-            </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              <!--규격-->
-              {{ productionPlanDetail.itemName }}
-            </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              <FormField name="plannedQty" v-slot="{ componentField }">
-                <Input type="number" v-bind="componentField" class="text-end" />
-              </FormField>
-            </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              <!--단위-->
-              {{ productionPlanDetail.salesManagerName }}
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      <ItemTable :itemDetail="productionPlanDetail" />
     </Form>
   </div>
 
@@ -284,15 +237,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
+
+import ItemTable from './ItemTable.vue';
 
 const productionPlanDetail = {
   id: 8,
@@ -326,7 +273,9 @@ const formSchema = toTypedSchema(
     lineCode: z.string({ required_error: '라인명은 필수입니다.' }),
     endTime: z.string(),
     status: z.string({ required_error: '상태는 필수입니다.' }),
-    plannedQty: z.number({ required_error: '생산계획수량은 필수입니다.' }),
+    plannedQty: z.coerce
+      .number({ required_error: '생산계획수량은 필수입니다.' })
+      .positive('생산계획수량은 1 이상이어야 합니다.'),
   }),
 );
 
