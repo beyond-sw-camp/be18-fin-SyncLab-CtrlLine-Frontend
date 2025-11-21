@@ -13,6 +13,8 @@
     </TabsList>
   </Tabs>
 
+  <FilterTab :filters="filters" @search="onSearch" />
+
   <div class="flex flex-col">
     <div class="min-h-[600px] flex-1">
       <Table class="w-full table-fixed">
@@ -40,7 +42,7 @@
               >생산계획수량</TableHead
             >
             <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >납기일정</TableHead
+              >납기일</TableHead
             >
             <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
               >비고</TableHead
@@ -70,10 +72,10 @@
               {{ productionPlan.itemName }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ productionPlan.salesManagerName }}
+              {{ productionPlan.productionManagerName }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ productionPlan.productionManagerName }}
+              {{ productionPlan.salesManagerName }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ Number(productionPlan.plannedQty).toFixed(2) }}
@@ -93,7 +95,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -108,10 +110,23 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { STATUS_CLASSES } from '@/constants/productionPlanStatus';
+import FilterTab from '@/pages/production-management/production-plan/FilterTab.vue';
 
 const router = useRouter();
 
 const page = ref(1);
+
+const filters = {
+  itemName: '원형 셀 21700 5.0Ah (NCM)',
+  factoryName: '제1공장',
+};
+
+const onSearch = newFilters => {
+  Object.assign(filters, newFilters);
+  page.value = 1; // 첫 페이지 부터 조회
+  // refetch();
+};
+
 const productionPlanList = ref({
   content: [
     {
