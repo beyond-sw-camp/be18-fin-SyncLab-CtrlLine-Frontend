@@ -2,6 +2,17 @@
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 목록</h3>
   </div>
+  <Tabs v-model="currentStatus" class="w-full">
+    <TabsList class="flex gap-3">
+      <TabsTrigger value="TOTAL">Total</TabsTrigger>
+      <TabsTrigger value="PENDING">Pending</TabsTrigger>
+      <TabsTrigger value="CONFIRMED">Confirmed</TabsTrigger>
+      <TabsTrigger value="RUNNING">Running</TabsTrigger>
+      <TabsTrigger value="COMPLETED">Completed</TabsTrigger>
+      <TabsTrigger value="RETURNED">Returned</TabsTrigger>
+    </TabsList>
+  </Tabs>
+
   <div class="flex flex-col">
     <div class="min-h-[600px] flex-1">
       <Table class="w-full table-fixed">
@@ -82,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -95,6 +106,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { STATUS_CLASSES } from '@/constants/productionPlanStatus';
 
 const router = useRouter();
@@ -234,6 +246,8 @@ const productionPlanList = ref({
     ],
   },
 });
+
+const currentStatus = ref('TOTAL');
 
 const goToDetail = documentNo => {
   router.push(`/production-management/production-plans/${documentNo}`);
