@@ -17,7 +17,7 @@
           <FilterInput label="품목명" v-model="localFilters.itemName" />
           <FilterInput label="생산담당자" v-model="localFilters.productionManagerName" />
           <FilterInput label="영업담당자" v-model="localFilters.salesManagerName" />
-          <FilterInput label="납기일" type="date" v-model="localFilters.dueDate" />
+          <FilterInput label="납기일자" type="date" v-model="localFilters.dueDate" />
           <div>
             <Label class="text-xs">생산기간</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">

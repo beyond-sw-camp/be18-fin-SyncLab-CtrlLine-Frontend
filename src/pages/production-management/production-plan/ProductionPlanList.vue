@@ -42,7 +42,7 @@
               >생산계획수량</TableHead
             >
             <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >납기일</TableHead
+              >납기일자</TableHead
             >
             <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
               >비고</TableHead
@@ -55,7 +55,7 @@
             v-for="(productionPlan, index) in productionPlanList.content"
             :key="index"
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
-            @click="goToDetail(productionPlan.documentNo)"
+            @click="goToDetail(productionPlan.id)"
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ productionPlan.documentNo }}
@@ -78,7 +78,7 @@
               {{ productionPlan.salesManagerName }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ Number(productionPlan.plannedQty).toFixed(2) }}
+              {{ productionPlan.plannedQty }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ productionPlan.dueDate }}
@@ -264,8 +264,8 @@ const productionPlanList = ref({
 
 const currentStatus = ref('TOTAL');
 
-const goToDetail = documentNo => {
-  router.push(`/production-management/production-plans/${documentNo}`);
+const goToDetail = productionPlanId => {
+  router.push(`/production-management/production-plans/${productionPlanId}`);
 };
 </script>
 
