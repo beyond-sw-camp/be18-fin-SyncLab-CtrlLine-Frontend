@@ -11,7 +11,7 @@
       </TabsTrigger>
     </TabsList>
 
-    <TabsContent value="scheduler"> 전체 일정 콘텐츠 </TabsContent>
+    <TabsContent value="scheduler"> <Scheduler /> </TabsContent>
     <TabsContent
       v-for="(factory, index) in factoryList.content"
       :key="factory.factoryCode + '-content'"
@@ -29,6 +29,7 @@ import { useRoute, useRouter } from 'vue-router';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import FirstFactory from '@/pages/dashboard/FirstFactory.vue';
+import Scheduler from '@/pages/dashboard/Scheduler.vue';
 import SecondFactory from '@/pages/dashboard/SecondFactory.vue';
 import ThirdFactory from '@/pages/dashboard/ThirdFactory.vue';
 

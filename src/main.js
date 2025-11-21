@@ -1,3 +1,4 @@
+import { registerLicense } from '@syncfusion/ej2-base';
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
@@ -23,6 +24,7 @@ const queryClient = new QueryClient({
 
 const app = createApp(App);
 const pinia = createPinia();
+registerLicense(import.meta.env.VITE_SYNCFUSION_LICENSE);
 
 pinia.use(piniaPluginPersistedstate);
 app.use(pinia);

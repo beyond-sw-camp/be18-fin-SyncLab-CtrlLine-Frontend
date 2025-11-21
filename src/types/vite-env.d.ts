@@ -9,6 +9,7 @@ interface ViteTypeOptions {
 interface ImportMetaEnv {
   readonly VITE_APP_TITLE: string;
   readonly VITE_APP_ENV: string;
+  readonly VITE_SYNCFUSION_LICENSE;
 }
 
 interface ImportMeta {
