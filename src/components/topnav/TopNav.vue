@@ -5,7 +5,7 @@
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuLink href="/" class="flex items-center gap-2 hover:bg-transparent">
-              <span class="text-lg font-bold tracking-tight">CtrlLine</span>
+              <img src="@/assets/logo.png" class="h-10" alt="logo" />
             </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
