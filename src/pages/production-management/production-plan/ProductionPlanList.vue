@@ -95,9 +95,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
+import useGetProductionPlanList from '@/apis/query-hooks/production-plan/useGetProductionPlanList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -114,159 +115,28 @@ import FilterTab from '@/pages/production-management/production-plan/FilterTab.v
 
 const router = useRouter();
 
-const page = ref(1);
+const currentStatus = ref('TOTAL');
 
-const filters = {
-  itemName: '원형 셀 21700 5.0Ah (NCM)',
-  factoryName: '제1공장',
-};
+const {
+  data: productionPlanList,
+  refetch,
+  page,
+  filters,
+} = useGetProductionPlanList(currentStatus);
 
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
   page.value = 1; // 첫 페이지 부터 조회
-  // refetch();
+  refetch();
 };
-
-const productionPlanList = ref({
-  content: [
-    {
-      id: 5,
-      documentNo: '2025/11/17-1',
-      status: 'PENDING',
-      factoryName: '제1공장',
-      salesManagerName: '이인화',
-      productionManagerName: '서현원',
-      itemName: '원형 셀 21700 5.0Ah (NCM)',
-      plannedQty: 1000000.0,
-      dueDate: '2099-01-01',
-      remark: '생산 일정 조정',
-    },
-    {
-      id: 8,
-      documentNo: '2025/11/18-1',
-      status: 'PENDING',
-      factoryName: '제1공장',
-      salesManagerName: '이인화',
-      productionManagerName: '서현원',
-      itemName: '원형 셀 21700 5.0Ah (NCM)',
-      plannedQty: 1000000.0,
-      dueDate: '2000-01-01',
-      remark: '생산 일정 조정',
-    },
-    {
-      id: 6,
-      documentNo: '2025/11/17-2',
-      status: 'PENDING',
-      factoryName: '제1공장',
-      salesManagerName: '이인화',
-      productionManagerName: '서현원',
-      itemName: '원형 셀 21700 5.0Ah (NCM)',
-      plannedQty: 100000.0,
-      dueDate: '2000-01-01',
-      remark: '생산 일정 조정',
-    },
-    {
-      id: 7,
-      documentNo: '2025/11/17-3',
-      status: 'PENDING',
-      factoryName: '제1공장',
-      salesManagerName: '이인화',
-      productionManagerName: '서현원',
-      itemName: '원형 셀 21700 5.0Ah (NCM)',
-      plannedQty: 100000.0,
-      dueDate: '2099-01-01',
-      remark: '생산 일정 조정',
-    },
-    {
-      id: 16,
-      documentNo: '2025/11/20-6',
-      status: 'CONFIRMED',
-      factoryName: '제1공장',
-      salesManagerName: '이인화',
-      productionManagerName: '서현원',
-      itemName: '원형 셀 21700 5.0Ah (NCM)',
-      plannedQty: 1000.0,
-      dueDate: '2025-12-01',
-      remark: '납기일정 변경 가능',
-    },
-    {
-      id: 17,
-      documentNo: '2025/11/20-7',
-      status: 'PENDING',
-      factoryName: '제1공장',
-      salesManagerName: '이인화',
-      productionManagerName: '서현원',
-      itemName: '원형 셀 21700 5.0Ah (NCM)',
-      plannedQty: 1000.0,
-      dueDate: '2025-12-01',
-      remark: '납기일정 변경 가능',
-    },
-    {
-      id: 18,
-      documentNo: '2025/11/20-8',
-      status: 'PENDING',
-      factoryName: '제1공장',
-      salesManagerName: '이인화',
-      productionManagerName: '서현원',
-      itemName: '원형 셀 21700 5.0Ah (NCM)',
-      plannedQty: 1000.0,
-      dueDate: '2099-01-01',
-      remark: '생산 일정 조정',
-    },
-    {
-      id: 10,
-      documentNo: '2025/11/19-2',
-      status: 'COMPLETED',
-      factoryName: '제1공장',
-      salesManagerName: '이인화',
-      productionManagerName: '서현원',
-      itemName: '원형 셀 21700 5.8Ah (NCA)',
-      plannedQty: 50.0,
-      dueDate: '2025-11-19',
-      remark: 'TEST2',
-    },
-    {
-      id: 15,
-      documentNo: '2025/11/20-5',
-      status: 'COMPLETED',
-      factoryName: '제1공장',
-      salesManagerName: '이인화',
-      productionManagerName: '서현원',
-      itemName: '원형 셀 21700 5.8Ah (NCA)',
-      plannedQty: 47.0,
-      dueDate: '2025-11-21',
-    },
-    {
-      id: 13,
-      documentNo: '2025/11/20-3',
-      status: 'RUNNING',
-      factoryName: '제1공장',
-      salesManagerName: '이인화',
-      productionManagerName: '서현원',
-      itemName: '원형 셀 18650 2.5Ah (NCM)',
-      plannedQty: 45.0,
-      dueDate: '2025-11-21',
-    },
-  ],
-  pageInfo: {
-    currentPage: 1,
-    pageSize: 10,
-    totalPages: 2,
-    totalElements: 14,
-    sort: [
-      {
-        sortBy: 'plannedQty',
-        direction: 'desc',
-      },
-    ],
-  },
-});
-
-const currentStatus = ref('TOTAL');
 
 const goToDetail = productionPlanId => {
   router.push(`/production-management/production-plans/${productionPlanId}`);
 };
+
+watch(currentStatus, () => {
+  page.value = 1; // 첫 페이지로 이동
+});
 </script>
 
 <style scoped></style>

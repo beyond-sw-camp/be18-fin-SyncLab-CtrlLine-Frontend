@@ -113,10 +113,12 @@ const resetFilters = () => {
   // 초기화하고 바로 조회
   Object.assign(localFilters, {
     factoryName: null,
-    userStatus: null,
-    userRole: null,
-    userPhoneNumber: '',
-    userEmail: '',
+    salesManagerName: '',
+    productionManagerName: '',
+    itemName: '',
+    dueDate: null,
+    startTime: null,
+    endTime: null,
   });
   emit('search', { ...localFilters });
 };
