@@ -319,7 +319,6 @@ const onSubmit = values => {
     userStatus: values.status,
     userTerminationDate: values.terminationDate,
   };
-  console.log(params);
   createUser(params);
 };
 </script>

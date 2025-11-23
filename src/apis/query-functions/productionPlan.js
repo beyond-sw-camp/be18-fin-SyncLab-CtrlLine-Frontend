@@ -13,8 +13,6 @@ export async function getProductionPlanList(params) {
     }
   }
 
-  console.log('query', params);
-
   const { data } = await apiClient.get(`/production-plans?${query.toString()}`);
   return data.data;
 }

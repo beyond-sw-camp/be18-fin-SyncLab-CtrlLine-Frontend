@@ -107,8 +107,6 @@ const route = useRoute();
 const { data: factoryDetail } = useGetFactory(route.params.factoryCode);
 const { mutate: updateFactoryStatus } = useUpdateFactoryStatus(route.params.factoryCode);
 
-console.log(factoryDetail.value);
-
 const onSubmit = values => {
   const params = {
     isActive: values.isActive === 'true',

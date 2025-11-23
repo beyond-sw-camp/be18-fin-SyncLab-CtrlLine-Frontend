@@ -47,7 +47,6 @@ apiClient.interceptors.response.use(
         if (newToken) {
           authStore.setToken(newToken);
           error.config.headers['Authorization'] = `Bearer ${newToken}`;
-          console.log('newToken', newToken);
           return apiClient(error.config);
         }
       } catch (refreshError) {
@@ -58,7 +57,6 @@ apiClient.interceptors.response.use(
         authStore.clearAuth();
         userStore.clearUser();
         await router.push('/login');
-        console.log('로그아웃 완료');
 
         return Promise.reject(refreshError);
       }

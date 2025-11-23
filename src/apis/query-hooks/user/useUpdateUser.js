@@ -17,7 +17,6 @@ export default function useLogin(userId) {
       queryClient.invalidateQueries({ queryKey: ['userList'] });
       queryClient.invalidateQueries({ queryKey: ['user', userId] });
 
-      console.log('userId === userStore.id', userId === userStore.id);
       if (Number(userId) === Number(userStore.id)) {
         // 서버에서 반환된 실제 데이터로 업데이트
         userStore.setUser({
