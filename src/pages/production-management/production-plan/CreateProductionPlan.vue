@@ -70,18 +70,58 @@
           </FormItem>
         </FormField>
 
-        <FormField name="itemCode" v-slot="{ componentField, errorMessage }">
+        <FormField name="itemCode" v-slot="{ value, setValue, errorMessage }">
           <FormItem>
             <FormLabel>품목명</FormLabel>
             <FormControl>
-              <div class="flex gap-2 items-center">
-                <Input type="text" placeholder="품목명을 입력하세요" class="flex-1" />
-                <Input type="text" v-bind="componentField" class="w-28 bg-gray-100" readonly />
+              <div class="flex gap-2">
+                <div class="relative w-full">
+                  <Input
+                    type="text"
+                    placeholder="품목명을 입력하세요"
+                    v-model="itemNameInput"
+                    @compositionstart="isComposing = true"
+                    @compositionend="onCompositionEnd"
+                    @input="onItemAutoInput"
+                    @keydown.enter.prevent="onEnter(setValue)"
+                    class="pr-8"
+                  />
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    @click="onSearchIconClick(setValue)"
+                    size="xs"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 hover:bg-transparent"
+                  >
+                    <SearchIcon class="w-4 h-4" />
+                  </Button>
+                  <ul
+                    v-if="autoCompleteItems.length > 0"
+                    class="absolute left-0 top-full mt-1 w-full bg-white border rounded-md shadow-lg z-50 max-h-48 overflow-auto"
+                  >
+                    <li
+                      v-for="item in autoCompleteItems"
+                      :key="item.itemCode"
+                      @click="selectItemFromAutoComplete(item, setValue)"
+                      class="px-2 py-1 hover:bg-gray-100 cursor-pointer text-xs"
+                    >
+                      {{ item.itemName }}
+                    </li>
+                  </ul>
+                </div>
+                <Input type="text" :value="value" readonly class="w-50 bg-gray-100" />
               </div>
             </FormControl>
             <p class="text-red-500 text-xs">{{ errorMessage }}</p>
           </FormItem>
         </FormField>
+
+        <ItemModal
+          :open="showItemModal"
+          :initialKeyword="itemNameInput"
+          @close="showItemModal = false"
+          @selected="onModalSelect"
+        />
 
         <FormField v-slot="{ componentField, errorMessage }" name="startTime">
           <FormItem>
@@ -185,9 +225,13 @@
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
+import { SearchIcon } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
+import { toast } from 'vue-sonner';
 import { z } from 'zod';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
+import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -199,8 +243,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
+import ItemModal from '@/pages/production-management/production-plan/ItemModal.vue';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
-
 
 const formSchema = toTypedSchema(
   z.object({
@@ -217,7 +261,110 @@ const formSchema = toTypedSchema(
   }),
 );
 
+// 품목 선택
+const itemNameInput = ref(''); // 입력창
+const autoCompleteItems = ref([]); // 자동완성 목록
+const showItemModal = ref(false); // 모달 열림
+const selectedSetValue = ref(null); // vee-validate setter 저장
+const isComposing = ref(false);
+
 const { data: factoryList } = useGetFactoryList();
+
+const { data: fullItemList, filters, refetch } = useGetItemList();
+
+function onCompositionEnd(e) {
+  isComposing.value = false;
+  itemNameInput.value = e.target.value; // 최종 텍스트 반영
+
+  // 조합이 끝나면 자동완성 다시 실행
+  onItemAutoInput();
+}
+
+async function onEnter(setValue) {
+  if (isComposing.value) return; // ⭐ 조합 중이면 엔터 무시
+
+  await onItemEnter(setValue);
+}
+
+// 품목 자동 완성 입력 처리
+async function onItemAutoInput() {
+  if (isComposing.value) return;
+
+  const keyword = itemNameInput.value;
+
+  if (!keyword.trim()) {
+    autoCompleteItems.value = [];
+    return;
+  }
+
+  filters.itemName = keyword;
+  await refetch();
+  autoCompleteItems.value = fullItemList.value?.content ?? [];
+}
+
+// 자동완성 선택
+function selectItemFromAutoComplete(item, setValue) {
+  itemNameInput.value = item.itemName;
+  setValue(item.itemCode);
+  autoCompleteItems.value = [];
+}
+
+async function onItemEnter(setValue) {
+  const keyword = itemNameInput.value.trim();
+  if (!keyword) return;
+
+  // 자동완성 목록 기준으로 먼저 판단
+  if (autoCompleteItems.value.length === 1) {
+    selectItemFromAutoComplete(autoCompleteItems.value[0], setValue);
+    return;
+  }
+
+  if (autoCompleteItems.value.length > 1) {
+    selectedSetValue.value = setValue;
+    showItemModal.value = true;
+    return;
+  }
+
+  // 자동완성 데이터 없으면 API 호출
+  filters.itemName = keyword;
+  await refetch();
+
+  const list = fullItemList.value?.content ?? [];
+
+  if (list.length === 1) {
+    selectItemFromAutoComplete(list[0], setValue);
+    return;
+  }
+
+  if (list.length > 1) {
+    selectedSetValue.value = setValue;
+    showItemModal.value = true;
+    return;
+  }
+
+  toast.info('검색 결과가 없습니다.');
+}
+
+// 돋보기 클릭
+function onSearchIconClick(setValue) {
+  selectedSetValue.value = setValue;
+  showItemModal.value = true;
+}
+
+function onModalSelect(item) {
+  if (selectedSetValue.value) {
+    selectedSetValue.value(item.itemCode);
+  }
+  itemNameInput.value = item.itemName;
+  showItemModal.value = false;
+}
+
+watch(itemNameInput, val => {
+  if (val === '' && selectedSetValue.value) {
+    console.log('실행');
+    selectedSetValue.value('');
+  }
+});
 
 const onSubmit = values => {
   const params = {
