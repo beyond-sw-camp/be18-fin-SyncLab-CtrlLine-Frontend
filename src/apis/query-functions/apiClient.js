@@ -36,8 +36,13 @@ apiClient.interceptors.response.use(
   async error => {
     const authStore = useAuthStore();
     const userStore = useUserStore();
+    const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !error.config._retry) {
+    if (originalRequest.url.includes('/auth/login')) {
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
       error.config._retry = true;
 
       try {
