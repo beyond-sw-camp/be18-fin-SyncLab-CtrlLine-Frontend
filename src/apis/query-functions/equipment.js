@@ -17,3 +17,9 @@ export async function getEquipmentList(params) {
   const { data } = await apiClient.get(`/equipments?${query.toString()}`);
   return data.data;
 }
+
+// 설비 정보 일부 수정
+export async function updateEquipment(equipmentCode, params) {
+  const { data } = await apiClient.patch(`/equipments/${equipmentCode}`, params);
+  return data.data;
+}
