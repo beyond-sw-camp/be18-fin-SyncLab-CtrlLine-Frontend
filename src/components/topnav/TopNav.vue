@@ -5,7 +5,7 @@
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuLink href="/" class="flex items-center gap-2 hover:bg-transparent">
-              <span class="text-lg font-bold tracking-tight">CtrlLine</span>
+              <img src="@/assets/logo.png" class="h-10" alt="logo" />
             </NavigationMenuLink>
           </NavigationMenuItem>
         </NavigationMenuList>
@@ -56,9 +56,8 @@
 <script setup>
 import { useQueryClient } from '@tanstack/vue-query';
 import { BellIcon, LogOutIcon } from 'lucide-vue-next';
-import { useRouter } from 'vue-router';
-import { toast } from 'vue-sonner';
 
+import useLogout from '@/apis/query-hooks/auth/useLogout';
 import BreadcrumbBar from '@/components/topnav/BreadcrumbBar.vue';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -76,19 +75,15 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { useAuthStore } from '@/stores/useAuthStore';
 import { useUserStore } from '@/stores/useUserStore';
 
-const router = useRouter();
-const authStore = useAuthStore();
+const { mutate: logoutTest } = useLogout();
+
 const userStore = useUserStore();
 const queryClient = useQueryClient();
 
 const logout = () => {
-  authStore.clearAuth();
-  userStore.clearUser();
+  logoutTest();
   queryClient.clear();
-  toast.success('로그아웃 되었습니다.');
-  router.push('/login');
 };
 </script>

@@ -38,7 +38,12 @@ export default function useLogin() {
       router.push('/dashboard');
     },
     onError: error => {
-      toast.error(error.response.data.message);
+      if (error.response.data.code === 'INVALID_LOGIN') {
+        toast.error(error.response.data.message);
+        return;
+      }
+
+      toast.error('로그인 중 오류가 발생했습니다.');
     },
   });
 }
