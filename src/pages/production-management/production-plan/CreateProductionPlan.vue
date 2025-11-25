@@ -109,7 +109,7 @@
                     </li>
                   </ul>
                 </div>
-                <Input type="text" :value="value" readonly class="w-50 bg-gray-100" />
+                <Input type="text" :value="value" readonly class="w-28 bg-gray-100" />
               </div>
             </FormControl>
             <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -281,7 +281,7 @@ function onCompositionEnd(e) {
 }
 
 async function onEnter(setValue) {
-  if (isComposing.value) return; // ⭐ 조합 중이면 엔터 무시
+  if (isComposing.value) return; // 조합 중이면 엔터 무시
 
   await onItemEnter(setValue);
 }
@@ -321,6 +321,7 @@ async function onItemEnter(setValue) {
 
   if (autoCompleteItems.value.length > 1) {
     selectedSetValue.value = setValue;
+    autoCompleteItems.value = [];
     showItemModal.value = true;
     return;
   }
@@ -348,6 +349,7 @@ async function onItemEnter(setValue) {
 // 돋보기 클릭
 function onSearchIconClick(setValue) {
   selectedSetValue.value = setValue;
+  autoCompleteItems.value = [];
   showItemModal.value = true;
 }
 
@@ -355,13 +357,14 @@ function onModalSelect(item) {
   if (selectedSetValue.value) {
     selectedSetValue.value(item.itemCode);
   }
+
   itemNameInput.value = item.itemName;
+  autoCompleteItems.value = [];
   showItemModal.value = false;
 }
 
 watch(itemNameInput, val => {
   if (val === '' && selectedSetValue.value) {
-    console.log('실행');
     selectedSetValue.value('');
   }
 });
