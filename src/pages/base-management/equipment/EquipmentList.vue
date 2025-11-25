@@ -62,12 +62,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
-import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
-
 import BasePagination from '@/components/pagination/BasePagination.vue';
 import { Badge } from '@/components/ui/badge';
 // 테이블 UI 컴포넌트
@@ -79,6 +76,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
 
 const router = useRouter();
 
