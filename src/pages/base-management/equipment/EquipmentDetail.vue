@@ -64,7 +64,7 @@
             <FormItem>
               <FormLabel>담당자</FormLabel>
               <FormControl>
-                <Input type="text" v-bind="componentField" :disabled="!isAdmin" />
+                <Input type="text" v-bind="componentField" />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -99,12 +99,12 @@
               <FormControl>
                 <RadioGroup v-bind="componentField" class="flex">
                   <div class="flex items-center space-x-2">
-                    <RadioGroupItem :disabled="!isAdmin" value="true" id="r1" />
+                    <RadioGroupItem value="true" id="r1" />
                     <Label for="r1" class="font-normal">설비코드 사용</Label>
                   </div>
 
                   <div class="flex items-center space-x-2">
-                    <RadioGroupItem :disabled="!isAdmin" value="false" id="r2" />
+                    <RadioGroupItem value="false" id="r2" />
                     <Label for="r2" class="font-normal">설비 미사용</Label>
                   </div>
                 </RadioGroup>
@@ -178,12 +178,12 @@
       </div>
     </Form>
   </div>
+
   <div class="flex justify-end pt-6 pb-5">
     <Button
       type="submit"
       form="equipmentUpdateForm"
       class="bg-primary text-white hover:bg-primary-600"
-      :disabled="!isAdmin"
     >
       Save
     </Button>
@@ -191,11 +191,8 @@
 </template>
 
 <script setup>
-import { toast } from 'vue-sonner';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
-import { useUserStore } from '@/stores/useUserStore';
-import { updateEquipment } from '@/apis/query-functions/equipment';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
@@ -211,10 +208,6 @@ import {
 } from '@/components/ui/select';
 import { DEPARTMENT_LABELS } from '@/constants/enumLabels';
 import getAccumulatedHours from '@/utils/getAccumulatedHours';
-
-// 현재 로그인한 사용자 정보
-const userStore = useUserStore();
-const isAdmin = userStore.userRole == 'ADMIN';
 
 // 유지보수 이력 없음
 const equipmentDetail = {
@@ -246,12 +239,7 @@ const formSchema = toTypedSchema(
   }),
 );
 
-const onSubmit = async values => {
-  if (!isAdmin) {
-    toast.error('권한이 없습니다. 관리자만 수정할 수 있습니다.');
-    return;
-  }
-
+const onSubmit = values => {
   const params = {
     equipmentCode: values.equipmentCode,
     equipmentName: values.equipmentName,
@@ -265,14 +253,8 @@ const onSubmit = async values => {
     defectiveCount: values.defectiveCount,
   };
 
-  try {
-    const updated = await updateEquipment(values.equipmentCode, params);
-    console.log('updated', updated);
-    toast.success('저장되었습니다.');
-  } catch (err) {
-    console.error(err);
-    toast.error('저장 중 오류가 발생했습니다.');
-  }
+  console.log(params);
+  // updateFactoryStatus(params);
 };
 </script>
 
