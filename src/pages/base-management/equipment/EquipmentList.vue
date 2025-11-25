@@ -3,6 +3,8 @@
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">설비 목록 조회</h3>
   </div>
 
+  <FilterTab :filters="filters" @search="onSearch" />
+
   <div class="flex flex-col">
     <div class="min-h-[600px] flex-1">
       <Table class="w-full table-fixed">
@@ -63,8 +65,12 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
+import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
+
 import BasePagination from '@/components/pagination/BasePagination.vue';
 import { Badge } from '@/components/ui/badge';
+// 테이블 UI 컴포넌트
 import {
   Table,
   TableBody,
@@ -76,113 +82,13 @@ import {
 
 const router = useRouter();
 
-const page = ref(1);
-const equipmentList = ref({
-  content: [
-    {
-      equipmentCode: 'F1-CL1-AU001',
-      equipmentName: '조립설비',
-      equipmentType: 'FEOL',
-      userDepartment: '영업 1팀',
-      userName: '이인화',
-      empNo: '202510001',
-      isActive: true,
-    },
-    {
-      equipmentCode: 'F1-CL1-AU002',
-      equipmentName: '조립설비',
-      equipmentType: 'FEOL',
-      userDepartment: '영업 1팀',
-      userName: '이인화',
-      empNo: '202510001',
-      isActive: true,
-    },
-    {
-      equipmentCode: 'F1-CL1-CCP001',
-      equipmentName: '셀세정기',
-      equipmentType: 'BEOL',
-      userDepartment: '영업 1팀',
-      userName: '이인화',
-      empNo: '202510001',
-      isActive: true,
-    },
-    {
-      equipmentCode: 'F1-CL1-CCP002',
-      equipmentName: '셀세정기',
-      equipmentType: 'BEOL',
-      userDepartment: '영업 1팀',
-      userName: '이인화',
-      empNo: '202510001',
-      isActive: true,
-    },
-    {
-      equipmentCode: 'F1-CL1-EU001',
-      equipmentName: '전극설비',
-      equipmentType: 'FEOL',
-      userDepartment: '영업 1팀',
-      userName: '이인화',
-      empNo: '202510001',
-      isActive: true,
-    },
-    {
-      equipmentCode: 'F1-CL1-EU002',
-      equipmentName: '전극설비',
-      equipmentType: 'FEOL',
-      userDepartment: '영업 1팀',
-      userName: '이인화',
-      empNo: '202510001',
-      isActive: true,
-    },
-    {
-      equipmentCode: 'F1-CL1-FAU001',
-      equipmentName: '활성화설비',
-      equipmentType: 'FEOL',
-      userDepartment: '영업 1팀',
-      userName: '이인화',
-      empNo: '202510001',
-      isActive: true,
-    },
-    {
-      equipmentCode: 'F1-CL1-FAU002',
-      equipmentName: '활성화설비',
-      equipmentType: 'FEOL',
-      userDepartment: '영업 1팀',
-      userName: '이인화',
-      empNo: '202510001',
-      isActive: true,
-    },
-    {
-      equipmentCode: 'F1-CL1-FIP001',
-      equipmentName: '검사기',
-      equipmentType: 'BEOL',
-      userDepartment: '영업 1팀',
-      userName: '이인화',
-      empNo: '202510001',
-      isActive: true,
-    },
-    {
-      equipmentCode: 'F1-CL1-FIP001',
-      equipmentName: '검사기',
-      equipmentType: 'BEOL',
-      userDepartment: '영업 1팀',
-      userName: '이인화',
-      empNo: '202510001',
-      isActive: true,
-    },
-  ],
-  pageInfo: {
-    currentPage: 1,
-    pageSize: 10,
-    totalPages: 2,
-    totalElements: 14,
-    sort: [
-      {
-        sortBy: 'equipmentCode',
-        direction: 'asc',
-      },
-    ],
-  },
-});
+const { data: equipmentList, refetch, page, filters } = useGetEquipmentList();
+
+const onSearch = newFilters => {
+  Object.assign(filters, newFilters);
+  page.value = 1;
+  refetch();
+};
 
 const goToDetail = equipmentCode => {
   router.push(`/base-management/equipments/${equipmentCode}`);
