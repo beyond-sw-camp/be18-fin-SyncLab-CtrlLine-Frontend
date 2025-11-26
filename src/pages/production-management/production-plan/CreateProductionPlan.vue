@@ -316,6 +316,7 @@ async function onItemEnter(setValue) {
   // 자동완성 목록 기준으로 먼저 판단
   if (autoCompleteItems.value.length === 1) {
     selectItemFromAutoComplete(autoCompleteItems.value[0], setValue);
+    autoCompleteItems.value = [];
     return;
   }
 
@@ -334,12 +335,14 @@ async function onItemEnter(setValue) {
 
   if (list.length === 1) {
     selectItemFromAutoComplete(list[0], setValue);
+    autoCompleteItems.value = [];
     return;
   }
 
   if (list.length > 1) {
     selectedSetValue.value = setValue;
     showItemModal.value = true;
+    autoCompleteItems.value = [];
     return;
   }
 
