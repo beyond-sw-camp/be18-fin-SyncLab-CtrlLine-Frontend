@@ -15,6 +15,7 @@
             @compositionend="onCompositionEnd"
             @keydown.enter.prevent="onEnter"
             class="pr-8"
+            :disabled="disabled"
           />
 
           <!-- 검색 아이콘 -->
@@ -24,6 +25,7 @@
             size="xs"
             @click="openModal"
             class="absolute right-2 top-1/2 -translate-y-1/2"
+            :disabled="disabled"
           >
             <SearchIcon class="w-4 h-4" />
           </Button>
@@ -86,6 +88,8 @@ const props = defineProps({
   fields: { type: Array, required: true },
   tableHeaders: { type: Array, required: true },
   emitFullItem: { type: Boolean, default: false },
+  disabled: { type: Boolean, default: false },
+  onItemCleared: { type: Function, default: null },
 });
 
 const textInput = ref('');
@@ -95,7 +99,7 @@ const isComposing = ref(false);
 const isItemSelected = ref(false);
 
 const { data, filters, refetch } = props.fetchList();
-const emit = defineEmits(['selectedFullItem']);
+const emit = defineEmits(['selectedFullItem', 'clear']);
 
 // 입력 이벤트
 function onInput() {
@@ -207,6 +211,7 @@ watch(textInput, v => {
     props.setValue('');
     autoItems.value = [];
     isItemSelected.value = false; // 입력값 지우면 선택 상태 해제
+    emit('clear');
   }
 });
 </script>

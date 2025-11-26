@@ -99,9 +99,11 @@
               'itemStatus',
               'isActive',
             ]"
-            :tableHeaders="['품목코드', '품목명', '규격', '단위', '활성여부', '사용여부']"
+            :tableHeaders="['품목코드', '품목명', '규격', '단위', '품목구분', '사용여부']"
             :emitFullItem="true"
             @selectedFullItem="onItemSelected"
+            @clear="onItemCleared"
+            :disabled="!selectedFactoryId"
           />
         </FormField>
 
@@ -145,10 +147,16 @@
           <FormItem>
             <FormLabel>라인명</FormLabel>
             <FormControl>
-              <Select v-bind="componentField">
+              <!-- 🔥 selectedItemId 가 없으면 Select 자체를 아예 렌더링하지 않음 -->
+              <Select
+                v-if="selectedFactoryId && selectedItemId"
+                v-bind="componentField"
+                :key="`factory-${selectedFactoryId}-item-${selectedItemId}`"
+              >
                 <SelectTrigger class="custom-input w-full">
                   <SelectValue placeholder="라인을 선택해주세요." />
                 </SelectTrigger>
+
                 <SelectContent>
                   <div
                     v-if="(lineList?.content ?? []).length === 0"
@@ -156,16 +164,24 @@
                   >
                     라인이 존재하지 않습니다.
                   </div>
+
                   <SelectItem
                     v-for="line in lineList?.content ?? []"
                     :key="line.lineCode"
                     :value="line.lineCode"
-                    v-else
                   >
                     {{ line.lineName }}
                   </SelectItem>
                 </SelectContent>
               </Select>
+
+              <div
+                v-else
+                class="h-9 flex items-center px-3 rounded-md border bg-gray-100 text-gray-400 text-sm"
+              >
+                품목을 선택해주세요.
+              </div>
+
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
@@ -223,6 +239,7 @@
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
+import { useForm } from 'vee-validate';
 import { ref } from 'vue';
 import { z } from 'zod';
 
@@ -246,31 +263,43 @@ import ItemTable from '@/pages/production-management/production-plan/ItemTable.v
 
 const formSchema = toTypedSchema(
   z.object({
-    factoryCode: z.string({ required_error: '공장명은 필수입니다.' }),
-    dueDate: z.string({ required_error: '납기일자는 필수입니다.' }),
-    productionManagerNo: z.string({ required_error: '생산담당자는 필수입니다.' }),
-    itemCode: z.string({ required_error: '품목명은 필수입니다.' }),
-    salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }),
-    lineCode: z.string({ required_error: '라인명은 필수입니다.' }),
-    status: z.string({ required_error: '상태는 필수입니다.' }),
+    factoryCode: z.string({ required_error: '공장명은 필수입니다.' }).optional(),
+    dueDate: z.string({ required_error: '납기일자는 필수입니다.' }).optional(),
+    productionManagerNo: z.string({ required_error: '생산담당자는 필수입니다.' }).optional(),
+    itemCode: z.string({ required_error: '품목명은 필수입니다.' }).optional(),
+    salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }).optional(),
+    lineCode: z.string({ required_error: '라인명은 필수입니다.' }).optional(),
+    status: z.string({ required_error: '상태는 필수입니다.' }).optional(),
     plannedQty: z.coerce
       .number({ required_error: '생산계획수량은 필수입니다.' })
-      .positive('생산계획수량은 1 이상이어야 합니다.'),
+      .positive('생산계획수량은 1 이상이어야 합니다.')
+      .optional(),
   }),
 );
 
 const selectedFactoryId = ref(null);
 const selectedItemId = ref(null);
+
+const { setFieldValue } = useForm();
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 
 function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
   selectedFactoryId.value = selected?.factoryId ?? null;
+
+  setFieldValue('itemCode', null);
+  setFieldValue('lineCode', null);
 }
 
 function onItemSelected(item) {
-  selectedItemId.value = item.itemId;
+  selectedItemId.value = item.id;
+  setFieldValue('lineCode', null);
+}
+
+function onItemCleared() {
+  selectedItemId.value = null;
+  setFieldValue('lineCode', null);
 }
 
 console.log(lineList);
