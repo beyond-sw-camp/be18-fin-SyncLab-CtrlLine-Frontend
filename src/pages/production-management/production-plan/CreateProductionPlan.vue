@@ -232,7 +232,7 @@
           </FormField>
         </div>
       </div>
-      <ItemTable :itemDetail="{}" />
+      <ItemTable :itemDetail="itemDetail" />
     </Form>
   </div>
 </template>
@@ -279,6 +279,7 @@ const formSchema = toTypedSchema(
 
 const selectedFactoryId = ref(null);
 const selectedItemId = ref(null);
+const itemDetail = ref({});
 
 const { setFieldValue } = useForm();
 const { data: factoryList } = useGetFactoryList();
@@ -295,11 +296,13 @@ function onFactorySelected(factoryCode) {
 function onItemSelected(item) {
   selectedItemId.value = item.id;
   setFieldValue('lineCode', null);
+  itemDetail.value = item;
 }
 
 function onItemCleared() {
   selectedItemId.value = null;
   setFieldValue('lineCode', null);
+  itemDetail.value = {};
 }
 
 console.log(lineList);
