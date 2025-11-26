@@ -10,9 +10,7 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center"
-              ><Checkbox :checked="areAllEditableActive" @change="toggleAllEditableActive"
-            /></TableHead>
+            <TableHead class="text-center"><Checkbox /></TableHead>
             <TableHead class="text-center">설비코드</TableHead>
             <TableHead class="text-center">설비명</TableHead>
             <TableHead class="text-center">설비유형</TableHead>
@@ -31,11 +29,7 @@
           >
             <!-- 왼쪽: isActive 편집 토글 -->
             <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
-              <Checkbox
-                :checked="equipment.isActive"
-                @click.stop
-                @change.stop.prevent="onRowToggle(index)"
-              />
+              <Checkbox :checked="equipment.isActive" />
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ equipment.equipmentCode }}
@@ -83,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
@@ -106,13 +100,16 @@ import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
 const router = useRouter();
 
 const { data: equipmentList, refetch, page, filters } = useGetEquipmentList();
-
+// 로컬에 있는 equipmentList가 변경되면, editableList를 갱신. (코드해석 필요)
 const editableList = ref([]);
 watch(
   equipmentList,
   val => {
     const list = val?.content || [];
-    editableList.value = list.map(item => ({ ...item, originalStatus: item.isActive }));
+    editableList.value = list.map(equipmentStatus => ({
+      ...equipmentStatus,
+      originalIsActive: equipmentStatus.isActive,
+    })); // 설비 상태의 초기값 저장.
   },
   { immediate: true },
 );
@@ -131,19 +128,6 @@ const goToDetail = equipmentCode => {
   router.push(`/base-management/equipments/${equipmentCode}`);
 };
 
-// (이전 선택 로직은 제거되었습니다 — 왼쪽 열은 isActive 편집용 토글입니다.)
-
-// (리스트 편집에서는 로컬 editableList를 사용하므로 낙관적 토글 핸들러는 사용하지 않습니다)
-
-const areAllEditableActive = computed(() => {
-  return editableList.value.length > 0 && editableList.value.every(e => e.isActive === true);
-});
-
-const toggleAllEditableActive = () => {
-  const set = !areAllEditableActive.value;
-  editableList.value = editableList.value.map(e => ({ ...e, isActive: set }));
-};
-
 // 첫 데이터 행의 체크박스를 클릭하면 모든 행에 같은 값 적용
 const onRowToggle = index => {
   const list = editableList.value || [];
@@ -151,7 +135,6 @@ const onRowToggle = index => {
 
   // 클릭된 행의 새로운 값
   const newValue = !list[index].isActive;
-
   if (index === 0) {
     // 첫 행이면 모든 행을 동일한 값으로 설정
     editableList.value = list.map(equipment => ({ ...equipment, isActive: newValue }));
@@ -161,16 +144,25 @@ const onRowToggle = index => {
     updatedList[index].isActive = newValue;
     editableList.value = updatedList;
   }
+
+  console.log('After Toggle:', list[index].equipmentCode, 'new isActive:', newValue);
 };
 
-// 변경된 상태 저장 (batch)
+// 변경된 상태를 DB에 저장
 const saveChanges = async () => {
   const list = editableList.value || [];
-  console.log('list', list);
+  // 이것부터 안 뜨던데.
+  console.log('Editablelist', list);
+
   const updated = list
-    .filter(e => e.isActive !== (e.originalStatus ?? e.isActive))
-    .map(e => ({ equipmentCode: e.equipmentCode, isActive: e.isActive }));
-  console.log('updated', updated);
+    .filter(e => e.isActive !== e.originalIsActive)
+    .map(e => ({
+      equipmentCode: e.equipmentCode,
+      isActive: e.isActive,
+    }));
+
+  console.log('Updated', updated);
+
   if (!updated.length) {
     toast('변경된 항목이 없습니다.');
     return;
