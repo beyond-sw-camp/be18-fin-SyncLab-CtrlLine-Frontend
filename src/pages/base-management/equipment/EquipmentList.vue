@@ -30,11 +30,11 @@
             @click="goToDetail(equipment.equipmentCode)"
           >
             <!-- 왼쪽: isActive 편집 토글 -->
-            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap">
+            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
               <Checkbox
                 :checked="equipment.isActive"
                 @click.stop
-                @change.stop="equipment.isActive = !equipment.isActive"
+                @change.stop.prevent="onRowToggle(index)"
               />
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
@@ -56,12 +56,12 @@
               <Badge
                 class="w-[50px] mx-auto"
                 :class="
-                  (equipment.originalStatus ?? equipment.isActive)
+                  equipment.isActive
                     ? 'bg-green-100 text-green-700 border-green-300'
                     : 'bg-red-100 text-red-700 border-red-300'
                 "
               >
-                {{ (equipment.originalStatus ?? equipment.isActive) ? '사용' : '미사용' }}
+                {{ equipment.isActive ? '사용' : '미사용' }}
               </Badge>
             </TableCell>
           </TableRow>
@@ -105,10 +105,8 @@ import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
 
 const router = useRouter();
 
-// list hook
 const { data: equipmentList, refetch, page, filters } = useGetEquipmentList();
 
-// editable local copy to avoid mutating vue-query cache directly
 const editableList = ref([]);
 watch(
   equipmentList,
@@ -119,10 +117,7 @@ watch(
   { immediate: true },
 );
 
-// update hook (batch)
 const { updateEquipmentList } = useUpdateEquipmentList();
-
-// (선택 기능 제거 — 왼쪽 열은 isActive 편집용 토글입니다)
 
 // 검색 처리 함수
 const onSearch = newFilters => {
@@ -149,12 +144,33 @@ const toggleAllEditableActive = () => {
   editableList.value = editableList.value.map(e => ({ ...e, isActive: set }));
 };
 
+// 첫 데이터 행의 체크박스를 클릭하면 모든 행에 같은 값 적용
+const onRowToggle = index => {
+  const list = editableList.value || [];
+  if (!list.length) return;
+
+  // 클릭된 행의 새로운 값
+  const newValue = !list[index].isActive;
+
+  if (index === 0) {
+    // 첫 행이면 모든 행을 동일한 값으로 설정
+    editableList.value = list.map(equipment => ({ ...equipment, isActive: newValue }));
+  } else {
+    // 클릭한, 해당 행만 토글
+    const updatedList = [...editableList.value];
+    updatedList[index].isActive = newValue;
+    editableList.value = updatedList;
+  }
+};
+
 // 변경된 상태 저장 (batch)
 const saveChanges = async () => {
   const list = editableList.value || [];
+  console.log('list', list);
   const updated = list
     .filter(e => e.isActive !== (e.originalStatus ?? e.isActive))
     .map(e => ({ equipmentCode: e.equipmentCode, isActive: e.isActive }));
+  console.log('updated', updated);
   if (!updated.length) {
     toast('변경된 항목이 없습니다.');
     return;
