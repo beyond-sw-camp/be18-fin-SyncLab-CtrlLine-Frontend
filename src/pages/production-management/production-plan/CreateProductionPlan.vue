@@ -59,52 +59,72 @@
         </FormField>
 
         <FormField name="productionManagerNo" v-slot="{ value, setValue, errorMessage }">
-          <AutoCompleteSelect
-            :key="`autocomplete-${'productionManagerNo'}`"
-            label="생산담당자"
-            :value="value"
-            :setValue="setValue"
-            :errorMessage="errorMessage"
-            :fetchList="useGetUserList"
-            keyField="empNo"
-            nameField="userName"
-            :fields="[
-              'empNo',
-              'userName',
-              'userEmail',
-              'userDepartment',
-              'userPhoneNumber',
-              'userStatus',
-              'userRole',
-            ]"
-            :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
-          />
+          <FormItem>
+            <FormLabel>생산담당자</FormLabel>
+            <FormControl>
+              <AutoCompleteSelect
+                :key="`autocomplete-${'productionManagerNo'}`"
+                label="생산담당자"
+                :value="value"
+                :setValue="setValue"
+                :fetchList="useGetUserList"
+                keyField="empNo"
+                nameField="userName"
+                :fields="[
+                  'empNo',
+                  'userName',
+                  'userEmail',
+                  'userDepartment',
+                  'userPhoneNumber',
+                  'userStatus',
+                  'userRole',
+                ]"
+                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+              />
+
+              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+            </FormControl>
+          </FormItem>
         </FormField>
 
         <FormField name="itemCode" v-slot="{ value, setValue, errorMessage }">
-          <AutoCompleteSelect
-            :key="`autocomplete-${'itemCode'}`"
-            label="품목명"
-            :value="value"
-            :setValue="setValue"
-            :errorMessage="errorMessage"
-            :fetchList="useGetItemList"
-            keyField="itemCode"
-            nameField="itemName"
-            :fields="[
-              'itemCode',
-              'itemName',
-              'itemSpecification',
-              'itemUnit',
-              'itemStatus',
-              'isActive',
-            ]"
-            :tableHeaders="['품목코드', '품목명', '규격', '단위', '품목구분', '사용여부']"
-            :emitFullItem="true"
-            @selectedFullItem="onItemSelected"
-            @clear="onItemCleared"
-            :disabled="!selectedFactoryId"
-          />
+          <FormItem>
+            <FormLabel>품목명</FormLabel>
+            <FormControl>
+              <div v-if="selectedFactoryId">
+                <AutoCompleteSelect
+                  :key="`autocomplete-${'itemCode'}`"
+                  label="품목명"
+                  :value="value"
+                  :setValue="setValue"
+                  :fetchList="useGetItemList"
+                  keyField="itemCode"
+                  nameField="itemName"
+                  :fields="[
+                    'itemCode',
+                    'itemName',
+                    'itemSpecification',
+                    'itemUnit',
+                    'itemStatus',
+                    'isActive',
+                  ]"
+                  :tableHeaders="['품목코드', '품목명', '규격', '단위', '품목구분', '사용여부']"
+                  :emitFullItem="true"
+                  @selectedFullItem="onItemSelected"
+                  @clear="onItemCleared"
+                />
+              </div>
+
+              <div
+                v-else
+                class="h-9 flex items-center px-3 rounded-md border bg-gray-100 text-gray-400 text-sm"
+              >
+                공장을 먼저 선택해주세요.
+              </div>
+            </FormControl>
+
+            <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+          </FormItem>
         </FormField>
 
         <FormField v-slot="{ componentField, errorMessage }" name="startTime">
@@ -121,33 +141,37 @@
         </FormField>
 
         <FormField name="salesManagerNo" v-slot="{ value, setValue, errorMessage }">
-          <AutoCompleteSelect
-            :key="`autocomplete-${'salesManagerNo'}`"
-            label="영업담당자"
-            :value="value"
-            :setValue="setValue"
-            :errorMessage="errorMessage"
-            :fetchList="useGetUserList"
-            keyField="empNo"
-            nameField="userName"
-            :fields="[
-              'empNo',
-              'userName',
-              'userEmail',
-              'userDepartment',
-              'userPhoneNumber',
-              'userStatus',
-              'userRole',
-            ]"
-            :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
-          />
+          <FormItem>
+            <FormLabel>영업담당자</FormLabel>
+            <FormControl>
+              <AutoCompleteSelect
+                :key="`autocomplete-${'salesManagerNo'}`"
+                label="영업담당자"
+                :value="value"
+                :setValue="setValue"
+                :fetchList="useGetUserList"
+                keyField="empNo"
+                nameField="userName"
+                :fields="[
+                  'empNo',
+                  'userName',
+                  'userEmail',
+                  'userDepartment',
+                  'userPhoneNumber',
+                  'userStatus',
+                  'userRole',
+                ]"
+                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+              />
+              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+            </FormControl>
+          </FormItem>
         </FormField>
 
         <FormField v-slot="{ componentField, errorMessage }" name="lineCode">
           <FormItem>
             <FormLabel>라인명</FormLabel>
             <FormControl>
-              <!-- 🔥 selectedItemId 가 없으면 Select 자체를 아예 렌더링하지 않음 -->
               <Select
                 v-if="selectedFactoryId && selectedItemId"
                 v-bind="componentField"
@@ -174,14 +198,12 @@
                   </SelectItem>
                 </SelectContent>
               </Select>
-
               <div
                 v-else
                 class="h-9 flex items-center px-3 rounded-md border bg-gray-100 text-gray-400 text-sm"
               >
                 품목을 선택해주세요.
               </div>
-
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
@@ -246,6 +268,7 @@ import { z } from 'zod';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
+import useCreateProductionPlan from '@/apis/query-hooks/production-plan/useCreateProductionPlan';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import AutoCompleteSelect from '@/components/auto-complete/AutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
@@ -263,17 +286,16 @@ import ItemTable from '@/pages/production-management/production-plan/ItemTable.v
 
 const formSchema = toTypedSchema(
   z.object({
-    factoryCode: z.string({ required_error: '공장명은 필수입니다.' }).optional(),
-    dueDate: z.string({ required_error: '납기일자는 필수입니다.' }).optional(),
-    productionManagerNo: z.string({ required_error: '생산담당자는 필수입니다.' }).optional(),
-    itemCode: z.string({ required_error: '품목명은 필수입니다.' }).optional(),
-    salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }).optional(),
-    lineCode: z.string({ required_error: '라인명은 필수입니다.' }).optional(),
-    status: z.string({ required_error: '상태는 필수입니다.' }).optional(),
+    factoryCode: z.string({ required_error: '공장명은 필수입니다.' }),
+    dueDate: z.string({ required_error: '납기일자는 필수입니다.' }),
+    productionManagerNo: z.string({ required_error: '생산담당자는 필수입니다.' }),
+    itemCode: z.string({ required_error: '품목명은 필수입니다.' }),
+    salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }),
+    lineCode: z.string({ required_error: '라인명은 필수입니다.' }),
+    status: z.string({ required_error: '상태는 필수입니다.' }),
     plannedQty: z.coerce
       .number({ required_error: '생산계획수량은 필수입니다.' })
-      .positive('생산계획수량은 1 이상이어야 합니다.')
-      .optional(),
+      .positive('생산계획수량은 1 이상이어야 합니다.'),
   }),
 );
 
@@ -284,6 +306,7 @@ const itemDetail = ref({});
 const { setFieldValue } = useForm();
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
+const { mutate: createProductionPlan } = useCreateProductionPlan();
 
 function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
@@ -310,10 +333,10 @@ console.log(lineList);
 const onSubmit = values => {
   const params = {
     factoryCode: values.factoryCode,
-    dueDate: values.itemName,
+    dueDate: values.dueDate,
     productionManagerNo: values.productionManagerNo,
     itemCode: values.itemCode,
-    startTime: values.startTime,
+    // startTime: values.startTime,
     salesManagerNo: values.salesManagerNo,
     lineCode: values.lineCode,
     status: values.status,
@@ -322,7 +345,7 @@ const onSubmit = values => {
   };
 
   console.log(params);
-  // updateFactoryStatus(params);
+  createProductionPlan(params);
 };
 </script>
 

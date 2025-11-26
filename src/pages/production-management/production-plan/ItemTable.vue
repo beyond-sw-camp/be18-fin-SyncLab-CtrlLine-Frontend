@@ -12,16 +12,22 @@
 
     <TableBody v-if="itemDetail">
       <TableRow class="text-center border-b border-dotted border-gray-300">
-        <TableCell>{{ itemDetail.itemCode }}</TableCell>
-        <TableCell>{{ itemDetail.itemName }}</TableCell>
-        <TableCell>{{ itemDetail.itemSpecification }}</TableCell>
+        <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">{{
+          itemDetail.itemCode
+        }}</TableCell>
+        <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">{{
+          itemDetail.itemName
+        }}</TableCell>
+        <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">{{
+          itemDetail.itemSpecification
+        }}</TableCell>
         <TableCell>
           <FormField name="plannedQty" v-slot="{ componentField, errorMessage }">
             <Input type="number" v-bind="componentField" class="text-end" />
             <p class="text-red-500 text-[10px] pt-1">{{ errorMessage }}</p>
           </FormField>
         </TableCell>
-        <TableCell>
+        <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
           {{ itemDetail.itemUnit }}
         </TableCell>
       </TableRow>

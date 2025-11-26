@@ -1,54 +1,53 @@
 <template>
-  <FormItem>
-    <FormLabel>{{ label }}</FormLabel>
+  <div class="flex flex-col gap-1">
+    <div class="flex gap-2">
+      <div ref="autocompleteRef" class="relative w-full">
+        <!-- 입력 -->
+        <Input
+          type="text"
+          :placeholder="`${label}을 입력하세요`"
+          v-model="textInput"
+          @input="onInput"
+          @compositionstart="isComposing = true"
+          @compositionend="onCompositionEnd"
+          @keydown.enter.prevent="onEnter"
+          class="pr-8"
+          :disabled="disabled"
+        />
 
-    <FormControl>
-      <div class="flex gap-2">
-        <div ref="autocompleteRef" class="relative w-full">
-          <!-- 입력 -->
-          <Input
-            type="text"
-            :placeholder="`${label}을 입력하세요`"
-            v-model="textInput"
-            @input="onInput"
-            @compositionstart="isComposing = true"
-            @compositionend="onCompositionEnd"
-            @keydown.enter.prevent="onEnter"
-            class="pr-8"
-            :disabled="disabled"
-          />
+        <!-- 검색 아이콘 -->
+        <Button
+          variant="ghost"
+          type="button"
+          size="xs"
+          @click="openModal"
+          class="absolute right-2 top-1/2 -translate-y-1/2"
+          :disabled="disabled"
+        >
+          <SearchIcon class="w-4 h-4" />
+        </Button>
 
-          <!-- 검색 아이콘 -->
-          <Button
-            variant="ghost"
-            type="button"
-            size="xs"
-            @click="openModal"
-            class="absolute right-2 top-1/2 -translate-y-1/2"
-            :disabled="disabled"
+        <!-- 자동완성 -->
+        <ul
+          v-if="autoItems.length > 0 && !isItemSelected"
+          class="absolute left-0 top-full mt-1 w-full bg-white border rounded-md shadow-lg z-50 max-h-48 overflow-auto"
+        >
+          <li
+            v-for="item in autoItems"
+            :key="item[keyField]"
+            @click="selectItem(item)"
+            class="px-2 py-1 hover:bg-gray-100 cursor-pointer text-xs"
           >
-            <SearchIcon class="w-4 h-4" />
-          </Button>
-
-          <ul
-            v-if="autoItems.length > 0 && !isItemSelected"
-            class="absolute left-0 top-full mt-1 w-full bg-white border rounded-md shadow-lg z-50 max-h-48 overflow-auto"
-          >
-            <li
-              v-for="item in autoItems"
-              :key="item[keyField]"
-              @click="selectItem(item)"
-              class="px-2 py-1 hover:bg-gray-100 cursor-pointer text-xs"
-            >
-              {{ item[nameField] }}
-            </li>
-          </ul>
-        </div>
-        <Input type="text" :value="value" readonly class="w-28 bg-gray-100" />
+            {{ item[nameField] }}
+          </li>
+        </ul>
       </div>
-    </FormControl>
 
-    <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+      <!-- 코드 표시 영역 -->
+      <Input type="text" :value="value" readonly class="w-28 bg-gray-100" />
+    </div>
+
+    <!-- 에러메시지는 FormField에서 출력하므로 여기서는 제외 -->
 
     <SelectModal
       :open="showModal"
@@ -62,7 +61,7 @@
       @selected="onModalSelect"
       @close="showModal = false"
     />
-  </FormItem>
+  </div>
 </template>
 
 <script setup>
@@ -72,7 +71,6 @@ import { ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
 import { Button } from '@/components/ui/button';
-import { FormControl, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
 import SelectModal from './SelectModal.vue';
@@ -81,7 +79,6 @@ const props = defineProps({
   label: { type: String, required: true },
   value: [Object, String, Number],
   setValue: Function,
-  errorMessage: String,
   fetchList: { type: Function, required: true },
   keyField: { type: String, required: true },
   nameField: { type: String, required: true },
