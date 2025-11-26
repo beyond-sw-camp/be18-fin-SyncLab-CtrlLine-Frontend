@@ -57,21 +57,33 @@
           </FormItem>
         </FormField>
 
-        <FormField name="productionManagerNo" v-slot="{ componentField, errorMessage }">
-          <FormItem>
-            <FormLabel>생산담당자</FormLabel>
-            <FormControl>
-              <div class="flex gap-2 items-center">
-                <Input type="text" placeholder="생산담당자를 입력하세요" class="flex-1" />
-                <Input type="text" v-bind="componentField" class="w-28 bg-gray-100" readonly />
-              </div>
-            </FormControl>
-            <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-          </FormItem>
+        <FormField name="productionManagerNo" v-slot="{ value, setValue, errorMessage }">
+          <AutoCompleteSelect
+            :key="label"
+            label="생산담당자"
+            :value="value"
+            :setValue="setValue"
+            :errorMessage="errorMessage"
+            :fetchList="useGetUserList"
+            keyField="empNo"
+            nameField="userName"
+            :fields="[
+              'empNo',
+              'userName',
+              'userEmail',
+              'userDepartment',
+              'userPhoneNumber',
+              'userStatus',
+
+              'userRole',
+            ]"
+            :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+          />
         </FormField>
 
         <FormField name="itemCode" v-slot="{ value, setValue, errorMessage }">
           <AutoCompleteSelect
+            :key="label"
             label="품목명"
             :value="value"
             :setValue="setValue"
@@ -104,17 +116,28 @@
           </FormItem>
         </FormField>
 
-        <FormField name="salesManagerNo" v-slot="{ componentField, errorMessage }">
-          <FormItem>
-            <FormLabel>영업담당자</FormLabel>
-            <FormControl>
-              <div class="flex gap-2 items-center">
-                <Input type="text" placeholder="영업담당자를 입력하세요" class="flex-1" />
-                <Input type="text" v-bind="componentField" class="w-28 bg-gray-100" readonly />
-              </div>
-            </FormControl>
-            <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-          </FormItem>
+        <FormField name="salesManagerNo" v-slot="{ value, setValue, errorMessage }">
+          <AutoCompleteSelect
+            :key="label"
+            label="영업담당자"
+            :value="value"
+            :setValue="setValue"
+            :errorMessage="errorMessage"
+            :fetchList="useGetUserList"
+            keyField="empNo"
+            nameField="userName"
+            :fields="[
+              'empNo',
+              'userName',
+              'userEmail',
+              'userDepartment',
+              'userPhoneNumber',
+              'userStatus',
+
+              'userRole',
+            ]"
+            :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+          />
         </FormField>
 
         <FormField v-slot="{ componentField, errorMessage }" name="lineCode">
@@ -193,11 +216,11 @@
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
-import { ref, watch } from 'vue';
 import { z } from 'zod';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import AutoCompleteSelect from '@/components/auto-complete/AutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
@@ -227,17 +250,8 @@ const formSchema = toTypedSchema(
   }),
 );
 
-// 품목 선택
-const itemNameInput = ref(''); // 입력창
-const selectedSetValue = ref(null); // vee-validate setter 저장
-
 const { data: factoryList } = useGetFactoryList();
 
-watch(itemNameInput, val => {
-  if (val === '' && selectedSetValue.value) {
-    selectedSetValue.value('');
-  }
-});
 
 const onSubmit = values => {
   const params = {

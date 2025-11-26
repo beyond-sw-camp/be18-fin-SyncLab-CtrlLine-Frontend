@@ -3,7 +3,7 @@
     <DialogContent class="min-w-[700px] w-full flex flex-col">
       <DialogHeader>
         <DialogTitle>{{ label }} 선택</DialogTitle>
-        <DialogDescription>{{ label }}을 검색하고 선택하세요.</DialogDescription>
+        <DialogDescription>{{ withObjectParticle(label) }} 검색하고 선택하세요.</DialogDescription>
       </DialogHeader>
 
       <!-- 검색창 (실시간 검색) -->
@@ -56,6 +56,22 @@
                     {{ item.isActive ? '사용' : '미사용' }}
                   </Badge>
                 </template>
+                <template v-else-if="field === 'userStatus'">
+                  <span
+                    :class="{
+                      'text-[#095A8C]': EMPLOYMENT_STATUS_LABELS[item.userStatus] === '재직',
+                      'text-[#8B5401]': EMPLOYMENT_STATUS_LABELS[item.userStatus] === '휴직',
+                      'text-[#969696]': EMPLOYMENT_STATUS_LABELS[item.userStatus] === '퇴사',
+                    }"
+                  >
+                    {{ EMPLOYMENT_STATUS_LABELS[item.userStatus] }}
+                  </span>
+                </template>
+
+                <template v-else-if="field === 'userRole'">
+                  {{ ROLE_LABELS[item.userRole] }}
+                </template>
+
                 <template v-else>
                   {{ item[field] }}
                 </template>
@@ -91,6 +107,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
+import withObjectParticle from '@/utils/withObjectParticle';
 
 const props = defineProps({
   open: Boolean,
