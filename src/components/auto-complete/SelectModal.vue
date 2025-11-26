@@ -9,7 +9,6 @@
       <!-- 검색창 (실시간 검색) -->
       <div class="border-b pb-3">
         <Input
-          ref="searchInputRef"
           type="text"
           :value="searchText"
           :placeholder="`${label}을 입력하세요`"
@@ -125,7 +124,6 @@ const emit = defineEmits(['selected', 'close']);
 
 const searchText = ref('');
 const isComposing = ref(false);
-const searchInputRef = ref(null);
 const { data, filters, page, refetch } = props.fetchList();
 
 const flatContent = computed(() => {
@@ -145,7 +143,6 @@ watch(
 
       // 검색창에 포커스
       await nextTick();
-      searchInputRef.value?.focus();
     }
   },
 );

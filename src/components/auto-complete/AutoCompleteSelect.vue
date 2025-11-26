@@ -77,7 +77,7 @@ import SelectModal from './SelectModal.vue';
 
 const props = defineProps({
   label: { type: String, required: true },
-  value: String,
+  value: [Object, String, Number],
   setValue: Function,
   errorMessage: String,
   fetchList: { type: Function, required: true },
@@ -85,6 +85,7 @@ const props = defineProps({
   nameField: { type: String, required: true },
   fields: { type: Array, required: true },
   tableHeaders: { type: Array, required: true },
+  emitFullItem: { type: Boolean, default: false },
 });
 
 const textInput = ref('');
@@ -94,6 +95,7 @@ const isComposing = ref(false);
 const isItemSelected = ref(false);
 
 const { data, filters, refetch } = props.fetchList();
+const emit = defineEmits(['selectedFullItem']);
 
 // 입력 이벤트
 function onInput() {
@@ -134,6 +136,11 @@ function selectItem(item) {
   isItemSelected.value = true;
   textInput.value = item[props.nameField];
   props.setValue(item[props.keyField]);
+
+  if (props.emitFullItem) {
+    emit('selectedFullItem', item); // 전체 객체 전달
+  }
+
   autoItems.value = [];
 }
 
@@ -179,6 +186,11 @@ function onModalSelect(item) {
   props.setValue(item[props.keyField]);
   textInput.value = item[props.nameField];
   isItemSelected.value = true; // 모달에서 선택 시에도 선택 상태로 표시
+
+  if (props.emitFullItem) {
+    emit('selectedFullItem', item); // 전체 객체 전달
+  }
+
   showModal.value = false;
 }
 

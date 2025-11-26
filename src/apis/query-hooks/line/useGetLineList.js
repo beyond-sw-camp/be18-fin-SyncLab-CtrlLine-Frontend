@@ -17,7 +17,6 @@ export default function useGetLineList(initialFilters = {}) {
     lineName: initialFilters.lineName ?? '',
     lineCode: initialFilters.lineCode ?? '',
   });
-  const fixedSort = ['empNo,asc', 'name,asc'];
 
   const queryParams = computed(() => {
     const cleaned = {};
@@ -30,16 +29,15 @@ export default function useGetLineList(initialFilters = {}) {
 
     cleaned.page = page.value - 1;
     cleaned.size = pageSize.value;
-    cleaned.sort = fixedSort;
 
     return cleaned;
   });
 
-  const { isPending, isError, data, error, isFetching, isPlaceholderData } = useQuery({
+  const { data, isPlaceholderData, refetch } = useQuery({
     queryKey: ['lineList', queryParams],
     queryFn: () => getLineList(queryParams.value),
-    placeholderData: keepPreviousData,
     enabled: computed(() => authStore.isLoggedIn),
+    placeholderData: keepPreviousData,
   });
 
   const prevPage = () => {
@@ -65,12 +63,8 @@ export default function useGetLineList(initialFilters = {}) {
   };
 
   return {
-    isPending,
-    isError,
     data,
-    error,
-    isFetching,
-    isPlaceholderData,
+    refetch,
     page,
     pageSize,
     filters,

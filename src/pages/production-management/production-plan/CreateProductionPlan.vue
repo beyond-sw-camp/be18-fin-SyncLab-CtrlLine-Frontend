@@ -27,7 +27,7 @@
           <FormItem>
             <FormLabel>공장명</FormLabel>
             <FormControl>
-              <Select v-bind="componentField">
+              <Select v-bind="componentField" @update:modelValue="onFactorySelected">
                 <SelectTrigger class="custom-input w-full">
                   <SelectValue placeholder="공장을 선택해주세요." />
                 </SelectTrigger>
@@ -37,6 +37,7 @@
                     v-for="factory in factoryList?.content ?? []"
                     :key="factory.factoryCode"
                     :value="factory.factoryCode"
+                    :data-factory-id="factory.factoryId"
                   >
                     {{ factory.factoryName }}
                   </SelectItem>
@@ -59,7 +60,7 @@
 
         <FormField name="productionManagerNo" v-slot="{ value, setValue, errorMessage }">
           <AutoCompleteSelect
-            :key="label"
+            :key="`autocomplete-${'productionManagerNo'}`"
             label="생산담당자"
             :value="value"
             :setValue="setValue"
@@ -74,7 +75,6 @@
               'userDepartment',
               'userPhoneNumber',
               'userStatus',
-
               'userRole',
             ]"
             :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
@@ -83,7 +83,7 @@
 
         <FormField name="itemCode" v-slot="{ value, setValue, errorMessage }">
           <AutoCompleteSelect
-            :key="label"
+            :key="`autocomplete-${'itemCode'}`"
             label="품목명"
             :value="value"
             :setValue="setValue"
@@ -100,6 +100,8 @@
               'isActive',
             ]"
             :tableHeaders="['품목코드', '품목명', '규격', '단위', '활성여부', '사용여부']"
+            :emitFullItem="true"
+            @selectedFullItem="onItemSelected"
           />
         </FormField>
 
@@ -118,7 +120,7 @@
 
         <FormField name="salesManagerNo" v-slot="{ value, setValue, errorMessage }">
           <AutoCompleteSelect
-            :key="label"
+            :key="`autocomplete-${'salesManagerNo'}`"
             label="영업담당자"
             :value="value"
             :setValue="setValue"
@@ -133,7 +135,6 @@
               'userDepartment',
               'userPhoneNumber',
               'userStatus',
-
               'userRole',
             ]"
             :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
@@ -148,14 +149,20 @@
                 <SelectTrigger class="custom-input w-full">
                   <SelectValue placeholder="라인을 선택해주세요." />
                 </SelectTrigger>
-                <!-- 라인으로 변경 필요 -->
                 <SelectContent>
-                  <SelectItem
-                    v-for="factory in factoryList?.content ?? []"
-                    :key="factory.factoryCode"
-                    :value="factory.factoryCode"
+                  <div
+                    v-if="(lineList?.content ?? []).length === 0"
+                    class="px-3 py-2 text-sm text-gray-500 select-none"
                   >
-                    {{ factory.factoryName }}
+                    라인이 존재하지 않습니다.
+                  </div>
+                  <SelectItem
+                    v-for="line in lineList?.content ?? []"
+                    :key="line.lineCode"
+                    :value="line.lineCode"
+                    v-else
+                  >
+                    {{ line.lineName }}
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -216,10 +223,12 @@
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
+import { ref } from 'vue';
 import { z } from 'zod';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
+import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import AutoCompleteSelect from '@/components/auto-complete/AutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
@@ -250,8 +259,21 @@ const formSchema = toTypedSchema(
   }),
 );
 
+const selectedFactoryId = ref(null);
+const selectedItemId = ref(null);
 const { data: factoryList } = useGetFactoryList();
+const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 
+function onFactorySelected(factoryCode) {
+  const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
+  selectedFactoryId.value = selected?.factoryId ?? null;
+}
+
+function onItemSelected(item) {
+  selectedItemId.value = item.itemId;
+}
+
+console.log(lineList);
 
 const onSubmit = values => {
   const params = {
