@@ -11,7 +11,7 @@
           @compositionstart="isComposing = true"
           @compositionend="onCompositionEnd"
           @keydown.enter.prevent="onEnter"
-          class="pr-8"
+          class="pr-8 text-sm"
           :disabled="disabled"
         />
 
@@ -44,7 +44,7 @@
       </div>
 
       <!-- 코드 표시 영역 -->
-      <Input type="text" :value="value" readonly class="w-28 bg-gray-100" />
+      <Input type="text" :value="value" readonly class="w-28 bg-gray-100 text-sm" />
     </div>
 
     <!-- 에러메시지는 FormField에서 출력하므로 여기서는 제외 -->
