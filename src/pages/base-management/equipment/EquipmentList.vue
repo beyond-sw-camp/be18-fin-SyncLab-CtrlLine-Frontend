@@ -1,6 +1,6 @@
 <template>
   <div class="flex justify-between items-center">
-    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">설비 목록 조회</h3>
+    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">설비 목록</h3>
   </div>
 
   <FilterTab :filters="filters" @search="onSearch" />
