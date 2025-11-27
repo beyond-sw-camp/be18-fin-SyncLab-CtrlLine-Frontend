@@ -2,7 +2,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { computed, reactive, ref } from 'vue';
 
-import { getFactoryList } from '@/apis/query-functions/factory';
+import { getProcessList } from '@/apis/query-functions/process';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 export default function useGetProcessList(initialFilters = {}) {
@@ -36,7 +36,7 @@ export default function useGetProcessList(initialFilters = {}) {
 
   const { data, isPlaceholderData, refetch } = useQuery({
     queryKey: ['processList', queryParams],
-    queryFn: () => getFactoryList(queryParams.value),
+    queryFn: () => getProcessList(queryParams.value),
     enabled: computed(() => authStore.isLoggedIn),
     placeholderData: keepPreviousData,
   });

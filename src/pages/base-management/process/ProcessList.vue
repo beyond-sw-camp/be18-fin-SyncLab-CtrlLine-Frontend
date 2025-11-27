@@ -25,7 +25,9 @@
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(process.processCode)"
           >
-            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop></TableCell>
+            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
+              <Checkbox />
+            </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ process.processCode }}
             </TableCell>
@@ -77,9 +79,4 @@ const goToDetail = processCode => {
 const { data: processList, refetch, page, filters } = useGetProcessList();
 </script>
 
-<style scoped>
-.table-checkbox-cell {
-  width: 40px;
-  text-align: center;
-}
-</style>
+<style scoped></style>
