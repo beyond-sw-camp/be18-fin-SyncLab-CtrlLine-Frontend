@@ -12,16 +12,7 @@
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row">
-    <Form
-      id="productionPlanCreateForm"
-      :validation-schema="formSchema"
-      @submit="onSubmit"
-      class="flex-1 flex flex-col gap-2"
-      :initial-values="{
-        status: 'PENDING',
-        plannedQty: 0,
-      }"
-    >
+    <form id="productionPlanCreateForm" @submit="onSubmit" class="flex-1 flex flex-col gap-2">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
         <FormField v-slot="{ componentField, errorMessage }" name="factoryCode">
           <FormItem>
@@ -58,30 +49,30 @@
           </FormItem>
         </FormField>
 
-        <FormField name="productionManagerNo" v-slot="{ value, setValue, errorMessage }">
+        <FormField name="productionManagerNo" v-slot="{ componentField, errorMessage }">
           <FormItem>
-            <FormLabel>생산담당자</FormLabel>
+            <FormLabel>
+              생산담당자
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>라인 담당자가 생산담당자로 자동 지정됩니다.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </FormLabel>
             <FormControl>
-              <AutoCompleteSelect
-                :key="`autocomplete-${'productionManagerNo'}`"
-                label="생산담당자"
-                :value="value"
-                :setValue="setValue"
-                :fetchList="useGetUserList"
-                keyField="empNo"
-                nameField="userName"
-                :fields="[
-                  'empNo',
-                  'userName',
-                  'userEmail',
-                  'userDepartment',
-                  'userPhoneNumber',
-                  'userStatus',
-                  'userRole',
-                ]"
-                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
-              />
-
+              <div class="flex gap-2 items-center">
+                <Input
+                  type="text"
+                  placeholder="생산담당자는 자동 지정됩니다."
+                  class="flex-1 w-full"
+                  readonly
+                  :value="lineDetail?.userName || ''"
+                />
+                <Input type="text" v-bind="componentField" class="w-20 bg-gray-100" readonly />
+              </div>
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
@@ -97,7 +88,7 @@
                   label="품목명"
                   :value="value"
                   :setValue="setValue"
-                  :fetchList="useGetItemList"
+                  :fetchList="() => useGetItemList({ isActive: true })"
                   keyField="itemCode"
                   nameField="itemName"
                   :fields="[
@@ -149,7 +140,7 @@
                 label="영업담당자"
                 :value="value"
                 :setValue="setValue"
-                :fetchList="useGetUserList"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
                 keyField="empNo"
                 nameField="userName"
                 :fields="[
@@ -176,6 +167,7 @@
                 v-if="selectedFactoryId && selectedItemId"
                 v-bind="componentField"
                 :key="`factory-${selectedFactoryId}-item-${selectedItemId}`"
+                @update:modelValue="onLineSelected"
               >
                 <SelectTrigger class="custom-input w-full">
                   <SelectValue placeholder="라인을 선택해주세요." />
@@ -255,13 +247,14 @@
         </div>
       </div>
       <ItemTable :itemDetail="itemDetail" />
-    </Form>
+    </form>
   </div>
 </template>
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
-import { useForm } from 'vee-validate';
+import { InfoIcon } from 'lucide-vue-next';
+import { configure, useForm } from 'vee-validate';
 import { ref } from 'vue';
 import { z } from 'zod';
 
@@ -272,7 +265,7 @@ import useCreateProductionPlan from '@/apis/query-hooks/production-plan/useCreat
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import AutoCompleteSelect from '@/components/auto-complete/AutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -281,6 +274,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
 
@@ -296,14 +290,23 @@ const formSchema = toTypedSchema(
     plannedQty: z.coerce
       .number({ required_error: '생산계획수량은 필수입니다.' })
       .positive('생산계획수량은 1 이상이어야 합니다.'),
+    remark: z.string().optional(),
   }),
 );
+
+const form = useForm({
+  validationSchema: formSchema,
+  initialValues: {
+    status: 'PENDING',
+    plannedQty: 0,
+  },
+});
 
 const selectedFactoryId = ref(null);
 const selectedItemId = ref(null);
 const itemDetail = ref({});
+const lineDetail = ref({});
 
-const { setFieldValue } = useForm();
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 const { mutate: createProductionPlan } = useCreateProductionPlan();
@@ -312,31 +315,43 @@ function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
   selectedFactoryId.value = selected?.factoryId ?? null;
 
-  setFieldValue('itemCode', null);
-  setFieldValue('lineCode', null);
+  form.setFieldValue('itemCode', undefined, false);
+  form.setFieldValue('lineCode', undefined, false);
+  form.setFieldValue('productionManagerNo', undefined, false);
+  lineDetail.value = {};
 }
 
 function onItemSelected(item) {
   selectedItemId.value = item.id;
-  setFieldValue('lineCode', null);
+  form.setFieldValue('lineCode', undefined, false);
   itemDetail.value = item;
 }
 
 function onItemCleared() {
   selectedItemId.value = null;
-  setFieldValue('lineCode', null);
+  form.setFieldValue('lineCode', undefined, false);
   itemDetail.value = {};
+  lineDetail.value = {};
 }
 
-console.log(lineList);
+function onLineSelected(lineCode) {
+  const selected = lineList.value?.content?.find(f => f.lineCode === lineCode);
 
-const onSubmit = values => {
+  if (selected) {
+    lineDetail.value = selected;
+    form.setFieldValue('productionManagerNo', selected.empNo, false);
+  } else {
+    lineDetail.value = {};
+    form.setFieldValue('productionManagerNo', undefined, false);
+  }
+}
+
+const onSubmit = form.handleSubmit(values => {
   const params = {
     factoryCode: values.factoryCode,
     dueDate: values.dueDate,
     productionManagerNo: values.productionManagerNo,
     itemCode: values.itemCode,
-    // startTime: values.startTime,
     salesManagerNo: values.salesManagerNo,
     lineCode: values.lineCode,
     status: values.status,
@@ -346,7 +361,7 @@ const onSubmit = values => {
 
   console.log(params);
   createProductionPlan(params);
-};
+});
 </script>
 
 <style scoped></style>
