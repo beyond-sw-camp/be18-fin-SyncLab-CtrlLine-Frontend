@@ -347,10 +347,10 @@ function onFactorySelected(factoryCode) {
   selectedFactoryId.value = selected?.factoryId ?? null;
 
   selectedItemId.value = null;
-  itemDetail.value = {};
   form.setFieldValue('itemCode', '', false);
   form.setFieldValue('lineCode', '', false);
   form.setFieldValue('productionManagerNo', '', false);
+  itemDetail.value = {};
   lineDetail.value = {};
 }
 
@@ -363,6 +363,7 @@ function onItemSelected(item) {
 function onItemCleared() {
   selectedItemId.value = null;
   form.setFieldValue('lineCode', '', false);
+  form.setFieldValue('productionManagerNo', '', false);
   itemDetail.value = {};
   lineDetail.value = {};
 }
