@@ -211,4 +211,17 @@ watch(textInput, v => {
     emit('clear');
   }
 });
+
+watch(
+  () => props.value,
+  newVal => {
+    // 외부에서 값이 비워졌을 때 ('' | null | undefined)
+    if (newVal === '' || newVal === null || newVal === undefined) {
+      textInput.value = '';
+      autoItems.value = [];
+      isItemSelected.value = false;
+      emit('clear'); // 부모 onItemCleared 호출
+    }
+  },
+);
 </script>

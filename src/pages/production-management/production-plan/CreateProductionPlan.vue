@@ -254,7 +254,7 @@
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
 import { InfoIcon } from 'lucide-vue-next';
-import { configure, useForm } from 'vee-validate';
+import { useForm } from 'vee-validate';
 import { ref } from 'vue';
 import { z } from 'zod';
 
@@ -280,12 +280,16 @@ import ItemTable from '@/pages/production-management/production-plan/ItemTable.v
 
 const formSchema = toTypedSchema(
   z.object({
-    factoryCode: z.string({ required_error: '공장명은 필수입니다.' }),
+    factoryCode: z
+      .string({ required_error: '공장명은 필수입니다.' })
+      .min(1, '공장명은 필수입니다.'),
     dueDate: z.string({ required_error: '납기일자는 필수입니다.' }),
-    productionManagerNo: z.string({ required_error: '생산담당자는 필수입니다.' }),
-    itemCode: z.string({ required_error: '품목명은 필수입니다.' }),
+    productionManagerNo: z
+      .string({ required_error: '생산담당자는 필수입니다.' })
+      .min(1, '생산담당자는 필수입니다.'),
+    itemCode: z.string({ required_error: '품목명은 필수입니다.' }).min(1, '품목명은 필수입니다.'),
     salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }),
-    lineCode: z.string({ required_error: '라인명은 필수입니다.' }),
+    lineCode: z.string({ required_error: '라인명은 필수입니다.' }).min(1, '라인명은 필수입니다.'),
     status: z.string({ required_error: '상태는 필수입니다.' }),
     plannedQty: z.coerce
       .number({ required_error: '생산계획수량은 필수입니다.' })
@@ -315,21 +319,23 @@ function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
   selectedFactoryId.value = selected?.factoryId ?? null;
 
-  form.setFieldValue('itemCode', undefined, false);
-  form.setFieldValue('lineCode', undefined, false);
-  form.setFieldValue('productionManagerNo', undefined, false);
+  selectedItemId.value = null;
+  itemDetail.value = {};
+  form.setFieldValue('itemCode', '', false);
+  form.setFieldValue('lineCode', '', false);
+  form.setFieldValue('productionManagerNo', '', false);
   lineDetail.value = {};
 }
 
 function onItemSelected(item) {
   selectedItemId.value = item.id;
-  form.setFieldValue('lineCode', undefined, false);
+  form.setFieldValue('lineCode', '', false);
   itemDetail.value = item;
 }
 
 function onItemCleared() {
   selectedItemId.value = null;
-  form.setFieldValue('lineCode', undefined, false);
+  form.setFieldValue('lineCode', '', false);
   itemDetail.value = {};
   lineDetail.value = {};
 }
@@ -342,7 +348,7 @@ function onLineSelected(lineCode) {
     form.setFieldValue('productionManagerNo', selected.empNo, false);
   } else {
     lineDetail.value = {};
-    form.setFieldValue('productionManagerNo', undefined, false);
+    form.setFieldValue('productionManagerNo', '', false);
   }
 }
 
@@ -360,7 +366,7 @@ const onSubmit = form.handleSubmit(values => {
   };
 
   console.log(params);
-  createProductionPlan(params);
+  // createProductionPlan(params);
 });
 </script>
 
