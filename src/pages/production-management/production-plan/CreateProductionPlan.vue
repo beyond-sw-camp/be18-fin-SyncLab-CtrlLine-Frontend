@@ -277,6 +277,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
+import { useUserStore } from '@/stores/useUserStore';
 
 const formSchema = toTypedSchema(
   z.object({
@@ -298,10 +299,12 @@ const formSchema = toTypedSchema(
   }),
 );
 
+const userStore = useUserStore();
+
 const form = useForm({
   validationSchema: formSchema,
   initialValues: {
-    status: 'PENDING',
+    status: userStore.userRole === 'ADMIN' ? 'CONFIRMED' : 'PENDING',
     plannedQty: 0,
   },
 });
@@ -365,7 +368,7 @@ const onSubmit = form.handleSubmit(values => {
     plannedQty: values.plannedQty,
   };
 
-  console.log(params);
+  console.log(params.status);
   // createProductionPlan(params);
 });
 </script>
