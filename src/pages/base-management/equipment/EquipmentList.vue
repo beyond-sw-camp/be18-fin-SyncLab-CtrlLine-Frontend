@@ -99,8 +99,20 @@ import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
 
 const router = useRouter();
 
+// 검색 처리 함수
+const onSearch = newFilters => {
+  Object.assign(filters, newFilters);
+  page.value = 1;
+  refetch();
+};
+
+// 상세 페이지로 이동
+const goToDetail = equipmentCode => {
+  router.push(`/base-management/equipments/${equipmentCode}`);
+};
+
 const { data: equipmentList, refetch, page, filters } = useGetEquipmentList();
-// 로컬에 있는 equipmentList가 변경되면, editableList를 갱신. (코드해석 필요)
+
 const editableList = ref([]);
 watch(
   equipmentList,
@@ -116,52 +128,15 @@ watch(
 
 const { updateEquipmentList } = useUpdateEquipmentList();
 
-// 검색 처리 함수
-const onSearch = newFilters => {
-  Object.assign(filters, newFilters);
-  page.value = 1;
-  refetch();
-};
-
-// 상세 페이지로 이동
-const goToDetail = equipmentCode => {
-  router.push(`/base-management/equipments/${equipmentCode}`);
-};
-
-// 첫 데이터 행의 체크박스를 클릭하면 모든 행에 같은 값 적용
-const onRowToggle = index => {
-  const list = editableList.value || [];
-  if (!list.length) return;
-
-  // 클릭된 행의 새로운 값
-  const newValue = !list[index].isActive;
-  if (index === 0) {
-    // 첫 행이면 모든 행을 동일한 값으로 설정
-    editableList.value = list.map(equipment => ({ ...equipment, isActive: newValue }));
-  } else {
-    // 클릭한, 해당 행만 토글
-    const updatedList = [...editableList.value];
-    updatedList[index].isActive = newValue;
-    editableList.value = updatedList;
-  }
-
-  console.log('After Toggle:', list[index].equipmentCode, 'new isActive:', newValue);
-};
-
 // 변경된 상태를 DB에 저장
 const saveChanges = async () => {
   const list = editableList.value || [];
-  // 이것부터 안 뜨던데.
-  console.log('Editablelist', list);
-
   const updated = list
     .filter(e => e.isActive !== e.originalIsActive)
     .map(e => ({
       equipmentCode: e.equipmentCode,
       isActive: e.isActive,
     }));
-
-  console.log('Updated', updated);
 
   if (!updated.length) {
     toast('변경된 항목이 없습니다.');
