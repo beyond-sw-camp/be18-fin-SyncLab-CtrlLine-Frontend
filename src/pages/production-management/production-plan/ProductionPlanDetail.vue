@@ -102,7 +102,7 @@
                   <Input
                     type="text"
                     v-bind="componentField"
-                    class="max-w-20 bg-gray-100 text-sm"
+                    class="max-w-30 bg-gray-100 text-sm"
                     readonly
                   />
                 </div>
@@ -274,6 +274,7 @@
                       v-for="(label, value) in PRODUCTION_PLAN_STATUS"
                       :key="value"
                       :value="value"
+                      :disabled="['RUNNING', 'COMPLETED'].includes(value)"
                     >
                       {{ label }}
                     </SelectItem>

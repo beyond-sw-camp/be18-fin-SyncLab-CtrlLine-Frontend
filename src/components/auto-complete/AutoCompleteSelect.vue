@@ -43,7 +43,7 @@
         </ul>
       </div>
 
-      <Input type="text" v-bind="componentField" readonly class="w-28 bg-gray-100 text-sm" />
+      <Input type="text" v-bind="componentField" readonly class="w-40 bg-gray-100 text-sm" />
     </div>
 
     <SelectModal
@@ -70,7 +70,6 @@ import { toast } from 'vue-sonner';
 import SelectModal from '@/components/auto-complete/SelectModal.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
 
 const props = defineProps({
   label: { type: String, required: true },
@@ -209,29 +208,29 @@ function onModalSelect(item) {
 // initialText 변경 감지
 watch(
   () => props.initialText,
-  (newText) => {
+  newText => {
     if (newText) {
       textInput.value = newText;
       isItemSelected.value = true;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // value 외부 변경 감지
 watch(
   () => props.value,
-  (newValue) => {
+  newValue => {
     const isEmpty = newValue === '' || newValue === null || newValue === undefined;
 
     if (isEmpty && textInput.value) {
       clearInput();
     }
-  }
+  },
 );
 
 // textInput 직접 변경 감지
-watch(textInput, (newValue) => {
+watch(textInput, newValue => {
   if (!newValue) {
     clearInput();
   }
