@@ -75,7 +75,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -91,8 +91,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 
+const route = useRoute();
 const router = useRouter();
+const currentStatus = ref(route.query.status || 'TOTAL');
 
 // 검색 처리 함수
 const onSearch = newFilters => {
@@ -120,6 +123,41 @@ watch(
   },
   { immediate: true },
 );
+
+if (route.query.page) {
+  const p = Number(route.query.page);
+  if (!Number.isNaN(p) && p > 0) {
+    page.value = p;
+  }
+}
+
+const syncQuery = () => {
+  const query = buildQueryObject({
+    status: currentStatus.value,
+    page: page.value,
+    ...filters,
+  });
+
+  router.replace({ query });
+};
+
+// page / status 변경 시
+watch([page, currentStatus], () => {
+  syncQuery();
+});
+
+// filters 변경 시
+watch(
+  () => ({ ...filters }),
+  () => {
+    syncQuery();
+  },
+  { deep: true },
+);
+
+watch(currentStatus, () => {
+  page.value = 1; // 첫 페이지로 이동
+});
 </script>
 
 <style scoped>
