@@ -15,6 +15,7 @@
             <TableHead class="text-center">공정명</TableHead>
             <TableHead class="text-center">담당부서</TableHead>
             <TableHead class="text-center">담당자</TableHead>
+            <TableHead class="text-center">사용여부</TableHead>
           </TableRow>
         </TableHeader>
 
