@@ -260,7 +260,9 @@
               <FormLabel>상태</FormLabel>
               <FormControl class="w-full">
                 <Select v-bind="componentField">
-                  <SelectTrigger class="custom-input w-full">
+                  <SelectTrigger
+                    :class="['custom-input w-full', isUser ? 'pointer-events-none' : '']"
+                  >
                     <SelectValue placeholder="상태를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
@@ -300,7 +302,7 @@
 import { toTypedSchema } from '@vee-validate/zod';
 import { InfoIcon } from 'lucide-vue-next';
 import { useForm } from 'vee-validate';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { z } from 'zod';
 
@@ -324,6 +326,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
+import { useUserStore } from '@/stores/useUserStore';
 
 const formSchema = toTypedSchema(
   z.object({
@@ -371,6 +374,9 @@ const selectedFactoryId = ref(null);
 const selectedItemId = ref(null);
 const itemDetail = ref({});
 const lineDetail = ref({});
+const userStore = useUserStore();
+
+const isUser = computed(() => userStore.userRole === 'USER');
 
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
