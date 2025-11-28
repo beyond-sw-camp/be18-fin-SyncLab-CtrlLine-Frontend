@@ -113,7 +113,7 @@ const syncQuery = () => {
   };
 
   const cleaned = Object.fromEntries(
-    Object.entries(query).filter(([_, v]) => v !== null && v !== '' && v !== undefined),
+    Object.entries(query).filter(([, v]) => v !== null && v !== '' && v !== undefined),
   );
 
   router.replace({ query: cleaned });

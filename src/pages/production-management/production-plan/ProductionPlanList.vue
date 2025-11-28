@@ -115,7 +115,7 @@
 
 <script setup>
 import { ChevronRightIcon } from 'lucide-vue-next';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter, RouterLink } from 'vue-router';
 
 import useGetProductionPlanList from '@/apis/query-hooks/production-plan/useGetProductionPlanList';

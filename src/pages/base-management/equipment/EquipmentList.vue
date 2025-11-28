@@ -76,14 +76,13 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-// 테이블 UI 컴포넌트
 import {
   Table,
   TableBody,
