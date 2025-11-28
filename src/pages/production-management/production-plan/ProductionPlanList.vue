@@ -2,8 +2,8 @@
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 목록</h3>
     <div class="flex gap-2">
-      <DeleteConfirmDialog :ids="selectedIds" @deleted="onDeleted" v-if="!isUser" />
-      <Button size="sm" class="cursor-pointer w-[70px]"> 상태 수정 </Button>
+      <DeleteConfirmDialog :ids="selectedRows.map(r => r.id)" @deleted="onReset" />
+      <StatusUpdateDialog :rows="selectedRows" @updated="onReset" />
       <RouterLink to="/production-management/production-plans/new">
         <Button size="sm" class="cursor-pointer w-[70px]">
           New <ChevronRightIcon class="ml-1" />
@@ -80,8 +80,11 @@
             >
               <Checkbox
                 class="size-4 border-[1.5px]"
-                :modelValue="selectedIds.includes(productionPlan.id)"
-                @update:modelValue="checked => toggleRow(checked, productionPlan.id)"
+                :modelValue="selectedRows.some(r => r.id === productionPlan.id)"
+                @update:modelValue="
+                  checked =>
+                    toggleRow(checked, { id: productionPlan.id, status: productionPlan.status })
+                "
                 @click.stop
               />
             </TableCell>
@@ -142,11 +145,10 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { STATUS_CLASSES } from '@/constants/productionPlanStatus';
+import DeleteConfirmDialog from '@/pages/production-management/production-plan/DeleteConfirmDialog.vue';
 import FilterTab from '@/pages/production-management/production-plan/FilterTab.vue';
-import { useUserStore } from '@/stores/useUserStore';
+import StatusUpdateDialog from '@/pages/production-management/production-plan/StatusUpdateDialog.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
-
-import DeleteConfirmDialog from './DeleteConfirmDialog.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -174,9 +176,6 @@ const defaultFilters = {
   endTime: null,
 };
 
-const userStore = useUserStore();
-const isUser = computed(() => userStore.userRole === 'USER');
-
 const {
   data: productionPlanList,
   page,
@@ -192,31 +191,37 @@ const goToDetail = productionPlanId => {
   router.push(`/production-management/production-plans/${productionPlanId}`);
 };
 
-const selectedIds = ref([]);
+const selectedRows = ref([]);
 
-const onDeleted = () => {
-  selectedIds.value = [];
+const onReset = () => {
+  selectedRows.value = [];
 };
 
-const allIds = computed(() => productionPlanList.value?.content?.map(item => item.id) ?? []);
+const allRows = computed(
+  () =>
+    productionPlanList.value?.content?.map(item => ({
+      id: item.id,
+      status: item.status,
+    })) ?? [],
+);
 
 const isAllChecked = computed(
-  () => selectedIds.value.length > 0 && selectedIds.value.length === allIds.value.length,
+  () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
 );
 
 // 전체 선택/해제
 const toggleAll = checked => {
-  selectedIds.value = checked ? [...allIds.value] : [];
+  selectedRows.value = checked ? [...allRows.value] : [];
 };
 
 // 개별 체크
-const toggleRow = (checked, id) => {
+const toggleRow = (checked, row) => {
   if (checked) {
-    if (!selectedIds.value.includes(id)) {
-      selectedIds.value.push(id);
+    if (!selectedRows.value.find(r => r.id === row.id)) {
+      selectedRows.value.push(row);
     }
   } else {
-    selectedIds.value = selectedIds.value.filter(v => v !== id);
+    selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
   }
 };
 
