@@ -30,3 +30,11 @@ export async function deleteProductionPlan(productionPlanId) {
   const { data } = await apiClient.delete(`/production-plans/${productionPlanId}`);
   return data.data;
 }
+
+export async function deleteProductionPlanList(params) {
+  const { data } = await apiClient.delete(`/production-plans`, {
+    data: params,
+  });
+
+  return data.data;
+}

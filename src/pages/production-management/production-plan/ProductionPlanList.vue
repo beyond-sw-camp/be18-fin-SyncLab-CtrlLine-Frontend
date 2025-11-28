@@ -1,7 +1,17 @@
 <template>
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 목록</h3>
+    <div class="flex gap-2">
+      <DeleteConfirmDialog :ids="selectedIds" @deleted="onDeleted" v-if="!isUser" />
+      <Button size="sm" class="cursor-pointer w-[70px]"> 상태 수정 </Button>
+      <RouterLink to="/production-management/production-plans/new">
+        <Button size="sm" class="cursor-pointer w-[70px]">
+          New <ChevronRightIcon class="ml-1" />
+        </Button>
+      </RouterLink>
+    </div>
   </div>
+
   <Tabs v-model="currentStatus" class="w-full">
     <TabsList class="flex gap-3">
       <TabsTrigger value="TOTAL">Total</TabsTrigger>
@@ -20,6 +30,14 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              <Checkbox
+                :modelValue="isAllChecked"
+                @update:modelValue="toggleAll"
+                @click.stop
+                class="size-4 border-[1.5px]"
+              />
+            </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
               전표번호
             </TableHead>
@@ -57,6 +75,16 @@
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(productionPlan.id)"
           >
+            <TableCell
+              class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
+            >
+              <Checkbox
+                class="size-4 border-[1.5px]"
+                :modelValue="selectedIds.includes(productionPlan.id)"
+                @update:modelValue="checked => toggleRow(checked, productionPlan.id)"
+                @click.stop
+              />
+            </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ productionPlan.documentNo }}
             </TableCell>
@@ -95,12 +123,15 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ChevronRightIcon } from 'lucide-vue-next';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter, RouterLink } from 'vue-router';
 
 import useGetProductionPlanList from '@/apis/query-hooks/production-plan/useGetProductionPlanList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -112,20 +143,24 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { STATUS_CLASSES } from '@/constants/productionPlanStatus';
 import FilterTab from '@/pages/production-management/production-plan/FilterTab.vue';
+import { useUserStore } from '@/stores/useUserStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
+
+import DeleteConfirmDialog from './DeleteConfirmDialog.vue';
 
 const route = useRoute();
 const router = useRouter();
 
+const disableSync = ref(false);
 const currentStatus = ref(route.query.status || 'TOTAL');
 
 const initialFilters = {
-  factoryName: route.query.factoryName  || '',
+  factoryName: route.query.factoryName || '',
   salesManagerName: route.query.salesManagerName || '',
-  productionManagerName: route.query.productionManagerName|| '',
+  productionManagerName: route.query.productionManagerName || '',
   itemName: route.query.itemName || '',
-  dueDate: route.query.dueDate ,
-  startTime: route.query.startTime  || null,
+  dueDate: route.query.dueDate,
+  startTime: route.query.startTime || null,
   endTime: route.query.endTime || null,
 };
 
@@ -138,6 +173,9 @@ const defaultFilters = {
   startTime: null,
   endTime: null,
 };
+
+const userStore = useUserStore();
+const isUser = computed(() => userStore.userRole === 'USER');
 
 const {
   data: productionPlanList,
@@ -152,6 +190,34 @@ const onSearch = newFilters => {
 
 const goToDetail = productionPlanId => {
   router.push(`/production-management/production-plans/${productionPlanId}`);
+};
+
+const selectedIds = ref([]);
+
+const onDeleted = () => {
+  selectedIds.value = [];
+};
+
+const allIds = computed(() => productionPlanList.value?.content?.map(item => item.id) ?? []);
+
+const isAllChecked = computed(
+  () => selectedIds.value.length > 0 && selectedIds.value.length === allIds.value.length,
+);
+
+// 전체 선택/해제
+const toggleAll = checked => {
+  selectedIds.value = checked ? [...allIds.value] : [];
+};
+
+// 개별 체크
+const toggleRow = (checked, id) => {
+  if (checked) {
+    if (!selectedIds.value.includes(id)) {
+      selectedIds.value.push(id);
+    }
+  } else {
+    selectedIds.value = selectedIds.value.filter(v => v !== id);
+  }
 };
 
 if (route.query.page) {
@@ -181,11 +247,11 @@ onMounted(() => {
 
     syncQuery();
   }
-})
+});
 
 // page / status 변경 시
 watch([page, currentStatus], () => {
-  syncQuery();
+  if (disableSync.value) return;
 });
 
 // filters 변경 시
@@ -196,7 +262,6 @@ watch(
   },
   { deep: true },
 );
-
 
 watch(currentStatus, () => {
   page.value = 1; // 첫 페이지로 이동
