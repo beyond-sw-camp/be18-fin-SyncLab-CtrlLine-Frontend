@@ -270,9 +270,7 @@
               <FormLabel>상태</FormLabel>
               <FormControl class="w-full">
                 <Select v-bind="componentField">
-                  <SelectTrigger
-                    :class="['custom-input w-full', canEdit ? '' : 'pointer-events-none']"
-                  >
+                  <SelectTrigger :class="['w-full', canEdit ? '' : 'pointer-events-none']">
                     <SelectValue placeholder="상태를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>

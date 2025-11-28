@@ -158,7 +158,7 @@
               <FormLabel>부서</FormLabel>
               <FormControl>
                 <Select v-bind="componentField" disabled>
-                  <SelectTrigger class="custom-input w-full">
+                  <SelectTrigger class="w-full">
                     <SelectValue placeholder="부서를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
@@ -184,7 +184,7 @@
                   type="text"
                   placeholder="내선번호를 입력하세요."
                   v-bind="componentField"
-                  class="custom-input w-full"
+                  class="w-full"
                   disabled
                 />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -197,7 +197,7 @@
               <FormLabel>직급</FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
-                  <SelectTrigger class="custom-input w-full" disabled>
+                  <SelectTrigger class="w-full" disabled>
                     <SelectValue placeholder="직급을 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
@@ -220,7 +220,7 @@
               <FormLabel>권한</FormLabel>
               <FormControl>
                 <Select v-bind="componentField" disabled>
-                  <SelectTrigger class="custom-input w-full">
+                  <SelectTrigger class="w-full">
                     <SelectValue placeholder="권한을 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
@@ -239,7 +239,7 @@
               <FormLabel>상태</FormLabel>
               <FormControl>
                 <Select v-bind="componentField" disabled>
-                  <SelectTrigger class="custom-input w-full">
+                  <SelectTrigger class="w-full">
                     <SelectValue placeholder="재직 상태를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
