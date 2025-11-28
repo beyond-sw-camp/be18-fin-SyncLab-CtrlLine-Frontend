@@ -17,3 +17,9 @@ export async function getItemList(params) {
   const { data } = await apiClient.get(`/items?${query.toString()}`);
   return data.data;
 }
+
+export async function getItem(itemId) {
+  console.log(itemId);
+  const { data } = await apiClient.get(`/items/${itemId}`);
+  return data.data;
+}

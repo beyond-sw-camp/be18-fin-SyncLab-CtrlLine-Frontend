@@ -22,3 +22,15 @@ export async function getProductionPlanList(params) {
 
   return data.data;
 }
+
+export async function getProductionPlan(productionPlanId) {
+  const { data } = await apiClient.get(`/production-plans/${productionPlanId}`);
+
+  console.log(data.data);
+  return data.data;
+}
+
+export async function updateProductionPlan(productionPlanId, params) {
+  const { data } = await apiClient.put(`/production-plans/${productionPlanId}`, params);
+  return data.data;
+}
