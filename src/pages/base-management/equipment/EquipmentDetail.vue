@@ -190,7 +190,7 @@
 import { useRoute } from 'vue-router';
 
 import useGetEquipment from '@/apis/query-hooks/equipment/useGetEquipment';
-import useUpdateEquipment from '@/apis/query-hooks/equipment/useUpdateEquipment.js';
+import useUpdateEquipmentList from '@/apis/query-hooks/equipment/useUpdateEquipmentList.js';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -208,7 +208,7 @@ import getAccumulatedHours from '@/utils/getAccumulatedHours';
 
 const route = useRoute();
 const { data: equipmentDetail } = useGetEquipment(route.params.equipmentCode);
-const { mutate: updateEquipment } = useUpdateEquipment();
+const { mutate: updateEquipmentList } = useUpdateEquipmentList();
 
 const onSubmit = values => {
   const params = {
@@ -216,7 +216,7 @@ const onSubmit = values => {
     userName: values.userName,
     isActive: values.isActive === 'true',
   };
-  updateEquipment(params);
+  updateEquipmentList(params);
 };
 </script>
 

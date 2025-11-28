@@ -60,7 +60,7 @@
 
         <FormField v-slot="{ componentField, errorMessage }" name="isActive">
           <FormItem>
-            <FormLabel>공장사용여부</FormLabel>
+            <FormLabel>공장 사용여부</FormLabel>
             <FormControl>
               <RadioGroup v-bind="componentField" class="flex">
                 <div class="flex items-center space-x-2">
