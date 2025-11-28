@@ -20,33 +20,33 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >전표번호</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >상태</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >공장명</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >품목명</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >생산담당자</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >영업담당자</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >생산계획수량</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >납기일자</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >비고</TableHead
-            >
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              전표번호
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              상태
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              공장명
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              품목명
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              생산담당자
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              영업담당자
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              생산계획수량
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              납기일자
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              비고
+            </TableHead>
           </TableRow>
         </TableHeader>
 

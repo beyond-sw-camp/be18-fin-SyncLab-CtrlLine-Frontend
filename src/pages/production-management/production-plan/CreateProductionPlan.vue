@@ -98,7 +98,7 @@
           <FormField name="itemCode" v-slot="{ value, setValue, errorMessage }">
             <FormItem>
               <FormLabel>품목명</FormLabel>
-              <FormControl class="w-full truncate min-w-0">
+              <FormControl class="w-full min-w-0">
                 <div v-if="selectedFactoryId">
                   <AutoCompleteSelect
                     :key="`autocomplete-${'itemCode'}`"
@@ -151,7 +151,7 @@
           <FormField name="salesManagerNo" v-slot="{ value, setValue, errorMessage }">
             <FormItem class="w-full">
               <FormLabel>영업담당자</FormLabel>
-              <FormControl class="w-full truncate min-w-0">
+              <FormControl class="w-full min-w-0">
                 <AutoCompleteSelect
                   :key="`autocomplete-${'salesManagerNo'}`"
                   label="영업담당자"
