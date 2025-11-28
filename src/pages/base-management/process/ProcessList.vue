@@ -40,6 +40,18 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ process.userName }}
             </TableCell>
+            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+              <Badge
+                class="w-[50px] mx-auto"
+                :class="
+                  process.isActive
+                    ? 'bg-green-100 text-green-700 border-green-300'
+                    : 'bg-red-100 text-red-700 border-red-300'
+                "
+              >
+                {{ process.isActive ? '사용' : '미사용' }}
+              </Badge>
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>
@@ -53,6 +65,7 @@ import { useRouter } from 'vue-router';
 
 import useGetProcessList from '@/apis/query-hooks/process/useGetProcessList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
+import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
