@@ -27,5 +27,5 @@ export async function getProcess(processCode) {
 // 공정 업데이트 (담당자와 사용여부 수정 가능)
 export async function updateProcess(processCode, params) {
   const { data } = await apiClient.patch(`/processes/${processCode}`, params);
-  return data.data;
+  return data;
 }
