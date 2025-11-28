@@ -156,7 +156,7 @@
             <FormItem class="w-full">
               <FormLabel>생산시작시간</FormLabel>
               <FormControl>
-                <Input type="datetime-local" v-bind="componentField" class="text-sm" />
+                <Input type="datetime-local" v-bind="componentField" class="text-sm" readonly />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -164,7 +164,10 @@
         </div>
 
         <div class="order-8 md:order-0">
-          <FormField name="salesManagerNo" v-slot="{ value, componentField, setValue, errorMessage }">
+          <FormField
+            name="salesManagerNo"
+            v-slot="{ value, componentField, setValue, errorMessage }"
+          >
             <FormItem class="w-full">
               <FormLabel>영업담당자</FormLabel>
               <FormControl class="w-full min-w-0">
@@ -257,7 +260,7 @@
               <FormLabel>상태</FormLabel>
               <FormControl class="w-full">
                 <Select v-bind="componentField">
-                  <SelectTrigger class="custom-input w-full pointer-events-none">
+                  <SelectTrigger class="custom-input w-full">
                     <SelectValue placeholder="상태를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
@@ -321,7 +324,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
-import formatDate from '@/utils/formatDate';
 
 const formSchema = toTypedSchema(
   z.object({
@@ -359,7 +361,7 @@ const form = useForm({
     lineCode: productionPlanDetail.value?.lineCode,
     status: productionPlanDetail.value?.status,
     plannedQty: productionPlanDetail.value?.plannedQty,
-    startTime: formatDate(productionPlanDetail.value?.startTime, 'datetime-local'),
+    startTime: productionPlanDetail.value?.startTime,
     endTime: productionPlanDetail.value?.endTime,
     remark: productionPlanDetail.value?.remark,
   },
@@ -414,15 +416,16 @@ function onLineSelected(lineCode) {
 
 const onSubmit = form.handleSubmit(values => {
   const params = {
-    factoryCode: values.factoryCode,
-    dueDate: values.dueDate,
-    productionManagerNo: values.productionManagerNo,
-    itemCode: values.itemCode,
-    salesManagerNo: values.salesManagerNo,
-    lineCode: values.lineCode,
     status: values.status,
-    remark: values.remark,
+    salesManagerNo: values.salesManagerNo,
+    productionManagerNo: values.productionManagerNo,
+    startTime: values.startTime,
     plannedQty: values.plannedQty,
+    remark: values.remark,
+    factoryCode: values.factoryCode,
+    itemCode: values.itemCode,
+    lineCode: values.lineCode,
+    dueDate: values.dueDate,
   };
 
   updateProductionPlan(params);

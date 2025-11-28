@@ -31,6 +31,6 @@ export async function getProductionPlan(productionPlanId) {
 }
 
 export async function updateProductionPlan(productionPlanId, params) {
-  const { data } = await apiClient.put(`/production-plans/${productionPlanId}`, params);
+  const { data } = await apiClient.patch(`/production-plans/${productionPlanId}`, params);
   return data.data;
 }
