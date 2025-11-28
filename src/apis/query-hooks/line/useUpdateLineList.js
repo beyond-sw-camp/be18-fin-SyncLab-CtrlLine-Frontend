@@ -1,76 +1,23 @@
-// 라인 목록 조회
-import { keepPreviousData, useQuery } from '@tanstack/vue-query';
-import { computed, reactive, ref } from 'vue';
+import { useMutation, useQueryClient } from '@tanstack/vue-query';
+import { useRouter } from 'vue-router';
+import { toast } from 'vue-sonner';
 
-import { getLineList } from '@/apis/query-functions/line';
-import { useAuthStore } from '@/stores/useAuthStore';
+import { updateLine } from '@/apis/query-functions/line';
 
-export default function useGetLineList(initialFilters = {}) {
-  const authStore = useAuthStore();
-  const page = ref(1);
-  const pageSize = ref(10);
-  const fixedSort = [{ sortBy: 'lineCode', direction: 'asc' }];
+export default function useUpdateLine(lineCode) {
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
-  const filters = reactive({
-    lineName: initialFilters.lineName ?? '',
-    lineCode: initialFilters.lineCode ?? '',
-    userName: initialFilters.userName ?? '',
-    userDepartment: initialFilters.userDepartment ?? null,
-    isActive: initialFilters.isActive ?? null,
+  return useMutation({
+    mutationFn: params => updateLine(lineCode, params),
+    onSuccess: () => {
+      toast.success('라인 사용여부를 수정했습니다.');
+      queryClient.invalidateQueries({ queryKey: ['process', lineCode] });
+      queryClient.invalidateQueries({ queryKey: ['lineList'] });
+      router.push('/base-management/lines');
+    },
+    onError: error => {
+      toast.error(error.message);
+    },
   });
-
-  const queryParams = computed(() => {
-    const cleaned = {};
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null && value !== '') {
-        cleaned[key] = value;
-      }
-    });
-
-    cleaned.page = page.value - 1;
-    cleaned.size = pageSize.value;
-    cleaned.sort = fixedSort;
-
-    return cleaned;
-  });
-
-  const { data, isPlaceholderData, refetch } = useQuery({
-    queryKey: ['lineList', queryParams],
-    queryFn: () => getLineList(queryParams.value),
-    enabled: computed(() => authStore.isLoggedIn),
-    placeholderData: keepPreviousData,
-  });
-
-  const prevPage = () => {
-    if (page.value > 1) {
-      page.value--;
-    }
-  };
-
-  const nextPage = () => {
-    const totalPages = data?.value?.pageInfo?.totalPages ?? 1;
-    if (!isPlaceholderData.value && page.value < totalPages) {
-      page.value++;
-    }
-  };
-
-  const firstPage = () => {
-    page.value = 1;
-  };
-
-  const lastPage = () => {
-    const totalPages = data?.value?.pageInfo?.totalPages ?? 1;
-    page.value = totalPages;
-  };
-
-  return {
-    data,
-    filters,
-    page,
-    refetch,
-    prevPage,
-    nextPage,
-    firstPage,
-    lastPage,
-  };
 }
