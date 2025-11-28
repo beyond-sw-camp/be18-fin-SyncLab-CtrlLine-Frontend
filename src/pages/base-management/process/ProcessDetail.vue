@@ -5,17 +5,11 @@
 
   <div class="flex flex-col gap-8 md:flex-row">
     <Form
-      v-if="processDetail"
+      v-if="processDetail?.processCode"
       id="processUpdateForm"
       @submit="onSubmit"
       class="flex-1 flex flex-col gap-10"
-      :initial-values="{
-        processCode: processDetail.processCode,
-        processName: processDetail.processName,
-        department: processDetail.userDepartment,
-        name: processDetail.userName,
-        isActive: processDetail.isActive ? 'true' : 'false',
-      }"
+      :initial-values="initialValues"
     >
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField v-slot="{ componentField, errorMessage }" name="processCode">
@@ -42,7 +36,7 @@
           <FormItem>
             <FormLabel>담당자</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="name" />
+              <Input type="text" v-bind="componentField" autocomplete="name" disabled />
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
@@ -92,6 +86,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import useGetProcess from '@/apis/query-hooks/process/useGetProcess.js';
@@ -106,9 +101,23 @@ const route = useRoute();
 const { data: processDetail } = useGetProcess(route.params.processCode);
 const { mutate: updateProcess } = useUpdateProcess(route.params.processCode);
 
+const initialValues = computed(() => {
+  if (!processDetail.value) return {};
+
+  return {
+    processCode: processDetail.value.processCode,
+    processName: processDetail.value.processName,
+    department: processDetail.value.userDepartment,
+    name: processDetail.value.userName,
+    empNo: processDetail.value.empNo,
+    isActive: processDetail.value.isActive ? 'true' : 'false',
+  };
+});
+
 const onSubmit = values => {
   const params = {
-    userName: values.userName,
+    empNo: values.empNo,
+    userName: values.name,
     isActive: values.isActive === 'true',
   };
   updateProcess(params);
