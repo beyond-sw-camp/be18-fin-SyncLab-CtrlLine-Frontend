@@ -7,8 +7,8 @@
     <Form
       v-if="equipmentDetail"
       id="equipmentUpdateForm"
-      :validation-schema="formSchema"
       @submit="onSubmit"
+      :validation-schema="formSchema"
       :initial-values="{
         equipmentCode: equipmentDetail.equipmentCode,
         equipmentName: equipmentDetail.equipmentName,
@@ -18,10 +18,9 @@
         isActive: equipmentDetail.isActive ? 'true' : 'false',
         equipmentPpm: equipmentDetail.equipmentPpm,
         operatingDate: getAccumulatedHours(equipmentDetail.operatingDate), // 누적 가동 시간
-        // maintenanceHistory: equipmentDetail.maintenanceHistory, // 유지보수 이력?
+        maintenanceHistory: equipmentDetail.maintenanceHistory, // 유지보수 이력?
         totalCount: equipmentDetail.totalCount, // 누적투입수량
         defectiveCount: equipmentDetail.defectiveCount, // 누적불량수량
-        // 유지보수이력
       }"
       class="flex-1 flex flex-col gap-12"
     >
@@ -32,7 +31,7 @@
             <FormItem>
               <FormLabel>설비코드</FormLabel>
               <FormControl>
-                <Input type="text" v-bind="componentField" disabled autocomplete="equipment-name" />
+                <Input type="text" v-bind="componentField" disabled />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -58,13 +57,11 @@
             </FormItem>
           </FormField>
 
-          <div class="hidden md:block"></div>
-
           <FormField name="userName" v-slot="{ componentField, errorMessage }">
             <FormItem>
               <FormLabel>담당자</FormLabel>
               <FormControl>
-                <Input type="text" v-bind="componentField" />
+                <Input type="text" v-bind="componentField" autocomplete="userName" />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -95,12 +92,12 @@
 
           <FormField v-slot="{ componentField, errorMessage }" name="isActive">
             <FormItem>
-              <FormLabel>설비사용여부</FormLabel>
+              <FormLabel>설비 사용여부</FormLabel>
               <FormControl>
                 <RadioGroup v-bind="componentField" class="flex">
                   <div class="flex items-center space-x-2">
                     <RadioGroupItem value="true" id="r1" />
-                    <Label for="r1" class="font-normal">설비코드 사용</Label>
+                    <Label for="r1" class="font-normal">설비 사용</Label>
                   </div>
 
                   <div class="flex items-center space-x-2">
@@ -137,7 +134,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField name="operatingDate" v-slot="{ componentField, errorMessage }">
             <FormItem>
-              <FormLabel>누적가동시간</FormLabel>
+              <FormLabel>누적 가동시간</FormLabel>
               <FormControl>
                 <Input type="number" v-bind="componentField" disabled />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -147,7 +144,7 @@
 
           <FormField name="maintenanceHistory" v-slot="{ componentField, errorMessage }">
             <FormItem>
-              <FormLabel>유지보수이력</FormLabel>
+              <FormLabel>유지 보수이력</FormLabel>
               <FormControl>
                 <Input type="text" v-bind="componentField" disabled />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -157,7 +154,7 @@
 
           <FormField name="totalCount" v-slot="{ componentField, errorMessage }">
             <FormItem>
-              <FormLabel>누적투입수량</FormLabel>
+              <FormLabel>누적 투입수량</FormLabel>
               <FormControl>
                 <Input type="number" v-bind="componentField" disabled />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -167,7 +164,7 @@
 
           <FormField name="defectiveCount" v-slot="{ componentField, errorMessage }">
             <FormItem>
-              <FormLabel>누적불량수량</FormLabel>
+              <FormLabel>누적 불량수량</FormLabel>
               <FormControl>
                 <Input type="number" v-bind="componentField" disabled />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
