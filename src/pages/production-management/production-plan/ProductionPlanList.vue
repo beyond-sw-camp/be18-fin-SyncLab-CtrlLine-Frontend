@@ -2,7 +2,7 @@
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 목록</h3>
     <div class="flex gap-2">
-      <DeleteConfirmDialog :ids="selectedRows.map(r => r.id)" @deleted="onReset" />
+      <DeleteConfirmDialog :rows="selectedRows" @deleted="onReset" />
       <StatusUpdateDialog :rows="selectedRows" @updated="onReset" />
       <RouterLink to="/production-management/production-plans/new">
         <Button size="sm" class="cursor-pointer w-[70px]">

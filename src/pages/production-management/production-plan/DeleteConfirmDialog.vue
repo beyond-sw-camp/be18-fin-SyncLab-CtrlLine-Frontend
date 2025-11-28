@@ -1,7 +1,9 @@
 <template>
-  <Dialog v-if="!isUser">
+  <Dialog>
     <DialogTrigger as-child>
-      <Button variant="outline" size="sm" class="cursor-pointer w-[70px]"> Delete </Button>
+      <Button variant="outline" size="sm" class="cursor-pointer w-[70px]" :disabled="!canDelete">
+        Delete
+      </Button>
     </DialogTrigger>
     <DialogContent class="rounded-2xl p-6 sm:max-w-[400px]">
       <DialogHeader>
@@ -42,24 +44,41 @@ import {
 import { useUserStore } from '@/stores/useUserStore';
 
 const props = defineProps({
-  ids: {
-    type: Array,
+  rows: {
+    type: Object,
     required: true,
   },
 });
 
 const userStore = useUserStore();
-const isUser = computed(() => userStore.userRole === 'USER');
+
+const canDelete = computed(() => {
+  const role = userStore.userRole;
+  const statuses = props.rows.map(r => r.status);
+  const uniqueStatuses = new Set(statuses);
+
+  // 선택된 항목이 없으면 삭제 불가
+  if (props.rows.length === 0) return false;
+
+  // RUNNING/COMPLETED 포함 시 삭제 불가 (상세조회와 동일)
+  if ([...uniqueStatuses].some(s => ['RUNNING', 'COMPLETED'].includes(s))) {
+    return false;
+  }
+
+  // ADMIN은 여기서 true
+  if (role === 'ADMIN') return true;
+
+  return false;
+});
 
 const emit = defineEmits(['deleted']);
 
 const { mutate: deleteProductionPlanList } = useDeleteProductionPlanList();
 
 const onDelete = () => {
-  const params = {
-    planIds: [...props.ids],
-  };
-  deleteProductionPlanList(params);
+  const ids = props.rows.map(r => r.id);
+
+  deleteProductionPlanList({ planIds: ids });
   emit('deleted');
 };
 </script>
