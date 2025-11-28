@@ -36,7 +36,6 @@
               {{ factory.name }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              <!-- <Badge class="w-[50px]" :variant="factory.isActive ? 'default' : 'outline'"> -->
               <Badge
                 class="w-[50px]"
                 :class="
