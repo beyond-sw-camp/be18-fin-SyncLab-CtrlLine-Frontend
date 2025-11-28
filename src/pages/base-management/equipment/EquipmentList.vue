@@ -10,8 +10,8 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              <Checkbox />
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
+              <Checkbox class="size-4 border-[1.5px]" />
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">설비코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">설비명</TableHead>
@@ -30,8 +30,8 @@
             @click="goToDetail(equipment.equipmentCode)"
           >
             <!-- 왼쪽: isActive 편집 토글 -->
-            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
-              <Checkbox :checked="equipment.isActive" />
+            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap " @click.stop>
+              <Checkbox :checked="equipment.isActive" class="size-4 border-[1.5px]" />
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ equipment.equipmentCode }}

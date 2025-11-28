@@ -30,7 +30,7 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
@@ -65,6 +65,7 @@
           >
             <TableCell
               class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
+              @click.stop
             >
               <Checkbox
                 class="size-4 border-[1.5px]"
@@ -73,7 +74,6 @@
                   checked =>
                     toggleRow(checked, { id: productionPlan.id, status: productionPlan.status })
                 "
-                @click.stop
               />
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
