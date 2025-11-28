@@ -24,3 +24,9 @@ export async function updateProductionPlan(productionPlanId, params) {
   const { data } = await apiClient.patch(`/production-plans/${productionPlanId}`, params);
   return data.data;
 }
+
+export async function deleteProductionPlan(productionPlanId) {
+  console.log(productionPlanId);
+  const { data } = await apiClient.delete(`/production-plans/${productionPlanId}`);
+  return data.data;
+}
