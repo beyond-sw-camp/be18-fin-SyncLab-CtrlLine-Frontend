@@ -110,7 +110,7 @@ export const productionManagement = [
         to: '/production-management/production-plans',
         children: [
           {
-            label: '공정 상세 조회',
+            label: '생산계획 상세 조회',
             to: '/production-management/production-plans/:documentNo',
           },
         ],
@@ -127,7 +127,7 @@ export const productionManagement = [
         to: '/production-management/production-performances',
         children: [
           {
-            label: '공정 상세 조회',
+            label: '생산실적 상세 조회',
             to: '/production-management/production-performances/:documentNo',
           },
         ],
@@ -143,7 +143,7 @@ export const productionManagement = [
         to: '/production-management/defectives',
         children: [
           {
-            label: '공정 상세 조회',
+            label: '불량 상세 조회',
             to: '/production-management/defectives/:documentNo',
           },
         ],
@@ -159,7 +159,7 @@ export const productionManagement = [
         to: '/production-management/lots',
         children: [
           {
-            label: '공정 상세 조회',
+            label: 'Lot No. 상세 조회',
             to: '/production-management/lots/:lotNo',
           },
         ],
