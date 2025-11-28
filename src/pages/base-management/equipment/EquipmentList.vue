@@ -64,10 +64,7 @@
     </div>
     <!-- 사용여부 저장 버튼 추가-->
     <div class="flex justify-end mt-4">
-      <button
-        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        @click="saveChanges"
-      >
+      <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
         사용여부 저장
       </button>
     </div>
@@ -79,10 +76,8 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { toast } from 'vue-sonner';
 
 import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
-import useUpdateEquipmentList from '@/apis/query-hooks/equipment/useUpdateEquipmentList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -125,33 +120,6 @@ watch(
   },
   { immediate: true },
 );
-
-const { updateEquipmentList } = useUpdateEquipmentList();
-
-// 변경된 상태를 DB에 저장
-const saveChanges = async () => {
-  const list = editableList.value || [];
-  const updated = list
-    .filter(e => e.isActive !== e.originalIsActive)
-    .map(e => ({
-      equipmentCode: e.equipmentCode,
-      isActive: e.isActive,
-    }));
-
-  if (!updated.length) {
-    toast('변경된 항목이 없습니다.');
-    return;
-  }
-
-  try {
-    await updateEquipmentList(updated);
-    toast.success('저장되었습니다.');
-    refetch();
-  } catch (err) {
-    console.error(err);
-    toast.error('저장에 실패했습니다.');
-  }
-};
 </script>
 
 <style scoped>
