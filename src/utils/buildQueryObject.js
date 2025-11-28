@@ -4,8 +4,10 @@ export function buildQueryObject(params) {
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null || value === '') continue;
 
-    if (Array.isArray(value)) {
-      search.set(key, value.join(','));
+    if (Array.isArray(value) && key === 'sort') {
+      value.forEach(sortItem => {
+        search.append('sort', sortItem);
+      });
     } else {
       search.set(key, String(value));
     }
