@@ -1,4 +1,5 @@
 import apiClient from '@/apis/query-functions/apiClient';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 
 export async function createProductionPlan(params) {
   const { data } = await apiClient.post(`/production-plans`, params);
@@ -6,19 +7,10 @@ export async function createProductionPlan(params) {
 }
 
 export async function getProductionPlanList(params) {
-  const query = new URLSearchParams();
+  const queryObj = buildQueryObject(params);
+  const search = new URLSearchParams(queryObj);
 
-  for (const [key, value] of Object.entries(params)) {
-    if (key === 'sort' && Array.isArray(value)) {
-      value.forEach(sortItem => {
-        query.append('sort', sortItem);
-      });
-    } else if (value !== undefined && value !== null && value !== '') {
-      query.append(key, value);
-    }
-  }
-
-  const { data } = await apiClient.get(`/production-plans?${query.toString()}`);
+  const { data } = await apiClient.get(`/production-plans?${search.toString()}`);
 
   return data.data;
 }

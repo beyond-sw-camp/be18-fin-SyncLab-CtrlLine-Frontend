@@ -1,20 +1,12 @@
 import apiClient from '@/apis/query-functions/apiClient';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 
 // 공정 목록 조회
 export async function getProcessList(params) {
-  const query = new URLSearchParams();
+  const queryObj = buildQueryObject(params);
+  const search = new URLSearchParams(queryObj);
 
-  for (const [key, value] of Object.entries(params)) {
-    if (key === 'sort' && Array.isArray(value)) {
-      value.forEach(sortItem => {
-        query.append('sort', `${sortItem.sortBy},${sortItem.direction}`);
-      });
-    } else if (value !== undefined && value !== null && value !== '') {
-      query.append(key, value);
-    }
-  }
-
-  const { data } = await apiClient.get(`/processes?${query.toString()}`);
+  const { data } = await apiClient.get(`/processes?${search.toString()}`);
   return data.data;
 }
 
