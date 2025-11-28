@@ -77,6 +77,11 @@ const routes = [
         component: () => import('@/pages/base-management/line/LineList.vue'),
       },
       {
+        path: 'lines/:lineCode',
+        name: 'LineDetail',
+        component: () => import('@/pages/base-management/line/LineDetail.vue'),
+      },
+      {
         path: 'equipments',
         name: 'EquipmentList',
         component: () => import('@/pages/base-management/equipment/EquipmentList.vue'),
