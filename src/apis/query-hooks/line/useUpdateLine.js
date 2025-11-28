@@ -5,7 +5,7 @@ import { toast } from 'vue-sonner';
 
 import { updateLine } from '@/apis/query-functions/line';
 
-export default function useUpdateProcess(lineCode) {
+export default function useUpdateLine(lineCode) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
