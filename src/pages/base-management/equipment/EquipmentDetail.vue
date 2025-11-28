@@ -5,6 +5,7 @@
 
   <div class="flex flex-col gap-10 md:flex-row">
     <Form
+      as="form"
       v-if="equipmentDetail"
       id="equipmentUpdateForm"
       @submit="onSubmit"
@@ -172,17 +173,16 @@
           </FormField>
         </div>
       </div>
+      <div class="flex justify-end pt-6 pb-5">
+        <Button
+          type="submit"
+          form="equipmentUpdateForm"
+          class="bg-primary text-white hover:bg-primary-600"
+        >
+          Save
+        </Button>
+      </div>
     </Form>
-  </div>
-
-  <div class="flex justify-end pt-6 pb-5">
-    <Button
-      type="submit"
-      form="equipmentUpdateForm"
-      class="bg-primary text-white hover:bg-primary-600"
-    >
-      Save
-    </Button>
   </div>
 </template>
 
@@ -190,7 +190,7 @@
 import { useRoute } from 'vue-router';
 
 import useGetEquipment from '@/apis/query-hooks/equipment/useGetEquipment';
-import useUpdateEquipmentList from '@/apis/query-hooks/equipment/useUpdateEquipmentList.js';
+import useUpdateEquipment from '@/apis/query-hooks/equipment/useUpdateEquipment.js';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -208,15 +208,14 @@ import getAccumulatedHours from '@/utils/getAccumulatedHours';
 
 const route = useRoute();
 const { data: equipmentDetail } = useGetEquipment(route.params.equipmentCode);
-const { mutate: updateEquipmentList } = useUpdateEquipmentList();
+const { mutate: updateEquipment } = useUpdateEquipment(route.params.equipmentCode);
 
 const onSubmit = values => {
   const params = {
-    equipmentCode: values.equipmentCode,
     userName: values.userName,
     isActive: values.isActive === 'true',
   };
-  updateEquipmentList(params);
+  updateEquipment(params);
 };
 </script>
 
