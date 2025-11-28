@@ -188,8 +188,7 @@
 </template>
 
 <script setup>
-import { toTypedSchema } from '@vee-validate/zod';
-import { z } from 'zod';
+import { useRoute } from 'vue-router';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
@@ -206,53 +205,7 @@ import {
 import { DEPARTMENT_LABELS } from '@/constants/enumLabels';
 import getAccumulatedHours from '@/utils/getAccumulatedHours';
 
-// 유지보수 이력 없음
-const equipmentDetail = {
-  equipmentCode: 'F1-CL1-AU001',
-  equipmentName: '조립설비',
-  equipmentType: 'FEOL',
-  userDepartment: '영업 1팀',
-  userName: '이인화',
-  isActive: true,
-  equipmentPpm: 80.0,
-  empNo: '202510001',
-  operatingDate: '2025-11-13T15:04:50',
-  totalCount: 0.0,
-  defectiveCount: 0.0,
-};
-
-const formSchema = toTypedSchema(
-  z.object({
-    equipmentCode: z.string().optional(),
-    equipmentName: z.string().optional(),
-    equipmentType: z.string().optional(),
-    userName: z.string({ required_error: '사원명은 필수입니다.' }),
-    userDepartment: z.string().optional(),
-    isActive: z.string().optional(),
-    equipmentPpm: z.number().optional(),
-    operatingDate: z.number().optional(),
-    totalCount: z.number().optional(),
-    defectiveCount: z.number().optional(),
-  }),
-);
-
-const onSubmit = values => {
-  const params = {
-    equipmentCode: values.equipmentCode,
-    equipmentName: values.equipmentName,
-    equipmentType: values.equipmentType,
-    userDepartment: values.userDepartment,
-    userName: values.userName,
-    isActive: values.isActive === 'true',
-    equipmentPpm: values.equipmentPpm,
-    operatingDate: values.operatingDate,
-    totalCount: values.totalCount,
-    defectiveCount: values.defectiveCount,
-  };
-
-  console.log(params);
-  // updateFactoryStatus(params);
-};
+const route = useRoute();
 </script>
 
 <style scoped></style>
