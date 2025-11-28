@@ -92,6 +92,11 @@ const routes = [
         component: () => import('@/pages/base-management/process/ProcessList.vue'),
       },
       {
+        path: 'processes/:processCode',
+        name: 'ProcessDetail',
+        component: () => import('@/pages/base-management/process/ProcessDetail.vue'),
+      },
+      {
         path: 'factory-structure',
         name: 'FactoryStructure',
         component: () => import('@/pages/base-management/factory-structure/Index.vue'),

@@ -72,6 +72,7 @@ const onSearch = newFilters => {
   refetch();
 };
 
+// 상세 페이지로 이동.
 const goToDetail = processCode => {
   router.push(`/base-management/processes/${processCode}`);
 };
