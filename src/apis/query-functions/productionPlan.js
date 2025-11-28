@@ -17,8 +17,6 @@ export async function getProductionPlanList(params) {
 
 export async function getProductionPlan(productionPlanId) {
   const { data } = await apiClient.get(`/production-plans/${productionPlanId}`);
-
-  console.log(data.data);
   return data.data;
 }
 

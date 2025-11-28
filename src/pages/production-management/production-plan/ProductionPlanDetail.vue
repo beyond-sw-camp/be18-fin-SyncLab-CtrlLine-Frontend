@@ -8,8 +8,12 @@
       >
         {{ productionPlanDetail.planDocumentNo }}
       </div>
-      <Button variant="outline" size="sm" class="cursor-pointer w-[60px]"> Delete </Button>
+
+      <Button v-if="canEdit" variant="outline" size="sm" class="cursor-pointer w-[60px]">
+        Delete
+      </Button>
       <Button
+        v-if="canEdit"
         type="submit"
         form="productionPlanUpdateForm"
         class="bg-primary text-white hover:bg-primary-600 cursor-pointer w-[60px]"
@@ -377,6 +381,11 @@ const lineDetail = ref({});
 const userStore = useUserStore();
 
 const isUser = computed(() => userStore.userRole === 'USER');
+const canEdit = computed(() => {
+  const status = productionPlanDetail.value?.status;
+  if (status !== 'PENDING' && isUser.value) return false;
+  return true;
+});
 
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });

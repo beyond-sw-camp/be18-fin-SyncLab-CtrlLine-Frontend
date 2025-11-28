@@ -10,7 +10,6 @@ export async function getItemList(params) {
 }
 
 export async function getItem(itemId) {
-  console.log(itemId);
   const { data } = await apiClient.get(`/items/${itemId}`);
   return data.data;
 }
