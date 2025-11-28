@@ -43,11 +43,8 @@
         </ul>
       </div>
 
-      <!-- 코드 표시 영역 -->
-      <Input type="text" :value="value" readonly class="w-28 bg-gray-100 text-sm" />
+      <Input type="text" v-bind="componentField" readonly class="w-28 bg-gray-100 text-sm" />
     </div>
-
-    <!-- 에러메시지는 FormField에서 출력하므로 여기서는 제외 -->
 
     <SelectModal
       :open="showModal"
@@ -70,10 +67,10 @@ import { SearchIcon } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
+import SelectModal from '@/components/auto-complete/SelectModal.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-import SelectModal from './SelectModal.vue';
 
 const props = defineProps({
   label: { type: String, required: true },
@@ -86,21 +83,24 @@ const props = defineProps({
   tableHeaders: { type: Array, required: true },
   emitFullItem: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
-  onItemCleared: { type: Function, default: null },
+  initialText: { type: String, default: '' },
+  componentField: { type: Object, default: () => ({}) },
 });
+
+const emit = defineEmits(['selectedFullItem', 'clear']);
 
 const textInput = ref('');
 const autoItems = ref([]);
 const showModal = ref(false);
 const isComposing = ref(false);
 const isItemSelected = ref(false);
+const autocompleteRef = ref(null);
 
 const { data, filters, refetch } = props.fetchList();
-const emit = defineEmits(['selectedFullItem', 'clear']);
 
-// 입력 이벤트
+// 입력 이벤트 핸들러
 function onInput() {
-  isItemSelected.value = false; // 사용자가 직접 입력하면 선택 상태 해제
+  isItemSelected.value = false;
 
   if (!isComposing.value) {
     performAutoCompleteDebounced();
@@ -109,15 +109,16 @@ function onInput() {
 
 function onCompositionEnd() {
   isComposing.value = false;
-  isItemSelected.value = false; // 한글 입력도 직접 입력으로 간주
+  isItemSelected.value = false;
   performAutoCompleteDebounced();
 }
 
-// 실시간 자동완성 검색
-async function performAutoComplete() {
+const performAutoCompleteDebounced = useDebounceFn(async () => {
+  // 이미 항목을 선택한 상태면 자동완성 안 함
   if (isItemSelected.value) {
     return;
   }
+
   const keyword = textInput.value.trim();
 
   if (!keyword) {
@@ -128,100 +129,111 @@ async function performAutoComplete() {
   filters[props.nameField] = keyword;
   await refetch();
   autoItems.value = data.value?.content ?? [];
-}
+}, 500);
 
-const performAutoCompleteDebounced = useDebounceFn(performAutoComplete, 500);
-
-// 자동완성 항목 선택
+// 항목 선택
 function selectItem(item) {
   isItemSelected.value = true;
   textInput.value = item[props.nameField];
   props.setValue(item[props.keyField]);
 
   if (props.emitFullItem) {
-    emit('selectedFullItem', item); // 전체 객체 전달
+    emit('selectedFullItem', item);
   }
 
   autoItems.value = [];
 }
 
+// 입력 초기화
+function clearInput() {
+  textInput.value = '';
+  autoItems.value = [];
+  isItemSelected.value = false;
+  props.setValue('');
+  emit('clear');
+}
+
 // 엔터키 처리
 async function onEnter() {
-  if (isComposing.value) return; // 한글 입력 중이면 무시
-  if (!textInput.value.trim()) return;
+  if (isComposing.value || !textInput.value.trim()) {
+    return;
+  }
 
-  // 1. 자동완성 결과가 1개면 바로 선택
+  // 1) 자동완성 결과가 1개 → 바로 선택
   if (autoItems.value.length === 1) {
     selectItem(autoItems.value[0]);
     return;
   }
 
-  // 2. 자동완성 결과가 2개 이상이면 모달 오픈
+  // 2) 자동완성 결과가 여러 개 → 모달 열기
   if (autoItems.value.length > 1) {
-    autoItems.value = []; // 자동완성 드롭다운 숨김
-    showModal.value = true;
+    openModal();
     return;
   }
 
-  // 3. 자동완성 결과가 없으면 강제 검색
-  filters[props.nameField] = textInput.value;
+  // 3) 자동완성 결과 없음 → 전체 검색
+  await searchAndHandle();
+}
+
+// 전체 검색 후 결과 처리
+async function searchAndHandle() {
+  filters[props.nameField] = textInput.value.trim();
   await refetch();
 
   const list = data.value?.content ?? [];
 
-  if (list.length === 1) {
-    selectItem(list[0]);
-  } else if (list.length > 1) {
-    showModal.value = true;
-  } else {
+  if (list.length === 0) {
     toast.info('검색 결과가 없습니다.');
+  } else if (list.length === 1) {
+    selectItem(list[0]);
+  } else {
+    openModal();
   }
 }
 
 function openModal() {
-  autoItems.value = []; // 자동완성 드롭다운 숨김
+  autoItems.value = [];
   showModal.value = true;
 }
 
-function onModalSelect(item) {
-  props.setValue(item[props.keyField]);
-  textInput.value = item[props.nameField];
-  isItemSelected.value = true; // 모달에서 선택 시에도 선택 상태로 표시
-
-  if (props.emitFullItem) {
-    emit('selectedFullItem', item); // 전체 객체 전달
-  }
-
+function closeModal() {
   showModal.value = false;
 }
 
-// 모달 열릴 때 자동완성 드롭다운 숨김
-watch(showModal, isOpen => {
-  if (isOpen) {
-    autoItems.value = [];
-  }
-});
+// 모달에서 항목 선택
+function onModalSelect(item) {
+  selectItem(item);
+  closeModal();
+}
 
-// 입력값 초기화 시 코드도 초기화
-watch(textInput, v => {
-  if (!v) {
-    props.setValue('');
-    autoItems.value = [];
-    isItemSelected.value = false; // 입력값 지우면 선택 상태 해제
-    emit('clear');
-  }
-});
-
+// initialText 변경 감지
 watch(
-  () => props.value,
-  newVal => {
-    // 외부에서 값이 비워졌을 때 ('' | null | undefined)
-    if (newVal === '' || newVal === null || newVal === undefined) {
-      textInput.value = '';
-      autoItems.value = [];
-      isItemSelected.value = false;
-      emit('clear'); // 부모 onItemCleared 호출
+  () => props.initialText,
+  (newText) => {
+    if (newText) {
+      textInput.value = newText;
+      isItemSelected.value = true;
     }
   },
+  { immediate: true }
 );
+
+// value 외부 변경 감지
+watch(
+  () => props.value,
+  (newValue) => {
+    const isEmpty = newValue === '' || newValue === null || newValue === undefined;
+
+    if (isEmpty && textInput.value) {
+      clearInput();
+    }
+  }
+);
+
+// textInput 직접 변경 감지
+watch(textInput, (newValue) => {
+  if (!newValue) {
+    clearInput();
+  }
+});
 </script>

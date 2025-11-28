@@ -20,33 +20,33 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >전표번호</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >상태</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >공장명</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >품목명</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >생산담당자</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >영업담당자</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >생산계획수량</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >납기일자</TableHead
-            >
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis"
-              >비고</TableHead
-            >
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              전표번호
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              상태
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              공장명
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              품목명
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              생산담당자
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              영업담당자
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              생산계획수량
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              납기일자
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+              비고
+            </TableHead>
           </TableRow>
         </TableHeader>
 
@@ -95,8 +95,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import useGetProductionPlanList from '@/apis/query-hooks/production-plan/useGetProductionPlanList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -112,27 +112,91 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { STATUS_CLASSES } from '@/constants/productionPlanStatus';
 import FilterTab from '@/pages/production-management/production-plan/FilterTab.vue';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 
+const route = useRoute();
 const router = useRouter();
 
-const currentStatus = ref('TOTAL');
+const currentStatus = ref(route.query.status || 'TOTAL');
+
+const initialFilters = {
+  factoryName: route.query.factoryName  || '',
+  salesManagerName: route.query.salesManagerName || '',
+  productionManagerName: route.query.productionManagerName|| '',
+  itemName: route.query.itemName || '',
+  dueDate: route.query.dueDate ,
+  startTime: route.query.startTime  || null,
+  endTime: route.query.endTime || null,
+};
+
+const defaultFilters = {
+  factoryName: '',
+  salesManagerName: '',
+  productionManagerName: '',
+  itemName: '',
+  dueDate: null,
+  startTime: null,
+  endTime: null,
+};
 
 const {
   data: productionPlanList,
-  refetch,
   page,
   filters,
-} = useGetProductionPlanList(currentStatus);
+} = useGetProductionPlanList(currentStatus, initialFilters);
 
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
   page.value = 1; // 첫 페이지 부터 조회
-  refetch();
 };
 
 const goToDetail = productionPlanId => {
   router.push(`/production-management/production-plans/${productionPlanId}`);
 };
+
+if (route.query.page) {
+  const p = Number(route.query.page);
+  if (!Number.isNaN(p) && p > 0) {
+    page.value = p;
+  }
+}
+
+const syncQuery = () => {
+  const query = buildQueryObject({
+    status: currentStatus.value,
+    page: page.value,
+    ...filters,
+  });
+
+  router.replace({ query });
+};
+
+onMounted(() => {
+  const navEntries = performance.getEntriesByType?.('navigation');
+  const navType = navEntries?.[0]?.type;
+
+  if (navType === 'reload') {
+    // 내부 filter state 초기화
+    Object.assign(filters, defaultFilters);
+
+    syncQuery();
+  }
+})
+
+// page / status 변경 시
+watch([page, currentStatus], () => {
+  syncQuery();
+});
+
+// filters 변경 시
+watch(
+  () => ({ ...filters }),
+  () => {
+    syncQuery();
+  },
+  { deep: true },
+);
+
 
 watch(currentStatus, () => {
   page.value = 1; // 첫 페이지로 이동

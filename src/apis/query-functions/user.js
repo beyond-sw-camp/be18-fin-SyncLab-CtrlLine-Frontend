@@ -1,4 +1,5 @@
 import apiClient from '@/apis/query-functions/apiClient';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 
 export async function createUser(params) {
   const { data } = await apiClient.post(`/users`, params);
@@ -6,20 +7,10 @@ export async function createUser(params) {
 }
 
 export async function getUserList(params) {
-  const query = new URLSearchParams();
+  const queryObj = buildQueryObject(params);
+  const search = new URLSearchParams(queryObj);
 
-  for (const [key, value] of Object.entries(params)) {
-    if (key === 'sort' && Array.isArray(value)) {
-      // sort 배열 그대로 append
-      value.forEach(sortItem => {
-        query.append('sort', sortItem);
-      });
-    } else if (value !== undefined && value !== null && value !== '') {
-      query.append(key, value);
-    }
-  }
-
-  const { data } = await apiClient.get(`/users?${query.toString()}`);
+  const { data } = await apiClient.get(`/users?${search.toString()}`);
   return data.data;
 }
 

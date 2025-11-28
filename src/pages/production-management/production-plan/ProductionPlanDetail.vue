@@ -2,7 +2,10 @@
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 상세 조회</h3>
     <div class="flex gap-2">
-      <div class="flex items-center text-xs font-medium bg-gray-100 px-2 py-1 rounded-xl">
+      <div
+        class="flex items-center text-xs font-medium bg-gray-100 px-2 py-1 rounded-xl"
+        v-if="productionPlanDetail"
+      >
         {{ productionPlanDetail.planDocumentNo }}
       </div>
       <Button variant="outline" size="sm" class="cursor-pointer w-[60px]"> Delete </Button>
@@ -18,207 +21,300 @@
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row">
-    <Form
+    <form
       v-if="productionPlanDetail"
       id="productionPlanUpdateForm"
-      :validation-schema="formSchema"
       @submit="onSubmit"
       class="flex-1 flex flex-col gap-2"
-      :initial-values="{
-        factoryCode: productionPlanDetail.factoryCode,
-        dueDate: productionPlanDetail.dueDate,
-        productionManagerNo: productionPlanDetail.productionManagerNo,
-        itemCode: productionPlanDetail.itemCode,
-        startTime: productionPlanDetail.startTime.slice(0, 16),
-        salesManagerNo: productionPlanDetail.salesManagerNo,
-        lineCode: productionPlanDetail.lineCode,
-        lineName: productionPlanDetail.lineName,
-        endTime: productionPlanDetail.endTime,
-        status: productionPlanDetail.status,
-        remark: productionPlanDetail.remark,
-        plannedQty: productionPlanDetail.plannedQty,
-      }"
     >
       <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <FormField v-slot="{ componentField, errorMessage }" name="factoryCode">
-          <FormItem>
-            <FormLabel>공장명</FormLabel>
-            <FormControl>
-              <Select v-bind="componentField">
-                <SelectTrigger class="custom-input w-full">
-                  <SelectValue placeholder="공장을 선택해주세요." />
-                </SelectTrigger>
+        <div class="order-1 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="factoryCode">
+            <FormItem>
+              <FormLabel>공장명</FormLabel>
+              <FormControl>
+                <Select v-bind="componentField" @update:modelValue="onFactorySelected">
+                  <SelectTrigger class="w-full truncate min-w-0">
+                    <SelectValue placeholder="공장을 선택해주세요." />
+                  </SelectTrigger>
 
-                <SelectContent>
-                  <SelectItem
-                    v-for="factory in factoryList?.content ?? []"
-                    :key="factory.factoryCode"
-                    :value="factory.factoryCode"
-                  >
-                    {{ factory.factoryName }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="factory in factoryList?.content ?? []"
+                      :key="factory.factoryCode"
+                      :value="factory.factoryCode"
+                      :data-factory-id="factory.factoryId"
+                    >
+                      {{ factory.factoryName }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="dueDate">
-          <FormItem>
-            <FormLabel>납기일자</FormLabel>
-            <FormControl>
-              <Input type="date" v-bind="componentField" autocomplete="due-date" />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <FormField name="productionManagerNo" v-slot="{ componentField, errorMessage }">
-          <FormItem>
-            <FormLabel>생산담당자</FormLabel>
-            <FormControl>
-              <div class="flex gap-2 items-center">
+        <div class="order-4 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="dueDate">
+            <FormItem>
+              <FormLabel>납기일자</FormLabel>
+              <FormControl class="w-full truncate min-w-0">
                 <Input
-                  type="text"
-                  v-model="productionPlanDetail.productionManagerName"
-                  placeholder="생산담당자를 입력하세요"
-                  class="flex-1"
+                  type="date"
+                  v-bind="componentField"
+                  autocomplete="due-date"
+                  class="text-sm"
                 />
-                <Input type="text" v-bind="componentField" class="w-28 bg-gray-100" readonly />
-              </div>
-            </FormControl>
-            <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-          </FormItem>
-        </FormField>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
 
-        <FormField name="itemCode" v-slot="{ componentField, errorMessage }">
-          <FormItem>
-            <FormLabel>품목명</FormLabel>
-            <FormControl>
-              <div class="flex gap-2 items-center">
-                <Input
-                  type="text"
-                  v-model="productionPlanDetail.itemName"
-                  placeholder="품목명을 입력하세요"
-                  class="flex-1"
-                />
-                <Input type="text" v-bind="componentField" class="w-28 bg-gray-100" readonly />
-              </div>
-            </FormControl>
-            <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-          </FormItem>
-        </FormField>
+        <div class="order-7 md:order-0">
+          <FormField name="productionManagerNo" v-slot="{ componentField, errorMessage }">
+            <FormItem>
+              <FormLabel>
+                생산담당자
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>라인 담당자가 생산담당자로 자동 지정됩니다.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </FormLabel>
+              <FormControl class="w-full truncate min-w-0">
+                <div class="flex gap-2 items-center">
+                  <Input
+                    type="text"
+                    placeholder="생산담당자는 자동 지정됩니다."
+                    readonly
+                    v-model="lineDetail.userName"
+                    class="text-sm"
+                  />
+                  <Input
+                    type="text"
+                    v-bind="componentField"
+                    class="max-w-20 bg-gray-100 text-sm"
+                    readonly
+                  />
+                </div>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="startTime">
-          <FormItem>
-            <FormLabel>생산시작시간</FormLabel>
-            <FormControl>
-              <Input type="datetime-local" v-bind="componentField" readonly />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <FormField name="salesManagerNo" v-slot="{ componentField, errorMessage }">
-          <FormItem>
-            <FormLabel>영업담당자</FormLabel>
-            <FormControl>
-              <div class="flex gap-2 items-center">
-                <Input
-                  type="text"
-                  v-model="productionPlanDetail.salesManagerName"
-                  placeholder="영업담당자를 입력하세요"
-                  class="flex-1"
-                />
-                <Input type="text" v-bind="componentField" class="w-28 bg-gray-100" readonly />
-              </div>
-            </FormControl>
-            <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-          </FormItem>
-        </FormField>
-
-        <FormField v-slot="{ componentField, errorMessage }" name="lineCode">
-          <FormItem>
-            <FormLabel>라인명</FormLabel>
-            <FormControl>
-              <Select v-bind="componentField">
-                <SelectTrigger class="custom-input w-full">
-                  <SelectValue placeholder="라인을 선택해주세요." />
-                </SelectTrigger>
-                <!-- 라인으로 변경 필요 -->
-                <SelectContent>
-                  <SelectItem
-                    v-for="factory in factoryList?.content ?? []"
-                    :key="factory.factoryCode"
-                    :value="factory.factoryCode"
-                  >
-                    {{ factory.factoryName }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <FormField v-slot="{ componentField, errorMessage }" name="endTime">
-          <FormItem>
-            <FormLabel>생산종료시간</FormLabel>
-            <FormControl>
-              <Input type="datetime-local" v-bind="componentField" disabled />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <FormField v-slot="{ componentField, errorMessage }" name="status">
-          <FormItem>
-            <FormLabel>상태</FormLabel>
-            <FormControl>
-              <Select v-bind="componentField">
-                <SelectTrigger class="custom-input w-full">
-                  <SelectValue placeholder="상태를 선택하세요." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem
-                    v-for="(label, value) in PRODUCTION_PLAN_STATUS"
-                    :key="value"
+        <div class="order-2 md:order-0">
+          <FormField name="itemCode" v-slot="{ value, componentField, setValue, errorMessage }">
+            <FormItem>
+              <FormLabel>품목명</FormLabel>
+              <FormControl class="w-full min-w-0">
+                <div v-if="selectedFactoryId">
+                  <AutoCompleteSelect
+                    :key="`itemCode-${productionPlanDetail?.itemCode}`"
+                    label="품목명"
                     :value="value"
-                  >
-                    {{ label }}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+                    :componentField="componentField"
+                    :setValue="setValue"
+                    :fetchList="() => useGetItemList({ isActive: true })"
+                    keyField="itemCode"
+                    nameField="itemName"
+                    :fields="[
+                      'itemCode',
+                      'itemName',
+                      'itemSpecification',
+                      'itemUnit',
+                      'itemStatus',
+                      'isActive',
+                    ]"
+                    :tableHeaders="['품목코드', '품목명', '규격', '단위', '품목구분', '사용여부']"
+                    :emitFullItem="true"
+                    @selectedFullItem="onItemSelected"
+                    @clear="onItemCleared"
+                    :initialText="productionPlanDetail.itemName"
+                  />
+                </div>
 
-        <div class="col-span-3">
+                <span
+                  v-else
+                  class="h-9 flex items-center px-3 rounded-md border bg-gray-100 text-gray-400 text-sm"
+                >
+                  공장을 먼저 선택해주세요.
+                </span>
+              </FormControl>
+              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+            </FormItem>
+          </FormField>
+        </div>
+
+        <div class="order-5 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="startTime">
+            <FormItem class="w-full">
+              <FormLabel>생산시작시간</FormLabel>
+              <FormControl>
+                <Input type="datetime-local" v-bind="componentField" class="text-sm" readonly />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+
+        <div class="order-8 md:order-0">
+          <FormField
+            name="salesManagerNo"
+            v-slot="{ value, componentField, setValue, errorMessage }"
+          >
+            <FormItem class="w-full">
+              <FormLabel>영업담당자</FormLabel>
+              <FormControl class="w-full min-w-0">
+                <AutoCompleteSelect
+                  :key="`salesManagerNo-${productionPlanDetail?.salesManagerNo}`"
+                  label="영업담당자"
+                  :value="value"
+                  :componentField="componentField"
+                  :setValue="setValue"
+                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                  keyField="empNo"
+                  nameField="userName"
+                  :fields="[
+                    'empNo',
+                    'userName',
+                    'userEmail',
+                    'userDepartment',
+                    'userPhoneNumber',
+                    'userStatus',
+                    'userRole',
+                  ]"
+                  :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                  :initialText="productionPlanDetail.salesManagerName"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+
+        <div class="order-3 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="lineCode">
+            <FormItem>
+              <FormLabel>라인명</FormLabel>
+              <FormControl>
+                <Select
+                  v-if="selectedFactoryId && selectedItemId"
+                  v-bind="componentField"
+                  :key="`factory-${selectedFactoryId}-item-${selectedItemId}`"
+                  @update:modelValue="onLineSelected"
+                >
+                  <SelectTrigger class="w-full truncate min-w-0">
+                    <SelectValue placeholder="라인을 선택해주세요." />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <div
+                      v-if="(lineList?.content ?? []).length === 0"
+                      class="px-3 py-2 text-sm text-gray-500 select-none"
+                    >
+                      라인이 존재하지 않습니다.
+                    </div>
+
+                    <SelectItem
+                      v-for="line in lineList?.content ?? []"
+                      :key="line.lineCode"
+                      :value="line.lineCode"
+                    >
+                      {{ line.lineName }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <span
+                  v-else
+                  class="h-9 flex items-center px-3 rounded-md border bg-gray-100 text-gray-400 text-sm"
+                >
+                  품목을 먼저 선택해주세요.
+                </span>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+
+        <div class="order-6 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="endTime">
+            <FormItem>
+              <FormLabel>생산종료시간</FormLabel>
+              <FormControl class="w-full">
+                <Input type="datetime-local" v-bind="componentField" disabled class="text-sm" />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+
+        <div class="order-9 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="status">
+            <FormItem>
+              <FormLabel>상태</FormLabel>
+              <FormControl class="w-full">
+                <Select v-bind="componentField">
+                  <SelectTrigger
+                    :class="['custom-input w-full', isUser ? 'pointer-events-none' : '']"
+                  >
+                    <SelectValue placeholder="상태를 선택하세요." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="(label, value) in PRODUCTION_PLAN_STATUS"
+                      :key="value"
+                      :value="value"
+                    >
+                      {{ label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+
+        <div class="order-10 md:order-0 col-span-1 md:col-span-3">
           <FormField v-slot="{ componentField, errorMessage }" name="remark">
             <FormItem>
               <FormLabel>비고</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" autocomplete="remark" />
+              <FormControl class="w-full">
+                <Input type="text" v-bind="componentField" autocomplete="remark" class="text-sm" />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
           </FormField>
         </div>
       </div>
-      <ItemTable :itemDetail="productionPlanDetail" />
-    </Form>
+      <ItemTable :itemDetail="itemDetail" />
+    </form>
   </div>
 </template>
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
+import { InfoIcon } from 'lucide-vue-next';
+import { useForm } from 'vee-validate';
+import { computed, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { z } from 'zod';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
+import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
+import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
+import useGetProductionPlan from '@/apis/query-hooks/production-plan/useGetProductionPlan';
+import useUpdateProductionPlan from '@/apis/query-hooks/production-plan/useUpdateProductionPlan';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
+import AutoCompleteSelect from '@/components/auto-complete/AutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -227,66 +323,162 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
-
-const productionPlanDetail = {
-  id: 8,
-  planDocumentNo: '2025/11/18-1',
-  dueDate: '2000-01-01',
-  status: 'PENDING',
-  salesManagerNo: '202510001',
-  salesManagerName: '이인화',
-  productionManagerNo: '202510002',
-  productionManagerName: '서현원',
-  startTime: '2025-11-18T13:30:27',
-  endTime: '2025-11-18T14:20:00',
-  factoryCode: 'F0001',
-  factoryName: '제1공장',
-  itemCode: 'CELL-C-21700-NCM-5.0',
-  itemName: '원형 셀 21700 5.0Ah (NCM)',
-  plannedQty: 1000000.0,
-  lineCode: 'CL0001',
-  lineName: '원형전지생산라인',
-  remark: '생산 일정 조정',
-};
+import { useUserStore } from '@/stores/useUserStore';
 
 const formSchema = toTypedSchema(
   z.object({
-    factoryCode: z.string({ required_error: '공장명은 필수입니다.' }),
+    factoryCode: z
+      .string({ required_error: '공장명은 필수입니다.' })
+      .min(1, '공장명은 필수입니다.'),
     dueDate: z.string({ required_error: '납기일자는 필수입니다.' }),
-    productionManagerNo: z.string({ required_error: '생산담당자는 필수입니다.' }),
-    itemCode: z.string({ required_error: '품목명은 필수입니다.' }),
-    startTime: z.string({ required_error: '생산시작시간은 필수입니다.' }),
+    productionManagerNo: z
+      .string({ required_error: '생산담당자는 필수입니다.' })
+      .min(1, '생산담당자는 필수입니다.'),
+    itemCode: z.string({ required_error: '품목명은 필수입니다.' }).min(1, '품목명은 필수입니다.'),
     salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }),
-    lineCode: z.string({ required_error: '라인명은 필수입니다.' }),
-    endTime: z.string().optional(),
+    lineCode: z.string({ required_error: '라인명은 필수입니다.' }).min(1, '라인명은 필수입니다.'),
     status: z.string({ required_error: '상태는 필수입니다.' }),
     plannedQty: z.coerce
       .number({ required_error: '생산계획수량은 필수입니다.' })
       .positive('생산계획수량은 1 이상이어야 합니다.'),
+    remark: z.string().optional(),
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
   }),
 );
 
-const { data: factoryList } = useGetFactoryList();
+const route = useRoute();
+const { data: productionPlanDetail } = useGetProductionPlan(route.params.productionPlanId);
 
-const onSubmit = values => {
+const form = useForm({
+  validationSchema: formSchema,
+  initialValues: {
+    factoryCode: productionPlanDetail.value?.factoryCode,
+    dueDate: productionPlanDetail.value?.dueDate,
+    productionManagerNo: productionPlanDetail.value?.productionManagerNo,
+    itemCode: productionPlanDetail.value?.itemCode,
+    salesManagerNo: productionPlanDetail.value?.salesManagerNo,
+    lineCode: productionPlanDetail.value?.lineCode,
+    status: productionPlanDetail.value?.status,
+    plannedQty: productionPlanDetail.value?.plannedQty,
+    startTime: productionPlanDetail.value?.startTime,
+    endTime: productionPlanDetail.value?.endTime,
+    remark: productionPlanDetail.value?.remark,
+  },
+});
+
+const selectedFactoryId = ref(null);
+const selectedItemId = ref(null);
+const itemDetail = ref({});
+const lineDetail = ref({});
+const userStore = useUserStore();
+
+const isUser = computed(() => userStore.userRole === 'USER');
+
+const { data: factoryList } = useGetFactoryList();
+const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
+const { mutate: updateProductionPlan } = useUpdateProductionPlan(route.params.productionPlanId);
+
+function onFactorySelected(factoryCode) {
+  const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
+  selectedFactoryId.value = selected?.factoryId ?? null;
+
+  selectedItemId.value = null;
+  form.setFieldValue('itemCode', '', false);
+  form.setFieldValue('lineCode', '', false);
+  form.setFieldValue('productionManagerNo', '', false);
+  itemDetail.value = {};
+  lineDetail.value = {};
+}
+
+function onItemSelected(item) {
+  selectedItemId.value = item.id;
+  form.setFieldValue('lineCode', '', false);
+  itemDetail.value = item;
+}
+
+function onItemCleared() {
+  selectedItemId.value = null;
+  form.setFieldValue('lineCode', '', false);
+  form.setFieldValue('productionManagerNo', '', false);
+  itemDetail.value = {};
+  lineDetail.value = {};
+}
+
+function onLineSelected(lineCode) {
+  const selected = lineList.value?.content?.find(f => f.lineCode === lineCode);
+
+  if (selected) {
+    lineDetail.value = selected;
+    form.setFieldValue('productionManagerNo', selected.empNo, false);
+  } else {
+    lineDetail.value = {};
+    form.setFieldValue('productionManagerNo', '', false);
+  }
+}
+
+const onSubmit = form.handleSubmit(values => {
   const params = {
-    factoryCode: values.factoryCode,
-    dueDate: values.itemName,
-    productionManagerNo: values.productionManagerNo,
-    itemCode: values.itemCode,
-    startTime: values.startTime,
-    salesManagerNo: values.salesManagerNo,
-    lineCode: values.lineCode,
     status: values.status,
-    remark: values.remark,
+    salesManagerNo: values.salesManagerNo,
+    productionManagerNo: values.productionManagerNo,
+    startTime: values.startTime,
     plannedQty: values.plannedQty,
+    remark: values.remark,
+    factoryCode: values.factoryCode,
+    itemCode: values.itemCode,
+    lineCode: values.lineCode,
+    dueDate: values.dueDate,
   };
 
-  console.log(params);
-  // updateFactoryStatus(params);
-};
+  updateProductionPlan(params);
+});
+
+watch(
+  () => productionPlanDetail.value,
+  val => {
+    if (!val) return;
+
+    form.setValues({
+      factoryCode: val.factoryCode,
+      dueDate: val.dueDate,
+      productionManagerNo: val.productionManagerNo,
+      itemCode: val.itemCode,
+      salesManagerNo: val.salesManagerNo,
+      lineCode: val.lineCode,
+      status: val.status,
+      plannedQty: val.plannedQty,
+      startTime: val.startTime,
+      endTime: val.endTime,
+      remark: val.remark,
+    });
+
+    // 실제 백엔드 응답으로 변경 필요
+    selectedFactoryId.value = val.factoryId;
+    selectedItemId.value = val.itemId;
+
+    itemDetail.value = {
+      itemCode: val.itemCode,
+      itemName: val.itemName,
+      itemSpecification: val.itemSpecification, // 상세 응답에 있으면 그대로
+      itemUnit: val.itemUnit, // 상세 응답에 있으면 그대로
+    };
+
+    lineDetail.value = {
+      lineCode: val.lineCode,
+      lineName: val.lineName,
+      userName: val.productionManagerName, // 생산담당자명 표시
+      empNo: val.productionManagerNo,
+    };
+
+    form.setFieldValue('itemCode', val.itemCode);
+    form.setFieldValue('salesManagerNo', val.salesManagerNo);
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped></style>
