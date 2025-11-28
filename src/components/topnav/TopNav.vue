@@ -43,7 +43,7 @@
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Button class="cursor-pointer" @click="logout">
+            <Button class="cursor-pointer" @click="logoutAndClear">
               <LogOutIcon />
             </Button>
           </NavigationMenuItem>
@@ -77,13 +77,13 @@ import {
 } from '@/components/ui/sheet';
 import { useUserStore } from '@/stores/useUserStore';
 
-const { mutate: logoutTest } = useLogout();
+const { mutate: logout } = useLogout();
 
 const userStore = useUserStore();
 const queryClient = useQueryClient();
 
-const logout = () => {
-  logoutTest();
+const logoutAndClear = () => {
+  logout();
   queryClient.clear();
 };
 </script>
