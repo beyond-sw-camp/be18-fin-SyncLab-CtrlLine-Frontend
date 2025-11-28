@@ -10,13 +10,15 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center"><Checkbox /></TableHead>
-            <TableHead class="text-center">설비코드</TableHead>
-            <TableHead class="text-center">설비명</TableHead>
-            <TableHead class="text-center">설비유형</TableHead>
-            <TableHead class="text-center">담당부서</TableHead>
-            <TableHead class="text-center">담당자</TableHead>
-            <TableHead class="text-center">사용여부</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              <Checkbox />
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">설비코드</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">설비명</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">설비유형</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">담당부서</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">담당자</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -46,7 +48,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ equipment.userName }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
                 class="w-[50px] mx-auto"
                 :class="

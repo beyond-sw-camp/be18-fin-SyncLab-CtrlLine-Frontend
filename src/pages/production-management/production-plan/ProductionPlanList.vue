@@ -30,7 +30,7 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
@@ -38,33 +38,21 @@
                 class="size-4 border-[1.5px]"
               />
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              전표번호
-            </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              상태
-            </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              공장명
-            </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              품목명
-            </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 전표번호 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 상태 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장명 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목명 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
               생산담당자
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
               영업담당자
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
               생산계획수량
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              납기일자
-            </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden text-ellipsis">
-              비고
-            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 납기일자 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 비고 </TableHead>
           </TableRow>
         </TableHeader>
 
@@ -91,7 +79,7 @@
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ productionPlan.documentNo }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge class="w-[87px]" :class="STATUS_CLASSES[productionPlan.status]">
                 {{ productionPlan.status }}
               </Badge>
