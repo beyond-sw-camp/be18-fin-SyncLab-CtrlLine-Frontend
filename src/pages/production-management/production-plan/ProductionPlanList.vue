@@ -141,7 +141,6 @@ import { buildQueryObject } from '@/utils/buildQueryObject';
 const route = useRoute();
 const router = useRouter();
 
-const disableSync = ref(false);
 const currentStatus = ref(route.query.status || 'TOTAL');
 
 const initialFilters = {
@@ -154,16 +153,6 @@ const initialFilters = {
   endTime: route.query.endTime || null,
 };
 
-const defaultFilters = {
-  factoryName: '',
-  salesManagerName: '',
-  productionManagerName: '',
-  itemName: '',
-  dueDate: null,
-  startTime: null,
-  endTime: null,
-};
-
 const {
   data: productionPlanList,
   page,
@@ -172,6 +161,7 @@ const {
 
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
+  syncQuery();
   page.value = 1; // 첫 페이지 부터 조회
 };
 
@@ -213,42 +203,17 @@ const toggleRow = (checked, row) => {
   }
 };
 
-if (route.query.page) {
-  const p = Number(route.query.page);
-  if (!Number.isNaN(p) && p > 0) {
-    page.value = p;
-  }
-}
-
 const syncQuery = () => {
   const query = buildQueryObject({
     status: currentStatus.value,
-    page: page.value,
     ...filters,
+    page: page.value,
   });
 
   router.replace({ query });
 };
 
-onMounted(() => {
-  const navEntries = performance.getEntriesByType?.('navigation');
-  // @ts-ignore
-  const navType = navEntries?.[0]?.type;
-
-  if (navType === 'reload') {
-    // 내부 filter state 초기화
-    Object.assign(filters, defaultFilters);
-
-    syncQuery();
-  }
-});
-
-// page / status 변경 시
-watch([page, currentStatus], () => {
-  if (disableSync.value) return;
-});
-
-// filters 변경 시
+// 필터 변경 시
 watch(
   () => ({ ...filters }),
   () => {
@@ -258,8 +223,30 @@ watch(
 );
 
 watch(currentStatus, () => {
-  page.value = 1; // 첫 페이지로 이동
+  page.value = 1; // 상태 바뀌면 1페이지로
+  syncQuery();
 });
+
+watch(page, () => {
+  syncQuery();
+});
+
+// 뒤로가기 시 필터 동기화
+watch(
+  () => route.query,
+  newQuery => {
+    currentStatus.value = newQuery.status ?? 'TOTAL';
+    page.value = Number(newQuery.page ?? 1);
+
+    filters.factoryName = newQuery.factoryName ?? null;
+    filters.salesManagerName = newQuery.salesManagerName ?? '';
+    filters.productionManagerName = newQuery.productionManagerName ?? '';
+    filters.itemName = newQuery.itemName ?? '';
+    filters.dueDate = newQuery.dueDate ?? null;
+    filters.startTime = newQuery.startTime ?? null;
+    filters.endTime = newQuery.endTime ?? null;
+  },
+);
 
 // 페이지, 필터링, 상태 변경 시 체크 해제
 watch([page, filters, currentStatus], () => {

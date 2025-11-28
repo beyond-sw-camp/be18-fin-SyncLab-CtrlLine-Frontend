@@ -65,7 +65,7 @@
 </template>
 
 <script setup>
-import { computed, reactive } from 'vue';
+import { computed, reactive, watch } from 'vue';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import FilterInput from '@/components/filter/FilterInput.vue';
@@ -79,17 +79,29 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
+const props = defineProps({
+  filters: { type: Object, required: true },
+});
+
 const emit = defineEmits(['search']);
 
 const localFilters = reactive({
-  factoryName: null,
-  itemName: '',
-  productionManagerName: '',
-  salesManagerName: '',
-  dueDate: null,
-  startTime: null,
-  endTime: null,
+  factoryName: props.filters.factoryName ?? null,
+  itemName: props.filters.itemName ?? '',
+  productionManagerName: props.filters.productionManagerName ?? '',
+  salesManagerName: props.filters.salesManagerName ?? '',
+  dueDate: props.filters.dueDate ?? null,
+  startTime: props.filters.startTime ?? null,
+  endTime: props.filters.endTime ?? null,
 });
+
+watch(
+  () => props.filters,
+  newVal => {
+    Object.assign(localFilters, newVal);
+  },
+  { deep: true },
+);
 
 const applyFilters = () => {
   emit('search', { ...localFilters });
