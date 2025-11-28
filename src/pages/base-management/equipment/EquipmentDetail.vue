@@ -8,7 +8,6 @@
       v-if="equipmentDetail"
       id="equipmentUpdateForm"
       @submit="onSubmit"
-      :validation-schema="formSchema"
       :initial-values="{
         equipmentCode: equipmentDetail.equipmentCode,
         equipmentName: equipmentDetail.equipmentName,
@@ -190,6 +189,8 @@
 <script setup>
 import { useRoute } from 'vue-router';
 
+import useGetEquipment from '@/apis/query-hooks/equipment/useGetEquipment';
+import useUpdateEquipment from '@/apis/query-hooks/equipment/useUpdateEquipment.js';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -206,6 +207,17 @@ import { DEPARTMENT_LABELS } from '@/constants/enumLabels';
 import getAccumulatedHours from '@/utils/getAccumulatedHours';
 
 const route = useRoute();
+const { data: equipmentDetail } = useGetEquipment(route.params.equipmentCode);
+const { mutate: updateEquipment } = useUpdateEquipment();
+
+const onSubmit = values => {
+  const params = {
+    equipmentCode: values.equipmentCode,
+    userName: values.userName,
+    isActive: values.isActive === 'true',
+  };
+  updateEquipment(params);
+};
 </script>
 
 <style scoped></style>

@@ -27,5 +27,5 @@ export async function getEquipment(equipmentCode) {
 // 설비 업데이트 (담당자와 사용여부 변경 가능)
 export async function updateEquipment(equipmentCode, params) {
   const { data } = await apiClient.patch(`/equipments/${equipmentCode}`, params);
-  return data.data;
+  return data;
 }

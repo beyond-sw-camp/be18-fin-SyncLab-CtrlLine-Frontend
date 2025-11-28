@@ -82,7 +82,7 @@ import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
 import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
-import useUpdateEquipmentList from '@/apis/query-hooks/equipment/useUpdateEquipmentList';
+import useUpdateEquipment from '@/apis/query-hooks/equipment/useUpdateEquipment';
 import BasePagination from '@/components/pagination/BasePagination.vue';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -126,7 +126,7 @@ watch(
   { immediate: true },
 );
 
-const { updateEquipmentList } = useUpdateEquipmentList();
+const { updateEquipment } = useUpdateEquipment();
 
 // 변경된 상태를 DB에 저장
 const saveChanges = async () => {
@@ -144,7 +144,7 @@ const saveChanges = async () => {
   }
 
   try {
-    await updateEquipmentList(updated);
+    await updateEquipment(updated);
     toast.success('저장되었습니다.');
     refetch();
   } catch (err) {
