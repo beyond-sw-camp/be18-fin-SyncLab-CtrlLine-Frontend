@@ -77,7 +77,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -93,7 +93,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 
+const route = useRoute();
 const router = useRouter();
 
 // 검색 처리 함수
@@ -122,11 +124,28 @@ watch(
   },
   { immediate: true },
 );
+
+// 페이지 쿼리 반영
+if (route.query.page) {
+  const p = Number(route.query.page);
+  if (!Number.isNaN(p) && p > 0) {
+    page.value = p;
+  }
+}
+
+const syncQuery = () => {
+  const query = buildQueryObject({
+    page: page.value,
+    ...filters,
+  });
+
+  router.replace({ query });
+};
+
+// page / status 변경 시
+watch(page, () => {
+  syncQuery();
+});
 </script>
 
-<style scoped>
-.table-checkbox-cell {
-  width: 40px;
-  text-align: center;
-}
-</style>
+<style scoped></style>

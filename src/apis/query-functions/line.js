@@ -1,10 +1,31 @@
 import apiClient from '@/apis/query-functions/apiClient';
-import { buildQueryObject } from '@/utils/buildQueryObject';
 
+// 라인 목록 조회
 export async function getLineList(params) {
-  const queryObj = buildQueryObject(params);
-  const search = new URLSearchParams(queryObj);
+  const query = new URLSearchParams();
 
-  const { data } = await apiClient.get(`/lines?${search.toString()}`);
+  for (const [key, value] of Object.entries(params)) {
+    if (key === 'sort' && Array.isArray(value)) {
+      value.forEach(sortItem => {
+        query.append('sort', sortItem.sortBy);
+      });
+    } else if (value !== undefined && value !== null && value !== '') {
+      query.append(key, value);
+    }
+  }
+
+  const { data } = await apiClient.get(`/lines?${query.toString()}`);
   return data.data;
+}
+
+// 라인 상세조회
+export async function getLine(lineCode) {
+  const { data } = await apiClient.get(`/lines/${lineCode}`);
+  return data.data;
+}
+
+// 라인 업데이트
+export async function updateLine(lineCode, params) {
+  const { data } = await apiClient.patch(`/lines/${lineCode}`, params);
+  return data;
 }

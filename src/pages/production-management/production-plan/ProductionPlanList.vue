@@ -232,6 +232,7 @@ const syncQuery = () => {
 
 onMounted(() => {
   const navEntries = performance.getEntriesByType?.('navigation');
+  // @ts-ignore
   const navType = navEntries?.[0]?.type;
 
   if (navType === 'reload') {
