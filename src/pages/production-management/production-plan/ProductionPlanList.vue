@@ -259,6 +259,11 @@ watch(
 watch(currentStatus, () => {
   page.value = 1; // 첫 페이지로 이동
 });
+
+// 페이지, 필터링, 상태 변경 시 체크 해제
+watch([page, filters, currentStatus], () => {
+  onReset();
+});
 </script>
 
 <style scoped></style>
