@@ -148,7 +148,7 @@ const initialFilters = {
   salesManagerName: route.query.salesManagerName || '',
   productionManagerName: route.query.productionManagerName || '',
   itemName: route.query.itemName || '',
-  dueDate: route.query.dueDate,
+  dueDate: route.query.dueDate || null,
   startTime: route.query.startTime || null,
   endTime: route.query.endTime || null,
 };

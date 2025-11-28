@@ -22,15 +22,15 @@
           </TableRow>
         </TableHeader>
 
-        <TableBody v-if="editableList && editableList.length">
+        <TableBody v-if="equipmentList && equipmentList.content">
           <TableRow
-            v-for="(equipment, index) in editableList"
+            v-for="(equipment, index) in equipmentList.content"
             :key="index"
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(equipment.equipmentCode)"
           >
             <!-- 왼쪽: isActive 편집 토글 -->
-            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap " @click.stop>
+            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
               <Checkbox :checked="equipment.isActive" class="size-4 border-[1.5px]" />
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
@@ -98,11 +98,20 @@ import { buildQueryObject } from '@/utils/buildQueryObject';
 const route = useRoute();
 const router = useRouter();
 
+const initialFilters = {
+  equipmentName: route.query.equipmentName || '',
+  equipmentType: route.query.equipmentType || null,
+  userName: route.query.userName || '',
+  userDepartment: route.query.userDepartment || null,
+};
+
+const { data: equipmentList, page, filters } = useGetEquipmentList(initialFilters);
+
 // 검색 처리 함수
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
+  syncQuery();
   page.value = 1;
-  refetch();
 };
 
 // 상세 페이지로 이동
@@ -110,42 +119,38 @@ const goToDetail = equipmentCode => {
   router.push(`/base-management/equipments/${equipmentCode}`);
 };
 
-const { data: equipmentList, refetch, page, filters } = useGetEquipmentList();
-
-const editableList = ref([]);
-watch(
-  equipmentList,
-  val => {
-    const list = val?.content || [];
-    editableList.value = list.map(equipmentStatus => ({
-      ...equipmentStatus,
-      originalIsActive: equipmentStatus.isActive,
-    })); // 설비 상태의 초기값 저장.
-  },
-  { immediate: true },
-);
-
-// 페이지 쿼리 반영
-if (route.query.page) {
-  const p = Number(route.query.page);
-  if (!Number.isNaN(p) && p > 0) {
-    page.value = p;
-  }
-}
-
 const syncQuery = () => {
   const query = buildQueryObject({
-    page: page.value,
     ...filters,
+    page: page.value,
   });
 
   router.replace({ query });
 };
 
-// page / status 변경 시
+watch(
+  () => ({ ...filters }),
+  () => {
+    syncQuery();
+  },
+  { deep: true },
+);
+
 watch(page, () => {
   syncQuery();
 });
+
+watch(
+  () => route.query,
+  newQuery => {
+    page.value = Number(newQuery.page ?? 1);
+
+    filters.equipmentName = newQuery.equipmentName ?? '';
+    filters.equipmentType = newQuery.equipmentType ?? null;
+    filters.userName = newQuery.userName ?? null;
+    filters.userDepartment = newQuery.userDepartment ?? null;
+  },
+);
 </script>
 
 <style scoped></style>

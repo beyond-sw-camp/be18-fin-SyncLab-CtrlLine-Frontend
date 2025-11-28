@@ -64,7 +64,8 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import useGetProcessList from '@/apis/query-hooks/process/useGetProcessList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -79,13 +80,23 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/process/FilterTab.vue';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 
+const route = useRoute();
 const router = useRouter();
+
+const initialFilters = {
+  processName: route.query.processName || '',
+  userName: route.query.userName || '',
+  userDepartment: route.query.userDepartment || null,
+};
+
+const { data: processList, page, filters } = useGetProcessList(initialFilters);
 
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
   page.value = 1;
-  refetch();
+  syncQuery();
 };
 
 // 상세 페이지로 이동.
@@ -93,7 +104,37 @@ const goToDetail = processCode => {
   router.push(`/base-management/processes/${processCode}`);
 };
 
-const { data: processList, refetch, page, filters } = useGetProcessList();
+const syncQuery = () => {
+  const query = buildQueryObject({
+    ...filters,
+    page: page.value,
+  });
+
+  router.replace({ query });
+};
+
+watch(
+  () => ({ ...filters }),
+  () => {
+    syncQuery();
+  },
+  { deep: true },
+);
+
+watch(page, () => {
+  syncQuery();
+});
+
+watch(
+  () => route.query,
+  newQuery => {
+    page.value = Number(newQuery.page ?? 1);
+
+    filters.processName = newQuery.equipmentName ?? '';
+    filters.userName = newQuery.userName ?? null;
+    filters.userDepartment = newQuery.userDepartment ?? null;
+  },
+);
 </script>
 
 <style scoped></style>
