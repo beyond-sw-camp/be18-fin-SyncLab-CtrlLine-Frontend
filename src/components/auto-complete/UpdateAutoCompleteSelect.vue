@@ -1,8 +1,7 @@
 <template>
   <div class="flex flex-col gap-1">
     <div class="flex gap-2">
-      <div ref="autocompleteRef" class="relative w-full">
-        <!-- 입력 -->
+      <div class="relative w-full">
         <Input
           type="text"
           :placeholder="`${label}을 입력하세요`"
@@ -14,8 +13,6 @@
           class="pr-8 text-sm"
           :disabled="disabled"
         />
-
-        <!-- 검색 아이콘 -->
         <Button
           variant="ghost"
           type="button"
@@ -27,7 +24,6 @@
           <SearchIcon class="w-4 h-4" />
         </Button>
 
-        <!-- 자동완성 -->
         <ul
           v-if="autoItems.length > 0 && !isItemSelected"
           class="absolute left-0 top-full mt-1 w-full bg-white border rounded-md shadow-lg z-50 max-h-48 overflow-auto"
@@ -43,7 +39,7 @@
         </ul>
       </div>
 
-      <Input type="text" v-bind="componentField" readonly class="w-40 bg-gray-100 text-sm" />
+      <Input type="text" v-bind="componentField" readonly class="w-28 bg-gray-100 text-sm" />
     </div>
 
     <SelectModal
@@ -93,7 +89,6 @@ const autoItems = ref([]);
 const showModal = ref(false);
 const isComposing = ref(false);
 const isItemSelected = ref(false);
-const autocompleteRef = ref(null);
 
 const { data, filters, refetch } = props.fetchList();
 
