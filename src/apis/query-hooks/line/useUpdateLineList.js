@@ -12,7 +12,7 @@ export default function useUpdateLine(lineCode) {
     mutationFn: params => updateLine(lineCode, params),
     onSuccess: () => {
       toast.success('라인 사용여부를 수정했습니다.');
-      queryClient.invalidateQueries({ queryKey: ['process', lineCode] });
+      queryClient.invalidateQueries({ queryKey: ['line', lineCode] });
       queryClient.invalidateQueries({ queryKey: ['lineList'] });
       router.push('/base-management/lines');
     },

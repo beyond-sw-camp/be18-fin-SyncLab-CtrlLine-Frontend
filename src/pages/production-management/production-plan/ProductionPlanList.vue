@@ -120,12 +120,12 @@ const router = useRouter();
 const currentStatus = ref(route.query.status || 'TOTAL');
 
 const initialFilters = {
-  factoryName: route.query.factoryName  || '',
+  factoryName: route.query.factoryName || '',
   salesManagerName: route.query.salesManagerName || '',
-  productionManagerName: route.query.productionManagerName|| '',
+  productionManagerName: route.query.productionManagerName || '',
   itemName: route.query.itemName || '',
-  dueDate: route.query.dueDate ,
-  startTime: route.query.startTime  || null,
+  dueDate: route.query.dueDate,
+  startTime: route.query.startTime || null,
   endTime: route.query.endTime || null,
 };
 
@@ -173,6 +173,7 @@ const syncQuery = () => {
 
 onMounted(() => {
   const navEntries = performance.getEntriesByType?.('navigation');
+  // @ts-ignore
   const navType = navEntries?.[0]?.type;
 
   if (navType === 'reload') {
@@ -181,7 +182,7 @@ onMounted(() => {
 
     syncQuery();
   }
-})
+});
 
 // page / status 변경 시
 watch([page, currentStatus], () => {
@@ -196,7 +197,6 @@ watch(
   },
   { deep: true },
 );
-
 
 watch(currentStatus, () => {
   page.value = 1; // 첫 페이지로 이동

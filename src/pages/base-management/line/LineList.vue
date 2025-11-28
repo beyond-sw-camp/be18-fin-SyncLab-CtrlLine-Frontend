@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
@@ -82,7 +82,6 @@ import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
-const currentStatus = ref(route.query.status || 'TOTAL');
 
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
@@ -105,7 +104,6 @@ if (route.query.page) {
 
 const syncQuery = () => {
   const query = buildQueryObject({
-    status: currentStatus.value,
     page: page.value,
     ...filters,
   });
@@ -114,21 +112,8 @@ const syncQuery = () => {
 };
 
 // page / status 변경 시
-watch([page, currentStatus], () => {
+watch([page], () => {
   syncQuery();
-});
-
-// filters 변경 시
-watch(
-  () => ({ ...filters }),
-  () => {
-    syncQuery();
-  },
-  { deep: true },
-);
-
-watch(currentStatus, () => {
-  page.value = 1; // 첫 페이지로 이동
 });
 </script>
 

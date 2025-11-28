@@ -95,7 +95,6 @@ import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
-const currentStatus = ref(route.query.status || 'TOTAL');
 
 // 검색 처리 함수
 const onSearch = newFilters => {
@@ -124,6 +123,7 @@ watch(
   { immediate: true },
 );
 
+// 페이지 쿼리 반영
 if (route.query.page) {
   const p = Number(route.query.page);
   if (!Number.isNaN(p) && p > 0) {
@@ -133,7 +133,6 @@ if (route.query.page) {
 
 const syncQuery = () => {
   const query = buildQueryObject({
-    status: currentStatus.value,
     page: page.value,
     ...filters,
   });
@@ -142,27 +141,9 @@ const syncQuery = () => {
 };
 
 // page / status 변경 시
-watch([page, currentStatus], () => {
+watch(page, () => {
   syncQuery();
-});
-
-// filters 변경 시
-watch(
-  () => ({ ...filters }),
-  () => {
-    syncQuery();
-  },
-  { deep: true },
-);
-
-watch(currentStatus, () => {
-  page.value = 1; // 첫 페이지로 이동
 });
 </script>
 
-<style scoped>
-.table-checkbox-cell {
-  width: 40px;
-  text-align: center;
-}
-</style>
+<style scoped></style>

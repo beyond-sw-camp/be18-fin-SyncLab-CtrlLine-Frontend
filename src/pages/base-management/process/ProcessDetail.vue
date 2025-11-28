@@ -120,6 +120,7 @@ const onSubmit = values => {
     userName: values.name,
     isActive: values.isActive === 'true',
   };
+  // @ts-ignore
   updateProcess(params);
 };
 </script>
