@@ -10,12 +10,14 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center"><Checkbox /></TableHead>
-            <TableHead class="text-center">라인코드</TableHead>
-            <TableHead class="text-center">라인명</TableHead>
-            <TableHead class="text-center">담당부서</TableHead>
-            <TableHead class="text-center">담당자</TableHead>
-            <TableHead class="text-center">사용여부</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
+              <Checkbox class="size-4 border-[1.5px]" />
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">라인코드</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">라인명</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">담당부서</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">담당자</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -26,9 +28,13 @@
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(line.lineCode)"
           >
-            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
-              <Checkbox />
+            <TableCell
+              class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
+              @click.stop
+            >
+              <Checkbox class="size-4 border-[1.5px]" />
             </TableCell>
+
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ line.lineCode }}
             </TableCell>
@@ -41,7 +47,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ line.userName }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
                 class="w-[50px] mx-auto"
                 :class="
@@ -78,43 +84,63 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/line/FilterTab.vue';
-import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
 
-const onSearch = newFilters => {
-  Object.assign(filters, newFilters);
-  page.value = 1;
-  refetch();
+const initialFilters = {
+  lineName: route.query.lineName || '',
+  userName: route.query.userName || '',
+  userDepartment: route.query.userDepartment || null,
 };
+
+const { data: lineList, page, filters } = useGetLineList(initialFilters);
 
 const goToDetail = lineCode => {
   router.push(`/base-management/lines/${lineCode}`);
 };
 
-const { data: lineList, refetch, page, filters } = useGetLineList();
-
-if (route.query.page) {
-  const p = Number(route.query.page);
-  if (!Number.isNaN(p) && p > 0) {
-    page.value = p;
-  }
-}
-
-const syncQuery = () => {
-  const query = buildQueryObject({
-    page: page.value,
-    ...filters,
-  });
-
-  router.replace({ query });
+const onSearch = newFilters => {
+  Object.assign(filters, newFilters);
+  syncQuery();
+  page.value = 1;
 };
 
-// page / status 변경 시
-watch([page], () => {
+const syncQuery = () => {
+  const query = {
+    ...filters,
+    page: page.value,
+  };
+
+  const cleaned = Object.fromEntries(
+    Object.entries(query).filter(([, v]) => v !== null && v !== '' && v !== undefined),
+  );
+
+  router.replace({ query: cleaned });
+};
+
+watch(
+  () => ({ ...filters }),
+  () => {
+    syncQuery();
+  },
+  { deep: true },
+);
+
+watch(page, () => {
   syncQuery();
 });
+
+watch(
+  () => route.query,
+  newQuery => {
+    page.value = Number(newQuery.page ?? 1);
+
+    filters.lineName = newQuery.lineName ?? '';
+    filters.userName = newQuery.userName ?? '';
+    filters.userDepartment = newQuery.userDepartment ?? null;
+  },
+);
 </script>
 
 <style lang="scss" scoped></style>

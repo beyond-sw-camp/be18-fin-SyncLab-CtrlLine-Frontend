@@ -10,26 +10,28 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center"><Checkbox /></TableHead>
-            <TableHead class="text-center">설비코드</TableHead>
-            <TableHead class="text-center">설비명</TableHead>
-            <TableHead class="text-center">설비유형</TableHead>
-            <TableHead class="text-center">담당부서</TableHead>
-            <TableHead class="text-center">담당자</TableHead>
-            <TableHead class="text-center">사용여부</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
+              <Checkbox class="size-4 border-[1.5px]" />
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">설비코드</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">설비명</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">설비유형</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">담당부서</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">담당자</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead>
           </TableRow>
         </TableHeader>
 
-        <TableBody v-if="editableList && editableList.length">
+        <TableBody v-if="equipmentList && equipmentList.content">
           <TableRow
-            v-for="(equipment, index) in editableList"
+            v-for="(equipment, index) in equipmentList.content"
             :key="index"
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(equipment.equipmentCode)"
           >
             <!-- 왼쪽: isActive 편집 토글 -->
             <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
-              <Checkbox :checked="equipment.isActive" />
+              <Checkbox :checked="equipment.isActive" class="size-4 border-[1.5px]" />
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ equipment.equipmentCode }}
@@ -46,7 +48,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ equipment.userName }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
                 class="w-[50px] mx-auto"
                 :class="
@@ -74,14 +76,13 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-// 테이블 UI 컴포넌트
 import {
   Table,
   TableBody,
@@ -96,11 +97,20 @@ import { buildQueryObject } from '@/utils/buildQueryObject';
 const route = useRoute();
 const router = useRouter();
 
+const initialFilters = {
+  equipmentName: route.query.equipmentName || '',
+  equipmentType: route.query.equipmentType || null,
+  userName: route.query.userName || '',
+  userDepartment: route.query.userDepartment || null,
+};
+
+const { data: equipmentList, page, filters } = useGetEquipmentList(initialFilters);
+
 // 검색 처리 함수
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
+  syncQuery();
   page.value = 1;
-  refetch();
 };
 
 // 상세 페이지로 이동
@@ -108,42 +118,38 @@ const goToDetail = equipmentCode => {
   router.push(`/base-management/equipments/${equipmentCode}`);
 };
 
-const { data: equipmentList, refetch, page, filters } = useGetEquipmentList();
-
-const editableList = ref([]);
-watch(
-  equipmentList,
-  val => {
-    const list = val?.content || [];
-    editableList.value = list.map(equipmentStatus => ({
-      ...equipmentStatus,
-      originalIsActive: equipmentStatus.isActive,
-    })); // 설비 상태의 초기값 저장.
-  },
-  { immediate: true },
-);
-
-// 페이지 쿼리 반영
-if (route.query.page) {
-  const p = Number(route.query.page);
-  if (!Number.isNaN(p) && p > 0) {
-    page.value = p;
-  }
-}
-
 const syncQuery = () => {
   const query = buildQueryObject({
-    page: page.value,
     ...filters,
+    page: page.value,
   });
 
   router.replace({ query });
 };
 
-// page / status 변경 시
+watch(
+  () => ({ ...filters }),
+  () => {
+    syncQuery();
+  },
+  { deep: true },
+);
+
 watch(page, () => {
   syncQuery();
 });
+
+watch(
+  () => route.query,
+  newQuery => {
+    page.value = Number(newQuery.page ?? 1);
+
+    filters.equipmentName = newQuery.equipmentName ?? '';
+    filters.equipmentType = newQuery.equipmentType ?? null;
+    filters.userName = newQuery.userName ?? null;
+    filters.userDepartment = newQuery.userDepartment ?? null;
+  },
+);
 </script>
 
 <style scoped></style>

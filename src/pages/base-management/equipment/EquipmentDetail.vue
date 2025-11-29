@@ -72,7 +72,7 @@
               <FormLabel>부서</FormLabel>
               <FormControl>
                 <Select v-bind="componentField" disabled>
-                  <SelectTrigger class="custom-input w-full">
+                  <SelectTrigger class="w-full">
                     <SelectValue placeholder="부서를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>

@@ -60,7 +60,7 @@
             <FormLabel>품목구분</FormLabel>
             <FormControl>
               <Select v-bind="componentField">
-                <SelectTrigger class="custom-input w-full">
+                <SelectTrigger class="w-full">
                   <SelectValue placeholder="품목구분을 선택하세요." />
                 </SelectTrigger>
                 <SelectContent>

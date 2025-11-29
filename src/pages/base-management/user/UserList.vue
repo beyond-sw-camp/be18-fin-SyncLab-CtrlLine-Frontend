@@ -13,12 +13,12 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center">사원명</TableHead>
-            <TableHead class="text-center">Email</TableHead>
-            <TableHead class="text-center">부서명</TableHead>
-            <TableHead class="text-center">연락처</TableHead>
-            <TableHead class="text-center">상태</TableHead>
-            <TableHead class="text-center">권한</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">사원명</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">Email</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">부서명</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">연락처</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">상태</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">권한</TableHead>
           </TableRow>
         </TableHeader>
 

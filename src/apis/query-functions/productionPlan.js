@@ -17,12 +17,29 @@ export async function getProductionPlanList(params) {
 
 export async function getProductionPlan(productionPlanId) {
   const { data } = await apiClient.get(`/production-plans/${productionPlanId}`);
-
-  console.log(data.data);
   return data.data;
 }
 
 export async function updateProductionPlan(productionPlanId, params) {
   const { data } = await apiClient.patch(`/production-plans/${productionPlanId}`, params);
+  return data.data;
+}
+
+export async function updateProductionPlanStatueList(params) {
+  const { data } = await apiClient.patch(`/production-plans/status`, params);
+  return data.data;
+}
+
+export async function deleteProductionPlan(productionPlanId) {
+  console.log(productionPlanId);
+  const { data } = await apiClient.delete(`/production-plans/${productionPlanId}`);
+  return data.data;
+}
+
+export async function deleteProductionPlanList(params) {
+  const { data } = await apiClient.delete(`/production-plans`, {
+    data: params,
+  });
+
   return data.data;
 }
