@@ -148,11 +148,7 @@ const initialFilters = {
   salesManagerName: route.query.salesManagerName || '',
   productionManagerName: route.query.productionManagerName || '',
   itemName: route.query.itemName || '',
-<<<<<<< HEAD
-  dueDate: route.query.dueDate,
-=======
   dueDate: route.query.dueDate || null,
->>>>>>> aa81ce4a176fcbb0241daff421729b16a3ccceb7
   startTime: route.query.startTime || null,
   endTime: route.query.endTime || null,
 };
@@ -217,29 +213,6 @@ const syncQuery = () => {
   router.replace({ query });
 };
 
-<<<<<<< HEAD
-onMounted(() => {
-  const navEntries = performance.getEntriesByType?.('navigation');
-  // @ts-ignore
-  const navType = navEntries?.[0]?.type;
-
-  if (navType === 'reload') {
-    // 내부 filter state 초기화
-    Object.assign(filters, defaultFilters);
-
-    syncQuery();
-  }
-});
-
-// page / status 변경 시
-watch([page, currentStatus], () => {
-  syncQuery();
-});
-
-// filters 변경 시
-=======
-// 필터 변경 시
->>>>>>> aa81ce4a176fcbb0241daff421729b16a3ccceb7
 watch(
   () => ({ ...filters }),
   () => {
