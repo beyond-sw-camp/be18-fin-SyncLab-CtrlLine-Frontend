@@ -10,12 +10,23 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
+<<<<<<< HEAD
             <TableHead class="text-center"><Checkbox /></TableHead>
             <TableHead class="text-center">라인코드</TableHead>
             <TableHead class="text-center">라인명</TableHead>
             <TableHead class="text-center">담당부서</TableHead>
             <TableHead class="text-center">담당자</TableHead>
             <TableHead class="text-center">사용여부</TableHead>
+=======
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
+              <Checkbox class="size-4 border-[1.5px]" />
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">라인코드</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">라인명</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">담당부서</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">담당자</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead>
+>>>>>>> aa81ce4a176fcbb0241daff421729b16a3ccceb7
           </TableRow>
         </TableHeader>
 
@@ -26,9 +37,19 @@
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(line.lineCode)"
           >
+<<<<<<< HEAD
             <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
               <Checkbox />
             </TableCell>
+=======
+            <TableCell
+              class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
+              @click.stop
+            >
+              <Checkbox class="size-4 border-[1.5px]" />
+            </TableCell>
+
+>>>>>>> aa81ce4a176fcbb0241daff421729b16a3ccceb7
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ line.lineCode }}
             </TableCell>
@@ -41,7 +62,11 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ line.userName }}
             </TableCell>
+<<<<<<< HEAD
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+=======
+            <TableCell class="whitespace-nowrap overflow-hidden">
+>>>>>>> aa81ce4a176fcbb0241daff421729b16a3ccceb7
               <Badge
                 class="w-[50px] mx-auto"
                 :class="
@@ -78,21 +103,36 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/line/FilterTab.vue';
+<<<<<<< HEAD
 import { buildQueryObject } from '@/utils/buildQueryObject';
+=======
+>>>>>>> aa81ce4a176fcbb0241daff421729b16a3ccceb7
 
 const route = useRoute();
 const router = useRouter();
 
+<<<<<<< HEAD
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
   page.value = 1;
   refetch();
 };
 
+=======
+const initialFilters = {
+  lineName: route.query.lineName || '',
+  userName: route.query.userName || '',
+  userDepartment: route.query.userDepartment || null,
+};
+
+const { data: lineList, page, filters } = useGetLineList(initialFilters);
+
+>>>>>>> aa81ce4a176fcbb0241daff421729b16a3ccceb7
 const goToDetail = lineCode => {
   router.push(`/base-management/lines/${lineCode}`);
 };
 
+<<<<<<< HEAD
 const { data: lineList, refetch, page, filters } = useGetLineList();
 
 if (route.query.page) {
@@ -115,6 +155,49 @@ const syncQuery = () => {
 watch([page], () => {
   syncQuery();
 });
+=======
+const onSearch = newFilters => {
+  Object.assign(filters, newFilters);
+  syncQuery();
+  page.value = 1;
+};
+
+const syncQuery = () => {
+  const query = {
+    ...filters,
+    page: page.value,
+  };
+
+  const cleaned = Object.fromEntries(
+    Object.entries(query).filter(([, v]) => v !== null && v !== '' && v !== undefined),
+  );
+
+  router.replace({ query: cleaned });
+};
+
+watch(
+  () => ({ ...filters }),
+  () => {
+    syncQuery();
+  },
+  { deep: true },
+);
+
+watch(page, () => {
+  syncQuery();
+});
+
+watch(
+  () => route.query,
+  newQuery => {
+    page.value = Number(newQuery.page ?? 1);
+
+    filters.lineName = newQuery.lineName ?? '';
+    filters.userName = newQuery.userName ?? '';
+    filters.userDepartment = newQuery.userDepartment ?? null;
+  },
+);
+>>>>>>> aa81ce4a176fcbb0241daff421729b16a3ccceb7
 </script>
 
 <style lang="scss" scoped></style>

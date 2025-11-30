@@ -18,7 +18,7 @@ export default function useLogout() {
       userStore.clearUser();
 
       toast.success('로그아웃 되었습니다.');
-      router.push('/login');
+      router.replace('/login');
     },
     onError: error => {
       toast.error(error.response.data.message);

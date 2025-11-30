@@ -100,7 +100,7 @@
               <FormLabel>품목명</FormLabel>
               <FormControl class="w-full min-w-0">
                 <div v-if="selectedFactoryId">
-                  <AutoCompleteSelect
+                  <CreateAutoCompleteSelect
                     :key="`autocomplete-${'itemCode'}`"
                     label="품목명"
                     :value="value"
@@ -152,7 +152,7 @@
             <FormItem class="w-full">
               <FormLabel>영업담당자</FormLabel>
               <FormControl class="w-full min-w-0">
-                <AutoCompleteSelect
+                <CreateAutoCompleteSelect
                   :key="`autocomplete-${'salesManagerNo'}`"
                   label="영업담당자"
                   :value="value"
@@ -239,7 +239,7 @@
               <FormLabel>상태</FormLabel>
               <FormControl class="w-full">
                 <Select v-bind="componentField" disabled>
-                  <SelectTrigger class="custom-input w-full pointer-events-none">
+                  <SelectTrigger class="w-full pointer-events-none">
                     <SelectValue placeholder="상태를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
@@ -287,7 +287,7 @@ import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useCreateProductionPlan from '@/apis/query-hooks/production-plan/useCreateProductionPlan';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
-import AutoCompleteSelect from '@/components/auto-complete/AutoCompleteSelect.vue';
+import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';

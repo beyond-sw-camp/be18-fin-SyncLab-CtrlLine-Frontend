@@ -10,12 +10,14 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center"><Checkbox /></TableHead>
-            <TableHead class="text-center">공정코드</TableHead>
-            <TableHead class="text-center">공정명</TableHead>
-            <TableHead class="text-center">담당부서</TableHead>
-            <TableHead class="text-center">담당자</TableHead>
-            <TableHead class="text-center">사용여부</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
+              <Checkbox class="size-4 border-[1.5px]" />
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">공정코드</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">공정명</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">담당부서</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">담당자</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -27,7 +29,7 @@
             @click="goToDetail(process.processCode)"
           >
             <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
-              <Checkbox />
+              <Checkbox class="size-4 border-[1.5px]" />
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ process.processCode }}
@@ -41,7 +43,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ process.userName }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
                 class="w-[50px] mx-auto"
                 :class="
@@ -62,7 +64,8 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import useGetProcessList from '@/apis/query-hooks/process/useGetProcessList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -77,13 +80,23 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/process/FilterTab.vue';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 
+const route = useRoute();
 const router = useRouter();
+
+const initialFilters = {
+  processName: route.query.processName || '',
+  userName: route.query.userName || '',
+  userDepartment: route.query.userDepartment || null,
+};
+
+const { data: processList, page, filters } = useGetProcessList(initialFilters);
 
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
   page.value = 1;
-  refetch();
+  syncQuery();
 };
 
 // 상세 페이지로 이동.
@@ -91,7 +104,37 @@ const goToDetail = processCode => {
   router.push(`/base-management/processes/${processCode}`);
 };
 
-const { data: processList, refetch, page, filters } = useGetProcessList();
+const syncQuery = () => {
+  const query = buildQueryObject({
+    ...filters,
+    page: page.value,
+  });
+
+  router.replace({ query });
+};
+
+watch(
+  () => ({ ...filters }),
+  () => {
+    syncQuery();
+  },
+  { deep: true },
+);
+
+watch(page, () => {
+  syncQuery();
+});
+
+watch(
+  () => route.query,
+  newQuery => {
+    page.value = Number(newQuery.page ?? 1);
+
+    filters.processName = newQuery.equipmentName ?? '';
+    filters.userName = newQuery.userName ?? null;
+    filters.userDepartment = newQuery.userDepartment ?? null;
+  },
+);
 </script>
 
 <style scoped></style>

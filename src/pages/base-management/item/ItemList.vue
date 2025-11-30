@@ -8,12 +8,12 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center">품목코드</TableHead>
-            <TableHead class="text-center">품목명</TableHead>
-            <TableHead class="text-center">규격</TableHead>
-            <TableHead class="text-center">단위</TableHead>
-            <TableHead class="text-center">품목구분</TableHead>
-            <TableHead class="text-center">사용여부</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">품목코드</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">규격</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">단위</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">품목구분</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -39,7 +39,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ item.itemStatus }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
                 class="w-[50px]"
                 :class="

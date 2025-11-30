@@ -8,8 +8,18 @@
       >
         {{ productionPlanDetail.planDocumentNo }}
       </div>
-      <Button variant="outline" size="sm" class="cursor-pointer w-[60px]"> Delete </Button>
+
       <Button
+        v-if="canDelete"
+        variant="outline"
+        size="sm"
+        class="cursor-pointer w-[60px]"
+        @click="deleteProductionPlan(productionPlanDetail.id)"
+      >
+        Delete
+      </Button>
+      <Button
+        v-if="canEdit"
         type="submit"
         form="productionPlanUpdateForm"
         class="bg-primary text-white hover:bg-primary-600 cursor-pointer w-[60px]"
@@ -98,7 +108,7 @@
                   <Input
                     type="text"
                     v-bind="componentField"
-                    class="max-w-20 bg-gray-100 text-sm"
+                    class="max-w-30 bg-gray-100 text-sm"
                     readonly
                   />
                 </div>
@@ -114,7 +124,7 @@
               <FormLabel>품목명</FormLabel>
               <FormControl class="w-full min-w-0">
                 <div v-if="selectedFactoryId">
-                  <AutoCompleteSelect
+                  <UpdateAutoCompleteSelect
                     :key="`itemCode-${productionPlanDetail?.itemCode}`"
                     label="품목명"
                     :value="value"
@@ -171,7 +181,7 @@
             <FormItem class="w-full">
               <FormLabel>영업담당자</FormLabel>
               <FormControl class="w-full min-w-0">
-                <AutoCompleteSelect
+                <UpdateAutoCompleteSelect
                   :key="`salesManagerNo-${productionPlanDetail?.salesManagerNo}`"
                   label="영업담당자"
                   :value="value"
@@ -260,9 +270,7 @@
               <FormLabel>상태</FormLabel>
               <FormControl class="w-full">
                 <Select v-bind="componentField">
-                  <SelectTrigger
-                    :class="['custom-input w-full', isUser ? 'pointer-events-none' : '']"
-                  >
+                  <SelectTrigger :class="['w-full', canEdit ? '' : 'pointer-events-none']">
                     <SelectValue placeholder="상태를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
@@ -270,6 +278,7 @@
                       v-for="(label, value) in PRODUCTION_PLAN_STATUS"
                       :key="value"
                       :value="value"
+                      :disabled="shouldDisableStatus(value)"
                     >
                       {{ label }}
                     </SelectItem>
@@ -309,10 +318,11 @@ import { z } from 'zod';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
+import useDeleteProductionPlan from '@/apis/query-hooks/production-plan/useDeleteProductionPlan';
 import useGetProductionPlan from '@/apis/query-hooks/production-plan/useGetProductionPlan';
 import useUpdateProductionPlan from '@/apis/query-hooks/production-plan/useUpdateProductionPlan';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
-import AutoCompleteSelect from '@/components/auto-complete/AutoCompleteSelect.vue';
+import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -352,6 +362,7 @@ const formSchema = toTypedSchema(
 
 const route = useRoute();
 const { data: productionPlanDetail } = useGetProductionPlan(route.params.productionPlanId);
+const { mutate: deleteProductionPlan } = useDeleteProductionPlan();
 
 const form = useForm({
   validationSchema: formSchema,
@@ -376,7 +387,66 @@ const itemDetail = ref({});
 const lineDetail = ref({});
 const userStore = useUserStore();
 
-const isUser = computed(() => userStore.userRole === 'USER');
+const isAdmin = computed(() => userStore.userRole === 'ADMIN');
+
+const canEdit = computed(() => {
+  const role = userStore.userRole;
+  const status = productionPlanDetail.value?.status;
+
+  if (!status || !role) return false;
+
+  // RUNNING, COMPLETED 은 누구든 수정 불가
+  if (['RUNNING', 'COMPLETED'].includes(status)) return false;
+
+  // ADMIN: PENDING, CONFIRMED 에서만 수정 가능
+  if (role === 'ADMIN') {
+    return ['PENDING', 'CONFIRMED'].includes(status);
+  }
+
+  // MANAGER, USER: PENDING 에서만 수정 가능
+  if (role === 'MANAGER' || role === 'USER') {
+    return status === 'PENDING';
+  }
+
+  // 혹시 모를 기타 롤은 모두 불가
+  return false;
+});
+
+const canDelete = computed(() => {
+  const role = userStore.userRole;
+  const status = productionPlanDetail.value?.status;
+  const userEmpNo = userStore.empNo;
+  const pmNo = productionPlanDetail.value?.productionManagerNo;
+
+  if (!status || !role) return false;
+
+  // RUNNING, COMPLETED 은 누구든 삭제 불가
+  if (['RUNNING', 'COMPLETED'].includes(status)) return false;
+
+  // ADMIN: RUNNING, COMPLETED, RETURNED 제외 모두 삭제 가능
+  if (role === 'ADMIN') {
+    return ['PENDING', 'CONFIRMED'].includes(status);
+  }
+
+  // MANAGER: 자기 자신 것만 삭제 가능 (PENDING, CONFIRMED 만)
+  if (role === 'MANAGER') {
+    return userEmpNo === pmNo && ['PENDING', 'CONFIRMED'].includes(status);
+  }
+
+  // USER: 삭제 불가
+  return false;
+});
+
+const shouldDisableStatus = value => {
+  // RUNNING, COMPLETED → 모든 사용자 비활성화
+  if (['RUNNING', 'COMPLETED'].includes(value)) return true;
+
+  // CONFIRMED → ADMIN만 선택 가능
+  if (value === 'CONFIRMED' && !isAdmin.value) return true;
+
+  // 나머지는 모든 사용자 선택 가능
+  return false;
+};
 
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });

@@ -9,7 +9,6 @@
 
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FilterInput label="공정코드" v-model="localFilters.processCode" />
           <FilterInput label="공정명" v-model="localFilters.processName" />
 
           <!-- 담당자 -->
@@ -52,7 +51,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
 
 import FilterInput from '@/components/filter/FilterInput.vue';
 import FilterSelect from '@/components/filter/FilterSelect.vue';
@@ -64,15 +63,26 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 
+const props = defineProps({
+  filters: { type: Object, required: true },
+});
+
 const emit = defineEmits(['search']);
 
 // 설비용 필터 구조
 const localFilters = reactive({
-  processName: '',
-  processCode: '',
-  userName: '',
-  userDepartment: null,
+  processName: props.filters.equipmentName ?? '',
+  userName: props.filters.userName ?? '',
+  userDepartment: props.filters.userDepartment ?? null,
 });
+
+watch(
+  () => props.filters,
+  newVal => {
+    Object.assign(localFilters, newVal);
+  },
+  { deep: true },
+);
 
 const applyFilters = () => {
   emit('search', { ...localFilters });
@@ -82,7 +92,6 @@ const applyFilters = () => {
 const resetFilters = () => {
   Object.assign(localFilters, {
     processName: '',
-    processCode: '',
     userName: '',
     userDepartment: null,
   });

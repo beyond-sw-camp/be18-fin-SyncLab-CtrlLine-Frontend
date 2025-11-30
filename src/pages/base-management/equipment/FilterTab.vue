@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, watch } from 'vue';
 
 import FilterInput from '@/components/filter/FilterInput.vue';
 import FilterSelect from '@/components/filter/FilterSelect.vue';
@@ -79,15 +79,28 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 
+const props = defineProps({
+  filters: { type: Object, required: true },
+});
+
 const emit = defineEmits(['search']);
 
 // 설비용 필터 구조
 const localFilters = reactive({
-  equipmentName: '',
-  equipmentType: null,
-  userName: '',
-  userDepartment: null,
+  equipmentName: props.filters.equipmentName ?? '',
+  equipmentType: props.filters.equipmentType ?? null,
+  userName: props.filters.userName ?? '',
+  userDepartment: props.filters.userDepartment ?? null,
 });
+
+watch(
+  () => props.filters,
+  newVal => {
+    Object.assign(localFilters, newVal);
+  },
+  { deep: true },
+);
+
 
 const applyFilters = () => {
   emit('search', { ...localFilters });
