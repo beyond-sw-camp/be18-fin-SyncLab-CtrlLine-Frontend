@@ -15,6 +15,7 @@
         equipmentType: equipmentDetail.equipmentType,
         userDepartment: equipmentDetail.userDepartment,
         userName: equipmentDetail.userName,
+        empNo: equipmentDetail.empNo,
         isActive: equipmentDetail.isActive ? 'true' : 'false',
         equipmentPpm: equipmentDetail.equipmentPpm,
         operatingDate: getAccumulatedHours(equipmentDetail.operatingDate), // 누적 가동 시간
@@ -57,11 +58,31 @@
             </FormItem>
           </FormField>
 
-          <FormField name="userName" v-slot="{ componentField, errorMessage }">
+          <FormField name="empNo" v-slot="{ value, componentField, setValue, errorMessage }">
             <FormItem>
               <FormLabel>담당자</FormLabel>
               <FormControl>
-                <Input type="text" v-bind="componentField" autocomplete="userName" />
+                <UpdateAutoCompleteSelect
+                  :key="`salesManagerNo-${equipmentDetail?.empNo}`"
+                  label="담당자"
+                  :value="value"
+                  :componentField="componentField"
+                  :setValue="setValue"
+                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                  keyField="empNo"
+                  nameField="empNo"
+                  :fields="[
+                    'empNo',
+                    'userName',
+                    'userEmail',
+                    'userDepartment',
+                    'userPhoneNumber',
+                    'userStatus',
+                    'userRole',
+                  ]"
+                  :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                  :initialText="equipmentDetail.empNo"
+                />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -191,6 +212,8 @@ import { useRoute } from 'vue-router';
 
 import useGetEquipment from '@/apis/query-hooks/equipment/useGetEquipment';
 import useUpdateEquipment from '@/apis/query-hooks/equipment/useUpdateEquipment.js';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
+import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -215,6 +238,7 @@ const onSubmit = values => {
     userName: values.userName,
     isActive: values.isActive === 'true',
   };
+  // @ts-ignore
   updateEquipment(params);
 };
 </script>
