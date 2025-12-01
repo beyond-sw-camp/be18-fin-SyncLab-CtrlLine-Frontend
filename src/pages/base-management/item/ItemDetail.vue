@@ -3,21 +3,13 @@
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">품목 상세 조회</h3>
   </div>
 
-  <div class="flex flex-col gap-8 md:flex-row">
+  <div v-if="itemDetail" class="flex flex-col gap-8 md:flex-row">
     <Form
-      v-if="itemDetail"
       id="itemUpdateForm"
       :validation-schema="formSchema"
       @submit="onSubmit"
       class="flex-1 flex flex-col gap-10"
-      :initial-values="{
-        itemCode: itemDetail.itemCode,
-        itemName: itemDetail.itemName,
-        itemSpecification: itemDetail.itemSpecification,
-        itemUnit: itemDetail.itemUnit,
-        itemStatus: itemDetail.itemStatus,
-        isActive: itemDetail.isActive ? 'true' : 'false',
-      }"
+      :initial-values="initialValues"
     >
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField v-slot="{ componentField, errorMessage }" name="itemCode">
@@ -85,7 +77,7 @@
 
         <FormField v-slot="{ componentField, errorMessage }" name="isActive">
           <FormItem>
-            <FormLabel>품목사용여부</FormLabel>
+            <FormLabel>품목 사용여부</FormLabel>
             <FormControl>
               <RadioGroup v-bind="componentField" class="flex">
                 <div class="flex items-center space-x-2">
@@ -103,23 +95,27 @@
           </FormItem>
         </FormField>
       </div>
+      <div class="flex justify-end pt-6 pb-5">
+        <Button
+          type="submit"
+          form="itemUpdateForm"
+          class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
+        >
+          Save
+        </Button>
+      </div>
     </Form>
-  </div>
-  <div class="flex justify-end pt-6 pb-5">
-    <Button
-      type="submit"
-      form="itemUpdateForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
-    >
-      Save
-    </Button>
   </div>
 </template>
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { z } from 'zod';
 
+import useGetItem from '@/apis/query-hooks/item/useGetItem.js';
+import useUpdateItem from '@/apis/query-hooks/item/useUpdateItem.js';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -134,17 +130,22 @@ import {
 } from '@/components/ui/select';
 import { ITEM_STATUS_LABELS } from '@/constants/enumLabels';
 
-const itemDetail = {
-  id: 1,
-  itemCode: 'ABS123123123',
-  itemName: '튀김쫄볶이(개선형)',
-  itemSpecification: '에 계란김밥을 곁들인',
-  itemUnit: 'KG',
-  itemStatus: 'RAW_MATERIAL',
-  isActive: true,
-  createdAt: '2025-11-10 11:29',
-  updatedAt: '2025-11-12 20:33',
-};
+const route = useRoute();
+const { data: itemDetail } = useGetItem(route.params.itemId);
+const { mutate: updateItem } = useUpdateItem(route.params.itemId);
+
+const initialValues = computed(() => {
+  if (!itemDetail.value) return {};
+
+  return {
+    itemCode: itemDetail.value.itemCode,
+    itemName: itemDetail.value.itemName,
+    itemSpecification: itemDetail.value.itemSpecification,
+    itemUnit: itemDetail.value.itemUnit,
+    itemStatus: itemDetail.value.itemStatus,
+    isActive: itemDetail.value.isActive ? 'true' : 'false',
+  };
+});
 
 const formSchema = toTypedSchema(
   z.object({
@@ -158,6 +159,7 @@ const formSchema = toTypedSchema(
       .nonempty('규격은 필수입니다.'),
     itemUnit: z.string({ required_error: '단위는 필수입니다.' }).nonempty('단위는 필수입니다.'),
     itemStatus: z.string({ required_error: '품목구분은 필수입니다.' }),
+    isActive: z.string({ required_error: '사용여부는 필수입니다.' }),
   }),
 );
 
@@ -171,8 +173,8 @@ const onSubmit = values => {
     isActive: values.isActive === 'true',
   };
 
-  console.log(params);
-  // updateFactoryStatus(params);
+  // @ts-ignore
+  updateItem(params);
 };
 </script>
 
