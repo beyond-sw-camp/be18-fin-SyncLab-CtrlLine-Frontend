@@ -14,7 +14,17 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField v-slot="{ componentField, errorMessage }" name="itemCode">
           <FormItem>
-            <FormLabel>품목코드</FormLabel>
+            <FormLabel
+              >품목코드
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>품목 코드 수정 시, 품목명과 규격을 수정해주세요.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" autocomplete="item-code" />
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -24,7 +34,17 @@
 
         <FormField v-slot="{ componentField, errorMessage }" name="itemName">
           <FormItem>
-            <FormLabel>품목명</FormLabel>
+            <FormLabel
+              >품목명
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>품목 코드와 유사하게 품목명을 수정해주세요.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" autocomplete="item-name" />
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -34,7 +54,17 @@
 
         <FormField v-slot="{ componentField, errorMessage }" name="itemSpecification">
           <FormItem>
-            <FormLabel>규격</FormLabel>
+            <FormLabel
+              >규격
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>품목 코드에 작성한 규격으로 수정해주세요.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" autocomplete="item-specification" />
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -110,6 +140,7 @@
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
+import { InfoIcon } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { z } from 'zod';
@@ -128,6 +159,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ITEM_STATUS_LABELS } from '@/constants/enumLabels';
 
 const route = useRoute();

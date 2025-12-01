@@ -5,7 +5,6 @@
 
   <div class="flex flex-col gap-8 md:flex-row">
     <Form
-      v-if="itemDetail"
       id="itemCreateForm"
       :validation-schema="formSchema"
       @submit="onSubmit"
@@ -80,7 +79,7 @@
 
         <FormField v-slot="{ componentField, errorMessage }" name="isActive">
           <FormItem>
-            <FormLabel>품목사용여부</FormLabel>
+            <FormLabel>품목 사용여부</FormLabel>
             <FormControl>
               <RadioGroup v-bind="componentField" class="flex" disabled>
                 <div class="flex items-center space-x-2">
