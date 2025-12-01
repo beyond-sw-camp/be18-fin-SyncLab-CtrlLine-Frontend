@@ -10,7 +10,9 @@ export default function useGetItemList(initialFilters = {}) {
   const pageSize = ref(10);
 
   const filters = reactive({
+    itemCode: initialFilters.itemCode ?? '',
     itemName: initialFilters.itemName ?? '',
+    itemUnit: initialFilters.itemUnit ?? '',
     itemStatus: initialFilters.itemStatus ?? null,
     itemSpecification: initialFilters.itemSpecification ?? '',
     isActive: initialFilters.isActive ?? null,
