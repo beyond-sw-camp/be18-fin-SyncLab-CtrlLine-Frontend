@@ -213,7 +213,6 @@ const syncQuery = () => {
   router.replace({ query });
 };
 
-// 필터 변경 시
 watch(
   () => ({ ...filters }),
   () => {

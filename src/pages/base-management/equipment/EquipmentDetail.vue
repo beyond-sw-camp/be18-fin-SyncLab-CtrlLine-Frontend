@@ -15,6 +15,7 @@
         equipmentType: equipmentDetail.equipmentType,
         userDepartment: equipmentDetail.userDepartment,
         userName: equipmentDetail.userName,
+        empNo: equipmentDetail.empNo,
         isActive: equipmentDetail.isActive ? 'true' : 'false',
         equipmentPpm: equipmentDetail.equipmentPpm,
         operatingDate: getAccumulatedHours(equipmentDetail.operatingDate), // 누적 가동 시간
@@ -57,11 +58,33 @@
             </FormItem>
           </FormField>
 
-          <FormField name="userName" v-slot="{ componentField, errorMessage }">
+          <FormField name="empNo" v-slot="{ value, componentField, setValue, errorMessage }">
             <FormItem>
               <FormLabel>담당자</FormLabel>
               <FormControl>
-                <Input type="text" v-bind="componentField" autocomplete="userName" />
+                <UpdateAutoCompleteSelect
+                  :key="`empNo-${equipmentDetail?.empNo}`"
+                  label="담당자"
+                  :value="value"
+                  :componentField="componentField"
+                  :setValue="setValue"
+                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                  keyField="empNo"
+                  nameField="userName"
+                  :fields="[
+                    'empNo',
+                    'userName',
+                    'userEmail',
+                    'userDepartment',
+                    'userPhoneNumber',
+                    'userStatus',
+                    'userRole',
+                  ]"
+                  :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                  :initialText="equipmentDetail.userName"
+                  :emitFullItem="true"
+                  @selectedFullItem="item => (selectedUserName = item.userName)"
+                />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -187,10 +210,13 @@
 </template>
 
 <script setup>
+import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import useGetEquipment from '@/apis/query-hooks/equipment/useGetEquipment';
 import useUpdateEquipment from '@/apis/query-hooks/equipment/useUpdateEquipment.js';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
+import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -205,16 +231,28 @@ import {
 } from '@/components/ui/select';
 import { DEPARTMENT_LABELS } from '@/constants/enumLabels';
 import getAccumulatedHours from '@/utils/getAccumulatedHours';
-
 const route = useRoute();
 const { data: equipmentDetail } = useGetEquipment(route.params.equipmentCode);
 const { mutate: updateEquipment } = useUpdateEquipment(route.params.equipmentCode);
 
+const selectedUserName = ref('');
+watch(
+  equipmentDetail,
+  val => {
+    if (val) {
+      selectedUserName.value = val.userName;
+    }
+  },
+  { immediate: true },
+);
 const onSubmit = values => {
   const params = {
-    userName: values.userName,
+    userName: selectedUserName.value,
+    empNo: values.empNo,
     isActive: values.isActive === 'true',
+    equipmentCode: values.equipmentCode,
   };
+  // @ts-ignore
   updateEquipment(params);
 };
 </script>
