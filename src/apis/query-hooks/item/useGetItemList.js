@@ -13,9 +13,9 @@ export default function useGetItemList(initialFilters = {}) {
     itemName: initialFilters.itemName ?? '',
     itemStatus: initialFilters.itemStatus ?? null,
     itemSpecification: initialFilters.itemSpecification ?? '',
-    isActive: initialFilters.isActive ?? true,
+    isActive: initialFilters.isActive ?? null,
   });
-  
+
   const fixedSort = ['itemCode, asc'];
 
   const queryParams = computed(() => {
