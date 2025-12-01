@@ -14,7 +14,7 @@
         equipmentName: equipmentDetail.equipmentName,
         equipmentType: equipmentDetail.equipmentType,
         userDepartment: equipmentDetail.userDepartment,
-
+        userName: equipmentDetail.userName,
         empNo: equipmentDetail.empNo,
         isActive: equipmentDetail.isActive ? 'true' : 'false',
         equipmentPpm: equipmentDetail.equipmentPpm,
@@ -63,7 +63,7 @@
               <FormLabel>담당자</FormLabel>
               <FormControl>
                 <UpdateAutoCompleteSelect
-                  :key="`salesManagerNo-${equipmentDetail?.empNo}`"
+                  :key="`empNo-${equipmentDetail?.empNo}`"
                   label="담당자"
                   :value="value"
                   :componentField="componentField"
@@ -253,7 +253,6 @@ const onSubmit = values => {
     equipmentCode: values.equipmentCode,
   };
   // @ts-ignore
-  console.log('Final Payload:', params);
   updateEquipment(params);
 };
 </script>

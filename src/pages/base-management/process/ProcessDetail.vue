@@ -32,11 +32,33 @@
           </FormItem>
         </FormField>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="name">
+        <FormField v-slot="{ value, componentField, setValue, errorMessage }" name="empNo">
           <FormItem>
             <FormLabel>담당자</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="name" disabled />
+              <UpdateAutoCompleteSelect
+                :key="`empNo-${processDetail.empNo}`"
+                label="담당자"
+                :value="value"
+                :componentField="componentField"
+                :setValue="setValue"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                key-field="empNo"
+                nameField="userName"
+                :fields="[
+                  'empNo',
+                  'userName',
+                  'userEmail',
+                  'userDepartment',
+                  'userPhoneNumber',
+                  'userStatus',
+                  'userRole',
+                ]"
+                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                :initialText="processDetail.userName"
+                :emitFullItem="true"
+                @selectedFullItem="item => (selectedUserName = item.userName)"
+              />
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
@@ -72,25 +94,27 @@
           </FormItem>
         </FormField>
       </div>
+      <div class="flex justify-end pt-6 pb-5">
+        <Button
+          type="submit"
+          form="processUpdateForm"
+          class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
+        >
+          Save
+        </Button>
+      </div>
     </Form>
-  </div>
-  <div class="flex justify-end pt-6 pb-5">
-    <Button
-      type="submit"
-      form="processUpdateForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
-    >
-      Save
-    </Button>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import useGetProcess from '@/apis/query-hooks/process/useGetProcess.js';
 import useUpdateProcess from '@/apis/query-hooks/process/useUpdateProcess.js';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
+import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -108,17 +132,29 @@ const initialValues = computed(() => {
     processCode: processDetail.value.processCode,
     processName: processDetail.value.processName,
     department: processDetail.value.userDepartment,
-    name: processDetail.value.userName,
+    // name: processDetail.value.userName,
     empNo: processDetail.value.empNo,
     isActive: processDetail.value.isActive ? 'true' : 'false',
   };
 });
 
+const selectedUserName = ref('');
+watch(
+  processDetail,
+  val => {
+    if (val) {
+      selectedUserName.value = val.userName;
+    }
+  },
+  { immediate: true },
+);
+
 const onSubmit = values => {
   const params = {
+    userName: selectedUserName.value,
     empNo: values.empNo,
-    userName: values.name,
     isActive: values.isActive === 'true',
+    processCode: values.processCode,
   };
   // @ts-ignore
   updateProcess(params);
