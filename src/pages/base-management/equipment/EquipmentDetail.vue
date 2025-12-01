@@ -14,7 +14,7 @@
         equipmentName: equipmentDetail.equipmentName,
         equipmentType: equipmentDetail.equipmentType,
         userDepartment: equipmentDetail.userDepartment,
-        userName: equipmentDetail.userName,
+
         empNo: equipmentDetail.empNo,
         isActive: equipmentDetail.isActive ? 'true' : 'false',
         equipmentPpm: equipmentDetail.equipmentPpm,
@@ -70,7 +70,7 @@
                   :setValue="setValue"
                   :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
                   keyField="empNo"
-                  nameField="empNo"
+                  nameField="userName"
                   :fields="[
                     'empNo',
                     'userName',
@@ -81,7 +81,9 @@
                     'userRole',
                   ]"
                   :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
-                  :initialText="equipmentDetail.empNo"
+                  :initialText="equipmentDetail.userName"
+                  :emitFullItem="true"
+                  @selectedFullItem="item => (selectedUserName = item.userName)"
                 />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
@@ -208,6 +210,7 @@
 </template>
 
 <script setup>
+import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import useGetEquipment from '@/apis/query-hooks/equipment/useGetEquipment';
@@ -228,17 +231,29 @@ import {
 } from '@/components/ui/select';
 import { DEPARTMENT_LABELS } from '@/constants/enumLabels';
 import getAccumulatedHours from '@/utils/getAccumulatedHours';
-
 const route = useRoute();
 const { data: equipmentDetail } = useGetEquipment(route.params.equipmentCode);
 const { mutate: updateEquipment } = useUpdateEquipment(route.params.equipmentCode);
 
+const selectedUserName = ref('');
+watch(
+  equipmentDetail,
+  val => {
+    if (val) {
+      selectedUserName.value = val.userName;
+    }
+  },
+  { immediate: true },
+);
 const onSubmit = values => {
   const params = {
-    userName: values.userName,
+    userName: selectedUserName.value,
+    empNo: values.empNo,
     isActive: values.isActive === 'true',
+    equipmentCode: values.equipmentCode,
   };
   // @ts-ignore
+  console.log('Final Payload:', params);
   updateEquipment(params);
 };
 </script>
