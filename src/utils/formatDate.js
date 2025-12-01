@@ -23,6 +23,10 @@ export default function formatDate(value, type = 'full') {
     return `${yyyy}-${MM}-${dd}T${hh}:${mm}`;
   }
 
+  if (type === 'local-datetime') {
+    return `${yyyy}-${MM}-${dd}T${hh}:${mm}:${ss}`;
+  }
+
   // full
   return `${yyyy}-${MM}-${dd} ${hh}:${mm}:${ss}`;
 }

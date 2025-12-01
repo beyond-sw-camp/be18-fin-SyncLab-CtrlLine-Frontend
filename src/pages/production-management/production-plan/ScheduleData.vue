@@ -8,11 +8,12 @@
         :selectedDate="selectedDate"
         height="300px"
         width="100%"
-        :views="['TimelineDay', 'TimelineWeek']"
+        :views="['TimelineDay', 'TimelineWeek', 'TimelineMonth']"
         :current-view="'TimelineDay'"
         :eventSettings="selectedEventSettings"
         :group="groupOptions"
         :resources="selectedLineResource"
+        @actionComplete="onActionComplete"
       />
     </div>
 
@@ -23,11 +24,12 @@
         :selectedDate="selectedDate"
         height="650px"
         width="100%"
-        :views="['TimelineDay', 'TimelineWeek']"
+        :views="['TimelineDay', 'TimelineWeek', 'TimelineMonth']"
         :current-view="'TimelineDay'"
         :eventSettings="availableEventSettings"
         :group="groupOptions"
         :resources="availableLineResource"
+        @actionComplete="onActionComplete"
       />
     </div>
   </div>
@@ -39,14 +41,16 @@ import {
   TimelineViews,
   Day,
   Week,
+  TimelineMonth,
 } from '@syncfusion/ej2-vue-schedule';
 import { computed, nextTick, onMounted, provide, ref, watch } from 'vue';
 
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetProductionPlanScheduleList from '@/apis/query-hooks/production-plan/useGetProductionPlanScheduleList';
 import { Badge } from '@/components/ui/badge';
+import { useScheduleRangeManager } from '@/hooks/useScheduleRangeManager';
 
-provide('schedule', [TimelineViews, Day, Week]);
+provide('schedule', [TimelineViews, Day, Week, TimelineMonth]);
 
 const props = defineProps({
   factoryId: Number,
@@ -54,12 +58,8 @@ const props = defineProps({
   lineCode: String,
 });
 
-const startTime = '2025-11-21T00:00:00';
-const endTime = '2025-11-22T00:00:00';
-const selectedDate = new Date(startTime.split('T')[0]);
-
 // 공장별 라인 조회
-const { data: lineList, filters } = useGetLineList({
+const { data: lineList, filters: lineFilters } = useGetLineList({
   factoryId: props.factoryId,
 });
 
@@ -110,23 +110,35 @@ const {
   data: availableLineData,
   fetchNextPage: fetchAvailableNext,
   hasNextPage: hasAvailableNext,
+  fetchPreviousPage: fetchAvailablePrev,
+  hasPreviousPage: hasAvailablePrev,
+  filters: availableFilters,
 } = useGetProductionPlanScheduleList({
   factoryCode: props.factoryCode,
   lineCode: null,
-  startTime,
-  endTime,
 });
 
 const {
   data: selectedLineData,
   fetchNextPage: fetchSelectedNext,
   hasNextPage: hasSelectedNext,
+  fetchPreviousPage: fetchSelectedPrev,
+  hasPreviousPage: hasSelectedPrev,
+  filters: selectedFilters,
 } = useGetProductionPlanScheduleList({
   factoryCode: props.factoryCode,
   lineCode: props.lineCode,
-  startTime,
-  endTime,
 });
+
+const { selectedDate, onNavigation } = useScheduleRangeManager(availableFilters, selectedFilters);
+
+function onActionComplete(args) {
+  if (!['dateNavigate', 'viewNavigate'].includes(args.requestType)) return;
+
+  const inst = availableScheduleRef.value?.ej2Instances || selectedScheduleRef.value?.ej2Instances;
+
+  if (inst) onNavigation(inst);
+}
 
 const makeEvent = ev => ({
   Id: ev.id,
@@ -158,28 +170,51 @@ const selectedEventSettings = computed(() => ({
 const availableScheduleRef = ref(null);
 const selectedScheduleRef = ref(null);
 
-const attachScrollInfinite = (refInstance, fetchFn, hasNext) => {
+// 양합향 무한 스크롤
+const attachScrollInfinite = (refInstance, fetchNext, hasNext, fetchPrev, hasPrev) => {
   nextTick(() => {
     const wrap = refInstance.value?.ej2Instances?.element?.querySelector('.e-content-wrap');
     if (!wrap) return;
 
     const handler = () => {
-      const nearEnd = wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 300;
-      if (nearEnd && hasNext.value) fetchFn();
+      // 우측 끝 (미래 데이터)
+      const nearRightEnd = wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 300;
+      if (nearRightEnd && hasNext.value) {
+        fetchNext();
+      }
+
+      // 좌측 끝 (과거 데이터)
+      const nearLeftEnd = wrap.scrollLeft <= 300;
+      if (nearLeftEnd && hasPrev.value) {
+        fetchPrev();
+      }
     };
+
     wrap.addEventListener('scroll', handler);
   });
 };
 
 onMounted(() => {
-  attachScrollInfinite(availableScheduleRef, fetchAvailableNext, hasAvailableNext);
-  attachScrollInfinite(selectedScheduleRef, fetchSelectedNext, hasSelectedNext);
+  attachScrollInfinite(
+    availableScheduleRef,
+    fetchAvailableNext,
+    hasAvailableNext,
+    fetchAvailablePrev,
+    hasAvailablePrev,
+  );
+  attachScrollInfinite(
+    selectedScheduleRef,
+    fetchSelectedNext,
+    hasSelectedNext,
+    fetchSelectedPrev,
+    hasSelectedPrev,
+  );
 });
 
 watch(
   () => props.factoryId,
   newVal => {
-    filters.factoryId = newVal;
+    lineFilters.factoryId = newVal;
   },
 );
 </script>
