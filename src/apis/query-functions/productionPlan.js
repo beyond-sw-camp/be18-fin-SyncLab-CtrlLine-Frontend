@@ -15,6 +15,15 @@ export async function getProductionPlanList(params) {
   return data.data;
 }
 
+export async function getProductionPlanScheduleList(params) {
+  const queryObj = buildQueryObject(params);
+  const search = new URLSearchParams(queryObj);
+
+  const { data } = await apiClient.get(`/production-plans/schedules?${search.toString()}`);
+
+  return data.data;
+}
+
 export async function getProductionPlan(productionPlanId) {
   const { data } = await apiClient.get(`/production-plans/${productionPlanId}`);
   return data.data;
