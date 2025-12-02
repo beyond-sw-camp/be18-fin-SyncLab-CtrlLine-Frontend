@@ -18,21 +18,13 @@
             <Label class="text-xs">생산기간</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <div class="flex-1 min-w-[180px]">
-                <FilterInput
-                  type="date-local"
-                  v-model="localFilters.startTime"
-                  placeholder="시작일"
-                />
+                <FilterInput type="date" v-model="localFilters.fromDate" placeholder="시작일" />
               </div>
 
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
 
               <div class="flex-1 min-w-[180px]">
-                <FilterInput
-                  type="date-local"
-                  v-model="localFilters.endTime"
-                  placeholder="종료일"
-                />
+                <FilterInput type="date" v-model="localFilters.toDate" placeholder="종료일" />
               </div>
             </div>
           </div>
@@ -86,8 +78,8 @@ const localFilters = reactive({
   itemName: props.filters.itemName ?? '',
   lineName: props.filters.lineName ?? '',
   productionPerformanceDocNo: props.filters.productionPerformanceDocNo ?? '',
-  startTime: props.filters.startTime ?? null,
-  endTime: props.filters.endTime ?? null,
+  fromDate: props.filters.fromDate ?? null,
+  toDate: props.filters.toDate ?? null,
 });
 
 watch(
@@ -108,10 +100,10 @@ const resetFilters = () => {
     defectiveDocNo: '',
     itemCode: '',
     itemName: '',
-    lineName: null,
+    lineName: '',
     productionPerformanceDocNo: '',
-    startTime: null,
-    endTime: null,
+    fromDate: null,
+    toDate: null,
   });
   emit('search', { ...localFilters });
 };

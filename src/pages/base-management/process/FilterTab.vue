@@ -69,7 +69,7 @@ const props = defineProps({
 
 const emit = defineEmits(['search']);
 
-// 설비용 필터 구조
+// 공정용 필터 구조
 const localFilters = reactive({
   processName: props.filters.equipmentName ?? '',
   userName: props.filters.userName ?? '',

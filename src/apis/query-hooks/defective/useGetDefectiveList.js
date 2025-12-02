@@ -18,7 +18,9 @@ export default function useGetDefectiveList(initialFilters = {}) {
     lineName: initialFilters.lineName ?? '',
     defectiveTotalQty: initialFilters.defectiveTotalQty ?? '',
     defectiveTotalRate: initialFilters.defectiveTotalRate ?? '',
-    productionPerformanceDocNo: initialFilters.productionPerformanceDocNo,
+    productionPerformanceDocNo: initialFilters.productionPerformanceDocNo ?? '',
+    fromDate: initialFilters.fromDate ?? null,
+    toDate: initialFilters.toDate ?? null,
   });
 
   const queryParams = computed(() => {
