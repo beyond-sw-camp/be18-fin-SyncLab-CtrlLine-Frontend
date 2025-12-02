@@ -97,6 +97,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetLotDetail from '@/apis/query-hooks/lot/useGetLotDetail';
@@ -109,7 +110,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { toast } from 'vue-sonner';
 
 const route = useRoute();
 const router = useRouter();
@@ -210,7 +210,7 @@ const viewSerialNumbers = async () => {
     const text = await response.text();
     serialNumbers.value = text.split(/\r?\n/).filter(line => line.trim().length > 0);
     showSerials.value = true;
-  } catch (error) {
+  } catch (err) {
     hasSerialError.value = true;
     toast.error('시리얼 번호를 불러오지 못했습니다.');
   } finally {
