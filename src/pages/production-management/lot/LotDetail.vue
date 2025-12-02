@@ -12,59 +12,51 @@
     </div>
 
     <div v-else-if="lotDetail" class="flex flex-col gap-6">
-      <section class="border rounded-lg p-6">
-        <h4 class="text-lg font-semibold mb-4">기본 정보</h4>
-        <div class="grid gap-3 md:grid-cols-2">
-          <div
-            v-for="field in basicFields"
-            :key="field.label"
-            class="flex flex-col gap-1"
-          >
-            <span class="text-xs text-muted-foreground">{{ field.label }}</span>
-            <span class="text-base font-medium break-words" :class="field.valueClass">
-              {{ displayValue(field.value) }}
-            </span>
+      <div class="grid gap-6 lg:grid-cols-2">
+        <section class="border rounded-lg p-6">
+          <h4 class="text-lg font-semibold mb-4">기본 정보</h4>
+          <div class="grid gap-3 md:grid-cols-2">
+            <div
+              v-for="field in basicFields"
+              :key="field.label"
+              class="flex flex-col gap-1"
+            >
+              <span class="text-xs text-muted-foreground">{{ field.label }}</span>
+              <span class="text-base font-medium break-words" :class="field.valueClass">
+                {{ displayValue(field.value) }}
+              </span>
+            </div>
           </div>
-        </div>
-        <div class="flex flex-col gap-1 mt-4">
-          <span class="text-xs text-muted-foreground">비고</span>
-          <span class="text-base font-medium break-words">
-            {{ displayValue(lotDetail.remark) }}
-          </span>
-        </div>
-      </section>
-
-      <section class="border rounded-lg p-6">
-        <h4 class="text-lg font-semibold mb-4">품목 및 수량</h4>
-        <div class="grid gap-3 md:grid-cols-2">
-          <div
-            v-for="field in quantityFields"
-            :key="field.label"
-            class="flex flex-col gap-1"
-          >
-            <span class="text-xs text-muted-foreground">{{ field.label }}</span>
+          <div class="flex flex-col gap-1 mt-4">
+            <span class="text-xs text-muted-foreground">비고</span>
             <span class="text-base font-medium break-words">
-              {{ displayValue(field.value) }}
+              {{ displayValue(lotDetail.remark) }}
             </span>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="border rounded-lg p-6">
-        <h4 class="text-lg font-semibold mb-4">기타</h4>
-        <div class="grid gap-3 md:grid-cols-2">
-          <div
-            v-for="field in miscFields"
-            :key="field.label"
-            class="flex flex-col gap-1"
-          >
-            <span class="text-xs text-muted-foreground">{{ field.label }}</span>
-            <span class="text-base font-medium break-words">
-              {{ displayValue(field.value) }}
-            </span>
+        <section class="border rounded-lg p-6">
+          <h4 class="text-lg font-semibold mb-4">품목 및 수량</h4>
+          <div class="grid gap-3 md:grid-cols-2">
+            <div
+              v-for="field in quantityFields"
+              :key="field.label"
+              class="flex flex-col gap-1"
+            >
+              <span class="text-xs text-muted-foreground">{{ field.label }}</span>
+              <span class="text-base font-medium break-words">
+                {{ displayValue(field.value) }}
+              </span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
+
+      <div class="flex justify-end">
+        <Button variant="outline" class="w-fit" @click="viewSerialNumbers">
+          시리얼 번호 조회
+        </Button>
+      </div>
     </div>
 
     <div
@@ -82,6 +74,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import useGetLotDetail from '@/apis/query-hooks/lot/useGetLotDetail';
 import { Button } from '@/components/ui/button';
+import { toast } from 'vue-sonner';
 
 const route = useRoute();
 const router = useRouter();
@@ -106,14 +99,6 @@ function formatRate(value) {
   const num = Number(value);
   if (Number.isNaN(num)) return value;
   return `${num.toFixed(2)}%`;
-}
-
-function formatDateTime(value) {
-  if (!value) return '-';
-  const formatted = new Date(value);
-  return Number.isNaN(formatted.getTime())
-    ? value
-    : formatted.toLocaleString();
 }
 
 function displayValue(value) {
@@ -151,15 +136,6 @@ const quantityFields = computed(() => {
   ];
 });
 
-const miscFields = computed(() => {
-  const detail = lotDetail.value ?? {};
-  return [
-    { label: 'Serial 파일 경로', value: detail.serialFilePath ?? '-' },
-    { label: '생성일', value: formatDateTime(detail.createdAt) },
-    { label: '수정일', value: formatDateTime(detail.updatedAt) },
-  ];
-});
-
 function calculateDefectiveRate(detail) {
   const defectiveQty = Number(detail.defectiveQty ?? 0);
   const lotQty = Number(
@@ -172,4 +148,13 @@ function calculateDefectiveRate(detail) {
   if (!lotQty) return 0;
   return (defectiveQty / lotQty) * 100;
 }
+
+const viewSerialNumbers = () => {
+  const filePath = lotDetail.value?.serialFilePath;
+  if (!filePath) {
+    toast.info('등록된 시리얼 번호가 없습니다.');
+    return;
+  }
+  window.open(filePath, '_blank', 'noopener');
+};
 </script>
