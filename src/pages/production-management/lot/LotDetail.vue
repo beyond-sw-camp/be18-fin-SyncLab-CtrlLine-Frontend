@@ -150,7 +150,7 @@ const quantityFields = computed(() => {
     { label: 'LOT 수량', value: formatNumber(detail.lotQty) },
     { label: '생산 수량', value: formatNumber(detail.performanceQty) },
     { label: '불량 수량', value: formatNumber(detail.defectiveQty) },
-    { label: '불량률', value: formatRate(detail.defectiveRate) },
+    { label: '불량률', value: formatRate(calculateDefectiveRate(detail)) },
   ];
 });
 
@@ -162,4 +162,17 @@ const miscFields = computed(() => {
     { label: '수정일', value: formatDateTime(detail.updatedAt) },
   ];
 });
+
+function calculateDefectiveRate(detail) {
+  const defectiveQty = Number(detail.defectiveQty ?? 0);
+  const lotQty = Number(
+    detail.lotQty ??
+      (detail.performanceQty !== undefined && detail.defectiveQty !== undefined
+        ? Number(detail.performanceQty) + Number(detail.defectiveQty)
+        : 0),
+  );
+
+  if (!lotQty) return 0;
+  return (defectiveQty / lotQty) * 100;
+}
 </script>

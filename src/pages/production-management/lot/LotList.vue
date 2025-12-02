@@ -42,7 +42,7 @@
               {{ formatNumber(lot.defectiveQty) }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ formatRate(lot.defectiveRate) }}
+              {{ formatRate(calculateDefectiveRate(lot)) }}
             </TableCell>
           </TableRow>
         </TableBody>
@@ -158,6 +158,17 @@ const formatRate = value => {
   const num = Number(value);
   if (Number.isNaN(num)) return value;
   return `${num.toFixed(2)}%`;
+};
+
+const calculateDefectiveRate = lot => {
+  const defectiveQty = Number(lot.defectiveQty ?? 0);
+  const lotQty =
+    lot.lotQty !== undefined
+      ? Number(lot.lotQty)
+      : Number(lot.performanceQty ?? 0) + Number(lot.defectiveQty ?? 0);
+
+  if (!lotQty) return 0;
+  return (defectiveQty / lotQty) * 100;
 };
 
 </script>
