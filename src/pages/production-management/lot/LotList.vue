@@ -24,7 +24,7 @@
             v-for="lot in lotList.content"
             :key="lot.lotId ?? lot.lotNo"
             class="hover:bg-gray-50 text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
-            @click="goToDetail(lot.lotNo)"
+            @click="goToDetail(lot.lotId)"
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ lot.lotNo }}
@@ -91,7 +91,6 @@ const initialFilters = {
   createdAtTo: route.query.createdAtTo || null,
   updatedAtFrom: route.query.updatedAtFrom || null,
   updatedAtTo: route.query.updatedAtTo || null,
-  isDeleted: route.query.isDeleted ? route.query.isDeleted === 'true' : null,
 };
 
 const { data: lotList, page, filters } = useGetLotList(initialFilters);
@@ -101,8 +100,8 @@ const onSearch = newFilters => {
   page.value = 1;
 };
 
-const goToDetail = lotNo => {
-  router.push(`/production-management/lots/${lotNo}`);
+const goToDetail = lotId => {
+  router.push(`/production-management/lots/${lotId}`);
 };
 
 const syncQuery = () => {
@@ -141,10 +140,6 @@ watch(
     filters.createdAtTo = newQuery.createdAtTo ?? null;
     filters.updatedAtFrom = newQuery.updatedAtFrom ?? null;
     filters.updatedAtTo = newQuery.updatedAtTo ?? null;
-    filters.isDeleted =
-      newQuery.isDeleted === undefined
-        ? null
-        : newQuery.isDeleted === 'true';
   },
   { deep: true },
 );

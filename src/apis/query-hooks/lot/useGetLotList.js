@@ -21,7 +21,6 @@ export default function useGetLotList(initialFilters = {}) {
     createdAtTo: initialFilters.createdAtTo ?? null,
     updatedAtFrom: initialFilters.updatedAtFrom ?? null,
     updatedAtTo: initialFilters.updatedAtTo ?? null,
-    isDeleted: initialFilters.isDeleted ?? null,
   });
 
   const queryParams = computed(() => {

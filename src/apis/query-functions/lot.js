@@ -8,3 +8,8 @@ export async function getLotList(params) {
   const { data } = await apiClient.get(`/lots?${search.toString()}`);
   return data.data;
 }
+
+export async function getLotDetail(lotId) {
+  const { data } = await apiClient.get(`/lots/${lotId}`);
+  return data.data;
+}

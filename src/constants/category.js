@@ -160,7 +160,7 @@ export const productionManagement = [
         children: [
           {
             label: 'Lot No. 상세 조회',
-            to: '/production-management/lots/:lotNo',
+            to: '/production-management/lots/:lotId',
           },
         ],
       },
