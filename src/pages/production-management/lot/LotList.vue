@@ -42,7 +42,7 @@
               {{ formatNumber(lot.defectiveQty) }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ formatRate(lot.defectiveRate) }}
+              {{ formatRate(calculateDefectiveRate(lot)) }}
             </TableCell>
           </TableRow>
         </TableBody>
@@ -85,7 +85,6 @@ const initialFilters = {
   itemCode: route.query.itemCode || '',
   factoryCode: route.query.factoryCode || '',
   lineCode: route.query.lineCode || '',
-  productionManagerNo: route.query.productionManagerNo || '',
   performanceDocumentNo: route.query.performanceDocumentNo || '',
   createdAtFrom: route.query.createdAtFrom || null,
   createdAtTo: route.query.createdAtTo || null,
@@ -136,7 +135,6 @@ watch(
     filters.itemCode = newQuery.itemCode ?? '';
     filters.factoryCode = newQuery.factoryCode ?? '';
     filters.lineCode = newQuery.lineCode ?? '';
-    filters.productionManagerNo = newQuery.productionManagerNo ?? '';
     filters.performanceDocumentNo = newQuery.performanceDocumentNo ?? '';
     filters.createdAtFrom = newQuery.createdAtFrom ?? null;
     filters.createdAtTo = newQuery.createdAtTo ?? null;
@@ -158,6 +156,17 @@ const formatRate = value => {
   const num = Number(value);
   if (Number.isNaN(num)) return value;
   return `${num.toFixed(2)}%`;
+};
+
+const calculateDefectiveRate = lot => {
+  const defectiveQty = Number(lot.defectiveQty ?? 0);
+  const lotQty =
+    lot.lotQty !== undefined
+      ? Number(lot.lotQty)
+      : Number(lot.performanceQty ?? 0) + Number(lot.defectiveQty ?? 0);
+
+  if (!lotQty) return 0;
+  return (defectiveQty / lotQty) * 100;
 };
 
 </script>
