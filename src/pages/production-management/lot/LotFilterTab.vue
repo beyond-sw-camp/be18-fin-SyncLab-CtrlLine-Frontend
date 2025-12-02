@@ -22,7 +22,6 @@
             label="생산실적 전표번호"
             v-model="localFilters.performanceDocumentNo"
           />
-          <FilterSelect label="삭제 여부" v-model="localFilters.isDeleted" :options="isDeletedOptions" />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -107,10 +106,6 @@ const localFilters = reactive({
   createdAtTo: props.filters.createdAtTo ?? null,
   updatedAtFrom: props.filters.updatedAtFrom ?? null,
   updatedAtTo: props.filters.updatedAtTo ?? null,
-  isDeleted:
-    props.filters.isDeleted === null || props.filters.isDeleted === undefined
-      ? null
-      : String(props.filters.isDeleted),
 });
 
 watch(
@@ -126,21 +121,12 @@ watch(
     localFilters.createdAtTo = newVal.createdAtTo ?? null;
     localFilters.updatedAtFrom = newVal.updatedAtFrom ?? null;
     localFilters.updatedAtTo = newVal.updatedAtTo ?? null;
-    localFilters.isDeleted =
-      newVal.isDeleted === null || newVal.isDeleted === undefined
-        ? null
-        : String(newVal.isDeleted);
   },
   { deep: true },
 );
 
 const applyFilters = () => {
-  const normalized = {
-    ...localFilters,
-    isDeleted:
-      localFilters.isDeleted === null ? null : localFilters.isDeleted === 'true',
-  };
-  emit('search', normalized);
+  emit('search', { ...localFilters });
 };
 
 const { data: factoryList } = useGetFactoryList();
@@ -159,12 +145,6 @@ const factoryOptions = computed(() => {
   ];
 });
 
-const isDeletedOptions = [
-  { value: null, label: '전체' },
-  { value: 'false', label: '사용중' },
-  { value: 'true', label: '삭제' },
-];
-
 const resetFilters = () => {
   Object.assign(localFilters, {
     lotNo: '',
@@ -177,11 +157,7 @@ const resetFilters = () => {
     createdAtTo: null,
     updatedAtFrom: null,
     updatedAtTo: null,
-    isDeleted: null,
   });
-  emit('search', {
-    ...localFilters,
-    isDeleted: null,
-  });
+  emit('search', { ...localFilters });
 };
 </script>

@@ -3,14 +3,6 @@
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Lot No. 목록</h3>
   </div>
 
-  <Tabs v-model="currentStatus" class="w-full mt-6">
-    <TabsList class="flex gap-3 flex-wrap">
-      <TabsTrigger value="ALL">전체</TabsTrigger>
-      <TabsTrigger value="ACTIVE">사용중</TabsTrigger>
-      <TabsTrigger value="DELETED">삭제</TabsTrigger>
-    </TabsList>
-  </Tabs>
-
   <LotFilterTab :filters="filters" @search="onSearch" />
 
   <div class="flex flex-col">
@@ -24,9 +16,6 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden">생산수량</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">불량수량</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">불량률</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">생성일</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">수정일</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">삭제여부</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -55,22 +44,11 @@
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ formatRate(lot.defectiveRate) }}
             </TableCell>
-            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ formatDateTime(lot.createdAt) }}
-            </TableCell>
-            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ formatDateTime(lot.updatedAt) }}
-            </TableCell>
-            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              <span :class="[lot.isDeleted ? 'text-red-500' : 'text-emerald-600']">
-                {{ lot.isDeleted ? '삭제' : '사용중' }}
-              </span>
-            </TableCell>
           </TableRow>
         </TableBody>
         <TableBody v-else>
           <TableRow>
-            <TableCell colspan="9" class="text-center py-10 text-gray-500">
+            <TableCell colspan="6" class="text-center py-10 text-gray-500">
               조회된 Lot No. 데이터가 없습니다.
             </TableCell>
           </TableRow>
@@ -96,35 +74,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LotFilterTab from '@/pages/production-management/lot/LotFilterTab.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
-
-const parseBooleanQuery = value => {
-  if (value === undefined) return null;
-  if (value === 'true') return true;
-  if (value === 'false') return false;
-  return null;
-};
-
-const statusFromFlag = flag => {
-  if (flag === true) return 'DELETED';
-  if (flag === false) return 'ACTIVE';
-  return 'ALL';
-};
-
-const flagFromStatus = status => {
-  if (status === 'DELETED') return true;
-  if (status === 'ACTIVE') return false;
-  return null;
-};
-
-const initialIsDeleted = parseBooleanQuery(route.query.isDeleted);
-
-const currentStatus = ref(statusFromFlag(initialIsDeleted));
 
 const initialFilters = {
   lotNo: route.query.lotNo || '',
@@ -137,7 +91,7 @@ const initialFilters = {
   createdAtTo: route.query.createdAtTo || null,
   updatedAtFrom: route.query.updatedAtFrom || null,
   updatedAtTo: route.query.updatedAtTo || null,
-  isDeleted: initialIsDeleted,
+  isDeleted: route.query.isDeleted ? route.query.isDeleted === 'true' : null,
 };
 
 const { data: lotList, page, filters } = useGetLotList(initialFilters);
@@ -168,14 +122,6 @@ watch(
   { deep: true },
 );
 
-watch(currentStatus, newStatus => {
-  const flag = flagFromStatus(newStatus);
-  if (filters.isDeleted !== flag) {
-    filters.isDeleted = flag;
-  }
-  page.value = 1;
-});
-
 watch(page, () => {
   syncQuery();
 });
@@ -183,8 +129,6 @@ watch(page, () => {
 watch(
   () => route.query,
   newQuery => {
-    const nextIsDeleted = parseBooleanQuery(newQuery.isDeleted);
-    currentStatus.value = statusFromFlag(nextIsDeleted);
     page.value = Number(newQuery.page ?? 1);
 
     filters.lotNo = newQuery.lotNo ?? '';
@@ -197,7 +141,10 @@ watch(
     filters.createdAtTo = newQuery.createdAtTo ?? null;
     filters.updatedAtFrom = newQuery.updatedAtFrom ?? null;
     filters.updatedAtTo = newQuery.updatedAtTo ?? null;
-    filters.isDeleted = nextIsDeleted;
+    filters.isDeleted =
+      newQuery.isDeleted === undefined
+        ? null
+        : newQuery.isDeleted === 'true';
   },
   { deep: true },
 );
@@ -216,8 +163,4 @@ const formatRate = value => {
   return `${num.toFixed(2)}%`;
 };
 
-const formatDateTime = value => {
-  if (!value) return '-';
-  return value;
-};
 </script>
