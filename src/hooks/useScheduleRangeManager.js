@@ -2,7 +2,7 @@ import { ref } from 'vue';
 
 import formatDate from '@/utils/formatDate';
 
-export function useScheduleRangeManager(availableFilters, selectedFilters) {
+export function useScheduleRangeManager(filters) {
   const selectedDate = ref(new Date());
   const currentView = ref('TimelineDay');
 
@@ -34,19 +34,16 @@ export function useScheduleRangeManager(availableFilters, selectedFilters) {
 
   function applyRangeToFilters(view, date) {
     const { start, end } = computeRange(view, date);
-    availableFilters.startTime = start;
-    availableFilters.endTime = end;
 
-    selectedFilters.startTime = start;
-    selectedFilters.endTime = end;
+    filters.startTime = start;
+    filters.endTime = end;
   }
 
   function onNavigation(inst) {
-    console.log(inst);
     selectedDate.value = inst.selectedDate;
     currentView.value = inst.currentView;
     applyRangeToFilters(currentView.value, selectedDate.value);
   }
 
-  return { selectedDate, onNavigation };
+  return { selectedDate, currentView, onNavigation };
 }

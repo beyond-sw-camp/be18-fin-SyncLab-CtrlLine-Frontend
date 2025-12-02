@@ -5,15 +5,18 @@
       <ejs-schedule
         v-if="props.lineCode"
         ref="selectedScheduleRef"
-        :selectedDate="selectedDate"
+        :selectedDate="selectedDateSelected"
         height="300px"
         width="100%"
         :views="['TimelineDay', 'TimelineWeek', 'TimelineMonth']"
         :current-view="'TimelineDay'"
         :eventSettings="selectedEventSettings"
+        :editSettings="editSettings"
+        :showCurrentTimeIndicator="true"
+        :popupOpen="onPopupOpen"
         :group="groupOptions"
         :resources="selectedLineResource"
-        @actionComplete="onActionComplete"
+        @actionComplete="onSelectedScheduleAction"
       />
     </div>
 
@@ -21,15 +24,18 @@
       <Badge variant="secondary" class="mb-4 mt-6">선택 가능한 라인</Badge>
       <ejs-schedule
         ref="availableScheduleRef"
-        :selectedDate="selectedDate"
+        :selectedDate="selectedDateAvailable"
         height="650px"
         width="100%"
         :views="['TimelineDay', 'TimelineWeek', 'TimelineMonth']"
         :current-view="'TimelineDay'"
         :eventSettings="availableEventSettings"
+        :editSettings="editSettings"
+        :showCurrentTimeIndicator="true"
+        :popupOpen="onPopupOpen"
         :group="groupOptions"
         :resources="availableLineResource"
-        @actionComplete="onActionComplete"
+        @actionComplete="onAvailableScheduleAction"
       />
     </div>
   </div>
@@ -51,6 +57,28 @@ import { Badge } from '@/components/ui/badge';
 import { useScheduleRangeManager } from '@/hooks/useScheduleRangeManager';
 
 provide('schedule', [TimelineViews, Day, Week, TimelineMonth]);
+
+const editSettings = {
+  allowAdding: false,
+  allowEditing: false,
+  allowDeleting: false,
+  showDeleteConfirmDialog: false,
+  showQuickInfo: false,
+};
+
+function onPopupOpen(args) {
+  // 1) QuickInfo 팝업
+  if (args.type === 'QuickInfo') {
+    args.cancel = true;
+    return;
+  }
+
+  // 2) Event Editor 팝업 (New Event / Edit Event)
+  if (args.type === 'Editor') {
+    args.cancel = true;
+    return;
+  }
+}
 
 const props = defineProps({
   factoryId: Number,
@@ -130,14 +158,26 @@ const {
   lineCode: props.lineCode,
 });
 
-const { selectedDate, onNavigation } = useScheduleRangeManager(availableFilters, selectedFilters);
+const { selectedDate: selectedDateSelected, onNavigation: onSelectedNavigation } =
+  useScheduleRangeManager(selectedFilters);
 
-function onActionComplete(args) {
+const { selectedDate: selectedDateAvailable, onNavigation: onAvailableNavigation } =
+  useScheduleRangeManager(availableFilters);
+
+function onSelectedScheduleAction(args) {
   if (!['dateNavigate', 'viewNavigate'].includes(args.requestType)) return;
 
-  const inst = availableScheduleRef.value?.ej2Instances || selectedScheduleRef.value?.ej2Instances;
+  const inst = selectedScheduleRef.value?.ej2Instances;
 
-  if (inst) onNavigation(inst);
+  if (inst) onSelectedNavigation(inst);
+}
+
+function onAvailableScheduleAction(args) {
+  if (!['dateNavigate', 'viewNavigate'].includes(args.requestType)) return;
+
+  const inst = availableScheduleRef.value?.ej2Instances;
+
+  if (inst) onAvailableNavigation(inst);
 }
 
 const makeEvent = ev => ({
@@ -217,6 +257,20 @@ watch(
     lineFilters.factoryId = newVal;
   },
 );
+
+watch(
+  () => props.factoryCode,
+  v => {
+    availableFilters.factoryCode = v;
+    selectedFilters.factoryCode = v;
+  },
+);
+watch(
+  () => props.lineCode,
+  v => {
+    selectedFilters.lineCode = v;
+  },
+);
 </script>
 
-<style lang="scss" scoped></style>
+<style></style>
