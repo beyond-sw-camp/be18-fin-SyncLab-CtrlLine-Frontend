@@ -4,9 +4,9 @@ import { computed, reactive, ref } from 'vue';
 import { getLotList } from '@/apis/query-functions/lot';
 import { useAuthStore } from '@/stores/useAuthStore';
 
-export default function useGetLotList(initialFilters = {}) {
+export default function useGetLotList(initialFilters = {}, initialPage = 1) {
   const authStore = useAuthStore();
-  const page = ref(1);
+  const page = ref(initialPage);
   const pageSize = ref(10);
   const fixedSort = ['lotNo,desc'];
 

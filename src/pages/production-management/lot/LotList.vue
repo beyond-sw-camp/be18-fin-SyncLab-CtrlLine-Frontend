@@ -93,7 +93,9 @@ const initialFilters = {
   updatedAtTo: route.query.updatedAtTo || null,
 };
 
-const { data: lotList, page, filters } = useGetLotList(initialFilters);
+const initialPage = Number(route.query.page ?? 1);
+
+const { data: lotList, page, filters } = useGetLotList(initialFilters, initialPage);
 
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
