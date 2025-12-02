@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetLotList from '@/apis/query-hooks/lot/useGetLotList';
