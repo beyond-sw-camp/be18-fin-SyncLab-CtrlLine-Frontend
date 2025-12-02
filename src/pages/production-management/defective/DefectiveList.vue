@@ -28,7 +28,7 @@
             v-for="(defective, index) in defectiveList.content"
             :key="index"
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
-            @click="goToDetail(defective.planDefectiveId)"
+            @click="goToDetail(defective.id)"
           >
             <TableCell lass="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
               <Checkbox class="size-4 border--[1.5px]" />
@@ -89,8 +89,6 @@ const initialFilters = {
   itemCode: route.query.itemCode || '',
   itemName: route.query.itemName || '',
   lineName: route.query.lineName || '',
-  defectiveTotalQty: route.query.defectiveTotalQty || '',
-  defectiveTotalRate: route.query.defectiveTotalRate || '',
   productionPerformanceDocNo: route.query.productionPerformanceDocNo || '',
 };
 
@@ -102,8 +100,8 @@ const onSearch = newFilters => {
   syncQuery();
 };
 
-const goToDetail = defectiveId => {
-  router.push(`/production-managemnet/defectives/${defectiveId}`);
+const goToDetail = id => {
+  router.push(`/production-management/defectives/${id}`);
 };
 
 const syncQuery = () => {

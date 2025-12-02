@@ -145,7 +145,7 @@ const routes = [
         component: () => import('@/pages/production-management/defective/DefectiveList.vue'),
       },
       {
-        path: 'defectives/:defectiveId',
+        path: 'defectives/:id',
         name: 'DefectiveDetail',
         component: () => import('@/pages/production-management/defective/DefectiveDetail.vue'),
       },

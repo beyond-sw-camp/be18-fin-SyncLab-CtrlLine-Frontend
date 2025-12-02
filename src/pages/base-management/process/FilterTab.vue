@@ -71,7 +71,7 @@ const emit = defineEmits(['search']);
 
 // 공정용 필터 구조
 const localFilters = reactive({
-  processName: props.filters.equipmentName ?? '',
+  processName: props.filters.processName ?? '',
   userName: props.filters.userName ?? '',
   userDepartment: props.filters.userDepartment ?? null,
 });
