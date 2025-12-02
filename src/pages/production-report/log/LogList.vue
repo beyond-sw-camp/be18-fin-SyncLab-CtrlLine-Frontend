@@ -143,9 +143,8 @@
 
 <script setup>
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
-import { computed, reactive, ref, watch } from 'vue';
-
 import { ChevronDown, Search } from 'lucide-vue-next';
+import { computed, reactive, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
 import { getLogList } from '@/apis/query-functions/log';
@@ -159,13 +158,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const isFilterOpen = ref(false);
 const isApplying = ref(false);
 const hasSearched = ref(false);
-const authStore = useAuthStore();
 
 const defaultFilter = () => ({
   fromDate: '',
@@ -215,7 +212,7 @@ const fetchUserName = async userId => {
   try {
     const user = await getUser(userId);
     userNameMap[userId] = user.userName ?? `사용자 #${userId}`;
-  } catch (error) {
+  } catch {
     userNameMap[userId] = `사용자 #${userId}`;
   } finally {
     pendingUserFetch.delete(userId);
