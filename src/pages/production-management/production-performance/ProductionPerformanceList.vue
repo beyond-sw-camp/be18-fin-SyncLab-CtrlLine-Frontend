@@ -36,19 +36,19 @@
               {{ performance.documentNo }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.factoryCode }}
+              {{ performance.factoryName }} ({{ performance.factoryCode }})
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.lineCode }}
+              {{ performance.lineName }} ({{ performance.lineCode }})
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.itemCode }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.salesManagerNo }}
+              {{ performance.salesManagerName }} ({{ performance.salesManagerNo }})
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.productionManagerNo }}
+              {{ performance.productionManagerName }} ({{ performance.productionManagerNo }})
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.performanceQty }} EA.
