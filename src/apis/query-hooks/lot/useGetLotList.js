@@ -15,7 +15,6 @@ export default function useGetLotList(initialFilters = {}, initialPage = 1) {
     itemCode: initialFilters.itemCode ?? '',
     factoryCode: initialFilters.factoryCode ?? '',
     lineCode: initialFilters.lineCode ?? '',
-    productionManagerNo: initialFilters.productionManagerNo ?? '',
     performanceDocumentNo: initialFilters.performanceDocumentNo ?? '',
     createdAtFrom: initialFilters.createdAtFrom ?? null,
     createdAtTo: initialFilters.createdAtTo ?? null,

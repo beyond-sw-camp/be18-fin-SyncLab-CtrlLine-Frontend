@@ -17,7 +17,6 @@
             :options="factoryOptions"
           />
           <FilterInput label="라인 코드" v-model="localFilters.lineCode" />
-          <FilterInput label="생산담당자 사번" v-model="localFilters.productionManagerNo" />
           <FilterInput
             label="생산실적 전표번호"
             v-model="localFilters.performanceDocumentNo"
@@ -100,7 +99,6 @@ const localFilters = reactive({
   itemCode: props.filters.itemCode ?? '',
   factoryCode: props.filters.factoryCode ? props.filters.factoryCode : null,
   lineCode: props.filters.lineCode ?? '',
-  productionManagerNo: props.filters.productionManagerNo ?? '',
   performanceDocumentNo: props.filters.performanceDocumentNo ?? '',
   createdAtFrom: props.filters.createdAtFrom ?? null,
   createdAtTo: props.filters.createdAtTo ?? null,
@@ -115,7 +113,6 @@ watch(
     localFilters.itemCode = newVal.itemCode ?? '';
     localFilters.factoryCode = newVal.factoryCode ? newVal.factoryCode : null;
     localFilters.lineCode = newVal.lineCode ?? '';
-    localFilters.productionManagerNo = newVal.productionManagerNo ?? '';
     localFilters.performanceDocumentNo = newVal.performanceDocumentNo ?? '';
     localFilters.createdAtFrom = newVal.createdAtFrom ?? null;
     localFilters.createdAtTo = newVal.createdAtTo ?? null;
@@ -151,7 +148,6 @@ const resetFilters = () => {
     itemCode: '',
     factoryCode: null,
     lineCode: '',
-    productionManagerNo: '',
     performanceDocumentNo: '',
     createdAtFrom: null,
     createdAtTo: null,
