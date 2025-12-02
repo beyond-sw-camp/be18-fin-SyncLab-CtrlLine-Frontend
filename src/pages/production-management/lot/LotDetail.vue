@@ -1,12 +1,7 @@
 <template>
   <div class="flex flex-col gap-6">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-      <div>
-        <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Lot No. 상세</h3>
-        <p class="text-sm text-muted-foreground" v-if="lotDetail?.lotNo">
-          Lot No. {{ lotDetail.lotNo }}
-        </p>
-      </div>
+      <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Lot No. 상세</h3>
       <div class="flex gap-2">
         <Button variant="outline" size="sm" @click="goBack">뒤로가기</Button>
       </div>
