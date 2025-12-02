@@ -154,6 +154,11 @@ const routes = [
         name: 'LotList',
         component: () => import('@/pages/production-management/lot/LotList.vue'),
       },
+      {
+        path: 'lots/:lotId',
+        name: 'LotDetail',
+        component: () => import('@/pages/production-management/lot/LotDetail.vue'),
+      },
     ],
   },
   {
