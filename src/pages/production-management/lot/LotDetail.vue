@@ -11,45 +11,32 @@
       로드 중입니다...
     </div>
 
-    <div v-else-if="lotDetail" class="flex flex-col gap-6">
-      <div class="grid gap-6 lg:grid-cols-2">
-        <section class="border rounded-lg p-6">
-          <h4 class="text-lg font-semibold mb-4">기본 정보</h4>
-          <div class="grid gap-3 md:grid-cols-2">
+    <div v-else-if="lotDetail" class="flex flex-col gap-8">
+      <div class="flex flex-col gap-4">
+        <h4 class="text-lg font-semibold">기본 정보</h4>
+        <div class="grid gap-4 md:grid-cols-3">
+          <div v-for="field in basicFields" :key="field.label" class="flex flex-col gap-2">
+            <span class="text-xs text-muted-foreground tracking-wide">{{ field.label }}</span>
             <div
-              v-for="field in basicFields"
-              :key="field.label"
-              class="flex flex-col gap-1"
+              class="rounded-lg border bg-muted/15 px-4 py-3 text-base font-medium break-words"
+              :class="field.isStatus ? field.statusWrapperClass : ''"
             >
-              <span class="text-xs text-muted-foreground">{{ field.label }}</span>
-              <span class="text-base font-medium break-words" :class="field.valueClass">
-                {{ displayValue(field.value) }}
-              </span>
+              {{ displayValue(field.value) }}
             </div>
           </div>
-          <div class="flex flex-col gap-1 mt-4">
-            <span class="text-xs text-muted-foreground">비고</span>
-            <span class="text-base font-medium break-words">
-              {{ displayValue(lotDetail.remark) }}
-            </span>
-          </div>
-        </section>
+        </div>
+      </div>
 
-        <section class="border rounded-lg p-6">
-          <h4 class="text-lg font-semibold mb-4">품목 및 수량</h4>
-          <div class="grid gap-3 md:grid-cols-2">
-            <div
-              v-for="field in quantityFields"
-              :key="field.label"
-              class="flex flex-col gap-1"
-            >
-              <span class="text-xs text-muted-foreground">{{ field.label }}</span>
-              <span class="text-base font-medium break-words">
-                {{ displayValue(field.value) }}
-              </span>
+      <div class="flex flex-col gap-4">
+        <h4 class="text-lg font-semibold">품목 및 수량</h4>
+        <div class="grid gap-4 md:grid-cols-3">
+          <div v-for="field in quantityFields" :key="field.label" class="flex flex-col gap-2">
+            <span class="text-xs text-muted-foreground tracking-wide">{{ field.label }}</span>
+            <div class="rounded-lg border bg-muted/15 px-4 py-3 text-base font-medium break-words">
+              {{ displayValue(field.value) }}
             </div>
           </div>
-        </section>
+        </div>
       </div>
 
       <div class="flex justify-end">
@@ -156,9 +143,10 @@ const basicFields = computed(() => {
     {
       label: '상태',
       value: detail.isDeleted ? '삭제' : '사용중',
-      valueClass: detail.isDeleted
-        ? 'inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold bg-red-100 text-red-700 border-red-300 w-fit'
-        : 'inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold bg-green-100 text-green-700 border-green-300 w-fit',
+      isStatus: true,
+      statusWrapperClass: detail.isDeleted
+        ? 'bg-red-50 text-red-700 border-red-200'
+        : 'bg-green-50 text-green-700 border-green-200',
     },
   ];
 });
