@@ -54,9 +54,36 @@
 
       <div class="flex justify-end">
         <Button variant="outline" class="w-fit" @click="viewSerialNumbers">
-          시리얼 번호 조회
+          {{ showSerials ? '시리얼 번호 닫기' : '시리얼 번호 조회' }}
         </Button>
       </div>
+
+      <section v-if="showSerials" class="border rounded-lg p-6">
+        <h4 class="text-lg font-semibold mb-4">시리얼 번호</h4>
+        <div v-if="isSerialLoading" class="text-sm text-muted-foreground">조회 중입니다...</div>
+        <div v-else-if="hasSerialError" class="text-sm text-red-500">
+          시리얼 번호를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.
+        </div>
+        <div v-else-if="serialNumbers.length === 0" class="text-sm text-muted-foreground">
+          등록된 시리얼 번호가 없습니다.
+        </div>
+        <div v-else class="max-h-72 overflow-auto border rounded">
+          <Table class="w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead class="w-20 text-center">No.</TableHead>
+                <TableHead>시리얼 번호</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="(serial, index) in serialNumbers" :key="`${serial}-${index}`">
+                <TableCell class="text-center font-medium">{{ index + 1 }}</TableCell>
+                <TableCell class="font-mono text-sm">{{ serial }}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      </section>
     </div>
 
     <div
@@ -69,11 +96,19 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetLotDetail from '@/apis/query-hooks/lot/useGetLotDetail';
 import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { toast } from 'vue-sonner';
 
 const route = useRoute();
@@ -82,6 +117,10 @@ const router = useRouter();
 const lotId = computed(() => route.params.lotId);
 
 const { data: lotDetail, isPending } = useGetLotDetail(lotId);
+const showSerials = ref(false);
+const serialNumbers = ref([]);
+const isSerialLoading = ref(false);
+const hasSerialError = ref(false);
 
 const goBack = () => {
   router.back();
@@ -149,12 +188,33 @@ function calculateDefectiveRate(detail) {
   return (defectiveQty / lotQty) * 100;
 }
 
-const viewSerialNumbers = () => {
-  const filePath = lotDetail.value?.serialFilePath;
-  if (!filePath) {
+const viewSerialNumbers = async () => {
+  if (!lotDetail.value?.serialFilePath) {
     toast.info('등록된 시리얼 번호가 없습니다.');
     return;
   }
-  window.open(filePath, '_blank', 'noopener');
+
+  if (showSerials.value) {
+    showSerials.value = false;
+    return;
+  }
+
+  isSerialLoading.value = true;
+  hasSerialError.value = false;
+
+  try {
+    const response = await fetch(lotDetail.value.serialFilePath);
+    if (!response.ok) {
+      throw new Error('failed to fetch');
+    }
+    const text = await response.text();
+    serialNumbers.value = text.split(/\r?\n/).filter(line => line.trim().length > 0);
+    showSerials.value = true;
+  } catch (error) {
+    hasSerialError.value = true;
+    toast.error('시리얼 번호를 불러오지 못했습니다.');
+  } finally {
+    isSerialLoading.value = false;
+  }
 };
 </script>
