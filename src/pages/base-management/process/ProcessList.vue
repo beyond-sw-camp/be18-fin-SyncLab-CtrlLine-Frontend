@@ -130,7 +130,7 @@ watch(
   newQuery => {
     page.value = Number(newQuery.page ?? 1);
 
-    filters.processName = newQuery.equipmentName ?? '';
+    filters.processName = newQuery.processName ?? '';
     filters.userName = newQuery.userName ?? null;
     filters.userDepartment = newQuery.userDepartment ?? null;
   },

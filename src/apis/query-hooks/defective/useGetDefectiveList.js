@@ -9,16 +9,16 @@ export default function useGetDefectiveList(initialFilters = {}) {
   const authStore = useAuthStore();
   const page = ref(1);
   const pageSize = ref(10);
-  const fixedSort = [{ sortBy: 'defectiveDocumentNo', direction: 'desc' }];
+  const fixedSort = [{ sortBy: 'defectiveDocNo', direction: 'desc' }];
 
   const filters = reactive({
-    defectiveDocumentNo: initialFilters.defectiveDocumentNo ?? '',
+    defectiveDocNo: initialFilters.defectiveDocNo ?? '',
     itemCode: initialFilters.itemCode ?? '',
     itemName: initialFilters.itemName ?? '',
     lineName: initialFilters.lineName ?? '',
-    defectiveQty: initialFilters.defectiveQty ?? '',
-    performanceDefectiveRate: initialFilters.performanceDefectiveRate ?? '',
-    performanceDocumentNo: initialFilters.performanceDocumentNo,
+    defectiveTotalQty: initialFilters.defectiveTotalQty ?? '',
+    defectiveTotalRate: initialFilters.defectiveTotalRate ?? '',
+    productionPerformanceDocNo: initialFilters.productionPerformanceDocNo,
   });
 
   const queryParams = computed(() => {
