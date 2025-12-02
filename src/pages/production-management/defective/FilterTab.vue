@@ -6,7 +6,7 @@
           Filter by
         </AccordionTrigger>
       </div>
-
+      <!--조인해서 가져오는 품목, 라인만 필터링이 안됨.. 왜 그러는 걸까요. AI: 백엔드 문제일 것 같아~!-->
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FilterInput label="전표번호" v-model="localFilters.defectiveDocNo" />
