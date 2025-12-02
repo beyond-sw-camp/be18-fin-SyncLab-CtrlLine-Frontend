@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="relative">
     <div>
       <Badge variant="secondary" class="mb-4">선택 라인</Badge>
       <ejs-schedule
@@ -19,7 +19,6 @@
         @actionComplete="onSelectedScheduleAction"
       />
     </div>
-
     <div>
       <Badge variant="secondary" class="mb-4 mt-6">선택 가능한 라인</Badge>
       <ejs-schedule
@@ -36,8 +35,10 @@
         :group="groupOptions"
         :resources="availableLineResource"
         @actionComplete="onAvailableScheduleAction"
+        :eventClick="onEventClick"
       />
     </div>
+    <ScheduleTooltip v-if="tooltip.show" :tooltip="tooltip" @close="tooltip.show = false" />
   </div>
 </template>
 
@@ -55,6 +56,38 @@ import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetProductionPlanScheduleList from '@/apis/query-hooks/production-plan/useGetProductionPlanScheduleList';
 import { Badge } from '@/components/ui/badge';
 import { useScheduleRangeManager } from '@/hooks/useScheduleRangeManager';
+import ScheduleTooltip from '@/pages/production-management/production-plan/ScheduleTooltip.vue';
+
+const tooltip = ref({
+  show: false,
+  x: 0,
+  y: 0,
+  data: null,
+});
+
+// 이벤트 클릭 핸들러
+function onEventClick(args) {
+  const el = args.element;
+  const rect = el.getBoundingClientRect();
+
+  const width = 300;
+  const height = 180;
+
+  let x = rect.left + rect.width / 2 - width / 2;
+  let y = rect.top - height - 8;
+
+  // 화면 밖이면 자동 처리
+  if (x < 0) x = 10;
+  if (x + width > window.innerWidth) x = window.innerWidth - width - 10;
+  if (y < 0) y = rect.bottom + 8;
+
+  tooltip.value = {
+    show: true,
+    x,
+    y,
+    data: args.event,
+  };
+}
 
 provide('schedule', [TimelineViews, Day, Week, TimelineMonth]);
 
@@ -67,17 +100,7 @@ const editSettings = {
 };
 
 function onPopupOpen(args) {
-  // 1) QuickInfo 팝업
-  if (args.type === 'QuickInfo') {
-    args.cancel = true;
-    return;
-  }
-
-  // 2) Event Editor 팝업 (New Event / Edit Event)
-  if (args.type === 'Editor') {
-    args.cancel = true;
-    return;
-  }
+  args.cancel = true;
 }
 
 const props = defineProps({
@@ -180,14 +203,21 @@ function onAvailableScheduleAction(args) {
   if (inst) onAvailableNavigation(inst);
 }
 
-const makeEvent = ev => ({
-  Id: ev.id,
-  Subject: ev.documentNo,
-  StartTime: new Date(ev.startTime),
-  EndTime: new Date(ev.endTime),
-  LineCode: ev.lineCode,
-  LineName: ev.lineName,
-});
+const makeEvent = ev => {
+  return {
+    Id: ev.id,
+    Subject: ev.documentNo,
+    StartTime: new Date(ev.startTime),
+    EndTime: new Date(ev.endTime),
+    LineCode: ev.lineCode,
+    LineName: ev.lineName,
+    FactoryCode: ev.factoryCode,
+    FactoryName: ev.factoryName,
+    ItemName: ev.itemName,
+    ItemQty: ev.plannedQty,
+    Status: ev.status,
+  };
+};
 
 const availableEvents = computed(
   () => availableLineData.value?.pages?.flatMap(p => p).map(makeEvent) ?? [],
