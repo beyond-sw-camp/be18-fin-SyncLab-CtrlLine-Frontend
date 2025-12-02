@@ -12,9 +12,9 @@
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 전표번호 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 라인 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목명 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장코드 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 라인코드 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목코드 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
               영업담당자
             </TableHead>
@@ -36,19 +36,19 @@
               {{ performance.documentNo }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.factoryName }} ({{ performance.factoryCode }})
+              {{ performance.factoryCode }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.lineName }} ({{ performance.lineCode }})
+              {{ performance.lineCode }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.itemCode }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.salesManagerName }} ({{ performance.salesManagerNo }})
+              {{ performance.salesManagerNo }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.productionManagerName }} ({{ performance.productionManagerNo }})
+              {{ performance.productionManagerNo }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.performanceQty }} EA.
