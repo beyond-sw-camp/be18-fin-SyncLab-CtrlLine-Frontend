@@ -23,7 +23,6 @@
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 실적수량 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 불량률 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 상세보기 </TableHead>
           </TableRow>
         </TableHeader>
 
@@ -37,28 +36,25 @@
               {{ performance.documentNo }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.factoryCode }}
+              {{ performance.factoryName }} ({{ performance.factoryCode }})
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.lineCode }}
+              {{ performance.lineName }} ({{ performance.lineCode }})
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.itemCode }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.salesManagerNo }}
+              {{ performance.salesManagerName }} ({{ performance.salesManagerNo }})
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.productionManagerNo }}
+              {{ performance.productionManagerName }} ({{ performance.productionManagerNo }})
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.performanceQty }}
+              {{ performance.performanceQty }} EA.
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.defectRate }}
-            </TableCell>
-            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              <Button size="xs" variant="outline" class="w-[80px]">상세보기</Button>
+              {{ performance.defectRate }} %
             </TableCell>
           </TableRow>
           <TableRow v-if="productionPerformanceList.content.length === 0">
@@ -82,7 +78,6 @@ import { useRoute, useRouter } from 'vue-router';
 
 import useGetProductionPerformanceList from '@/apis/query-hooks/production-performance/useGetProductionPerformanceList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
-import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
