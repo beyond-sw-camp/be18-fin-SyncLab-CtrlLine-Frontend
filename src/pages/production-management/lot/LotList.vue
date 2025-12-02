@@ -85,7 +85,6 @@ const initialFilters = {
   itemCode: route.query.itemCode || '',
   factoryCode: route.query.factoryCode || '',
   lineCode: route.query.lineCode || '',
-  productionManagerNo: route.query.productionManagerNo || '',
   performanceDocumentNo: route.query.performanceDocumentNo || '',
   createdAtFrom: route.query.createdAtFrom || null,
   createdAtTo: route.query.createdAtTo || null,
@@ -136,7 +135,6 @@ watch(
     filters.itemCode = newQuery.itemCode ?? '';
     filters.factoryCode = newQuery.factoryCode ?? '';
     filters.lineCode = newQuery.lineCode ?? '';
-    filters.productionManagerNo = newQuery.productionManagerNo ?? '';
     filters.performanceDocumentNo = newQuery.performanceDocumentNo ?? '';
     filters.createdAtFrom = newQuery.createdAtFrom ?? null;
     filters.createdAtTo = newQuery.createdAtTo ?? null;
