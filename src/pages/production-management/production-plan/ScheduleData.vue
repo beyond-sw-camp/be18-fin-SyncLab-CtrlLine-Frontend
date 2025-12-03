@@ -18,6 +18,7 @@
         :eventRendered="onEventRendered"
         @actionComplete="onSelectedScheduleAction"
         :eventClick="onEventClick"
+        :dragAndDrop="true"
       />
     </div>
 
@@ -33,6 +34,7 @@
         :eventSettings="availableEventSettings"
         :showCurrentTimeIndicator="true"
         :popupOpen="onPopupOpen"
+        :dragStart="onDragStart"
         :group="groupOptions"
         :resources="availableLineResource"
         :created="onAvailableCreated"
@@ -302,6 +304,10 @@ function onPopupOpen(args) {
   if (args.type === 'QuickInfo' || args.type === 'Editor') {
     args.cancel = true;
   }
+}
+
+function onDragStart(args) {
+  args.cancel = true;
 }
 </script>
 
