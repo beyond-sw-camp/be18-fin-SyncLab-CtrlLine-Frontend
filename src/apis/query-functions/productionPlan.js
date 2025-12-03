@@ -25,7 +25,7 @@ export async function updateProductionPlan(productionPlanId, params) {
   return data.data;
 }
 
-export async function updateProductionPlanStatueList(params) {
+export async function updateProductionPlanStatusList(params) {
   const { data } = await apiClient.patch(`/production-plans/status`, params);
   return data.data;
 }
