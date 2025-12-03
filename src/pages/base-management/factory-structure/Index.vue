@@ -24,13 +24,9 @@
       <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-500">선택된 공장</p>
             <h2 class="text-2xl font-semibold text-gray-900">
               {{ selectedFactory?.factoryName ?? '공장을 선택해주세요' }}
             </h2>
-            <p class="mt-1 text-sm text-gray-500">
-              Milo-Server 라인/설비 데이터를 공정 흐름 평면도로 표현했습니다.
-            </p>
           </div>
           <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600">
             <div class="rounded-full border border-gray-200 px-4 py-1">라인 {{ lineStructures.length }}개</div>
@@ -359,7 +355,7 @@ const summariseEquipments = () => [];
 
 .line-rack-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: 1fr;
   gap: 1rem;
   margin-bottom: 2rem;
 }
