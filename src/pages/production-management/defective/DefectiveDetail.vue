@@ -83,6 +83,7 @@
           </FormItem>
         </FormField>
       </div>
+      <DefectiveTable: defectvieDetail="defectiveDetail"/>
     </Form>
   </div>
 </template>
@@ -101,7 +102,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 const route = useRoute();
 
 const { data: defectiveDetail } = useGetDefective(route.params.planDefectiveId);
-
+const defectiveDetail = ref({});
 const initialValues = computed(() => {
   if (!defectiveDetail.value) return {};
 
