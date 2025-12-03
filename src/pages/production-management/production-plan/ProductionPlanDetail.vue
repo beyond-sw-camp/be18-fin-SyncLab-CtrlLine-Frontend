@@ -308,6 +308,8 @@
         :factoryId="selectedFactoryId"
         :factoryCode="productionPlanDetail.factoryCode"
         :lineCode="productionPlanDetail.lineCode"
+        mode="detail"
+        @updateStartEndTime="onStartTimeEndTimeChanged"
       />
     </form>
   </div>
@@ -345,6 +347,7 @@ import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
 import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
+import formatDate from '@/utils/formatDate';
 
 const formSchema = toTypedSchema(
   z.object({
@@ -496,6 +499,14 @@ function onLineSelected(lineCode) {
     lineDetail.value = {};
     form.setFieldValue('productionManagerNo', '', false);
   }
+}
+
+function onStartTimeEndTimeChanged(ev) {
+  const start = formatDate(ev.StartTime, 'local-datetime');
+  const end = formatDate(ev.EndTime, 'local-datetime');
+
+  form.setFieldValue('startTime', start);
+  form.setFieldValue('endTime', end);
 }
 
 const onSubmit = form.handleSubmit(values => {

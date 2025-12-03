@@ -275,6 +275,7 @@
         :factoryId="selectedFactoryId"
         :factoryCode="factoryDetail?.factoryCode"
         :lineCode="lineDetail?.lineCode"
+        mode="create"
       />
     </form>
   </div>

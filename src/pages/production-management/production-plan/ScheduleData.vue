@@ -10,7 +10,6 @@
         :views="['TimelineDay', 'TimelineWeek', 'TimelineMonth']"
         :current-view="'TimelineDay'"
         :eventSettings="selectedEventSettings"
-        :editSettings="editSettings"
         :showCurrentTimeIndicator="true"
         :popupOpen="onPopupOpen"
         :group="groupOptions"
@@ -32,7 +31,6 @@
         :views="['TimelineDay', 'TimelineWeek', 'TimelineMonth']"
         :current-view="'TimelineDay'"
         :eventSettings="availableEventSettings"
-        :editSettings="editSettings"
         :showCurrentTimeIndicator="true"
         :popupOpen="onPopupOpen"
         :group="groupOptions"
@@ -55,6 +53,7 @@ import {
   Day,
   Week,
   TimelineMonth,
+  DragAndDrop,
 } from '@syncfusion/ej2-vue-schedule';
 import { computed, nextTick, provide, ref, watch } from 'vue';
 
@@ -66,7 +65,7 @@ import { useScheduleRangeManager } from '@/hooks/useScheduleRangeManager';
 
 import ScheduleTooltip from './ScheduleTooltip.vue';
 
-provide('schedule', [TimelineViews, Day, Week, TimelineMonth]);
+provide('schedule', [TimelineViews, Day, Week, TimelineMonth, DragAndDrop]);
 
 const tooltip = ref({
   show: false,
@@ -134,7 +133,13 @@ const props = defineProps({
   factoryCode: String,
   lineCode: String,
   productionPlanDetailId: Number,
+  mode: {
+    type: String,
+    default: 'detail',
+  },
 });
+
+const emit = defineEmits(['updateStartEndTime']);
 
 const { data: lineListSchedule } = useGetLineList({
   factoryId: props.factoryId,
@@ -249,9 +254,42 @@ function onAvailableCreated() {
 }
 
 function onSelectedScheduleAction(args) {
-  if (!['dateNavigate', 'viewNavigate'].includes(args.requestType)) return;
-  const inst = selectedScheduleRef.value?.ej2Instances;
-  if (inst) onSelectedNavigation(inst);
+  // 날짜 이동 처리
+  if (['dateNavigate', 'viewNavigate'].includes(args.requestType)) {
+    const inst = selectedScheduleRef.value?.ej2Instances;
+    if (inst) onSelectedNavigation(inst);
+  }
+
+  // 드래그앤드롭 후 시간 변경 처리
+  if (args.requestType === 'eventChanged') {
+    const updatedEvents = args.changedRecords; // 여러개 이벤트를 처리하기 위해 배열 처리
+
+    updatedEvents.forEach(updated => {
+      // 선택된 라인에서 업데이트된 이벤트와 동일한 lineCode를 가진 이벤트들을 찾음
+      if (updated && props.mode === 'detail' && updated.Id === props.productionPlanDetailId) {
+        // 선택된 라인에 있는 이벤트 업데이트
+        emit('updateStartEndTime', updated);
+
+        // 선택 가능한 라인에 동일한 라인 코드가 있는 경우, 해당 이벤트도 업데이트
+        availableLineResource.value[0].dataSource.forEach(line => {
+          if (line.LineCode === updated.LineCode) {
+            // 동일한 라인 코드가 존재하면 해당 라인도 업데이트
+            availableEvents.value.forEach(event => {
+              if (event.LineCode === updated.LineCode) {
+                event.StartTime = updated.StartTime;
+                event.EndTime = updated.EndTime;
+              }
+            });
+          }
+        });
+      }
+    });
+
+    nextTick(() => {
+      selectedScheduleRef.value?.ej2Instances?.refreshEvents();
+      availableScheduleRef.value?.ej2Instances?.refreshEvents();
+    });
+  }
 }
 
 function onAvailableScheduleAction(args) {
@@ -259,14 +297,6 @@ function onAvailableScheduleAction(args) {
   const inst = availableScheduleRef.value?.ej2Instances;
   if (inst) onAvailableNavigation(inst);
 }
-
-const editSettings = {
-  allowAdding: false,
-  allowEditing: false,
-  allowDeleting: false,
-  showDeleteConfirmDialog: false,
-  showQuickInfo: false,
-};
 
 function onPopupOpen(args) {
   if (args.type === 'QuickInfo' || args.type === 'Editor') {
