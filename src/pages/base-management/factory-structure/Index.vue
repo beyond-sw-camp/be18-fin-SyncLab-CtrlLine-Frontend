@@ -49,9 +49,14 @@
                     class="pipeline__node"
                     :data-position="equipment.position"
                   >
-                    <div class="pipeline__machine" :data-active="(equipment.lineTypes ?? ['CL','PL','CP']).includes(line.type)">
+                    <div
+                      class="pipeline__machine"
+                      :data-active="(equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)"
+                    >
+                      <component :is="equipment.icon" class="equipment-icon" aria-hidden="true" />
                       <span class="pipeline__stage-number">{{ index + 1 }}</span>
                     </div>
+                    <p class="pipeline__equip-label">{{ equipment.label }}</p>
                   </div>
                 </div>
               </div>
@@ -153,14 +158,32 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import { BatteryCharging, Boxes, Brush, Droplet, Puzzle, ShieldCheck, Zap } from 'lucide-vue-next';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const EQUIPMENT_LAYOUT = Array.from({ length: 14 }, (_, index) => ({
-  key: `equipment-node-${index + 1}`,
-  position: index % 2 === 0 ? 'top' : 'bottom',
-  lineTypes: ['CL', 'PL', 'CP'],
-}));
+const EQUIPMENT_GROUPS = [
+  { label: 'Tray Cleaner', icon: Brush },
+  { label: 'Electrode Unit', icon: Zap },
+  { label: 'Assembly Unit', icon: Puzzle },
+  { label: 'Formation Unit', icon: BatteryCharging },
+  { label: 'Module & Pack', icon: Boxes },
+  { label: 'Cell Cleaner', icon: Droplet },
+  { label: 'Final Inspection', icon: ShieldCheck },
+];
+
+const EQUIPMENT_LAYOUT = EQUIPMENT_GROUPS.flatMap((group, groupIndex) =>
+  Array.from({ length: 2 }, (_, offset) => {
+    const absoluteIndex = groupIndex * 2 + offset;
+    return {
+      key: `${group.label}-${offset}`,
+      label: group.label,
+      icon: group.icon,
+      position: absoluteIndex % 2 === 0 ? 'top' : 'bottom',
+      lineTypes: ['CL', 'PL', 'CP'],
+    };
+  }),
+);
 
 const PLAN_ZONES = [
   {
@@ -409,12 +432,13 @@ const summariseEquipments = () => [];
   position: relative;
   height: 160px;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .pipeline__node[data-position='bottom'] {
-  align-items: flex-end;
+  justify-content: flex-end;
 }
 
 .pipeline__machine {
@@ -456,6 +480,25 @@ const summariseEquipments = () => [];
   justify-content: center;
   font-weight: 600;
   box-shadow: 0 4px 10px rgba(16, 24, 40, 0.1);
+}
+
+.equipment-icon {
+  width: 28px;
+  height: 28px;
+  color: #405531;
+}
+
+.pipeline__equip-label {
+  margin: 0.4rem 0 0;
+  font-size: 0.72rem;
+  text-align: center;
+  color: #475467;
+  font-weight: 500;
+}
+
+.pipeline__node[data-position='bottom'] .pipeline__equip-label {
+  order: -1;
+  margin: 0 0 0.4rem;
 }
 
 .pipeline__lines {
