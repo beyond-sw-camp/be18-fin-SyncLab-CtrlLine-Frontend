@@ -2,12 +2,9 @@
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 상세 조회</h3>
     <div class="flex gap-2">
-      <div
-        class="flex items-center text-xs font-medium bg-gray-100 px-2 py-1 rounded-xl"
-        v-if="productionPlanDetail"
+      <Badge v-if="productionPlanDetail" variant="secondary">
+        {{ productionPlanDetail.planDocumentNo }}</Badge
       >
-        {{ productionPlanDetail.planDocumentNo }}
-      </div>
 
       <Button
         v-if="canDelete"
@@ -303,6 +300,14 @@
         </div>
       </div>
       <ItemTable :itemDetail="itemDetail" />
+      <ScheduleData
+        v-if="
+          productionPlanDetail && selectedFactoryId && selectedItemId && lineList?.content?.length
+        "
+        :factoryId="selectedFactoryId"
+        :factoryCode="productionPlanDetail.factoryCode"
+        :lineCode="productionPlanDetail.lineCode"
+      />
     </form>
   </div>
 </template>
@@ -323,6 +328,7 @@ import useGetProductionPlan from '@/apis/query-hooks/production-plan/useGetProdu
 import useUpdateProductionPlan from '@/apis/query-hooks/production-plan/useUpdateProductionPlan';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompleteSelect.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -336,6 +342,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
+import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
 
 const formSchema = toTypedSchema(

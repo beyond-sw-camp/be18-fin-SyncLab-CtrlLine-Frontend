@@ -3,10 +3,9 @@
     <div>
       <Badge variant="secondary" class="mb-4">선택 라인</Badge>
       <ejs-schedule
-        v-if="props.lineCode"
+        v-if="props.lineCode && selectedLineResource.length > 0"
         ref="selectedScheduleRef"
         :selectedDate="selectedDateSelected"
-        height="300px"
         width="100%"
         :views="['TimelineDay', 'TimelineWeek', 'TimelineMonth']"
         :current-view="'TimelineDay'"
@@ -16,15 +15,17 @@
         :popupOpen="onPopupOpen"
         :group="groupOptions"
         :resources="selectedLineResource"
+        :eventRendered="onEventRendered"
         @actionComplete="onSelectedScheduleAction"
+        :eventClick="onEventClick"
       />
     </div>
     <div>
       <Badge variant="secondary" class="mb-4 mt-6">선택 가능한 라인</Badge>
       <ejs-schedule
+        v-if="availableLineResource.length > 0"
         ref="availableScheduleRef"
         :selectedDate="selectedDateAvailable"
-        height="650px"
         width="100%"
         :views="['TimelineDay', 'TimelineWeek', 'TimelineMonth']"
         :current-view="'TimelineDay'"
@@ -34,6 +35,7 @@
         :popupOpen="onPopupOpen"
         :group="groupOptions"
         :resources="availableLineResource"
+        :eventRendered="onEventRendered"
         @actionComplete="onAvailableScheduleAction"
         :eventClick="onEventClick"
       />
@@ -55,6 +57,7 @@ import { computed, nextTick, onMounted, provide, ref, watch } from 'vue';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetProductionPlanScheduleList from '@/apis/query-hooks/production-plan/useGetProductionPlanScheduleList';
 import { Badge } from '@/components/ui/badge';
+import { STATUS_COLORS } from '@/constants/productionPlanStatus';
 import { useScheduleRangeManager } from '@/hooks/useScheduleRangeManager';
 import ScheduleTooltip from '@/pages/production-management/production-plan/ScheduleTooltip.vue';
 
@@ -70,16 +73,26 @@ function onEventClick(args) {
   const el = args.element;
   const rect = el.getBoundingClientRect();
 
-  const width = 300;
-  const height = 180;
+  const width = 256;
+  const gap = 10;
 
-  let x = rect.left + rect.width / 2 - width / 2;
-  let y = rect.top - height - 8;
+  // 실제 스크롤되는 곳
+  const scheduleWrap = document.querySelector('.e-schedule .e-content-wrap');
+  const scrollTop = scheduleWrap.scrollTop;
 
-  // 화면 밖이면 자동 처리
-  if (x < 0) x = 10;
-  if (x + width > window.innerWidth) x = window.innerWidth - width - 10;
-  if (y < 0) y = rect.bottom + 8;
+  // 스케줄 전체의 문서 기반 top 위치
+  const scheduleRect = scheduleWrap.getBoundingClientRect();
+  const scheduleTop = scheduleRect.top;
+
+  let x = rect.right - width;
+
+  // 700 이하게 될 때까지 반복
+  while (x > 700) {
+    x = x / 1.5;
+  }
+
+  // y: 막대바 bottom + 스케줄 내부 스크롤 보정
+  const y = rect.bottom - scheduleTop + scrollTop - gap * 2;
 
   tooltip.value = {
     show: true,
@@ -87,6 +100,24 @@ function onEventClick(args) {
     y,
     data: args.event,
   };
+}
+
+function onEventRendered(args) {
+  console.log(args);
+  const status = args.data?.Status;
+  const colorSet = STATUS_COLORS[status];
+
+  console.log(status);
+
+  if (!colorSet) return;
+
+  args.element.style.backgroundColor = colorSet.background;
+  args.element.style.borderColor = colorSet.border;
+
+  const subject = args.element.querySelector('.e-subject');
+  if (subject) {
+    subject.style.color = colorSet.text;
+  }
 }
 
 provide('schedule', [TimelineViews, Day, Week, TimelineMonth]);
@@ -100,7 +131,15 @@ const editSettings = {
 };
 
 function onPopupOpen(args) {
-  args.cancel = true;
+  if (args.type === 'QuickInfo') {
+    args.cancel = true; // 기본 퀵인포도 막음
+  }
+
+  if (args.type === 'Editor') {
+    // 이벤트 추가하는 에디터 막음
+    args.cancel = true;
+    return;
+  }
 }
 
 const props = defineProps({
@@ -110,14 +149,14 @@ const props = defineProps({
 });
 
 // 공장별 라인 조회
-const { data: lineList, filters: lineFilters } = useGetLineList({
+const { data: lineListSchedule, filters: lineFilters } = useGetLineList({
   factoryId: props.factoryId,
 });
 
 // 선택한 라인
 const selectedLine = computed(() => {
-  if (!props.lineCode || !lineList.value?.content) return null;
-  return lineList.value.content.find(l => l.lineCode === props.lineCode);
+  if (!props.lineCode || !lineListSchedule.value?.content) return null;
+  return lineListSchedule.value.content.find(l => l.lineCode === props.lineCode);
 });
 
 const availableLineResource = computed(() => [
@@ -128,7 +167,7 @@ const availableLineResource = computed(() => [
     idField: 'LineCode',
     textField: 'text',
     dataSource:
-      lineList.value?.content?.map(l => ({
+      lineListSchedule.value?.content?.map(l => ({
         text: `${l.lineName} (${l.lineCode})`,
         LineCode: l.lineCode,
       })) ?? [],
@@ -303,4 +342,25 @@ watch(
 );
 </script>
 
-<style></style>
+<style>
+.e-schedule {
+  overflow: visible !important;
+}
+/* inline style 강제로 덮어쓰기 */
+.e-schedule .e-timeline-view .e-content-wrap tr,
+.e-schedule .e-timeline-view .e-resource-column-wrap tr {
+  height: 30px !important;
+}
+
+/* 막대바 높이 지정 */
+.e-appointment {
+  height: 22px !important;
+  border-radius: 12px !important;
+}
+
+/* 전체 컨테이너 높이도 자동으로 늘어나게  */
+.e-schedule .e-timeline-view .e-content-wrap,
+.e-schedule .e-timeline-view .e-resource-column-wrap {
+  height: auto !important;
+}
+</style>
