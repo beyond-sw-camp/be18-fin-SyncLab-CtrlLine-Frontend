@@ -62,7 +62,12 @@
               </TooltipProvider>
             </FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="item-specification" />
+              <Input
+                type="text"
+                v-bind="componentField"
+                autocomplete="item-specification"
+                disabled
+              />
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
@@ -72,7 +77,7 @@
           <FormItem>
             <FormLabel>단위</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="item-unit" />
+              <Input type="text" v-bind="componentField" autocomplete="item-unit" disabled />
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
@@ -95,7 +100,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 const route = useRoute();
 
-const { data: defectiveDetail } = useGetDefective(route.params.id);
+const { data: defectiveDetail } = useGetDefective(route.params.planDefectiveId);
 
 const initialValues = computed(() => {
   if (!defectiveDetail.value) return {};
