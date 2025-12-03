@@ -21,6 +21,7 @@ export async function getDefectiveList(params) {
   const queryObj = buildQueryObject(params);
   const search = new URLSearchParams(queryObj);
 
-  const { data } = await apiClient.get(`/items?${search.toString()}`);
+  const { data } = await apiClient.get(`/defectives?${search.toString()}`);
+
   return data.data;
 }

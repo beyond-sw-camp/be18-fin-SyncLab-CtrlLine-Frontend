@@ -26,7 +26,9 @@
         </button>
       </DialogTrigger>
 
-      <DialogContent class="w-full max-w-[1040px] sm:max-w-[1040px] rounded-3xl border border-gray-300 p-8 shadow-xl">
+      <DialogContent
+        class="w-full max-w-[1040px] sm:max-w-[1040px] rounded-3xl border border-gray-300 p-8 shadow-xl"
+      >
         <DialogHeader class="flex items-center justify-between p-0">
           <DialogTitle class="text-lg font-semibold text-gray-800">필터 설정</DialogTitle>
         </DialogHeader>
@@ -184,7 +186,11 @@
               <div class="flex items-center gap-2">
                 <span
                   class="h-3 w-3 rounded-full"
-                  :style="{ backgroundColor: pieChartConfig[item.label]?.color || CHART_COLORS[index % CHART_COLORS.length] }"
+                  :style="{
+                    backgroundColor:
+                      pieChartConfig[item.label]?.color ||
+                      CHART_COLORS[index % CHART_COLORS.length],
+                  }"
                 ></span>
                 <span>{{ formatNgTypeLabel(item.label) }}</span>
               </div>
@@ -242,7 +248,9 @@
           >건
         </p>
         <div class="relative w-full sm:w-64">
-          <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+          <Search
+            class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400"
+          />
           <input
             v-model="tableSearch"
             placeholder="전표, 품목, 공장 검색"
@@ -293,7 +301,9 @@
               <td class="px-4 py-3 text-center font-medium">
                 <button
                   class="text-[#2765C4] underline-offset-2 hover:underline"
-                  @click="goToDefectiveDetail(record.defectiveDocNo || record.productionPerformanceDocNo)"
+                  @click="
+                    goToDefectiveDetail(record.defectiveDocNo || record.productionPerformanceDocNo)
+                  "
                 >
                   {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
                 </button>
@@ -334,7 +344,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
-import { getDefectiveAll, getDefectiveDetail } from '@/apis/query-functions/defective';
+import { getDefectiveList, getDefectiveDetail } from '@/apis/query-functions/defective';
 import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -404,7 +414,7 @@ const {
   refetch,
 } = useQuery({
   queryKey: ['defectiveAll', queryParams],
-  queryFn: () => getDefectiveAll(queryParams.value),
+  queryFn: () => getDefectiveList(queryParams.value),
   enabled: false,
   placeholderData: keepPreviousData,
 });
@@ -559,8 +569,7 @@ const formatPercent = value => {
   const numeric = Number(value);
   if (Number.isNaN(numeric)) return String(value);
 
-  const display =
-    numeric > 1 ? numeric : numeric * 100; // API가 비율(0~1) 또는 %값 모두 대비
+  const display = numeric > 1 ? numeric : numeric * 100; // API가 비율(0~1) 또는 %값 모두 대비
   return `${display.toFixed(1)}%`;
 };
 
@@ -603,10 +612,7 @@ const exportCsv = () => {
     : [];
   const lineData = lineChartData.value.length
     ? [['기간', '평균 불량률(%)']].concat(
-        lineChartData.value.map(entry => [
-          entry.label,
-          Number(entry.rate ?? 0).toFixed(1),
-        ]),
+        lineChartData.value.map(entry => [entry.label, Number(entry.rate ?? 0).toFixed(1)]),
       )
     : [];
 
@@ -775,7 +781,10 @@ const parseRecordDate = record => {
 const lineChartData = computed(() => {
   if (!chartRecords.value.length) return [];
   const entries = chartRecords.value
-    .map(record => ({ date: parseRecordDate(record), rate: normalizeRate(record.defectiveTotalRate) }))
+    .map(record => ({
+      date: parseRecordDate(record),
+      rate: normalizeRate(record.defectiveTotalRate),
+    }))
     .filter(entry => entry.date);
 
   if (!entries.length) return [];

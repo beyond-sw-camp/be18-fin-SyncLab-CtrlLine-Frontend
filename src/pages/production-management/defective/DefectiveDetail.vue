@@ -85,7 +85,7 @@
 
       <div class="mt-6">
         <h4 class="text-base font-semibold mb-3 border-b pb-2">불량 상세 내역</h4>
-        <DefectiveTable :defectiveDetail="defectiveDetail?.value?.defectives" />
+        <DefectiveTable :defectives="defectiveDetail?.value?.defectives" />
       </div>
     </Form>
   </div>
