@@ -9,3 +9,8 @@ export async function getDefectiveAll(params = {}) {
 
   return data.data ?? [];
 }
+
+export async function getDefectiveDetail(defectiveId) {
+  const { data } = await apiClient.get(`/defectives/${defectiveId}`);
+  return data.data;
+}

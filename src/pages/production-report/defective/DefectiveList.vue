@@ -158,6 +158,83 @@
       </DialogContent>
     </Dialog>
 
+    <div v-if="chartsVisible" class="grid gap-4 lg:grid-cols-2">
+      <Card class="h-[340px]">
+        <CardContent class="flex h-full items-center gap-4">
+          <div v-if="pieChartData.length" class="h-[260px] w-1/2">
+            <ChartContainer :config="pieChartConfig">
+              <VisSingleContainer :data="pieChartVisData" :margin="{ top: 24, bottom: 24 }">
+                <VisDonut
+                  :value="d => d.value"
+                  :color="d => pieChartConfig[d.type]?.color || CHART_COLORS[0]"
+                  :arc-width="0"
+                />
+                <ChartTooltip :template="pieTooltipTemplate" />
+              </VisSingleContainer>
+            </ChartContainer>
+          </div>
+          <div v-else class="text-sm text-gray-400">표시할 NG 타입 데이터가 없습니다.</div>
+
+          <div class="w-1/2 space-y-3">
+            <div
+              v-for="(item, index) in pieChartPercentages"
+              :key="item.label"
+              class="flex items-center justify-between rounded-xl border px-3 py-2 text-sm text-gray-600"
+            >
+              <div class="flex items-center gap-2">
+                <span
+                  class="h-3 w-3 rounded-full"
+                  :style="{ backgroundColor: pieChartConfig[item.label]?.color || CHART_COLORS[index % CHART_COLORS.length] }"
+                ></span>
+                <span>{{ item.label }}</span>
+              </div>
+              <span class="font-semibold text-gray-800">{{ item.percent.toFixed(1) }}%</span>
+            </div>
+            <p v-if="!pieChartData.length" class="text-sm text-gray-400 text-center">
+              데이터가 없습니다.
+            </p>
+          </div>
+        </CardContent>
+        <CardFooter class="justify-center text-sm text-gray-500">NG 타입 비율</CardFooter>
+      </Card>
+
+      <Card class="h-[340px]">
+        <CardContent class="flex h-full flex-col justify-center">
+          <div v-if="lineChartData.length" class="h-[260px] w-full">
+            <ChartContainer :config="LINE_CHART_CONFIG" cursor>
+              <VisXYContainer :data="lineChartData" :margin="{ left: 32, right: 16, bottom: 32 }">
+                <VisLine
+                  :x="d => d.index"
+                  :y="d => d.rate"
+                  :color="LINE_CHART_CONFIG.rate.color"
+                  :line-width="3"
+                />
+                <VisAxis
+                  type="x"
+                  :tick-line="false"
+                  :domain-line="false"
+                  :grid-line="false"
+                  :tick-format="lineTickFormatter"
+                  :tick-values="lineTickValues"
+                />
+                <VisAxis
+                  type="y"
+                  :num-ticks="4"
+                  :tick-line="false"
+                  :domain-line="false"
+                  :tick-format="value => `${Number(value ?? 0).toFixed(1)}%`"
+                />
+                <ChartTooltip />
+                <ChartCrosshair :template="lineTooltipTemplate" color="#0000" />
+              </VisXYContainer>
+            </ChartContainer>
+          </div>
+          <p v-else class="text-sm text-gray-400">표시할 불량률 데이터가 없습니다.</p>
+        </CardContent>
+        <CardFooter class="justify-center text-sm text-gray-500">불량률 추이</CardFooter>
+      </Card>
+    </div>
+
     <div class="rounded-xl border border-gray-200 bg-white p-5">
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-sm text-gray-500">
@@ -210,7 +287,7 @@
           <tbody v-else-if="visibleRecords.length">
             <tr
               v-for="record in visibleRecords"
-              :key="record.planDefectiveId"
+              :key="detailKeyOf(record)"
               class="border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50"
             >
               <td class="px-4 py-3 text-center font-medium">
@@ -251,14 +328,23 @@
 
 <script setup>
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
+import { VisDonut, VisSingleContainer, VisXYContainer, VisAxis, VisLine } from '@unovis/vue';
 import { ChevronDown, Search } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
-import { getDefectiveAll } from '@/apis/query-functions/defective';
+import { getDefectiveAll, getDefectiveDetail } from '@/apis/query-functions/defective';
 import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartCrosshair,
+  ChartTooltipContent,
+  componentToString,
+} from '@/components/ui/chart';
 import {
   Dialog,
   DialogContent,
@@ -350,6 +436,11 @@ const visibleRecords = computed(() => {
 const isLoading = computed(() => isFetching.value);
 const remarksMap = reactive({});
 const pendingRemarkFetch = new Set();
+const defectiveDetailMap = reactive({});
+const pendingDetailFetch = new Set();
+const detailKeyOf = record =>
+  record.planDefectiveId || record.defectiveDocNo || record.productionPerformanceDocNo;
+const detailPlanIdOf = record => record.planDefectiveId;
 
 const remarkKeyOf = record => record.productionPerformanceDocNo || record.defectiveDocNo;
 
@@ -374,6 +465,30 @@ const fetchRemark = async docNo => {
   }
 };
 
+const fetchDefectiveDetail = async record => {
+  const detailKey = detailKeyOf(record);
+  const planId = detailPlanIdOf(record);
+
+  if (
+    !detailKey ||
+    !planId ||
+    defectiveDetailMap[detailKey] !== undefined ||
+    pendingDetailFetch.has(detailKey)
+  )
+    return;
+
+  pendingDetailFetch.add(detailKey);
+  try {
+    const detail = await getDefectiveDetail(planId);
+    defectiveDetailMap[detailKey] = detail;
+  } catch (error) {
+    console.error('Failed to fetch defective detail for', planId, error);
+    defectiveDetailMap[detailKey] = null;
+  } finally {
+    pendingDetailFetch.delete(detailKey);
+  }
+};
+
 watch(
   defectiveRows,
   rows => {
@@ -381,6 +496,9 @@ watch(
       const key = remarkKeyOf(row);
       if (key) {
         fetchRemark(key);
+      }
+      if (detailPlanIdOf(row)) {
+        fetchDefectiveDetail(row);
       }
     });
   },
@@ -486,6 +604,167 @@ const goToDefectiveDetail = docNo => {
   }
   router.push(`/production-management/defectives/${docNo}`);
 };
+
+const CHART_COLORS = ['#5B6D4C', '#7F9C7A', '#AFC49A', '#D7E0C7', '#F1F3EA', '#94A57B'];
+
+const chartRecords = computed(() => (hasSearched.value ? defectiveRows.value : []));
+
+const pieChartData = computed(() => {
+  if (!chartRecords.value.length) return [];
+  const counts = {};
+
+  chartRecords.value.forEach(record => {
+    const detail = defectiveDetailMap[detailKeyOf(record)];
+    const entries = Array.isArray(detail?.defectives) ? detail.defectives : [];
+
+    if (!entries.length) return;
+
+    entries.forEach(entry => {
+      const type = entry?.defectiveType || entry?.defectiveName || '기타';
+      const qty = Number(entry?.defectiveQty ?? 0);
+      if (Number.isNaN(qty) || qty <= 0) return;
+      counts[type] = (counts[type] || 0) + qty;
+    });
+  });
+
+  return Object.entries(counts).map(([label, value], index) => ({
+    label,
+    value,
+    color: CHART_COLORS[index % CHART_COLORS.length],
+  }));
+});
+
+const pieChartConfig = computed(() => {
+  if (!pieChartData.value.length) {
+    return { default: { label: '데이터 없음', color: CHART_COLORS[0] } };
+  }
+  return pieChartData.value.reduce((acc, item) => {
+    acc[item.label] = { label: item.label, color: item.color };
+    return acc;
+  }, {});
+});
+
+const pieChartVisData = computed(() =>
+  pieChartData.value.map(item => ({ type: item.label, value: item.value })),
+);
+
+const pieTooltipTemplate = computed(() =>
+  componentToString(pieChartConfig.value, ChartTooltipContent, {
+    hideLabel: false,
+    valueFormatter: value => `${Number(value ?? 0).toFixed(1)}건`,
+  }),
+);
+
+const pieChartPercentages = computed(() => {
+  const total = pieChartData.value.reduce((sum, item) => sum + item.value, 0);
+  if (!total) return [];
+  return pieChartData.value.map(item => ({
+    label: item.label,
+    percent: (item.value / total) * 100,
+  }));
+});
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+const getISOWeekInfo = date => {
+  const tmp = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = tmp.getUTCDay() || 7;
+  tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
+  const week = Math.ceil(((tmp - yearStart) / MS_PER_DAY + 1) / 7);
+
+  const start = new Date(tmp);
+  const startDay = start.getUTCDay() || 7;
+  start.setUTCDate(tmp.getUTCDate() - startDay + 1);
+  return { year: tmp.getUTCFullYear(), week, start: new Date(start.getTime()) };
+};
+
+const getBucketKey = (date, mode) => {
+  if (mode === 'day') {
+    return {
+      key: date.toISOString().slice(0, 10),
+      label: `${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`,
+      sortKey: date.getTime(),
+    };
+  }
+  if (mode === 'week') {
+    const info = getISOWeekInfo(date);
+    const label = `${String(info.week).padStart(2, '0')}주`;
+    return {
+      key: `${info.year}-W${String(info.week).padStart(2, '0')}`,
+      label,
+      sortKey: info.start.getTime(),
+    };
+  }
+  const first = new Date(date.getFullYear(), date.getMonth(), 1);
+  const label = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}`;
+  return { key: label, label, sortKey: first.getTime() };
+};
+
+const normalizeRate = rate => {
+  const value = Number(rate ?? 0);
+  if (Number.isNaN(value)) return 0;
+  return value <= 1 ? value * 100 : value;
+};
+
+const parseRecordDate = record => {
+  const raw = record.createdAt || record.dueDate;
+  if (!raw) return null;
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const lineChartData = computed(() => {
+  if (!chartRecords.value.length) return [];
+  const entries = chartRecords.value
+    .map(record => ({ date: parseRecordDate(record), rate: normalizeRate(record.defectiveTotalRate) }))
+    .filter(entry => entry.date);
+
+  if (!entries.length) return [];
+
+  entries.sort((a, b) => a.date - b.date);
+
+  const min = entries[0].date;
+  const max = entries[entries.length - 1].date;
+  const spanDays = Math.max(1, Math.round((max - min) / MS_PER_DAY) + 1);
+
+  const mode = spanDays <= 7 ? 'day' : spanDays <= 42 ? 'week' : 'month';
+
+  const buckets = new Map();
+  entries.forEach(entry => {
+    const keyInfo = getBucketKey(entry.date, mode);
+    const bucket = buckets.get(keyInfo.key) || { ...keyInfo, sum: 0, count: 0 };
+    bucket.sum += entry.rate;
+    bucket.count += 1;
+    buckets.set(keyInfo.key, bucket);
+  });
+
+  return Array.from(buckets.values())
+    .sort((a, b) => a.sortKey - b.sortKey)
+    .map((bucket, index) => ({
+      index,
+      label: bucket.label,
+      rate: bucket.count ? bucket.sum / bucket.count : 0,
+    }));
+});
+
+const lineTickValues = computed(() => lineChartData.value.map(item => item.index));
+
+const lineTickFormatter = value => {
+  const target = lineChartData.value.find(entry => entry.index === value);
+  return target?.label ?? '';
+};
+
+const LINE_CHART_CONFIG = {
+  rate: { label: '불량률', color: 'var(--chart-1)' },
+};
+
+const lineTooltipTemplate = componentToString(LINE_CHART_CONFIG, ChartTooltipContent, {
+  hideLabel: true,
+  valueFormatter: value => `${Number(value ?? 0).toFixed(1)}%`,
+});
+
+const chartsVisible = computed(() => hasSearched.value && chartRecords.value.length > 0);
 </script>
 
 <style scoped>
