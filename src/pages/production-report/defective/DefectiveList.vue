@@ -186,7 +186,7 @@
                   class="h-3 w-3 rounded-full"
                   :style="{ backgroundColor: pieChartConfig[item.label]?.color || CHART_COLORS[index % CHART_COLORS.length] }"
                 ></span>
-                <span>{{ item.label }}</span>
+                <span>{{ formatNgTypeLabel(item.label) }}</span>
               </div>
               <span class="font-semibold text-gray-800">{{ item.percent.toFixed(1) }}%</span>
             </div>
@@ -569,8 +569,18 @@ const escapeCsv = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
 const exportCsv = () => {
   if (!visibleRecords.value.length) return;
 
-  const headers = ['전표번호', '품목 코드', '품목명', '공장', '라인', '불량률', '생산 담당자', '영업 담당자', '비고'];
-  const rows = visibleRecords.value.map(record => [
+  const tableHeaders = [
+    '전표번호',
+    '품목 코드',
+    '품목명',
+    '공장',
+    '라인',
+    '불량률',
+    '생산 담당자',
+    '영업 담당자',
+    '비고',
+  ];
+  const tableRows = visibleRecords.value.map(record => [
     record.productionPerformanceDocNo || record.defectiveDocNo,
     record.itemCode,
     record.itemName,
@@ -582,9 +592,51 @@ const exportCsv = () => {
     remarksMap[remarkKeyOf(record)] ?? '',
   ]);
 
-  const csvContent = [headers.map(escapeCsv).join(',')]
-    .concat(rows.map(row => row.map(escapeCsv).join(',')))
-    .join('\n');
+  const tableData = [tableHeaders, ...tableRows];
+  const pieData = pieChartPercentages.value.length
+    ? [['NG 타입', '비율(%)']].concat(
+        pieChartPercentages.value.map(item => [
+          formatNgTypeLabel(item.label),
+          item.percent.toFixed(1),
+        ]),
+      )
+    : [];
+  const lineData = lineChartData.value.length
+    ? [['기간', '평균 불량률(%)']].concat(
+        lineChartData.value.map(entry => [
+          entry.label,
+          Number(entry.rate ?? 0).toFixed(1),
+        ]),
+      )
+    : [];
+
+  const includePie = pieData.length > 0;
+  const includeLine = lineData.length > 0;
+  const maxRows = Math.max(
+    tableData.length,
+    includePie ? pieData.length : 0,
+    includeLine ? lineData.length : 0,
+  );
+  const csvRows = [];
+
+  for (let i = 0; i < maxRows; i += 1) {
+    const tableRow = tableData[i] ?? new Array(tableHeaders.length).fill('');
+    const row = [...tableRow];
+
+    if (includePie) {
+      const pieRow = pieData[i] ?? ['', ''];
+      row.push('', ...pieRow);
+    }
+
+    if (includeLine) {
+      const lineRow = lineData[i] ?? ['', ''];
+      row.push('', ...lineRow);
+    }
+
+    csvRows.push(row);
+  }
+
+  const csvContent = csvRows.map(row => row.map(escapeCsv).join(',')).join('\n');
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -663,6 +715,12 @@ const pieChartPercentages = computed(() => {
     percent: (item.value / total) * 100,
   }));
 });
+
+const formatNgTypeLabel = type => {
+  const text = String(type ?? '').trim();
+  if (!text) return 'NG Type 미확인';
+  return /^ng\s*type/i.test(text) ? text : `NG Type ${text}`;
+};
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
