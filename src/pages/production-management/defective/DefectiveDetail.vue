@@ -27,14 +27,13 @@
           </FormItem>
         </FormField>
 
-        <FormField name="itemCode" v-slot="{ componentField, errorMessage }">
+        <FormField name="itemName" v-slot="{ componentField, errorMessage }">
           <FormItem>
             <FormLabel>품목명</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" autocomplete="item-name" disabled />
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
-            <p class="text-red-500 text-xs">{{ errorMessage }}</p>
           </FormItem>
         </FormField>
 
@@ -83,33 +82,40 @@
           </FormItem>
         </FormField>
       </div>
-      <DefectiveTable: defectvieDetail="defectiveDetail"/>
+
+      <div class="mt-6">
+        <h4 class="text-base font-semibold mb-3 border-b pb-2">불량 상세 내역</h4>
+        <DefectiveTable :defectiveDetail="defectiveDetail?.value?.defectives" />
+      </div>
     </Form>
   </div>
 </template>
 
 <script setup>
 import { InfoIcon } from 'lucide-vue-next';
-import { Form } from 'vee-validate';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import useGetDefective from '@/apis/query-hooks/defective/useGetDefective';
-import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import DefectiveTable from '@/pages/production-management/defective/DefectiveTable.vue';
 
 const route = useRoute();
+const {
+  data: defectiveDetail, // 에러 객체 추가
+} = useGetDefective(route.params.planDefectiveId);
 
-const { data: defectiveDetail } = useGetDefective(route.params.planDefectiveId);
-const defectiveDetail = ref({});
 const initialValues = computed(() => {
+  // data가 null 또는 undefined일 경우 빈 객체 반환
   if (!defectiveDetail.value) return {};
 
+  // defectiveDetail.value 객체의 값을 Form 필드에 맞게 매핑
   return {
     factoryName: defectiveDetail.value.factoryName,
     lineName: defectiveDetail.value.lineName,
-    itemCode: defectiveDetail.value.itemCode,
+    itemName: `${defectiveDetail.value.itemName} (${defectiveDetail.value.itemCode})`,
     defectiveDocNo: defectiveDetail.value.defectiveDocNo,
     itemSpecification: defectiveDetail.value.itemSpecification,
     itemUnit: defectiveDetail.value.itemUnit,

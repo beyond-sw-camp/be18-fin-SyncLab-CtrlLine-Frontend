@@ -10,23 +10,17 @@
       </TableRow>
     </TableHeader>
 
-    <TableBody v-if="defectiveDetail">
-      <TableRow class="text-center border-b border-dotted border-gray-300">
-        <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-          {{ defectiveDetail.defectiveCode }}
-        </TableCell>
-        <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-          {{ defectiveDetail.defectiveName }}
-        </TableCell>
-        <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-          {{ defectiveDetail.defectiveType }}
-        </TableCell>
-        <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-          {{ defectiveDetail.defectiveQty }}
-        </TableCell>
-        <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-          {{ defectiveDetail.defectiveRate }}
-        </TableCell>
+    <TableBody v-if="props.defectiveDetail?.length">
+      <TableRow
+        v-for="(row, idx) in props.defectiveDetail"
+        :key="idx"
+        class="text-center border-b border-dotted border-gray-300"
+      >
+        <TableCell>{{ row.defectiveCode }}</TableCell>
+        <TableCell>{{ row.defectiveName }}</TableCell>
+        <TableCell>{{ row.defectiveType }}</TableCell>
+        <TableCell>{{ row.defectiveQty }}</TableCell>
+        <TableCell>{{ row.defectiveRate }}</TableCell>
       </TableRow>
     </TableBody>
   </Table>
@@ -42,11 +36,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-defineProps({
+const props = defineProps({
   defectiveDetail: {
-    type: Object,
-    required: false,
-    default: () => ({}),
+    type: Array,
+    default: () => [],
   },
 });
 </script>
