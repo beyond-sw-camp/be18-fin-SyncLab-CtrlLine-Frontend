@@ -213,8 +213,13 @@
               :key="record.planDefectiveId"
               class="border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50"
             >
-              <td class="px-4 py-3 text-center font-medium text-[#2765C4]">
-                {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
+              <td class="px-4 py-3 text-center font-medium">
+                <button
+                  class="text-[#2765C4] underline-offset-2 hover:underline"
+                  @click="goToDefectiveDetail(record.defectiveDocNo || record.productionPerformanceDocNo)"
+                >
+                  {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
+                </button>
               </td>
               <td class="px-4 py-3 text-center">{{ record.itemCode }}</td>
               <td class="px-4 py-3 text-center">{{ record.itemName }}</td>
@@ -248,6 +253,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { ChevronDown, Search } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
 import { getDefectiveAll } from '@/apis/query-functions/defective';
@@ -266,6 +272,7 @@ import { buildQueryObject } from '@/utils/buildQueryObject';
 const isFilterOpen = ref(false);
 const isApplying = ref(false);
 const hasSearched = ref(false);
+const router = useRouter();
 
 const filterForm = reactive({
   fromDate: '',
@@ -470,6 +477,14 @@ const exportCsv = () => {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+};
+
+const goToDefectiveDetail = docNo => {
+  if (!docNo) {
+    toast.error('전표번호가 없습니다.');
+    return;
+  }
+  router.push(`/production-management/defectives/${docNo}`);
 };
 </script>
 
