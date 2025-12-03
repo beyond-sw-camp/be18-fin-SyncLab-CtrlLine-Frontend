@@ -22,17 +22,7 @@
       </div>
 
       <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 class="text-2xl font-semibold text-gray-900">
-              {{ selectedFactory?.factoryName ?? '공장을 선택해주세요' }}
-            </h2>
-          </div>
-          <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600">
-            <div class="rounded-full border border-gray-200 px-4 py-1">라인 {{ lineStructures.length }}개</div>
-            <div class="rounded-full border border-gray-200 px-4 py-1">설비 {{ totalEquipmentCount }}개</div>
-          </div>
-        </div>
+        <div></div>
 
         <div class="factory-floor">
           <div class="line-rack-grid">
@@ -54,16 +44,14 @@
                 <div class="pipeline">
                   <div class="pipeline__rail"></div>
                   <div
-                    v-for="(process, index) in PROCESS_STAGES"
-                    :key="process.key"
-                    class="pipeline__stage"
-                    :data-active="(process.lineTypes ?? []).includes(line.type)"
+                    v-for="(equipment, index) in EQUIPMENT_LAYOUT"
+                    :key="equipment.key"
+                    class="pipeline__node"
+                    :data-position="equipment.position"
                   >
-                    <div class="pipeline__machine" :data-machine="process.key">
+                    <div class="pipeline__machine" :data-active="(equipment.lineTypes ?? ['CL','PL','CP']).includes(line.type)">
                       <span class="pipeline__stage-number">{{ index + 1 }}</span>
                     </div>
-                    <p class="pipeline__label">{{ process.label }}</p>
-                    <p class="pipeline__desc">{{ process.description }}</p>
                   </div>
                 </div>
               </div>
@@ -168,16 +156,11 @@ import { useRoute, useRouter } from 'vue-router';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const PROCESS_STAGES = [
-  { key: 'mixing', label: '믹싱 공정', description: '원료 혼합', lineTypes: ['CL'] },
-  { key: 'coating', label: '코팅 공정', description: '전극 도포', lineTypes: ['CL'] },
-  { key: 'press', label: '롤 프레싱 공정', description: '압연 공정', lineTypes: ['CL'] },
-  { key: 'slitting', label: '슬리팅 공정', description: '절단 공정', lineTypes: ['CL'] },
-  { key: 'notching', label: '노칭 공정', description: '성형/가공', lineTypes: ['CL'] },
-  { key: 'dryer', label: '드라이어 공정', description: '건조', lineTypes: ['CL'] },
-  { key: 'assembly', label: 'Assembly', description: '조립', lineTypes: ['PL'] },
-  { key: 'activation', label: 'Activation', description: '활성화', lineTypes: ['CP'] },
-];
+const EQUIPMENT_LAYOUT = Array.from({ length: 14 }, (_, index) => ({
+  key: `equipment-node-${index + 1}`,
+  position: index % 2 === 0 ? 'top' : 'bottom',
+  lineTypes: ['CL', 'PL', 'CP'],
+}));
 
 const PLAN_ZONES = [
   {
@@ -325,8 +308,6 @@ const lineStructures = computed(() => {
     equipments: [],
   }));
 });
-const totalEquipmentCount = computed(() => 0);
-
 const planZones = computed(() =>
   PLAN_ZONES.map(zone => ({
     ...zone,
@@ -407,37 +388,38 @@ const summariseEquipments = () => [];
 .pipeline {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(8, minmax(80px, 1fr));
-  gap: 0.75rem;
-  padding-bottom: 2rem;
+  grid-template-columns: repeat(14, minmax(50px, 1fr));
+  gap: 0.35rem;
+  padding: 2.5rem 0;
 }
 
 .pipeline__rail {
   position: absolute;
-  top: 42px;
+  top: 50%;
+  transform: translateY(-50%);
   left: 0;
   right: 0;
-  height: 20px;
+  height: 18px;
   border-radius: 9999px;
   background: linear-gradient(90deg, rgba(91, 109, 76, 0.45), rgba(91, 109, 76, 0.08));
   box-shadow: inset 0 0 6px rgba(15, 23, 42, 0.1);
 }
 
-.pipeline__stage {
+.pipeline__node {
   position: relative;
-  text-align: center;
-  padding-top: 4.5rem;
-  transition: transform 0.2s ease;
+  height: 160px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-.pipeline__stage[data-active='true'] {
-  transform: translateY(-6px);
+.pipeline__node[data-position='bottom'] {
+  align-items: flex-end;
 }
 
 .pipeline__machine {
-  width: 76px;
-  height: 76px;
-  margin: 0 auto 0.5rem;
+  width: 70px;
+  height: 70px;
   border-radius: 1.25rem;
   background: #e0e7d9;
   border: 2px solid rgba(91, 109, 76, 0.35);
@@ -445,6 +427,7 @@ const summariseEquipments = () => [];
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
 }
 
 .pipeline__machine::after {
@@ -458,49 +441,21 @@ const summariseEquipments = () => [];
   border-radius: 9999px;
 }
 
-.pipeline__machine[data-machine='coating'] {
-  border-radius: 50% / 35%;
-  background: linear-gradient(180deg, #f8fafc, #d7e0ee);
-}
-
-.pipeline__machine[data-machine='press'],
-.pipeline__machine[data-machine='slitting'] {
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #dbeafe, #c7d2fe);
-}
-
-.pipeline__machine[data-machine='assembly'],
-.pipeline__machine[data-machine='activation'] {
-  background: linear-gradient(180deg, #fef3c7, #fde68a);
-}
-
 .pipeline__stage-number {
   position: absolute;
   top: -14px;
   right: -8px;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: #5b6d4c;
   color: white;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
   box-shadow: 0 4px 10px rgba(16, 24, 40, 0.1);
-}
-
-.pipeline__label {
-  margin: 0;
-  font-weight: 600;
-  color: #111827;
-}
-
-.pipeline__desc {
-  margin: 0;
-  font-size: 0.75rem;
-  color: #64748b;
 }
 
 .pipeline__lines {
