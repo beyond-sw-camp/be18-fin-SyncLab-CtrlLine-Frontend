@@ -2,7 +2,6 @@
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산실적 상세 조회</h3>
 
-    <!-- 전표번호 표시 -->
     <div
       v-if="detail"
       class="flex items-center text-xs font-medium bg-gray-100 px-2 py-1 rounded-xl"
@@ -11,187 +10,220 @@
     </div>
   </div>
 
-  <!-- 상단 - 기본 정보 -->
-  <div v-if="detail" class="flex flex-col gap-8 md:flex-row">
-    <form class="flex-1 flex flex-col gap-2">
+  <div v-if="isLoading" class="text-center py-20 text-gray-500">
+    <p>데이터를 불러오는 중입니다...</p>
+  </div>
+  <div v-else-if="isError" class="text-center py-20 text-red-600">
+    <p>데이터 로딩 중 오류가 발생했습니다. (ID: {{ route.params.id }})</p>
+  </div>
+
+  <Form
+    as="form"
+    v-else-if="detail"
+    :initial-values="{
+      // 상단 기본 정보
+      factoryName: `${detail.factoryName} (${detail.factoryCode})`,
+      lineName: `${detail.lineName} (${detail.lineCode})`,
+      dueDate: detail.dueDate,
+      salesManagerName: `${detail.salesManagerName} (${detail.salesManagerNo})`,
+      productionManagerName: `${detail.productionManagerName} (${detail.productionManagerNo})`,
+      startTime: detail.startTime,
+      endTime: detail.endTime,
+      lotNo: detail.lotNo,
+      remark: detail.remark,
+
+      // 하단 품목 및 생산 정보
+      itemCode: detail.itemCode,
+      itemName: detail.itemName,
+      itemSpecification: detail.itemSpecification,
+      itemUnit: detail.itemUnit,
+      totalQty: detail.totalQty,
+      performanceQty: detail.performanceQty,
+      defectiveQty: detail.defectiveQty,
+      defectiveRate: detail.defectRate,
+    }"
+    class="flex flex-col gap-8 md:flex-row"
+  >
+    <div class="flex-1 flex flex-col gap-2">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-        <!-- 공장명 -->
-        <FormItem>
-          <FormLabel>공장명</FormLabel>
-          <FormControl>
-            <Input
-              type="text"
-              :value="`${detail.factoryName} (${detail.factoryCode})`"
-              readonly
-              class="text-sm"
-            />
-          </FormControl>
-        </FormItem>
+        <FormField name="factoryName" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>공장명</FormLabel>
+            <FormControl>
+              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
 
-        <!-- 라인명 -->
-        <FormItem>
-          <FormLabel>라인명</FormLabel>
-          <FormControl>
-            <Input
-              type="text"
-              :value="`${detail.lineName} (${detail.lineCode})`"
-              readonly
-              class="text-sm"
-            />
-          </FormControl>
-        </FormItem>
+        <FormField name="lineName" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>라인명</FormLabel>
+            <FormControl>
+              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
 
-        <!-- 납기일 -->
-        <FormItem>
-          <FormLabel>납기일</FormLabel>
-          <FormControl>
-            <Input type="date" :value="detail.dueDate" readonly class="text-sm" />
-          </FormControl>
-        </FormItem>
+        <FormField name="dueDate" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>납기일</FormLabel>
+            <FormControl>
+              <Input type="date" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
 
-        <!-- 영업담당자 -->
-        <FormItem>
-          <FormLabel>영업담당자</FormLabel>
-          <FormControl>
-            <Input
-              type="text"
-              :value="`${detail.salesManagerName} (${detail.salesManagerNo})`"
-              readonly
-              class="text-sm"
-            />
-          </FormControl>
-        </FormItem>
+        <FormField name="salesManagerName" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>영업담당자</FormLabel>
+            <FormControl>
+              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
 
-        <!-- 생산담당자 -->
-        <FormItem>
-          <FormLabel>생산담당자</FormLabel>
-          <FormControl>
-            <Input
-              type="text"
-              :value="`${detail.productionManagerName} (${detail.productionManagerNo})`"
-              readonly
-              class="text-sm"
-            />
-          </FormControl>
-        </FormItem>
+        <FormField name="productionManagerName" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>생산담당자</FormLabel>
+            <FormControl>
+              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
 
-        <!-- 생산 시작시각 -->
-        <FormItem>
-          <FormLabel>생산 시작시각</FormLabel>
-          <FormControl>
-            <Input type="datetime-local" :value="detail.startTime" readonly class="text-sm" />
-          </FormControl>
-        </FormItem>
+        <FormField name="startTime" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>생산 시작시각</FormLabel>
+            <FormControl>
+              <Input type="datetime-local" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
 
-        <!-- 생산 종료시각 -->
-        <FormItem>
-          <FormLabel>생산 종료시각</FormLabel>
-          <FormControl>
-            <Input type="datetime-local" :value="detail.endTime" readonly class="text-sm" />
-          </FormControl>
-        </FormItem>
+        <FormField name="endTime" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>생산 종료시각</FormLabel>
+            <FormControl>
+              <Input type="datetime-local" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
 
-        <!-- LOT 번호 -->
-        <FormItem>
-          <FormLabel>LOT 번호</FormLabel>
-          <FormControl>
-            <Input type="text" :value="detail.lotNo" readonly class="text-sm" />
-          </FormControl>
-        </FormItem>
+        <FormField name="lotNo" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>LOT 번호</FormLabel>
+            <FormControl>
+              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
 
-        <!-- 비고 -->
-        <FormItem class="md:col-span-3">
-          <FormLabel>비고</FormLabel>
-          <FormControl>
-            <Input type="text" :value="detail.remark" readonly class="text-sm" />
-          </FormControl>
-        </FormItem>
+        <FormField name="remark" v-slot="{ componentField }">
+          <FormItem class="md:col-span-3">
+            <FormLabel>비고</FormLabel>
+            <FormControl>
+              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
       </div>
 
-      <!-- 하단: 품목 및 생산정보 -->
       <div class="mt-6 border-t pt-4">
         <h4 class="scroll-m-20 text-xl font-semibold mb-4">품목 및 생산 정보</h4>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <!-- 품목코드 -->
-          <FormItem>
-            <FormLabel>품목코드</FormLabel>
-            <FormControl>
-              <Input type="text" :value="detail.itemCode" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
+          <FormField name="itemCode" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>품목코드</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" readonly class="text-sm" />
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-          <!-- 품목명 -->
-          <FormItem>
-            <FormLabel>품목명</FormLabel>
-            <FormControl>
-              <Input type="text" :value="detail.itemName" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
+          <FormField name="itemName" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>품목명</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" readonly class="text-sm" />
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-          <!-- 규격 -->
-          <FormItem>
-            <FormLabel>규격</FormLabel>
-            <FormControl>
-              <Input type="text" :value="detail.itemSpecification" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
+          <FormField name="itemSpecification" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>규격</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" readonly class="text-sm" />
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-          <!-- 단위 -->
-          <FormItem>
-            <FormLabel>단위</FormLabel>
-            <FormControl>
-              <Input type="text" :value="detail.itemUnit" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
+          <FormField name="itemUnit" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>단위</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" readonly class="text-sm" />
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-          <!-- 총 투입수량 -->
-          <FormItem>
-            <FormLabel>총 투입수량 (EA)</FormLabel>
-            <FormControl>
-              <Input type="number" :value="detail.totalQty" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
+          <FormField name="totalQty" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>총 투입수량 (EA)</FormLabel>
+              <FormControl>
+                <Input type="number" v-bind="componentField" readonly class="text-sm" />
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-          <!-- 실적수량 -->
-          <FormItem>
-            <FormLabel>실적수량 (EA)</FormLabel>
-            <FormControl>
-              <Input type="number" :value="detail.performanceQty" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
+          <FormField name="performanceQty" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>실적수량 (EA)</FormLabel>
+              <FormControl>
+                <Input type="number" v-bind="componentField" readonly class="text-sm" />
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-          <!-- 불량수량 -->
-          <FormItem>
-            <FormLabel>불량수량 (EA)</FormLabel>
-            <FormControl>
-              <Input type="number" :value="detail.defectiveQty" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
+          <FormField name="defectiveQty" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>불량수량 (EA)</FormLabel>
+              <FormControl>
+                <Input type="number" v-bind="componentField" readonly class="text-sm" />
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-          <!-- 불량률 -->
-          <FormItem>
-            <FormLabel>불량률 (%)</FormLabel>
-            <FormControl>
-              <Input type="text" :value="detail.defectiveRate" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
+          <FormField name="defectiveRate" v-slot="{ componentField }">
+            <FormItem>
+              <FormLabel>불량률 (%)</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" readonly class="text-sm" />
+              </FormControl>
+            </FormItem>
+          </FormField>
         </div>
       </div>
-    </form>
-  </div>
+    </div>
+  </Form>
 </template>
 
 <script setup>
+import { Form } from 'vee-validate';
 import { useRoute } from 'vue-router';
 
 import useGetProductionPerformance from '@/apis/query-hooks/production-performance/useGetProductionPerformance';
-import { FormItem, FormLabel, FormControl } from '@/components/ui/form';
+import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
 const route = useRoute();
 
-const { data: detail } = useGetProductionPerformance(route.params.id);
+const {
+  data: detail,
+  isLoading, // 로딩 상태 추가
+  isError, // 에러 상태 추가 // 에러 객체 추가
+} = useGetProductionPerformance(route.params.id);
 </script>
 
 <style scoped></style>
