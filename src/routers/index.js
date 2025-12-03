@@ -138,7 +138,7 @@ const routes = [
           import('@/pages/production-management/production-performance/ProductionPerformanceList.vue'),
       },
       {
-        path: 'production-performances/:performanceId',
+        path: 'production-performances/:id',
         name: 'ProductionPerformanceDetail',
         component: () =>
           import('@/pages/production-management/production-performance/ProductionPerformanceDetail.vue'),

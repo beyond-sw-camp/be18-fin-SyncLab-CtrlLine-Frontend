@@ -190,7 +190,8 @@ import { FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
 const route = useRoute();
-const { data: detail } = useGetProductionPerformance(route.params.performanceId);
+
+const { data: detail } = useGetProductionPerformance(route.params.id);
 </script>
 
 <style scoped></style>
