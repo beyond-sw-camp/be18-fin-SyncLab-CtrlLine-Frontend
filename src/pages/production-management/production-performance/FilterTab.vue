@@ -144,12 +144,6 @@
           </div>
           <!-- ────────── 비고 ────────── -->
           <FilterInput label="비고" v-model="localFilters.remark" />
-
-          <!-- ────────── 삭제 여부 ────────── -->
-          <div class="flex items-center gap-2">
-            <Label class="text-xs">삭제 여부</Label>
-            <input type="checkbox" v-model="localFilters.isDeleted" class="size-4" />
-          </div>
         </div>
 
         <div class="flex justify-end mt-4 gap-2">

@@ -1,7 +1,6 @@
 <template>
-  <div>생산 실적</div>
   <div class="flex justify-between items-center">
-    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산 실적 목록</h3>
+    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산실적 목록 조회</h3>
   </div>
 
   <FilterTab :filters="filters" @search="onSearch" />
@@ -15,9 +14,7 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장코드 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 라인코드 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목코드 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              영업담당자
-            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목명 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
               생산담당자
             </TableHead>
@@ -31,24 +28,25 @@
             v-for="(performance, index) in productionPerformanceList.content"
             :key="index"
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300"
+            @click="goDetail(performance.productionPerformanceId)"
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.documentNo }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.factoryCode }}
+              {{ performance.factoryName }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.lineCode }}
+              {{ performance.lineName }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.itemCode }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.salesManagerNo }}
+              {{ performance.itemName }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.productionManagerNo }}
+              {{ performance.productionManagerName }} ({{ performance.productionManagerNo }})
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.performanceQty }} EA.
@@ -91,6 +89,10 @@ import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
+
+const goDetail = performanceId => {
+  router.push(`/production-management/production-performances/${performanceId}`);
+};
 
 const parseNumberQuery = value => {
   if (value === undefined || value === null || value === '') return null;

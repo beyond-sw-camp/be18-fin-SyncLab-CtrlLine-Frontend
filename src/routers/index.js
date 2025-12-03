@@ -135,9 +135,13 @@ const routes = [
         path: 'production-performances',
         name: 'ProductionPerformanceList',
         component: () =>
-          import(
-            '@/pages/production-management/production-performance/ProductionPerformanceList.vue'
-          ),
+          import('@/pages/production-management/production-performance/ProductionPerformanceList.vue'),
+      },
+      {
+        path: 'production-performances/:performanceId',
+        name: 'ProductionPerformanceDetail',
+        component: () =>
+          import('@/pages/production-management/production-performance/ProductionPerformanceDetail.vue'),
       },
       {
         path: 'defectives',

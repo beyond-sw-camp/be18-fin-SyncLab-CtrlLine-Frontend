@@ -9,3 +9,8 @@ export async function getProductionPerformanceList(params) {
 
   return data.data;
 }
+
+export async function getProductionPerformance(productionPerformanceId) {
+  const { data } = await apiClient.get(`/production-performances/${productionPerformanceId}`);
+  return data.data;
+}
