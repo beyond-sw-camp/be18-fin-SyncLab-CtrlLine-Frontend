@@ -95,10 +95,10 @@
       <table class="w-full table-fixed">
         <thead class="text-sm font-semibold text-gray-600">
           <tr class="border-b border-gray-200">
-            <th class="px-4 py-3 text-left">일자</th>
-            <th class="px-4 py-3 text-left">테이블</th>
-            <th class="px-4 py-3 text-left">담당자</th>
-            <th class="px-4 py-3 text-left">속성</th>
+            <th class="px-4 py-3 text-center">일자</th>
+            <th class="px-4 py-3 text-center">테이블</th>
+            <th class="px-4 py-3 text-center">담당자</th>
+            <th class="px-4 py-3 text-center">속성</th>
           </tr>
         </thead>
         <tbody v-if="!hasSearched">
@@ -121,12 +121,12 @@
             :key="log.logId"
             class="border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50"
           >
-            <td class="px-4 py-3">{{ formatDate(log.createdAt) }}</td>
-            <td class="px-4 py-3">{{ log.entityName }}</td>
-            <td class="px-4 py-3">
+            <td class="px-4 py-3 text-center">{{ formatDate(log.createdAt) }}</td>
+            <td class="px-4 py-3 text-center">{{ log.entityName }}</td>
+            <td class="px-4 py-3 text-center">
               {{ userNameMap[log.userId] ?? `사용자 #${log.userId}` }}
             </td>
-            <td class="px-4 py-3 font-semibold text-[#5B6D4C]">{{ log.actionType }}</td>
+            <td class="px-4 py-3 text-center font-semibold text-[#5B6D4C]">{{ log.actionType }}</td>
           </tr>
         </tbody>
         <tbody v-else>

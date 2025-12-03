@@ -176,23 +176,24 @@
       </div>
 
       <div class="mt-4 overflow-x-auto">
-        <table class="w-full min-w-[720px] table-fixed">
+        <table class="w-full min-w-[920px] table-fixed">
           <thead class="text-sm font-semibold text-gray-600">
             <tr class="border-b border-gray-200">
-              <th class="px-4 py-3 text-left">전표번호</th>
-              <th class="px-4 py-3 text-left">품목 코드</th>
-              <th class="px-4 py-3 text-left">품목명</th>
-              <th class="px-4 py-3 text-left">공장</th>
-              <th class="px-4 py-3 text-left">라인</th>
-              <th class="px-4 py-3 text-right">불량률</th>
-              <th class="px-4 py-3 text-left">생산 담당자</th>
-              <th class="px-4 py-3 text-left">영업 담당자</th>
+              <th class="px-4 py-3 text-center w-[160px]">전표번호</th>
+              <th class="px-4 py-3 text-center w-[150px]">품목 코드</th>
+              <th class="px-4 py-3 text-center w-[180px]">품목명</th>
+              <th class="px-4 py-3 text-center">공장</th>
+              <th class="px-4 py-3 text-center w-[140px]">라인</th>
+              <th class="px-4 py-3 text-center">불량률</th>
+              <th class="px-4 py-3 text-center">생산 담당자</th>
+              <th class="px-4 py-3 text-center">영업 담당자</th>
+              <th class="px-4 py-3 text-center">비고</th>
             </tr>
           </thead>
 
           <tbody v-if="!hasSearched">
             <tr>
-              <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="8">
+              <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="9">
                 필터를 설정한 뒤 조회 버튼을 눌러주세요.
               </td>
             </tr>
@@ -200,7 +201,7 @@
 
           <tbody v-else-if="isLoading">
             <tr>
-              <td class="px-4 py-10 text-center text-sm text-gray-500" colspan="8">
+              <td class="px-4 py-10 text-center text-sm text-gray-500" colspan="9">
                 불량 데이터를 불러오는 중입니다...
               </td>
             </tr>
@@ -212,24 +213,27 @@
               :key="record.planDefectiveId"
               class="border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50"
             >
-              <td class="px-4 py-3 font-medium text-[#2765C4]">
+              <td class="px-4 py-3 text-center font-medium text-[#2765C4]">
                 {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
               </td>
-              <td class="px-4 py-3">{{ record.itemCode }}</td>
-              <td class="px-4 py-3">{{ record.itemName }}</td>
-              <td class="px-4 py-3">{{ record.factoryName }}</td>
-              <td class="px-4 py-3">{{ record.lineName }}</td>
-              <td class="px-4 py-3 text-right font-semibold text-[#5B6D4C]">
+              <td class="px-4 py-3 text-center">{{ record.itemCode }}</td>
+              <td class="px-4 py-3 text-center">{{ record.itemName }}</td>
+              <td class="px-4 py-3 text-center">{{ record.factoryName }}</td>
+              <td class="px-4 py-3 text-center">{{ record.lineName }}</td>
+              <td class="px-4 py-3 text-center font-semibold text-[#5B6D4C]">
                 {{ formatPercent(record.defectiveTotalRate) }}
               </td>
-              <td class="px-4 py-3">{{ record.productionManagerName }}</td>
-              <td class="px-4 py-3">{{ record.salesManagerName }}</td>
+              <td class="px-4 py-3 text-center">{{ record.productionManagerName }}</td>
+              <td class="px-4 py-3 text-center">{{ record.salesManagerName }}</td>
+              <td class="px-4 py-3 whitespace-pre-wrap text-center text-gray-600">
+                {{ remarksMap[remarkKeyOf(record)] ?? '' }}
+              </td>
             </tr>
           </tbody>
 
           <tbody v-else>
             <tr>
-              <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="8">
+              <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="9">
                 조건에 맞는 불량 데이터가 없습니다.
               </td>
             </tr>
@@ -243,10 +247,11 @@
 <script setup>
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { ChevronDown, Search } from 'lucide-vue-next';
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
 import { getDefectiveAll } from '@/apis/query-functions/defective';
+import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -336,6 +341,44 @@ const visibleRecords = computed(() => {
 });
 
 const isLoading = computed(() => isFetching.value);
+const remarksMap = reactive({});
+const pendingRemarkFetch = new Set();
+
+const remarkKeyOf = record => record.productionPerformanceDocNo || record.defectiveDocNo;
+
+const fetchRemark = async docNo => {
+  if (!docNo || remarksMap[docNo] !== undefined || pendingRemarkFetch.has(docNo)) return;
+
+  pendingRemarkFetch.add(docNo);
+  try {
+    const response = await getProductionPerformanceList({
+      defectiveDocumentNo: docNo,
+      size: 1,
+      page: 0,
+    });
+
+    const remark = response?.content?.[0]?.remark ?? '';
+    remarksMap[docNo] = remark;
+  } catch (error) {
+    console.error('Failed to fetch remark for', docNo, error);
+    remarksMap[docNo] = '';
+  } finally {
+    pendingRemarkFetch.delete(docNo);
+  }
+};
+
+watch(
+  defectiveRows,
+  rows => {
+    rows.forEach(row => {
+      const key = remarkKeyOf(row);
+      if (key) {
+        fetchRemark(key);
+      }
+    });
+  },
+  { immediate: true },
+);
 
 const sanitizeNumber = value => {
   if (!value) return '';
@@ -401,7 +444,7 @@ const escapeCsv = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
 const exportCsv = () => {
   if (!visibleRecords.value.length) return;
 
-  const headers = ['전표번호', '품목 코드', '품목명', '공장', '라인', '불량률', '생산 담당자', '영업 담당자'];
+  const headers = ['전표번호', '품목 코드', '품목명', '공장', '라인', '불량률', '생산 담당자', '영업 담당자', '비고'];
   const rows = visibleRecords.value.map(record => [
     record.productionPerformanceDocNo || record.defectiveDocNo,
     record.itemCode,
@@ -411,6 +454,7 @@ const exportCsv = () => {
     formatPercent(record.defectiveTotalRate),
     record.productionManagerName,
     record.salesManagerName,
+    remarksMap[remarkKeyOf(record)] ?? '',
   ]);
 
   const csvContent = [headers.map(escapeCsv).join(',')]
