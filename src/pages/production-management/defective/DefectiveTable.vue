@@ -10,17 +10,17 @@
       </TableRow>
     </TableHeader>
 
-    <TableBody v-if="props.defectiveDetail?.length">
+    <TableBody>
       <TableRow
-        v-for="(row, idx) in props.defectiveDetail"
+        v-for="(defective, idx) in props.defectives"
         :key="idx"
         class="text-center border-b border-dotted border-gray-300"
       >
-        <TableCell>{{ row.defectiveCode }}</TableCell>
-        <TableCell>{{ row.defectiveName }}</TableCell>
-        <TableCell>{{ row.defectiveType }}</TableCell>
-        <TableCell>{{ row.defectiveQty }}</TableCell>
-        <TableCell>{{ row.defectiveRate }}</TableCell>
+        <TableCell>{{ defective.defectiveCode }}</TableCell>
+        <TableCell>{{ defective.defectiveName }}</TableCell>
+        <TableCell>{{ defective.defectiveType }}</TableCell>
+        <TableCell>{{ defective.defectiveQty }}</TableCell>
+        <TableCell>{{ defective.defectiveRate }}</TableCell>
       </TableRow>
     </TableBody>
   </Table>
@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/table';
 
 const props = defineProps({
-  defectiveDetail: {
+  defectives: {
     type: Array,
     default: () => [],
   },
