@@ -61,7 +61,7 @@ import { computed, nextTick, provide, ref, watch } from 'vue';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetProductionPlanScheduleList from '@/apis/query-hooks/production-plan/useGetProductionPlanScheduleList';
 import { Badge } from '@/components/ui/badge';
-import { STATUS_COLORS } from '@/constants/productionPlanStatus';
+import { DETAIL_HIGHLIGHT, STATUS_COLORS } from '@/constants/productionPlanStatus';
 import { useScheduleRangeManager } from '@/hooks/useScheduleRangeManager';
 
 import ScheduleTooltip from './ScheduleTooltip.vue';
@@ -99,7 +99,25 @@ function onEventClick(args) {
 }
 
 function onEventRendered(args) {
-  const status = args.data.Status;
+  const ev = args.data;
+
+  // 상세 조회 중인 이벤트인 경우
+  if (props.productionPlanDetailId && ev.Id === props.productionPlanDetailId) {
+    console.log(props.productionPlanDetailId, ev.Id);
+    console.log('상세 조회 데이터');
+    args.element.style.setProperty('background-color', DETAIL_HIGHLIGHT.background, 'important');
+    args.element.style.setProperty('border-color', DETAIL_HIGHLIGHT.border, 'important');
+
+    const subject = args.element.querySelector('.e-subject');
+    if (subject) {
+      subject.style.setProperty('color', DETAIL_HIGHLIGHT.text, 'important');
+      subject.style.opacity = '1';
+    }
+    return; // 상태 컬러 스킵
+  }
+
+  // 일반 이벤트는 상태 컬러 적용
+  const status = ev.Status;
   const color = STATUS_COLORS[status];
   if (!color) return;
 
@@ -117,6 +135,7 @@ const props = defineProps({
   factoryId: Number,
   factoryCode: String,
   lineCode: String,
+  productionPlanDetailId: Number,
 });
 
 const { data: lineListSchedule } = useGetLineList({
@@ -179,15 +198,20 @@ const { selectedDate: selectedDateSelected, onNavigation: onSelectedNavigation }
 const { selectedDate: selectedDateAvailable, onNavigation: onAvailableNavigation } =
   useScheduleRangeManager(availableFilters);
 
-const makeEvent = ev => ({
-  Id: ev.id,
-  Subject: ev.documentNo,
-  StartTime: new Date(ev.startTime),
-  EndTime: new Date(ev.endTime),
-  LineCode: ev.lineCode,
-  Status: ev.status,
-  ...ev,
-});
+const makeEvent = ev => {
+  // 디버깅 목적으로 인자 확인
+  console.log('원본 이벤트 데이터:', ev);
+
+  return {
+    ...ev,
+    Id: ev.id,
+    Subject: ev.documentNo,
+    StartTime: new Date(ev.startTime), // 문자열을 Date 객체로 변환
+    EndTime: new Date(ev.endTime),
+    LineCode: ev.lineCode,
+    Status: ev.status,
+  };
+};
 
 const selectedEvents = computed(() => selectedLineData.value?.map(makeEvent) ?? []);
 

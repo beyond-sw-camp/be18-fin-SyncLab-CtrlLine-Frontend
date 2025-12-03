@@ -33,3 +33,9 @@ export const STATUS_COLORS = {
     border: '#fca5a5',
   },
 };
+
+export const DETAIL_HIGHLIGHT = {
+  background: 'var(--primary-light)', // #7f9c7a
+  border: 'var(--primary)', // #6b8865
+  text: 'var(--primary-foreground)', // #ffffff
+};

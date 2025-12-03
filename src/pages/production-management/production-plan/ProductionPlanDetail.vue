@@ -304,6 +304,7 @@
         v-if="
           productionPlanDetail && selectedFactoryId && selectedItemId && lineList?.content?.length
         "
+        :productionPlanDetailId="productionPlanDetail.id"
         :factoryId="selectedFactoryId"
         :factoryCode="productionPlanDetail.factoryCode"
         :lineCode="productionPlanDetail.lineCode"
