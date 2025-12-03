@@ -26,7 +26,7 @@
         </button>
       </DialogTrigger>
 
-      <DialogContent class="max-w-[1040px] rounded-3xl border border-gray-300 p-8 shadow-xl">
+      <DialogContent class="w-full max-w-[1040px] sm:max-w-[1040px] rounded-3xl border border-gray-300 p-8 shadow-xl">
         <DialogHeader class="flex items-center justify-between p-0">
           <DialogTitle class="text-lg font-semibold text-gray-800">필터 설정</DialogTitle>
         </DialogHeader>
