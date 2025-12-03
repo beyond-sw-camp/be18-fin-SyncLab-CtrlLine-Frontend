@@ -39,30 +39,39 @@
         </div>
 
         <div class="factory-floor">
-          <div class="pipeline">
-            <div class="pipeline__rail"></div>
-            <div
-              v-for="(process, index) in PROCESS_STAGES"
-              :key="process.key"
-              class="pipeline__stage"
-              :data-active="isProcessActive(process.key)"
+          <div class="line-rack-grid">
+            <article
+              v-for="line in lineStructures"
+              :key="line.lineCode"
+              class="line-floor-plan"
+              :data-type="line.type"
             >
-              <div class="pipeline__machine" :data-machine="process.key">
-                <span class="pipeline__stage-number">{{ index + 1 }}</span>
+              <header class="line-floor-plan__header">
+                <div>
+                  <p class="line-floor-plan__title">{{ line.displayLabel }}</p>
+                  <p class="line-floor-plan__code">{{ line.lineCode }}</p>
+                </div>
+                <span class="line-floor-plan__badge">라인</span>
+              </header>
+
+              <div class="line-floor-plan__body">
+                <div class="pipeline">
+                  <div class="pipeline__rail"></div>
+                  <div
+                    v-for="(process, index) in PROCESS_STAGES"
+                    :key="process.key"
+                    class="pipeline__stage"
+                    :data-active="(process.lineTypes ?? []).includes(line.type)"
+                  >
+                    <div class="pipeline__machine" :data-machine="process.key">
+                      <span class="pipeline__stage-number">{{ index + 1 }}</span>
+                    </div>
+                    <p class="pipeline__label">{{ process.label }}</p>
+                    <p class="pipeline__desc">{{ process.description }}</p>
+                  </div>
+                </div>
               </div>
-              <p class="pipeline__label">{{ process.label }}</p>
-              <p class="pipeline__desc">{{ process.description }}</p>
-              <div class="pipeline__lines" v-if="stageLineMap[process.key]?.length">
-                <span
-                  v-for="line in stageLineMap[process.key]"
-                  :key="line.lineCode"
-                  class="line-token"
-                  :class="lineTokenClass(process.key)"
-                >
-                  {{ line.lineCode }}
-                </span>
-              </div>
-            </div>
+            </article>
           </div>
 
           <div class="sub-process-grid">
@@ -160,19 +169,18 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import useFactoryStructure from '@/apis/query-hooks/factory/useFactoryStructure';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const PROCESS_STAGES = [
-  { key: 'mixing', label: '믹싱 공정', description: '원료 혼합', linePrefixes: ['CL'] },
-  { key: 'coating', label: '코팅 공정', description: '전극 도포', linePrefixes: ['CL'] },
-  { key: 'press', label: '롤 프레싱 공정', description: '압연 공정', linePrefixes: ['CL'] },
-  { key: 'slitting', label: '슬리팅 공정', description: '절단 공정', linePrefixes: ['CL'] },
-  { key: 'notching', label: '노칭 공정', description: '성형/가공', linePrefixes: ['CL'] },
-  { key: 'dryer', label: '드라이어 공정', description: '건조', linePrefixes: ['CL'] },
-  { key: 'assembly', label: 'Assembly', description: '조립', linePrefixes: ['PL'] },
-  { key: 'activation', label: 'Activation', description: '활성화', linePrefixes: ['CP'] },
+  { key: 'mixing', label: '믹싱 공정', description: '원료 혼합', lineTypes: ['CL'] },
+  { key: 'coating', label: '코팅 공정', description: '전극 도포', lineTypes: ['CL'] },
+  { key: 'press', label: '롤 프레싱 공정', description: '압연 공정', lineTypes: ['CL'] },
+  { key: 'slitting', label: '슬리팅 공정', description: '절단 공정', lineTypes: ['CL'] },
+  { key: 'notching', label: '노칭 공정', description: '성형/가공', lineTypes: ['CL'] },
+  { key: 'dryer', label: '드라이어 공정', description: '건조', lineTypes: ['CL'] },
+  { key: 'assembly', label: 'Assembly', description: '조립', lineTypes: ['PL'] },
+  { key: 'activation', label: 'Activation', description: '활성화', lineTypes: ['CP'] },
 ];
 
 const PLAN_ZONES = [
@@ -180,21 +188,21 @@ const PLAN_ZONES = [
     key: 'cl',
     title: '전극/코팅 존',
     subtitle: 'Cell Line (CL)',
-    linePrefixes: ['CL'],
+    lineTypes: ['CL'],
     codeLabel: code => `코드 ${code}`,
   },
   {
     key: 'pl',
     title: '조립 존',
     subtitle: 'Pack Line (PL)',
-    linePrefixes: ['PL'],
+    lineTypes: ['PL'],
     codeLabel: code => `코드 ${code}`,
   },
   {
     key: 'cp',
     title: '활성화 존',
     subtitle: 'Cell Process (CP)',
-    linePrefixes: ['CP'],
+    lineTypes: ['CP'],
     codeLabel: code => `코드 ${code}`,
   },
 ];
@@ -241,11 +249,38 @@ const ACTIVATION_STEPS = [
   { key: 'grading', label: 'Grading' },
 ];
 
+const FACTORY_LINE_PRESETS = {
+  F0001: [
+    { lineCode: 'CL0001', lineName: '원형전지라인', type: 'CL' },
+    { lineCode: 'PL0001', lineName: '각형전지라인', type: 'PL' },
+    { lineCode: 'CP0001', lineName: '복합전지라인', type: 'CP' },
+  ],
+  F0002: [
+    { lineCode: 'CL0002', lineName: '원형전지라인', type: 'CL' },
+    { lineCode: 'PL0002', lineName: '각형전지라인', type: 'PL' },
+    { lineCode: 'CP0002', lineName: '복합전지라인', type: 'CP' },
+  ],
+  F0003: [
+    { lineCode: 'CL0003', lineName: '원형전지라인', type: 'CL' },
+    { lineCode: 'PL0003', lineName: '각형전지라인', type: 'PL' },
+    { lineCode: 'CP0003', lineName: '복합전지라인', type: 'CP' },
+  ],
+};
+
+const FALLBACK_FACTORIES = [
+  { factoryCode: 'F0001', factoryName: '제1공장' },
+  { factoryCode: 'F0002', factoryName: '제2공장' },
+  { factoryCode: 'F0003', factoryName: '제3공장' },
+];
+
 const { data: factoryList } = useGetFactoryList();
 const route = useRoute();
 const router = useRouter();
 
-const factories = computed(() => factoryList.value?.content ?? []);
+const factories = computed(() => {
+  const remote = factoryList.value?.content ?? [];
+  return remote.length ? remote : FALLBACK_FACTORIES;
+});
 const selectedFactoryCode = ref(route.query.factory ?? '');
 
 watch(
@@ -284,77 +319,31 @@ const selectedFactory = computed(() =>
   factories.value.find(factory => factory.factoryCode === selectedFactoryCode.value),
 );
 
-const { data: structureResponse } = useFactoryStructure(selectedFactoryCode);
-
-const lineStructures = computed(() => structureResponse.value ?? []);
-const totalEquipmentCount = computed(() =>
-  lineStructures.value.reduce((sum, line) => sum + line.equipments.length, 0),
-);
+const lineStructures = computed(() => {
+  const factoryCode = selectedFactory.value?.factoryCode;
+  const baseLines = FACTORY_LINE_PRESETS[factoryCode] ?? [];
+  return baseLines.map(line => ({
+    ...line,
+    instanceIndex: 0,
+    displayLabel: line.lineName,
+    equipments: [],
+  }));
+});
+const totalEquipmentCount = computed(() => 0);
 
 const planZones = computed(() =>
   PLAN_ZONES.map(zone => ({
     ...zone,
-    lines: lineStructures.value.filter(line =>
-      zone.linePrefixes.some(prefix => line.lineCode?.startsWith(prefix)),
-    ),
+    lines: lineStructures.value.filter(line => zone.lineTypes.includes(line.type)),
   })),
 );
 
-const stageLineMap = computed(() => {
-  const map = {};
-  PROCESS_STAGES.forEach(stage => {
-    map[stage.key] = lineStructures.value.filter(line =>
-      (stage.linePrefixes ?? []).some(prefix => line.lineCode?.startsWith(prefix)),
-    );
-  });
-  return map;
-});
+const stageLineMap = computed(() => ({
+  assembly: lineStructures.value.filter(line => line.type === 'PL'),
+  activation: lineStructures.value.filter(line => line.type === 'CP'),
+}));
 
-const isProcessActive = processKey => (stageLineMap.value[processKey] ?? []).length > 0;
-
-const lineTokenClass = stageKey => {
-  if (stageKey === 'assembly') return 'line-token--pl';
-  if (stageKey === 'activation') return 'line-token--cp';
-  return 'line-token--cl';
-};
-
-const resolveStatusKey = status => {
-  if (status === null || status === undefined) return 'UNKNOWN';
-
-  if (typeof status === 'string') {
-    const upper = status.toUpperCase();
-    if (['RUN', 'RUNNING', 'ACTIVE', 'OPERATION'].includes(upper)) return 'RUNNING';
-    if (['IDLE', 'READY', 'STANDBY'].includes(upper)) return 'IDLE';
-    if (['MAINTENANCE', 'CHECK', 'FIX'].includes(upper)) return 'MAINTENANCE';
-    if (['ERROR', 'DOWN', 'FAIL', 'ALARM'].includes(upper)) return 'ERROR';
-  }
-
-  if (typeof status === 'number') {
-    if (status === 2) return 'RUNNING';
-    if (status === 1) return 'MAINTENANCE';
-    if (status === 3) return 'ERROR';
-    return 'IDLE';
-  }
-
-  return 'UNKNOWN';
-};
-
-const summariseEquipments = equipments => {
-  const counts = { RUNNING: 0, IDLE: 0, MAINTENANCE: 0, ERROR: 0, UNKNOWN: 0 };
-  equipments.forEach(eq => {
-    const key = resolveStatusKey(eq.status);
-    counts[key] += 1;
-  });
-
-  return Object.entries(counts)
-    .filter(([, count]) => count > 0)
-    .map(([key, count]) => ({
-      key,
-      label: STATUS_META[key].label,
-      count,
-      classes: STATUS_META[key].classes,
-    }));
-};
+const summariseEquipments = () => [];
 </script>
 
 <style scoped>
@@ -366,6 +355,57 @@ const summariseEquipments = equipments => {
     radial-gradient(circle at bottom right, rgba(91, 109, 76, 0.12), transparent 40%),
     linear-gradient(180deg, #fdfefe 0%, #f5f7f2 100%);
   overflow: hidden;
+}
+
+.line-rack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.line-floor-plan {
+  border-radius: 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+  box-shadow: 0 20px 35px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.line-floor-plan__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.line-floor-plan__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.line-floor-plan__code {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #475467;
+}
+
+.line-floor-plan__badge {
+  border-radius: 9999px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(91, 109, 76, 0.1);
+  color: #405531;
+}
+
+.line-floor-plan__body {
+  padding: 1.5rem;
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.1), rgba(255, 255, 255, 0.5));
 }
 
 .pipeline {
