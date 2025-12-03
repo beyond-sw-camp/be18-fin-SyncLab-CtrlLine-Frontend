@@ -15,11 +15,13 @@
         :popupOpen="onPopupOpen"
         :group="groupOptions"
         :resources="selectedLineResource"
+        :created="onSelectedCreated"
         :eventRendered="onEventRendered"
         @actionComplete="onSelectedScheduleAction"
         :eventClick="onEventClick"
       />
     </div>
+
     <div>
       <Badge variant="secondary" class="mb-4 mt-6">선택 가능한 라인</Badge>
       <ejs-schedule
@@ -35,11 +37,13 @@
         :popupOpen="onPopupOpen"
         :group="groupOptions"
         :resources="availableLineResource"
+        :created="onAvailableCreated"
         :eventRendered="onEventRendered"
         @actionComplete="onAvailableScheduleAction"
         :eventClick="onEventClick"
       />
     </div>
+
     <ScheduleTooltip v-if="tooltip.show" :tooltip="tooltip" @close="tooltip.show = false" />
   </div>
 </template>
@@ -52,14 +56,17 @@ import {
   Week,
   TimelineMonth,
 } from '@syncfusion/ej2-vue-schedule';
-import { computed, nextTick, onMounted, provide, ref, watch } from 'vue';
+import { computed, nextTick, provide, ref, watch } from 'vue';
 
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetProductionPlanScheduleList from '@/apis/query-hooks/production-plan/useGetProductionPlanScheduleList';
 import { Badge } from '@/components/ui/badge';
 import { STATUS_COLORS } from '@/constants/productionPlanStatus';
 import { useScheduleRangeManager } from '@/hooks/useScheduleRangeManager';
-import ScheduleTooltip from '@/pages/production-management/production-plan/ScheduleTooltip.vue';
+
+import ScheduleTooltip from './ScheduleTooltip.vue';
+
+provide('schedule', [TimelineViews, Day, Week, TimelineMonth]);
 
 const tooltip = ref({
   show: false,
@@ -68,30 +75,19 @@ const tooltip = ref({
   data: null,
 });
 
-// 이벤트 클릭 핸들러
 function onEventClick(args) {
   const el = args.element;
   const rect = el.getBoundingClientRect();
-
   const width = 256;
   const gap = 10;
 
-  // 실제 스크롤되는 곳
-  const scheduleWrap = document.querySelector('.e-schedule .e-content-wrap');
-  const scrollTop = scheduleWrap.scrollTop;
-
-  // 스케줄 전체의 문서 기반 top 위치
-  const scheduleRect = scheduleWrap.getBoundingClientRect();
-  const scheduleTop = scheduleRect.top;
+  const wrap = document.querySelector('.e-schedule .e-content-wrap');
+  const scrollTop = wrap.scrollTop;
+  const scheduleTop = wrap.getBoundingClientRect().top;
 
   let x = rect.right - width;
+  while (x > 700) x = x / 1.5;
 
-  // 700 이하게 될 때까지 반복
-  while (x > 700) {
-    x = x / 1.5;
-  }
-
-  // y: 막대바 bottom + 스케줄 내부 스크롤 보정
   const y = rect.bottom - scheduleTop + scrollTop - gap * 2;
 
   tooltip.value = {
@@ -103,42 +99,17 @@ function onEventClick(args) {
 }
 
 function onEventRendered(args) {
-  console.log(args);
-  const status = args.data?.Status;
-  const colorSet = STATUS_COLORS[status];
+  const status = args.data.Status;
+  const color = STATUS_COLORS[status];
+  if (!color) return;
 
-  console.log(status);
-
-  if (!colorSet) return;
-
-  args.element.style.backgroundColor = colorSet.background;
-  args.element.style.borderColor = colorSet.border;
+  args.element.style.setProperty('background-color', color.background, 'important');
+  args.element.style.setProperty('border-color', color.border, 'important');
 
   const subject = args.element.querySelector('.e-subject');
   if (subject) {
-    subject.style.color = colorSet.text;
-  }
-}
-
-provide('schedule', [TimelineViews, Day, Week, TimelineMonth]);
-
-const editSettings = {
-  allowAdding: false,
-  allowEditing: false,
-  allowDeleting: false,
-  showDeleteConfirmDialog: false,
-  showQuickInfo: false,
-};
-
-function onPopupOpen(args) {
-  if (args.type === 'QuickInfo') {
-    args.cancel = true; // 기본 퀵인포도 막음
-  }
-
-  if (args.type === 'Editor') {
-    // 이벤트 추가하는 에디터 막음
-    args.cancel = true;
-    return;
+    subject.style.setProperty('color', color.text, 'important');
+    subject.style.opacity = '1';
   }
 }
 
@@ -148,15 +119,12 @@ const props = defineProps({
   lineCode: String,
 });
 
-// 공장별 라인 조회
-const { data: lineListSchedule, filters: lineFilters } = useGetLineList({
+const { data: lineListSchedule } = useGetLineList({
   factoryId: props.factoryId,
 });
 
-// 선택한 라인
 const selectedLine = computed(() => {
-  if (!props.lineCode || !lineListSchedule.value?.content) return null;
-  return lineListSchedule.value.content.find(l => l.lineCode === props.lineCode);
+  return lineListSchedule.value?.content?.find(l => l.lineCode === props.lineCode);
 });
 
 const availableLineResource = computed(() => [
@@ -176,7 +144,6 @@ const availableLineResource = computed(() => [
 
 const selectedLineResource = computed(() => {
   if (!selectedLine.value) return [];
-
   return [
     {
       field: 'LineCode',
@@ -196,26 +163,12 @@ const selectedLineResource = computed(() => {
 
 const groupOptions = { resources: ['Lines'] };
 
-const {
-  data: availableLineData,
-  fetchNextPage: fetchAvailableNext,
-  hasNextPage: hasAvailableNext,
-  fetchPreviousPage: fetchAvailablePrev,
-  hasPreviousPage: hasAvailablePrev,
-  filters: availableFilters,
-} = useGetProductionPlanScheduleList({
+const { data: availableLineData, filters: availableFilters } = useGetProductionPlanScheduleList({
   factoryCode: props.factoryCode,
   lineCode: null,
 });
 
-const {
-  data: selectedLineData,
-  fetchNextPage: fetchSelectedNext,
-  hasNextPage: hasSelectedNext,
-  fetchPreviousPage: fetchSelectedPrev,
-  hasPreviousPage: hasSelectedPrev,
-  filters: selectedFilters,
-} = useGetProductionPlanScheduleList({
+const { data: selectedLineData, filters: selectedFilters } = useGetProductionPlanScheduleList({
   factoryCode: props.factoryCode,
   lineCode: props.lineCode,
 });
@@ -226,120 +179,80 @@ const { selectedDate: selectedDateSelected, onNavigation: onSelectedNavigation }
 const { selectedDate: selectedDateAvailable, onNavigation: onAvailableNavigation } =
   useScheduleRangeManager(availableFilters);
 
+const makeEvent = ev => ({
+  Id: ev.id,
+  Subject: ev.documentNo,
+  StartTime: new Date(ev.startTime),
+  EndTime: new Date(ev.endTime),
+  LineCode: ev.lineCode,
+  Status: ev.status,
+  ...ev,
+});
+
+const selectedEvents = computed(() => selectedLineData.value?.map(makeEvent) ?? []);
+
+const availableEvents = computed(() => availableLineData.value?.map(makeEvent) ?? []);
+
+const selectedEventSettings = computed(() => ({
+  dataSource: [...selectedEvents.value],
+  resources: ['Lines'],
+}));
+
+const availableEventSettings = computed(() => ({
+  dataSource: [...availableEvents.value],
+  resources: ['Lines'],
+}));
+
+const selectedScheduleRef = ref(null);
+const availableScheduleRef = ref(null);
+
+watch(selectedEvents, () => {
+  nextTick(() => {
+    selectedScheduleRef.value?.ej2Instances?.refreshEvents();
+  });
+});
+
+watch(availableEvents, () => {
+  nextTick(() => {
+    availableScheduleRef.value?.ej2Instances?.refreshEvents();
+  });
+});
+
+function onSelectedCreated() {
+  const inst = selectedScheduleRef.value?.ej2Instances;
+  if (inst) onSelectedNavigation(inst);
+}
+
+function onAvailableCreated() {
+  const inst = availableScheduleRef.value?.ej2Instances;
+  if (inst) onAvailableNavigation(inst);
+}
+
 function onSelectedScheduleAction(args) {
   if (!['dateNavigate', 'viewNavigate'].includes(args.requestType)) return;
-
   const inst = selectedScheduleRef.value?.ej2Instances;
-
   if (inst) onSelectedNavigation(inst);
 }
 
 function onAvailableScheduleAction(args) {
   if (!['dateNavigate', 'viewNavigate'].includes(args.requestType)) return;
-
   const inst = availableScheduleRef.value?.ej2Instances;
-
   if (inst) onAvailableNavigation(inst);
 }
 
-const makeEvent = ev => {
-  return {
-    Id: ev.id,
-    Subject: ev.documentNo,
-    StartTime: new Date(ev.startTime),
-    EndTime: new Date(ev.endTime),
-    LineCode: ev.lineCode,
-    LineName: ev.lineName,
-    FactoryCode: ev.factoryCode,
-    FactoryName: ev.factoryName,
-    ItemName: ev.itemName,
-    ItemQty: ev.plannedQty,
-    Status: ev.status,
-  };
+const editSettings = {
+  allowAdding: false,
+  allowEditing: false,
+  allowDeleting: false,
+  showDeleteConfirmDialog: false,
+  showQuickInfo: false,
 };
 
-const availableEvents = computed(
-  () => availableLineData.value?.pages?.flatMap(p => p).map(makeEvent) ?? [],
-);
-
-const selectedEvents = computed(
-  () => selectedLineData.value?.pages?.flatMap(p => p).map(makeEvent) ?? [],
-);
-
-const availableEventSettings = computed(() => ({
-  dataSource: availableEvents.value,
-  resources: ['Lines'],
-}));
-
-const selectedEventSettings = computed(() => ({
-  dataSource: selectedEvents.value,
-  resources: ['Lines'],
-}));
-
-const availableScheduleRef = ref(null);
-const selectedScheduleRef = ref(null);
-
-// 양합향 무한 스크롤
-const attachScrollInfinite = (refInstance, fetchNext, hasNext, fetchPrev, hasPrev) => {
-  nextTick(() => {
-    const wrap = refInstance.value?.ej2Instances?.element?.querySelector('.e-content-wrap');
-    if (!wrap) return;
-
-    const handler = () => {
-      // 우측 끝 (미래 데이터)
-      const nearRightEnd = wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 300;
-      if (nearRightEnd && hasNext.value) {
-        fetchNext();
-      }
-
-      // 좌측 끝 (과거 데이터)
-      const nearLeftEnd = wrap.scrollLeft <= 300;
-      if (nearLeftEnd && hasPrev.value) {
-        fetchPrev();
-      }
-    };
-
-    wrap.addEventListener('scroll', handler);
-  });
-};
-
-onMounted(() => {
-  attachScrollInfinite(
-    availableScheduleRef,
-    fetchAvailableNext,
-    hasAvailableNext,
-    fetchAvailablePrev,
-    hasAvailablePrev,
-  );
-  attachScrollInfinite(
-    selectedScheduleRef,
-    fetchSelectedNext,
-    hasSelectedNext,
-    fetchSelectedPrev,
-    hasSelectedPrev,
-  );
-});
-
-watch(
-  () => props.factoryId,
-  newVal => {
-    lineFilters.factoryId = newVal;
-  },
-);
-
-watch(
-  () => props.factoryCode,
-  v => {
-    availableFilters.factoryCode = v;
-    selectedFilters.factoryCode = v;
-  },
-);
-watch(
-  () => props.lineCode,
-  v => {
-    selectedFilters.lineCode = v;
-  },
-);
+function onPopupOpen(args) {
+  if (args.type === 'QuickInfo' || args.type === 'Editor') {
+    args.cancel = true;
+  }
+}
 </script>
 
 <style>
