@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/vue-query';
 import { computed } from 'vue';
 
-import { getDefective } from '@/apis/query-functions/defective';
+import { getDefectiveDetail } from '@/apis/query-functions/defective';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 export default function useGetDefective(planDefectiveId) {
@@ -9,7 +9,7 @@ export default function useGetDefective(planDefectiveId) {
 
   return useQuery({
     queryKey: ['defective', planDefectiveId],
-    queryFn: () => getDefective(planDefectiveId),
+    queryFn: () => getDefectiveDetail(planDefectiveId),
     enabled: computed(() => authStore.isLoggedIn),
   });
 }
