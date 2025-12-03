@@ -103,8 +103,6 @@ function onEventRendered(args) {
 
   // 상세 조회 중인 이벤트인 경우
   if (props.productionPlanDetailId && ev.Id === props.productionPlanDetailId) {
-    console.log(props.productionPlanDetailId, ev.Id);
-    console.log('상세 조회 데이터');
     args.element.style.setProperty('background-color', DETAIL_HIGHLIGHT.background, 'important');
     args.element.style.setProperty('border-color', DETAIL_HIGHLIGHT.border, 'important');
 
@@ -199,16 +197,14 @@ const { selectedDate: selectedDateAvailable, onNavigation: onAvailableNavigation
   useScheduleRangeManager(availableFilters);
 
 const makeEvent = ev => {
-  // 디버깅 목적으로 인자 확인
-  console.log('원본 이벤트 데이터:', ev);
-
   return {
-    ...ev,
     Id: ev.id,
     Subject: ev.documentNo,
-    StartTime: new Date(ev.startTime), // 문자열을 Date 객체로 변환
+    StartTime: new Date(ev.startTime),
     EndTime: new Date(ev.endTime),
     LineCode: ev.lineCode,
+    ItemName: ev.itemName,
+    ItemQty: ev.plannedQty,
     Status: ev.status,
   };
 };
