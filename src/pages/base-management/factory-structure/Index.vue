@@ -111,13 +111,11 @@
 </template>
 
 <script setup>
+import { BatteryCharging, Boxes, Droplet, Puzzle, ShieldCheck, Sparkles, Zap } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { BatteryCharging, Boxes, Droplet, Puzzle, ShieldCheck, Sparkles, Zap } from 'lucide-vue-next';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -125,6 +123,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const EQUIPMENT_GROUPS = [
   {
@@ -215,48 +215,6 @@ const EQUIPMENT_LAYOUT = EQUIPMENT_GROUPS.flatMap((group, groupIndex) =>
     };
   }),
 );
-
-const STATUS_META = {
-  RUNNING: {
-    label: '가동',
-    classes: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-  },
-  IDLE: {
-    label: '대기',
-    classes: 'bg-slate-50 border-slate-200 text-slate-600',
-  },
-  MAINTENANCE: {
-    label: '점검',
-    classes: 'bg-amber-50 border-amber-200 text-amber-700',
-  },
-  ERROR: {
-    label: '고장',
-    classes: 'bg-rose-50 border-rose-200 text-rose-700',
-  },
-  UNKNOWN: {
-    label: '확인 필요',
-    classes: 'bg-gray-50 border-gray-200 text-gray-600',
-  },
-};
-
-const ASSEMBLY_STEPS = [
-  { key: 'packaging', label: 'Packaging' },
-  { key: 'electrolyte', label: 'Electrolyte' },
-  { key: 'sealing', label: 'Sealing' },
-  { key: 'welding', label: 'Welding' },
-  { key: 'forming', label: 'Al Forming' },
-  { key: 'folding', label: 'Folding' },
-  { key: 'lamination', label: 'Lamination' },
-  { key: 'anode', label: 'Anode' },
-  { key: 'cathode', label: 'Cathode' },
-];
-
-const ACTIVATION_STEPS = [
-  { key: 'formation', label: 'Formation' },
-  { key: 'aging', label: 'Aging' },
-  { key: 'degas', label: 'Degas' },
-  { key: 'grading', label: 'Grading' },
-];
 
 const tooltipDescription = label => {
   const descriptions = {
