@@ -1,6 +1,9 @@
 <template>
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">설비 목록</h3>
+    <div class="flex gap-2">
+      <StatusUpdateDialog :rows="selectedRows" @updated="onReset" />
+    </div>
   </div>
 
   <FilterTab :filters="filters" @search="onSearch" />
@@ -79,13 +82,6 @@
         </TableBody>
       </Table>
     </div>
-    <!-- 사용여부 저장 버튼 추가-->
-    <div class="flex justify-end mt-4">
-      <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-        사용여부 저장
-      </button>
-    </div>
-
     <BasePagination v-model="page" :total-pages="equipmentList?.pageInfo?.totalPages ?? 1" />
   </div>
 </template>
@@ -107,6 +103,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
+import StatusUpdateDialog from '@/pages/base-management/equipment/StatusUpdateDialog.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
