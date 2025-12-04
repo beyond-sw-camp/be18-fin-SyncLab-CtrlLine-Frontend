@@ -10,14 +10,14 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHeader class="flex items-center justify-center h-ful">
+            <TableHead class="flex items-center justify-center h-ful">
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
                 @click.stop
                 class="size-4 border-[1.5px]"
               />
-            </TableHeader>
+            </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">품목코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">규격</TableHead>
