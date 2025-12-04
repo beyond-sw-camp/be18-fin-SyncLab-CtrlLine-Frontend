@@ -17,7 +17,11 @@
       :key="factory.factoryCode + '-content'"
       :value="factory.factoryCode"
     >
-      <FactoryDashboard :factory-code="factory.factoryCode" />
+      <FactoryDashboard
+        :factory-code="factory.factoryCode"
+        :factory-id="factory.factoryId"
+        :factory-name="factory.factoryName"
+      />
     </TabsContent>
   </Tabs>
 </template>

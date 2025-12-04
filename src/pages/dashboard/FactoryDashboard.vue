@@ -29,6 +29,7 @@ import { computed } from 'vue';
 import useGetFactoryEnergyLatest from '@/apis/query-hooks/factory/useGetFactoryEnergyLatest';
 import useGetFactoryEnergyTodayMax from '@/apis/query-hooks/factory/useGetFactoryEnergyTodayMax';
 import useGetFactoryEnvironmentLatest from '@/apis/query-hooks/factory/useGetFactoryEnvironmentLatest';
+import useGetFactoryLinesWithEquipments from '@/apis/query-hooks/factory/useGetFactoryLinesWithEquipments';
 import useGetDefectiveTypes from '@/apis/query-hooks/defective/useGetDefectiveTypes';
 import ChartNgType from '@/pages/dashboard/ChartNgType.vue';
 import DefectRateChart from '@/pages/dashboard/DefectRateChart.vue';
@@ -44,12 +45,21 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  factoryId: {
+    type: [Number, String],
+    required: false,
+  },
+  factoryName: {
+    type: String,
+    default: '공장',
+  },
 });
 
 const { data: environmentData } = useGetFactoryEnvironmentLatest(props.factoryCode);
 const { data: energyLatest } = useGetFactoryEnergyLatest(props.factoryCode);
 const { data: energyPeak } = useGetFactoryEnergyTodayMax(props.factoryCode);
 const { data: defectiveTypes } = useGetDefectiveTypes(props.factoryCode);
+const { data: factoryLines } = useGetFactoryLinesWithEquipments(props.factoryId);
 
 const temperature = computed(() =>
   environmentData.value?.temperature ? Number(environmentData.value.temperature) : 0,
@@ -109,53 +119,10 @@ const dynamicNgConfig = computed(() => {
 const ngChartData = computed(() => dynamicNgData.value ?? []);
 const ngChartConfig = computed(() => dynamicNgConfig.value ?? PIE_CHART_CONFIG);
 
-const lines = {
-  factoryName: '공장',
-  lines: [
-    {
-      lineId: 10,
-      lineName: 'Line 1',
-      lineCode: 'L001',
-      equipments: [
-        { equipmentId: 101, equipmentCode: 'EQ001', equipmentName: '설비 1', status: 2 },
-        { equipmentId: 102, equipmentCode: 'EQ002', equipmentName: '설비 2', status: 1 },
-        { equipmentId: 103, equipmentCode: 'EQ003', equipmentName: '설비 3', status: 2 },
-        { equipmentId: 104, equipmentCode: 'EQ004', equipmentName: '설비 4', status: 0 },
-        { equipmentId: 105, equipmentCode: 'EQ005', equipmentName: '설비 5', status: 3 },
-        { equipmentId: 106, equipmentCode: 'EQ006', equipmentName: '설비 6', status: 3 },
-        { equipmentId: 107, equipmentCode: 'EQ007', equipmentName: '설비 7', status: 1 },
-      ],
-    },
-    {
-      lineId: 11,
-      lineName: 'Line 2',
-      lineCode: 'L002',
-      equipments: [
-        { equipmentId: 201, equipmentCode: 'EQ001', equipmentName: '설비 1', status: 3 },
-        { equipmentId: 202, equipmentCode: 'EQ002', equipmentName: '설비 2', status: 0 },
-        { equipmentId: 203, equipmentCode: 'EQ003', equipmentName: '설비 3', status: 1 },
-        { equipmentId: 204, equipmentCode: 'EQ004', equipmentName: '설비 4', status: 2 },
-        { equipmentId: 205, equipmentCode: 'EQ005', equipmentName: '설비 5', status: 3 },
-        { equipmentId: 206, equipmentCode: 'EQ006', equipmentName: '설비 6', status: 2 },
-        { equipmentId: 207, equipmentCode: 'EQ007', equipmentName: '설비 7', status: 2 },
-      ],
-    },
-    {
-      lineId: 12,
-      lineName: 'Line 3',
-      lineCode: 'L003',
-      equipments: [
-        { equipmentId: 301, equipmentCode: 'EQ001', equipmentName: '설비 1', status: 0 },
-        { equipmentId: 302, equipmentCode: 'EQ002', equipmentName: '설비 2', status: 1 },
-        { equipmentId: 303, equipmentCode: 'EQ003', equipmentName: '설비 3', status: 3 },
-        { equipmentId: 304, equipmentCode: 'EQ004', equipmentName: '설비 4', status: 0 },
-        { equipmentId: 305, equipmentCode: 'EQ005', equipmentName: '설비 5', status: 1 },
-        { equipmentId: 306, equipmentCode: 'EQ006', equipmentName: '설비 6', status: 1 },
-        { equipmentId: 307, equipmentCode: 'EQ007', equipmentName: '설비 7', status: 2 },
-      ],
-    },
-  ],
-};
+const lines = computed(() => ({
+  factoryName: props.factoryName || '공장',
+  lines: factoryLines.value ?? [],
+}));
 
 const barData = [
   { date: new Date('2024-01-01'), desktop: 186 },
