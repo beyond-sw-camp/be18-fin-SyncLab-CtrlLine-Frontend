@@ -37,7 +37,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 
-import useUpdateItem from '@/apis/query-hooks/item/useUpdateItem';
+import useUpdateItemStatusList from '@/apis/query-hooks/item/useUpdateItemStatusList';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -70,18 +70,7 @@ const userStore = {
   userRole: 'ADMIN',
 };
 
-const { mutate: callUpdateItem } = useUpdateItem({
-  onSuccess: () => {
-    alert(`품목 ${props.rows.length}개의 사용여부가 성공적으로 변경되었습니다.`);
-    emit('updated');
-    selectedStatus.value = null;
-  },
-  onError: error => {
-    console.error('품목 사용여부 변경 오류:', error);
-    alert('품목 사용여부 변경 중 오류가 발생했습니다.');
-    selectedStatus.value = null;
-  },
-});
+const { mutate: callUpdateItem } = useUpdateItemStatusList();
 
 const canEdit = computed(() => {
   if (props.rows.length === 0) return false;
