@@ -11,7 +11,12 @@
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
-              <Checkbox class="size-4 border-[1.5px]" />
+              <Checkbox
+                :modelValue="isAllChecked"
+                @update:modelValue="toggleAll"
+                @click.stop
+                class="size-4 border-[1.5px]"
+              />
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">설비코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">설비명</TableHead>
@@ -30,8 +35,18 @@
             @click="goToDetail(equipment.equipmentCode)"
           >
             <!-- 왼쪽: isActive 편집 토글 -->
-            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
-              <Checkbox :checked="equipment.isActive" class="size-4 border-[1.5px]" />
+            <TableCell
+              class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
+              @click.stop
+            >
+              <Checkbox
+                class="size-4 border-[1.5px]"
+                :modelValue="selectedRows.some(r => r.id === equipment.equipmentCode)"
+                @update:modelValue="
+                  checked =>
+                    toggleRow(checked, { id: equipment.equipmentCode, status: equipment.isActive })
+                "
+              />
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ equipment.equipmentCode }}
@@ -76,7 +91,7 @@
 </template>
 
 <script setup>
-import { watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
@@ -96,12 +111,44 @@ import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
+const selectedRows = ref([]);
 
 const initialFilters = {
   equipmentName: route.query.equipmentName || '',
   equipmentType: route.query.equipmentType || null,
   userName: route.query.userName || '',
   userDepartment: route.query.userDepartment || null,
+};
+
+const onReset = () => {
+  selectedRows.value = [];
+};
+
+const allRows = computed(
+  () =>
+    equipmentList.value?.content?.map(item => ({
+      id: item.equipmentCode,
+      status: item.isActive,
+    })) ?? [],
+);
+
+const isAllChecked = computed(
+  () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
+);
+
+// 전체 선택/해제
+const toggleAll = checked => {
+  selectedRows.value = checked ? [...allRows.value] : [];
+};
+
+const toggleRow = (checked, row) => {
+  if (checked) {
+    if (!selectedRows.value.find(r => r.id === row.id)) {
+      selectedRows.value.push(row);
+    }
+  } else {
+    selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
+  }
 };
 
 const { data: equipmentList, page, filters } = useGetEquipmentList(initialFilters);
@@ -150,6 +197,10 @@ watch(
     filters.userDepartment = newQuery.userDepartment ?? null;
   },
 );
+
+watch([page, filters], () => {
+  onReset();
+});
 </script>
 
 <style scoped></style>
