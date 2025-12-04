@@ -48,35 +48,31 @@
                     v-for="(equipment, index) in EQUIPMENT_LAYOUT"
                     :key="equipment.key"
                     class="pipeline__node"
-                    :data-position="equipment.position"
-                    :style="{ gridColumn: equipment.column }"
+                    :class="`pipeline__node--${equipment.position}`"
+                    :style="{ gridColumn: equipment.gridColumn, gridRow: equipment.gridRow }"
                   >
-                    <div class="pipeline__content">
-                      <Tooltip>
-                        <TooltipTrigger as-child>
-                          <button
-                            type="button"
-                            class="pipeline__machine"
-                            :data-active="(equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)"
-                            @click.stop="openEquipmentModal(equipment)"
-                          >
-                            <component :is="equipment.icon" class="equipment-icon" aria-hidden="true" />
-                            <span class="pipeline__stage-number">{{ index + 1 }}</span>
-                          </button>
-                        </TooltipTrigger>
-
-                        <TooltipContent
-                          class="rounded-xl border border-gray-200 bg-white/95 px-3 py-2 shadow-xl"
-                          side="top"
-                          :side-offset="8"
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <button
+                          type="button"
+                          class="pipeline__machine"
+                          :data-active="(equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)"
+                          @click.stop="openEquipmentModal(equipment)"
                         >
-                          <p class="text-xs font-semibold text-gray-800">{{ equipment.label }}</p>
-                          <p class="text-[11px] text-gray-500">{{ tooltipDescription(equipment.label) }}</p>
-                        </TooltipContent>
-                      </Tooltip>
+                          <component :is="equipment.icon" class="equipment-icon" aria-hidden="true" />
+                          <span class="pipeline__stage-number">{{ index + 1 }}</span>
+                        </button>
+                      </TooltipTrigger>
 
-                      <!-- 설비명은 모달/툴팁에서만 표시 -->
-                    </div>
+                      <TooltipContent
+                        class="rounded-xl border border-gray-200 bg-white/95 px-3 py-2 shadow-xl"
+                        side="top"
+                        :side-offset="8"
+                      >
+                        <p class="text-xs font-semibold text-gray-800">{{ equipment.label }}</p>
+                        <p class="text-[11px] text-gray-500">{{ tooltipDescription(equipment.label) }}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
               </div>
@@ -289,13 +285,16 @@ const EQUIPMENT_GROUPS = [
 const EQUIPMENT_LAYOUT = EQUIPMENT_GROUPS.flatMap((group, groupIndex) =>
   Array.from({ length: 2 }, (_, offset) => {
     const absoluteIndex = groupIndex * 2 + offset;
+    const position = absoluteIndex % 2 === 0 ? 'top' : 'bottom';
+    const baseColumn = groupIndex * 2 + 1;
     return {
       key: `${group.label}-${offset}`,
       label: group.label,
       icon: group.icon,
       processes: group.processes,
-      position: absoluteIndex % 2 === 0 ? 'top' : 'bottom',
-      column: groupIndex + 1,
+      position,
+      gridColumn: `${position === 'top' ? baseColumn : baseColumn + 1}`,
+      gridRow: position === 'top' ? '1' : '2',
       lineTypes: ['CL', 'PL', 'CP'],
     };
   }),
@@ -552,13 +551,12 @@ const summariseEquipments = () => [];
 .pipeline {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  grid-template-columns: repeat(14, minmax(60px, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
-  column-gap: 1.25rem;
-  row-gap: 6rem;
-  padding: 4rem 1rem;
-  min-height: 340px;
-  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 3.5rem;
+  padding: 4rem 1rem 3rem;
+  min-height: 320px;
 }
 
 .pipeline__rail {
@@ -572,11 +570,20 @@ const summariseEquipments = () => [];
   background: linear-gradient(90deg, rgba(91, 109, 76, 0.45), rgba(91, 109, 76, 0.08));
   box-shadow: inset 0 0 6px rgba(15, 23, 42, 0.1);
 }
-
 .pipeline__node {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.pipeline__node--top {
+  align-self: flex-end;
+  margin-bottom: 0.75rem;
+}
+
+.pipeline__node--bottom {
+  align-self: flex-start;
+  margin-top: 0.75rem;
 }
 
 .pipeline__content {
@@ -584,16 +591,6 @@ const summariseEquipments = () => [];
   flex-direction: column;
   align-items: center;
   gap: 0.35rem;
-}
-
-.pipeline__node[data-position='top'] {
-  grid-row: 1;
-  align-self: flex-end;
-}
-
-.pipeline__node[data-position='bottom'] {
-  grid-row: 2;
-  align-self: flex-start;
 }
 
 .pipeline__machine {
