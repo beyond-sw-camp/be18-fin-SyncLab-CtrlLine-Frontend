@@ -25,12 +25,13 @@
         <div></div>
 
         <div class="factory-floor">
-          <div class="line-rack-grid">
-            <article
-              v-for="line in lineStructures"
-              :key="line.lineCode"
-              class="line-floor-plan"
-              :data-type="line.type"
+          <TooltipProvider delay-duration="150">
+            <div class="line-rack-grid">
+              <article
+                v-for="line in lineStructures"
+                :key="line.lineCode"
+                class="line-floor-plan"
+                :data-type="line.type"
             >
               <header class="line-floor-plan__header">
                 <div>
@@ -43,25 +44,36 @@
               <div class="line-floor-plan__body">
                 <div class="pipeline">
                   <div class="pipeline__rail"></div>
-                  <div
+                  <Tooltip
                     v-for="(equipment, index) in EQUIPMENT_LAYOUT"
                     :key="equipment.key"
-                    class="pipeline__node"
-                    :data-position="equipment.position"
                   >
-                    <div
-                      class="pipeline__machine"
-                      :data-active="(equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)"
-                    >
-                      <component :is="equipment.icon" class="equipment-icon" aria-hidden="true" />
-                      <span class="pipeline__stage-number">{{ index + 1 }}</span>
-                    </div>
-                    <p class="pipeline__equip-label">{{ equipment.label }}</p>
-                  </div>
+                    <TooltipTrigger as-child>
+                      <div
+                        class="pipeline__node"
+                        :data-position="equipment.position"
+                      >
+                        <div
+                          class="pipeline__machine"
+                          :data-active="(equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)"
+                        >
+                          <component :is="equipment.icon" class="equipment-icon" aria-hidden="true" />
+                          <span class="pipeline__stage-number">{{ index + 1 }}</span>
+                        </div>
+                        <p class="pipeline__equip-label">{{ equipment.label }}</p>
+                      </div>
+                    </TooltipTrigger>
+
+                    <TooltipContent class="rounded-xl border border-gray-200 bg-white/95 px-3 py-2 shadow-xl">
+                      <p class="text-xs font-semibold text-gray-800">{{ equipment.label }}</p>
+                      <p class="text-[11px] text-gray-500">{{ tooltipDescription(equipment.label) }}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </article>
-          </div>
+            </div>
+          </TooltipProvider>
 
           <div class="sub-process-grid">
             <div class="sub-process" data-type="assembly">
@@ -161,6 +173,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { BatteryCharging, Boxes, Droplet, Puzzle, ShieldCheck, Sparkles, Zap } from 'lucide-vue-next';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const EQUIPMENT_GROUPS = [
   { label: 'Tray Cleaner', icon: Sparkles },
@@ -250,6 +263,19 @@ const ACTIVATION_STEPS = [
   { key: 'degas', label: 'Degas' },
   { key: 'grading', label: 'Grading' },
 ];
+
+const tooltipDescription = label => {
+  const descriptions = {
+    'Tray Cleaner': 'DryCleaner 설비 · 트레이 표면 이물 제거',
+    'Electrode Unit': '전극 조립 모듈 · 극판 압입',
+    'Assembly Unit': '셀 케이스 및 스택 조립',
+    'Formation Unit': '충방전 및 활성화 공정',
+    'Module & Pack': '모듈화 및 팩 조립',
+    'Cell Cleaner': '셀 외면 세정 · 이물 제거',
+    'Final Inspection': '최종 검사 · 품질 판정',
+  };
+  return descriptions[label] ?? '2차전지 생산 설비';
+};
 
 const FACTORY_LINE_PRESETS = {
   F0001: [
