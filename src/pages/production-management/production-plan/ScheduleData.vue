@@ -142,8 +142,8 @@ const props = defineProps({
 
 const emit = defineEmits(['updateStartEndTime']);
 
-const { data: lineListSchedule, refetch: refetchLineList } = useGetLineList({
-  factoryId: props.factoryId,
+const { data: lineListSchedule } = useGetLineList({
+  factoryId: computed(() => props.factoryId),
 });
 
 const selectedLine = computed(() => {
