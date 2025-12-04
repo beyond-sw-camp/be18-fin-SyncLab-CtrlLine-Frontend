@@ -11,8 +11,8 @@ export async function getDefectiveAll(params = {}) {
 }
 
 // 불량 상세조회
-export async function getDefectiveDetail(defectiveId) {
-  const { data } = await apiClient.get(`/defectives/${defectiveId}`);
+export async function getDefectiveDetail(planDefectiveId) {
+  const { data } = await apiClient.get(`/defectives/${planDefectiveId}`);
   return data.data;
 }
 
