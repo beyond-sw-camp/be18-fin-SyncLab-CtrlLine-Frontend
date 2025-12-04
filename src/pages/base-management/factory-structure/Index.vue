@@ -594,8 +594,8 @@ const summariseEquipments = () => [];
 }
 
 .pipeline__machine {
-  width: 88px;
-  height: 88px;
+  width: 78px;
+  height: 78px;
   border-radius: 1.25rem;
   background: #e0e7d9;
   border: 2px solid rgba(91, 109, 76, 0.35);
