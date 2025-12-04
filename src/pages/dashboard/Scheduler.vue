@@ -323,27 +323,4 @@ const eventSettings = {
 const group = { resources: ['Factories', 'Lines'] };
 </script>
 
-<style>
-/* 일정 디자인 */
-.e-schedule .e-timeline-view .e-appointment,
-.e-schedule .e-timeline-month-view .e-appointment {
-  border-radius: 12px;
-}
-.e-appointment-details {
-  padding-left: 8px !important;
-  padding-right: 8px !important;
-}
-.e-subject,
-.e-time {
-  font-size: 10px !important;
-}
-
-/* 시간 축 디자인 */
-.e-schedule .e-timeline-view .e-date-header-wrap table col,
-.e-schedule .e-timeline-view .e-content-wrap table col {
-  width: 22px !important;
-}
-.e-header-row {
-  font-size: 9px !important;
-}
-</style>
+<style></style>

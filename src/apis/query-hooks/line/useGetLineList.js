@@ -1,4 +1,3 @@
-// 라인 목록 조회
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { computed, reactive, ref } from 'vue';
 
@@ -9,18 +8,19 @@ export default function useGetLineList(initialFilters = {}) {
   const authStore = useAuthStore();
   const page = ref(1);
   const pageSize = ref(10);
-  const fixedSort = [{ sortBy: 'lineCode', direction: 'asc' }];
 
   const filters = reactive({
-    lineName: initialFilters.lineName ?? '',
-    lineCode: initialFilters.lineCode ?? '',
+    factoryId: initialFilters.factoryId ?? '',
+    itemId: initialFilters.itemId ?? '',
     userName: initialFilters.userName ?? '',
     userDepartment: initialFilters.userDepartment ?? null,
-    isActive: initialFilters.isActive ?? null,
+    lineName: initialFilters.lineName ?? '',
+    lineCode: initialFilters.lineCode ?? '',
   });
 
   const queryParams = computed(() => {
     const cleaned = {};
+
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== null && value !== '') {
         cleaned[key] = value;
@@ -29,7 +29,6 @@ export default function useGetLineList(initialFilters = {}) {
 
     cleaned.page = page.value - 1;
     cleaned.size = pageSize.value;
-    cleaned.sort = fixedSort;
 
     return cleaned;
   });
@@ -65,9 +64,10 @@ export default function useGetLineList(initialFilters = {}) {
 
   return {
     data,
-    filters,
-    page,
     refetch,
+    page,
+    pageSize,
+    filters,
     prevPage,
     nextPage,
     firstPage,
