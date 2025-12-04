@@ -42,9 +42,9 @@
             >
               <Checkbox
                 class="size-4 border-[1.5px]"
-                :modelValue="selectedRows.some(r => r.id === line.id)"
+                :modelValue="selectedRows.some(r => r.id === line.lineCode)"
                 @update:modelValue="
-                  checked => toggleRow(checked, { id: line.id, status: line.isActive })
+                  checked => toggleRow(checked, { id: line.lineCode, status: line.isActive })
                 "
               />
             </TableCell>
@@ -119,7 +119,7 @@ const onReset = () => {
 const allRows = computed(
   () =>
     lineList.value?.content?.map(item => ({
-      id: item.id,
+      id: item.lineCode,
       status: item.isActive,
     })) ?? [],
 );
