@@ -13,6 +13,7 @@ const normalizeEquipment = equipment => ({
   equipmentCode: equipment.equipmentCode,
   equipmentName: equipment.equipmentName,
   lineCode: equipment.lineCode ?? equipment.line?.lineCode ?? null,
+  lineId: equipment.lineId ?? equipment.line?.lineId ?? null,
   status: equipment.status ?? equipment.equipmentStatus ?? equipment.state ?? null,
 });
 
@@ -48,16 +49,17 @@ export default function useGetFactoryLinesWithEquipments(factoryIdRef) {
       const lines = (lineResponse?.content ?? []).map(normalizeLine);
       const equipments = (equipmentResponse?.content ?? []).map(normalizeEquipment);
 
-      const equipmentByLineCode = equipments.reduce((acc, equipment) => {
-        if (!equipment.lineCode) return acc;
-        if (!acc[equipment.lineCode]) acc[equipment.lineCode] = [];
-        acc[equipment.lineCode].push(equipment);
+      const equipmentByLineId = equipments.reduce((acc, equipment) => {
+        const key = equipment.lineId ?? equipment.lineCode;
+        if (!key) return acc;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(equipment);
         return acc;
       }, {});
 
       return lines.map(line => ({
         ...line,
-        equipments: (equipmentByLineCode[line.lineCode] ?? []).sort((a, b) => {
+        equipments: (equipmentByLineId[line.lineId ?? line.lineCode] ?? []).sort((a, b) => {
           if (!a.equipmentCode || !b.equipmentCode) return 0;
           return a.equipmentCode.localeCompare(b.equipmentCode);
         }),

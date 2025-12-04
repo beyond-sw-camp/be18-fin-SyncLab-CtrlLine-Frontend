@@ -11,22 +11,25 @@
         </div>
       </div>
 
-      <div class="flex flex-col gap-3">
-        <div v-for="line in lines.lines" :key="line.lineId" class="flex items-center gap-3">
-          <div class="w-20 font-medium">{{ line.lineCode }}</div>
+      <div class="flex flex-col gap-4">
+        <div v-for="line in lines.lines" :key="line.lineId" class="flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-sm">{{ line.lineName || line.lineCode }}</span>
+              <span class="text-xs text-muted-foreground">({{ line.lineCode }})</span>
+            </div>
+            <span class="text-xs text-muted-foreground">{{ line.equipments.length }}대</span>
+          </div>
 
-          <div class="flex flex-1 gap-0.5">
+          <div class="flex flex-1 flex-wrap gap-1">
             <div
-              v-for="(eq, index) in line.equipments"
-              :key="eq.equipmentId"
-              class="flex items-center justify-center border text-sm font-medium rounded-sm w-full"
-              :title="STATUS_LABELS[eq.status]"
-              :style="{
-                maxHeight: '26px',
-                backgroundColor: STATUS_COLORS[eq.status],
-              }"
+              v-for="equipment in line.equipments"
+              :key="equipment.equipmentId"
+              class="flex items-center justify-center rounded-md border px-2 py-1 text-xs font-medium min-w-[80px] shadow-sm"
+              :title="`${equipment.equipmentName ?? equipment.equipmentCode} - ${STATUS_LABELS[equipment.status]}`"
+              :style="{ backgroundColor: STATUS_COLORS[equipment.status] }"
             >
-              {{ index + 1 }}
+              {{ equipment.equipmentCode }}
             </div>
           </div>
         </div>
