@@ -173,7 +173,7 @@
 
 <script setup>
 import { Form } from 'vee-validate';
-import { computed, watch } from 'vue';
+import { watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import useGetProductionPerformance from '@/apis/query-hooks/production-performance/useGetProductionPerformance';
@@ -193,29 +193,6 @@ const {
 } = useGetProductionPerformance(route.params.id);
 
 const { mutate: updateRemark } = useUpdatePerformanceRemark(route.params.id);
-
-// 초기 렌더링용
-const initialValues = computed(() => ({
-  factoryName: `${detail.value?.factoryName} (${detail.value?.factoryCode})`,
-  lineName: `${detail.value?.lineName} (${detail.value?.lineCode})`,
-  salesManagerName: `${detail.value?.salesManagerName} (${detail.value?.salesManagerNo})`,
-  productionManagerName: `${detail.value?.productionManagerName} (${detail.value?.productionManagerNo})`,
-  startTime: detail.value?.startTime,
-  endTime: detail.value?.endTime,
-  dueDate: detail.value?.dueDate,
-  lotNo: detail.value?.lotNo,
-  planDocNo: detail.value?.planDocNo,
-  defectiveDocNo: detail.value?.defectiveDocNo,
-  remark: detail.value?.remark,
-  itemCode: detail.value?.itemCode,
-  itemName: detail.value?.itemName,
-  itemSpecification: detail.value?.itemSpecification,
-  itemUnit: detail.value?.itemUnit,
-  totalQty: detail.value?.totalQty,
-  performanceQty: detail.value?.performanceQty,
-  defectiveQty: detail.value?.defectiveQty,
-  defectiveRate: detail.value?.defectiveRate,
-}));
 
 // watch detail → form.setValues로 값 업데이트
 watch(
