@@ -6,7 +6,11 @@
   <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
     <ChartNgType :data="chartData1" />
     <VerticalProgress :temperature="temperature" :humidity="humidity" />
-    <PowerUsageGauge :usagePercent="70" :currentUsage="333.39" :peakUsage="221.2" />
+    <PowerUsageGauge
+      :usagePercent="usagePercent"
+      :currentUsage="currentUsage"
+      :peakUsage="peakUsage"
+    />
   </div>
 
   <div class="grid gap-4 pt-4">
@@ -22,6 +26,8 @@
 <script setup>
 import { computed } from 'vue';
 
+import useGetFactoryEnergyLatest from '@/apis/query-hooks/factory/useGetFactoryEnergyLatest';
+import useGetFactoryEnergyTodayMax from '@/apis/query-hooks/factory/useGetFactoryEnergyTodayMax';
 import useGetFactoryEnvironmentLatest from '@/apis/query-hooks/factory/useGetFactoryEnvironmentLatest';
 import ChartNgType from '@/pages/dashboard/ChartNgType.vue';
 import DefectRateChart from '@/pages/dashboard/DefectRateChart.vue';
@@ -39,6 +45,8 @@ const props = defineProps({
 });
 
 const { data: environmentData } = useGetFactoryEnvironmentLatest(props.factoryCode);
+const { data: energyLatest } = useGetFactoryEnergyLatest(props.factoryCode);
+const { data: energyPeak } = useGetFactoryEnergyTodayMax(props.factoryCode);
 
 const temperature = computed(() =>
   environmentData.value?.temperature ? Number(environmentData.value.temperature) : 0,
@@ -46,6 +54,20 @@ const temperature = computed(() =>
 const humidity = computed(() =>
   environmentData.value?.humidity ? Number(environmentData.value.humidity) : 0,
 );
+
+const currentUsage = computed(() =>
+  energyLatest.value?.powerConsumption ? Number(energyLatest.value.powerConsumption) : 0,
+);
+
+const peakUsage = computed(() =>
+  energyPeak.value?.powerConsumption ? Number(energyPeak.value.powerConsumption) : 0,
+);
+
+const usagePercent = computed(() => {
+  const peak = peakUsage.value;
+  if (!peak) return 0;
+  return Math.min(100, Math.max(0, (currentUsage.value / peak) * 100));
+});
 
 const chartData1 = [
   { browser: 'chrome', visitors: 275, fill: 'var(--color-chrome)' },
