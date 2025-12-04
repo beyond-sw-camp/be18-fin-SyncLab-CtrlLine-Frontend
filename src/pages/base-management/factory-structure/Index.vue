@@ -44,15 +44,14 @@
               <div class="line-floor-plan__body">
                 <div class="pipeline">
                   <div class="pipeline__rail"></div>
-                  <Tooltip
+                  <div
                     v-for="(equipment, index) in EQUIPMENT_LAYOUT"
                     :key="equipment.key"
+                    class="pipeline__node"
+                    :data-position="equipment.position"
                   >
-                    <TooltipTrigger as-child>
-                      <div
-                        class="pipeline__node"
-                        :data-position="equipment.position"
-                      >
+                    <Tooltip>
+                      <TooltipTrigger as-child>
                         <div
                           class="pipeline__machine"
                           :data-active="(equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)"
@@ -60,15 +59,20 @@
                           <component :is="equipment.icon" class="equipment-icon" aria-hidden="true" />
                           <span class="pipeline__stage-number">{{ index + 1 }}</span>
                         </div>
-                        <p class="pipeline__equip-label">{{ equipment.label }}</p>
-                      </div>
-                    </TooltipTrigger>
+                      </TooltipTrigger>
 
-                    <TooltipContent class="rounded-xl border border-gray-200 bg-white/95 px-3 py-2 shadow-xl">
-                      <p class="text-xs font-semibold text-gray-800">{{ equipment.label }}</p>
-                      <p class="text-[11px] text-gray-500">{{ tooltipDescription(equipment.label) }}</p>
-                    </TooltipContent>
-                  </Tooltip>
+                      <TooltipContent
+                        class="rounded-xl border border-gray-200 bg-white/95 px-3 py-2 shadow-xl"
+                        side="top"
+                        :side-offset="8"
+                      >
+                        <p class="text-xs font-semibold text-gray-800">{{ equipment.label }}</p>
+                        <p class="text-[11px] text-gray-500">{{ tooltipDescription(equipment.label) }}</p>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <p class="pipeline__equip-label">{{ equipment.label }}</p>
+                  </div>
                 </div>
               </div>
             </article>
