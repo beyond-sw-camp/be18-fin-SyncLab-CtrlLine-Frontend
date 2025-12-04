@@ -48,8 +48,12 @@
                 >
                   <div
                     class="flex h-10 w-10 items-center justify-center rounded-xl border shadow-sm transition-colors"
-                    :style="{ backgroundColor: STATUS_COLORS[equipment.status] }"
-                    :title="`${STAGE_LABELS[stageCode]} · ${STATUS_LABELS[equipment.status]}`"
+                    :style="{
+                      backgroundColor: STATUS_COLORS[resolveStatusLevel(equipment, statusMap)],
+                    }"
+                    :title="`${STAGE_LABELS[stageCode]} · ${
+                      STATUS_LABELS[resolveStatusLevel(equipment, statusMap)]
+                    }`"
                   >
                     <span class="text-[10px] font-semibold text-slate-900">
                       {{ stageCode }}
@@ -99,6 +103,13 @@ const STAGE_LABELS = STAGE_DEFINITIONS.reduce((acc, stage) => {
   return acc;
 }, {});
 
+const STATUS_LEVEL_MAP = {
+  STOPPED: 1,
+  RUNNING: 2,
+  LOW_WARNING: 3,
+  HIGH_WARNING: 4,
+};
+
 const equipmentIconLabel = equipment => {
   if (equipment.code) {
     return equipment.code;
@@ -108,7 +119,26 @@ const equipmentIconLabel = equipment => {
   return code.slice(-2);
 };
 
-defineProps({
+const resolveStatusLevel = (equipment, statusMap) => {
+  const externalLevel = statusMap?.[equipment.equipmentCode];
+  if (externalLevel !== undefined) {
+    if (typeof externalLevel === 'number') return externalLevel;
+    return STATUS_LEVEL_MAP[`${externalLevel}`.toUpperCase()] ?? equipment.status ?? 1;
+  }
+  if (equipment.status && STATUS_COLORS[equipment.status]) {
+    return equipment.status;
+  }
+  if (equipment.status && STATUS_LEVEL_MAP[equipment.status]) {
+    return STATUS_LEVEL_MAP[equipment.status];
+  }
+  return 1;
+};
+
+const props = defineProps({
   lines: Object,
+  statusMap: {
+    type: Object,
+    default: () => ({}),
+  },
 });
 </script>

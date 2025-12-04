@@ -29,3 +29,18 @@ export async function updateEquipment(equipmentCode, params) {
   const { data } = await apiClient.patch(`/equipments/${equipmentCode}`, params);
   return data;
 }
+
+export async function getEquipmentStatuses(params = {}) {
+  const query = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      query.append(key, value);
+    }
+  }
+
+  const queryString = query.toString();
+  const url = queryString ? `/equipments/statuses?${queryString}` : '/equipments/statuses';
+  const { data } = await apiClient.get(url);
+  return data.data;
+}

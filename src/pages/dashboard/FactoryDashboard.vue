@@ -14,7 +14,7 @@
   </div>
 
   <div class="grid gap-4 pt-4">
-    <LineEquipmentStatus :lines="lines" />
+    <LineEquipmentStatus :lines="lines" :status-map="equipmentStatuses" />
 
     <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
       <DefectRateChart :data="barData" />
@@ -31,6 +31,7 @@ import useGetFactoryEnergyTodayMax from '@/apis/query-hooks/factory/useGetFactor
 import useGetFactoryEnvironmentLatest from '@/apis/query-hooks/factory/useGetFactoryEnvironmentLatest';
 import useGetFactoryLinesWithEquipments from '@/apis/query-hooks/factory/useGetFactoryLinesWithEquipments';
 import useGetDefectiveTypes from '@/apis/query-hooks/defective/useGetDefectiveTypes';
+import useEquipmentStatusFeed from '@/composables/useEquipmentStatusFeed';
 import ChartNgType from '@/pages/dashboard/ChartNgType.vue';
 import DefectRateChart from '@/pages/dashboard/DefectRateChart.vue';
 import LineEquipmentStatus from '@/pages/dashboard/LineEquipmentStatus.vue';
@@ -58,8 +59,10 @@ const props = defineProps({
 const { data: environmentData } = useGetFactoryEnvironmentLatest(props.factoryCode);
 const { data: energyLatest } = useGetFactoryEnergyLatest(props.factoryCode);
 const { data: energyPeak } = useGetFactoryEnergyTodayMax(props.factoryCode);
+const factoryIdRef = computed(() => props.factoryId);
 const { data: defectiveTypes } = useGetDefectiveTypes(props.factoryCode);
-const { data: factoryLines } = useGetFactoryLinesWithEquipments(props.factoryId);
+const { data: factoryLines } = useGetFactoryLinesWithEquipments(factoryIdRef);
+const { statusMap: equipmentStatuses } = useEquipmentStatusFeed(factoryIdRef);
 
 const temperature = computed(() =>
   environmentData.value?.temperature ? Number(environmentData.value.temperature) : 0,
