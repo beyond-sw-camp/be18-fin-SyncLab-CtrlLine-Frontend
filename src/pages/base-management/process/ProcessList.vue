@@ -42,10 +42,9 @@
             >
               <Checkbox
                 class="size-4 border-[1.5px]"
-                :modelValue="selectedRows.some(r => r.id === process.processCode)"
+                :modelValue="selectedRows.some(r => r.id === process.processId)"
                 @update:modelValue="
-                  checked =>
-                    toggleRow(checked, { id: process.processCode, status: process.isActive })
+                  checked => toggleRow(checked, { id: process.processId, status: process.isActive })
                 "
               />
             </TableCell>
@@ -118,7 +117,7 @@ const onReset = () => {
 const allRows = computed(
   () =>
     processList.value?.content?.map(item => ({
-      id: item.processCode,
+      id: item.processId,
       status: item.isActive,
     })) ?? [],
 );

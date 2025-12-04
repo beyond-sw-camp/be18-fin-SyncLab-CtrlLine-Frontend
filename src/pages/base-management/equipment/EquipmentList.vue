@@ -120,11 +120,10 @@ const onReset = () => {
   selectedRows.value = [];
 };
 
-// allRows 수정됨: 고유 ID로 equipmentId 사용
 const allRows = computed(
   () =>
     equipmentList.value?.content?.map(item => ({
-      id: item.equipmentId, // ✅ equipmentId 사용
+      id: item.equipmentId,
       status: item.isActive,
     })) ?? [],
 );

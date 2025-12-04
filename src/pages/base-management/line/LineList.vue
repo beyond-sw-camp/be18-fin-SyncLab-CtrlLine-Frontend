@@ -42,9 +42,9 @@
             >
               <Checkbox
                 class="size-4 border-[1.5px]"
-                :modelValue="selectedRows.some(r => r.id === line.lineCode)"
+                :modelValue="selectedRows.some(r => r.id === line.lineId)"
                 @update:modelValue="
-                  checked => toggleRow(checked, { id: line.lineCode, status: line.isActive })
+                  checked => toggleRow(checked, { id: line.lineId, status: line.isActive })
                 "
               />
             </TableCell>
@@ -119,7 +119,7 @@ const onReset = () => {
 const allRows = computed(
   () =>
     lineList.value?.content?.map(item => ({
-      id: item.lineCode,
+      id: item.lineId,
       status: item.isActive,
     })) ?? [],
 );
@@ -188,4 +188,4 @@ watch([page, filters], () => {
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped></style>
