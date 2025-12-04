@@ -1,6 +1,6 @@
 <template>
-  <Card class="flex flex-col overflow-hidden">
-    <CardContent class="flex flex-col gap-4 py-4">
+  <Card class="flex flex-col h-full overflow-hidden">
+    <CardContent class="flex flex-col gap-4 py-4 flex-1">
       <div class="flex items-center justify-between text-xs uppercase tracking-wider text-muted-foreground">
         <span>Power Usage</span>
         <span class="flex items-center gap-2">

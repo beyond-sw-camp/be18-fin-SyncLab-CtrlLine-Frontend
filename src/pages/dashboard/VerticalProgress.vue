@@ -1,5 +1,5 @@
 <template>
-  <Card class="flex flex-col">
+  <Card class="flex flex-col h-full">
     <CardContent class="flex-1 grid grid-cols-2 gap-6 py-6">
       <div
         v-for="gauge in gauges"

@@ -82,14 +82,6 @@ const NG_COLOR_PALETTE = [
   'var(--chart-6)',
 ];
 
-const FALLBACK_NG_DATA = [
-  { browser: 'chrome', visitors: 275, fill: 'var(--color-chrome)' },
-  { browser: 'safari', visitors: 200, fill: 'var(--color-safari)' },
-  { browser: 'firefox', visitors: 187, fill: 'var(--color-firefox)' },
-  { browser: 'edge', visitors: 173, fill: 'var(--color-edge)' },
-  { browser: 'other', visitors: 90, fill: 'var(--color-other)' },
-];
-
 const dynamicNgData = computed(() => {
   const types = defectiveTypes.value?.types;
   if (!types?.length) return null;
@@ -114,7 +106,7 @@ const dynamicNgConfig = computed(() => {
   }, {});
 });
 
-const ngChartData = computed(() => dynamicNgData.value ?? FALLBACK_NG_DATA);
+const ngChartData = computed(() => dynamicNgData.value ?? []);
 const ngChartConfig = computed(() => dynamicNgConfig.value ?? PIE_CHART_CONFIG);
 
 const lines = {
