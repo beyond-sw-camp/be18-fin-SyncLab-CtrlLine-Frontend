@@ -49,35 +49,63 @@
                     :key="equipment.key"
                     class="pipeline__node"
                     :data-position="equipment.position"
+                    :style="{ gridColumn: equipment.column }"
                   >
-                    <Tooltip>
-                      <TooltipTrigger as-child>
-                        <div
-                          class="pipeline__machine"
-                          :data-active="(equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)"
+                    <div class="pipeline__content">
+                      <Tooltip>
+                        <TooltipTrigger as-child>
+                          <button
+                            type="button"
+                            class="pipeline__machine"
+                            :data-active="(equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)"
+                            @click.stop="openEquipmentModal(equipment)"
+                          >
+                            <component :is="equipment.icon" class="equipment-icon" aria-hidden="true" />
+                            <span class="pipeline__stage-number">{{ index + 1 }}</span>
+                          </button>
+                        </TooltipTrigger>
+
+                        <TooltipContent
+                          class="rounded-xl border border-gray-200 bg-white/95 px-3 py-2 shadow-xl"
+                          side="top"
+                          :side-offset="8"
                         >
-                          <component :is="equipment.icon" class="equipment-icon" aria-hidden="true" />
-                          <span class="pipeline__stage-number">{{ index + 1 }}</span>
-                        </div>
-                      </TooltipTrigger>
+                          <p class="text-xs font-semibold text-gray-800">{{ equipment.label }}</p>
+                          <p class="text-[11px] text-gray-500">{{ tooltipDescription(equipment.label) }}</p>
+                        </TooltipContent>
+                      </Tooltip>
 
-                      <TooltipContent
-                        class="rounded-xl border border-gray-200 bg-white/95 px-3 py-2 shadow-xl"
-                        side="top"
-                        :side-offset="8"
-                      >
-                        <p class="text-xs font-semibold text-gray-800">{{ equipment.label }}</p>
-                        <p class="text-[11px] text-gray-500">{{ tooltipDescription(equipment.label) }}</p>
-                      </TooltipContent>
-                    </Tooltip>
-
-                    <p class="pipeline__equip-label">{{ equipment.label }}</p>
+                      <!-- 설비명은 모달/툴팁에서만 표시 -->
+                    </div>
                   </div>
                 </div>
               </div>
             </article>
             </div>
           </TooltipProvider>
+
+          <Dialog :open="isEquipmentModalOpen" @update:open="val => (!val ? closeEquipmentModal() : null)">
+            <DialogContent class="max-w-xl rounded-3xl border border-gray-200 p-6 shadow-2xl">
+              <DialogHeader>
+                <DialogTitle class="text-2xl font-semibold text-gray-900">
+                  {{ activeEquipment?.label ?? '설비 정보' }}
+                </DialogTitle>
+                <DialogDescription class="text-sm text-gray-500">
+                  {{ tooltipDescription(activeEquipment?.label) }}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div class="mt-4 space-y-3" v-if="activeEquipment?.processes?.length">
+                <p class="text-sm font-semibold text-gray-700">주요 공정</p>
+                <ul class="equipment-process-list">
+                  <li v-for="step in activeEquipment.processes" :key="step.name">
+                    <p class="font-medium text-gray-900">{{ step.name }}</p>
+                    <p class="text-sm text-gray-500">{{ step.desc }}</p>
+                  </li>
+                </ul>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <div class="sub-process-grid">
             <div class="sub-process" data-type="assembly">
@@ -178,15 +206,84 @@ import { BatteryCharging, Boxes, Droplet, Puzzle, ShieldCheck, Sparkles, Zap } f
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 const EQUIPMENT_GROUPS = [
-  { label: 'Tray Cleaner', icon: Sparkles },
-  { label: 'Electrode Unit', icon: Zap },
-  { label: 'Assembly Unit', icon: Puzzle },
-  { label: 'Formation Unit', icon: BatteryCharging },
-  { label: 'Module & Pack', icon: Boxes },
-  { label: 'Cell Cleaner', icon: Droplet },
-  { label: 'Final Inspection', icon: ShieldCheck },
+  {
+    label: 'Tray Dry Cleaning Unit',
+    icon: Sparkles,
+    processes: [
+      { name: 'Tray Loading System', desc: '빈 트레이 투입 공정' },
+      { name: 'Dry Cleaning Process', desc: '에어 블로우 · 정전기 제거' },
+      { name: 'Static Neutralizer', desc: '이온 발생기로 정전기 중화' },
+      { name: 'Tray Buffer Conveyor', desc: '세정 완료 트레이 대기' },
+    ],
+  },
+  {
+    label: 'Electrode Unit',
+    icon: Zap,
+    processes: [
+      { name: 'Mixing Process', desc: '슬러리 혼합 공정' },
+      { name: 'Coating Process', desc: '슬러리 도포 공정' },
+      { name: 'Drying Oven Process', desc: '건조 공정' },
+      { name: 'Calender Press Process', desc: '압연 공정' },
+      { name: 'Slitting Process', desc: '전극 절단 공정' },
+      { name: 'Tray Loading Process', desc: '전극 적재 공정' },
+    ],
+  },
+  {
+    label: 'Assembly Unit',
+    icon: Puzzle,
+    processes: [
+      { name: 'Notching Process', desc: '셀 시트 절단 공정' },
+      { name: 'Stacking / Winding Process', desc: '적층 · 권취 공정' },
+      { name: 'Tab Welding Process', desc: '탭 용접 공정' },
+      { name: 'Cell Enclosing Process', desc: '봉입 공정' },
+      { name: 'Electrolyte Filling Process', desc: '전해액 주입 공정' },
+    ],
+  },
+  {
+    label: 'Formation Unit',
+    icon: BatteryCharging,
+    processes: [
+      { name: 'Formation Rack', desc: '충방전 공정' },
+      { name: 'Aging Chamber', desc: 'Aging 보관' },
+    ],
+  },
+  {
+    label: 'Module & Pack Unit',
+    icon: Boxes,
+    processes: [
+      { name: 'Cell Sorting Process', desc: '셀 분류 공정' },
+      { name: 'Module Assembly Process', desc: '모듈 조립 공정' },
+      { name: 'BMS Test Process', desc: '관리시스템 검사 공정' },
+    ],
+  },
+  {
+    label: 'Cell Cleaning Unit',
+    icon: Droplet,
+    processes: [
+      { name: 'Unloading Station', desc: '모듈 완료 셀 분리 공정' },
+      { name: 'Ultrasonic Washer', desc: '초음파 세정 공정' },
+      { name: 'Drying Chamber', desc: '건조 공정' },
+      { name: 'Surface Vision Process', desc: '세정 품질 검사 공정' },
+    ],
+  },
+  {
+    label: 'Final Inspection Unit',
+    icon: ShieldCheck,
+    processes: [
+      { name: 'Final Inspection Process', desc: '최종 검사 공정' },
+      { name: 'BMS Test Process', desc: '관리시스템 검사 공정' },
+      { name: 'Tray Return Conveyor', desc: '트레이 회수 · 세정 루프' },
+    ],
+  },
 ];
 
 const EQUIPMENT_LAYOUT = EQUIPMENT_GROUPS.flatMap((group, groupIndex) =>
@@ -196,7 +293,9 @@ const EQUIPMENT_LAYOUT = EQUIPMENT_GROUPS.flatMap((group, groupIndex) =>
       key: `${group.label}-${offset}`,
       label: group.label,
       icon: group.icon,
+      processes: group.processes,
       position: absoluteIndex % 2 === 0 ? 'top' : 'bottom',
+      column: groupIndex + 1,
       lineTypes: ['CL', 'PL', 'CP'],
     };
   }),
@@ -270,13 +369,13 @@ const ACTIVATION_STEPS = [
 
 const tooltipDescription = label => {
   const descriptions = {
-    'Tray Cleaner': 'DryCleaner 설비 · 트레이 표면 이물 제거',
-    'Electrode Unit': '전극 조립 모듈 · 극판 압입',
-    'Assembly Unit': '셀 케이스 및 스택 조립',
-    'Formation Unit': '충방전 및 활성화 공정',
-    'Module & Pack': '모듈화 및 팩 조립',
-    'Cell Cleaner': '셀 외면 세정 · 이물 제거',
-    'Final Inspection': '최종 검사 · 품질 판정',
+    'Tray Dry Cleaning Unit': '트레이 재사용 전 Dry Cleaning 및 버퍼 라인',
+    'Electrode Unit': '전극 시트를 생산하고 트레이에 적재하는 공정',
+    'Assembly Unit': '셀을 조립하고 전해액을 주입하는 공정',
+    'Formation Unit': '충방전 및 Aging으로 셀을 활성화',
+    'Module & Pack Unit': '셀을 모듈 · 팩 단계로 조립',
+    'Cell Cleaning Unit': '완성 셀을 세정하고 품질을 확인',
+    'Final Inspection Unit': '최종 검사 후 트레이 회수 루프',
   };
   return descriptions[label] ?? '2차전지 생산 설비';
 };
@@ -373,6 +472,18 @@ const stageLineMap = computed(() => ({
   activation: lineStructures.value.filter(line => line.type === 'CP'),
 }));
 
+const isEquipmentModalOpen = ref(false);
+const activeEquipment = ref(null);
+
+const openEquipmentModal = equipment => {
+  activeEquipment.value = equipment;
+  isEquipmentModalOpen.value = true;
+};
+
+const closeEquipmentModal = () => {
+  isEquipmentModalOpen.value = false;
+};
+
 const summariseEquipments = () => [];
 </script>
 
@@ -441,17 +552,21 @@ const summariseEquipments = () => [];
 .pipeline {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(14, minmax(50px, 1fr));
-  gap: 0.35rem;
-  padding: 2.5rem 0;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  column-gap: 1.25rem;
+  row-gap: 6rem;
+  padding: 4rem 1rem;
+  min-height: 340px;
+  align-items: center;
 }
 
 .pipeline__rail {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  left: 0;
-  right: 0;
+  left: 1rem;
+  right: 1rem;
   height: 18px;
   border-radius: 9999px;
   background: linear-gradient(90deg, rgba(91, 109, 76, 0.45), rgba(91, 109, 76, 0.08));
@@ -459,24 +574,26 @@ const summariseEquipments = () => [];
 }
 
 .pipeline__node {
-  position: relative;
-  height: 210px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pipeline__content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  gap: 0.35rem;
+}
+
+.pipeline__node[data-position='top'] {
+  grid-row: 1;
+  align-self: flex-end;
 }
 
 .pipeline__node[data-position='bottom'] {
-  justify-content: flex-end;
-}
-
-.pipeline__node[data-position='top'] .pipeline__machine {
-  transform: translateY(-45px);
-}
-
-.pipeline__node[data-position='bottom'] .pipeline__machine {
-  transform: translateY(45px);
+  grid-row: 2;
+  align-self: flex-start;
 }
 
 .pipeline__machine {
@@ -490,6 +607,18 @@ const summariseEquipments = () => [];
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pipeline__machine:focus-visible {
+  outline: 2px solid #5b6d4c;
+  outline-offset: 3px;
+}
+
+.pipeline__machine:hover {
+  transform: scale(1.03);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
 }
 
 .pipeline__machine::after {
@@ -527,7 +656,7 @@ const summariseEquipments = () => [];
 }
 
 .pipeline__equip-label {
-  margin: 0.4rem 0 0;
+  margin: 0;
   font-size: 0.72rem;
   text-align: center;
   color: #1f2937;
@@ -536,12 +665,10 @@ const summariseEquipments = () => [];
 
 .pipeline__node[data-position='top'] .pipeline__equip-label {
   order: -1;
-  margin: 0 0 0.4rem;
 }
 
 .pipeline__node[data-position='bottom'] .pipeline__equip-label {
   order: 1;
-  margin: 0.4rem 0 0;
 }
 
 .pipeline__lines {
@@ -723,5 +850,17 @@ const summariseEquipments = () => [];
   padding: 0.2rem 0.6rem;
   font-size: 0.75rem;
   font-weight: 500;
+}
+
+.equipment-process-list {
+  list-style: disc;
+  margin: 0;
+  padding-left: 1.5rem;
+  color: #1f2937;
+  font-size: 0.9rem;
+}
+
+.equipment-process-list li {
+  margin-bottom: 0.25rem;
 }
 </style>
