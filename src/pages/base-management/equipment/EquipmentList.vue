@@ -37,17 +37,16 @@
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(equipment.equipmentCode)"
           >
-            <!-- 왼쪽: isActive 편집 토글 -->
             <TableCell
               class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
               @click.stop
             >
               <Checkbox
                 class="size-4 border-[1.5px]"
-                :modelValue="selectedRows.some(r => r.id === equipment.equipmentCode)"
+                :modelValue="selectedRows.some(r => r.id === equipment.equipmentId)"
                 @update:modelValue="
                   checked =>
-                    toggleRow(checked, { id: equipment.equipmentCode, status: equipment.isActive })
+                    toggleRow(checked, { id: equipment.equipmentId, status: equipment.isActive })
                 "
               />
             </TableCell>
@@ -121,10 +120,11 @@ const onReset = () => {
   selectedRows.value = [];
 };
 
+// allRows 수정됨: 고유 ID로 equipmentId 사용
 const allRows = computed(
   () =>
     equipmentList.value?.content?.map(item => ({
-      id: item.equipmentCode,
+      id: item.equipmentId, // ✅ equipmentId 사용
       status: item.isActive,
     })) ?? [],
 );
