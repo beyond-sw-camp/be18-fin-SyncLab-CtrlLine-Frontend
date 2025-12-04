@@ -1,6 +1,10 @@
 <template>
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">품목 목록</h3>
+
+    <div class="flex gap-2">
+      <StatusUpdateDialog :rows="selectedRows" @updated="onReset" />
+    </div>
   </div>
 
   <FilterTab :filters="filters" @search="onSearch" />
@@ -98,6 +102,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/item/FilterTab.vue';
+import StatusUpdateDialog from '@/pages/base-management/item/StatusUpdateDialog.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
