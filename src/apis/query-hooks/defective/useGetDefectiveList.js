@@ -1,28 +1,30 @@
+// 공정 목록 조회
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { computed, reactive, ref } from 'vue';
 
-import { getItemList } from '@/apis/query-functions/item';
+import { getDefectiveList } from '@/apis/query-functions/defective';
 import { useAuthStore } from '@/stores/useAuthStore';
 
-export default function useGetItemList(initialFilters = {}) {
+export default function useGetDefectiveList(initialFilters = {}) {
   const authStore = useAuthStore();
   const page = ref(1);
   const pageSize = ref(10);
+  const fixedSort = [{ sortBy: 'defectiveDocNo', direction: 'desc' }];
 
   const filters = reactive({
+    defectiveDocNo: initialFilters.defectiveDocNo ?? '',
     itemCode: initialFilters.itemCode ?? '',
     itemName: initialFilters.itemName ?? '',
-    itemUnit: initialFilters.itemUnit ?? '',
-    itemStatus: initialFilters.itemStatus ?? null,
-    itemSpecification: initialFilters.itemSpecification ?? '',
-    isActive: initialFilters.isActive ?? null,
+    lineName: initialFilters.lineName ?? '',
+    defectiveTotalQty: initialFilters.defectiveTotalQty ?? '',
+    defectiveTotalRate: initialFilters.defectiveTotalRate ?? '',
+    productionPerformanceDocNo: initialFilters.productionPerformanceDocNo ?? '',
+    fromDate: initialFilters.fromDate ?? null,
+    toDate: initialFilters.toDate ?? null,
   });
-
-  const fixedSort = ['itemCode, asc'];
 
   const queryParams = computed(() => {
     const cleaned = {};
-
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== null && value !== '') {
         cleaned[key] = value;
@@ -37,10 +39,10 @@ export default function useGetItemList(initialFilters = {}) {
   });
 
   const { data, isPlaceholderData, refetch } = useQuery({
-    queryKey: ['itemList', queryParams],
-    queryFn: () => getItemList(queryParams.value),
-    placeholderData: keepPreviousData,
+    queryKey: ['defectiveList', queryParams],
+    queryFn: () => getDefectiveList(queryParams.value),
     enabled: computed(() => authStore.isLoggedIn),
+    placeholderData: keepPreviousData,
   });
 
   const prevPage = () => {

@@ -5,7 +5,6 @@
 
   <div class="flex flex-col gap-8 md:flex-row">
     <Form
-      v-if="itemDetail"
       id="itemCreateForm"
       :validation-schema="formSchema"
       @submit="onSubmit"
@@ -27,7 +26,17 @@
 
         <FormField v-slot="{ componentField, errorMessage }" name="itemName">
           <FormItem>
-            <FormLabel>품목명</FormLabel>
+            <FormLabel
+              >품목명
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>품목 코드와 유사하게 품목명을 작성해주세요.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" autocomplete="item-name" />
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -37,7 +46,17 @@
 
         <FormField v-slot="{ componentField, errorMessage }" name="itemSpecification">
           <FormItem>
-            <FormLabel>규격</FormLabel>
+            <FormLabel
+              >규격
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>품목 코드에 작성한 규격으로 작성해주세요.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" autocomplete="item-specification" />
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -80,7 +99,7 @@
 
         <FormField v-slot="{ componentField, errorMessage }" name="isActive">
           <FormItem>
-            <FormLabel>품목사용여부</FormLabel>
+            <FormLabel>품목 사용여부</FormLabel>
             <FormControl>
               <RadioGroup v-bind="componentField" class="flex" disabled>
                 <div class="flex items-center space-x-2">
@@ -113,8 +132,10 @@
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
+import { InfoIcon } from 'lucide-vue-next';
 import { z } from 'zod';
 
+import useCreateItem from '@/apis/query-hooks/item/useCreateItem';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -127,31 +148,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ITEM_STATUS_LABELS } from '@/constants/enumLabels';
 
-const itemDetail = {
-  id: 1,
-  itemCode: 'ABS123123123',
-  itemName: '튀김쫄볶이(개선형)',
-  itemSpecification: '에 계란김밥을 곁들인',
-  itemUnit: 'KG',
-  itemStatus: 'RAW_MATERIAL',
-  isActive: true,
-  createdAt: '2025-11-10 11:29',
-  updatedAt: '2025-11-12 20:33',
-};
-
+const { mutate: createItem } = useCreateItem();
 const formSchema = toTypedSchema(
   z.object({
     itemCode: z
-      .string({ required_error: '품목코드는 필수입니다.' })
+      .string({ required_error: '품목코드는 필수입니다. ex) CELL-C-12345-ABC-31.0' })
       .nonempty('품목코드는 필수입니다.')
       .regex(/^CELL-/i, "품목코드는 'CELL-'로 시작해야 합니다."),
-    itemName: z.string({ required_error: '품목명은 필수입니다.' }).nonempty('품목명은 필수입니다.'),
+    itemName: z
+      .string({ required_error: '품목명은 필수입니다. ex) 원형 셀 12345 31.0Ah (ABC)' })
+      .nonempty('품목명은 필수입니다.'),
     itemSpecification: z
-      .string({ required_error: '규격은 필수입니다.' })
+      .string({
+        required_error:
+          '규격은 필수입니다. ex) Li-ion Cylindrical Cell 12345, ABC, Ø18×65 mm, 3.65V, 31.0Ah',
+      })
       .nonempty('규격은 필수입니다.'),
-    itemUnit: z.string({ required_error: '단위는 필수입니다.' }).nonempty('단위는 필수입니다.'),
+    itemUnit: z
+      .string({ required_error: '단위는 필수입니다. ex) EA' })
+      .nonempty('단위는 필수입니다.'),
     itemStatus: z.string({ required_error: '품목구분은 필수입니다.' }),
   }),
 );
@@ -165,8 +183,7 @@ const onSubmit = values => {
     itemStatus: values.itemStatus,
     isActive: values.isActive === 'true',
   };
-
-  console.log(params);
+  createItem(params);
   // updateFactoryStatus(params);
 };
 </script>

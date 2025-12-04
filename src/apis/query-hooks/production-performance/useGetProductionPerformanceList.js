@@ -1,24 +1,27 @@
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { computed, reactive, ref } from 'vue';
 
-import { getItemList } from '@/apis/query-functions/item';
+import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
 import { useAuthStore } from '@/stores/useAuthStore';
 
-export default function useGetItemList(initialFilters = {}) {
+export default function useGetProductionPerformanceList(initialFilters = {}) {
   const authStore = useAuthStore();
   const page = ref(1);
   const pageSize = ref(10);
+  const fixedSort = ['documentNo,desc'];
 
   const filters = reactive({
+    productionPlanDocumentNo: initialFilters.productionPlanDocumentNo ?? '',
+    factoryCode: initialFilters.factoryCode ?? '',
+    lineCode: initialFilters.lineCode ?? '',
     itemCode: initialFilters.itemCode ?? '',
-    itemName: initialFilters.itemName ?? '',
-    itemUnit: initialFilters.itemUnit ?? '',
-    itemStatus: initialFilters.itemStatus ?? null,
-    itemSpecification: initialFilters.itemSpecification ?? '',
-    isActive: initialFilters.isActive ?? null,
+    salesManagerNo: initialFilters.salesManagerNo ?? '',
+    productionManagerNo: initialFilters.productionManagerNo ?? '',
+    minPerformanceQty: initialFilters.minPerformanceQty ?? null,
+    maxPerformanceQty: initialFilters.maxPerformanceQty ?? null,
+    minDefectRate: initialFilters.minDefectRate ?? null,
+    maxDefectRate: initialFilters.maxDefectRate ?? null,
   });
-
-  const fixedSort = ['itemCode, asc'];
 
   const queryParams = computed(() => {
     const cleaned = {};
@@ -37,10 +40,10 @@ export default function useGetItemList(initialFilters = {}) {
   });
 
   const { data, isPlaceholderData, refetch } = useQuery({
-    queryKey: ['itemList', queryParams],
-    queryFn: () => getItemList(queryParams.value),
-    placeholderData: keepPreviousData,
+    queryKey: ['productionPerformanceList', queryParams],
+    queryFn: () => getProductionPerformanceList(queryParams.value),
     enabled: computed(() => authStore.isLoggedIn),
+    placeholderData: keepPreviousData,
   });
 
   const prevPage = () => {

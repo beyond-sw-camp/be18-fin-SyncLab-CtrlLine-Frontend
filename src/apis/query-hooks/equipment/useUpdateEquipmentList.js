@@ -21,7 +21,7 @@ export default function useUpdateEquipment(equipmentCode) {
       router.push('/base-management/equipments');
     },
     onError: error => {
-      toast.error(error.message);
+      toast.error(error.response.data.message);
     },
   });
 }

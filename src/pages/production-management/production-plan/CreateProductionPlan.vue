@@ -402,6 +402,7 @@ const onSubmit = form.handleSubmit(values => {
     plannedQty: values.plannedQty,
   };
 
+  // @ts-ignore
   createProductionPlan(params);
 });
 </script>

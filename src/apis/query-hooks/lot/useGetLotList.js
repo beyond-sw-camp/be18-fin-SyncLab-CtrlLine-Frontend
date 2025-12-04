@@ -1,24 +1,26 @@
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { computed, reactive, ref } from 'vue';
 
-import { getItemList } from '@/apis/query-functions/item';
+import { getLotList } from '@/apis/query-functions/lot';
 import { useAuthStore } from '@/stores/useAuthStore';
 
-export default function useGetItemList(initialFilters = {}) {
+export default function useGetLotList(initialFilters = {}, initialPage = 1) {
   const authStore = useAuthStore();
-  const page = ref(1);
+  const page = ref(initialPage);
   const pageSize = ref(10);
+  const fixedSort = ['lotNo,desc'];
 
   const filters = reactive({
+    lotNo: initialFilters.lotNo ?? '',
     itemCode: initialFilters.itemCode ?? '',
-    itemName: initialFilters.itemName ?? '',
-    itemUnit: initialFilters.itemUnit ?? '',
-    itemStatus: initialFilters.itemStatus ?? null,
-    itemSpecification: initialFilters.itemSpecification ?? '',
-    isActive: initialFilters.isActive ?? null,
+    factoryCode: initialFilters.factoryCode ?? '',
+    lineCode: initialFilters.lineCode ?? '',
+    performanceDocumentNo: initialFilters.performanceDocumentNo ?? '',
+    createdAtFrom: initialFilters.createdAtFrom ?? null,
+    createdAtTo: initialFilters.createdAtTo ?? null,
+    updatedAtFrom: initialFilters.updatedAtFrom ?? null,
+    updatedAtTo: initialFilters.updatedAtTo ?? null,
   });
-
-  const fixedSort = ['itemCode, asc'];
 
   const queryParams = computed(() => {
     const cleaned = {};
@@ -37,10 +39,10 @@ export default function useGetItemList(initialFilters = {}) {
   });
 
   const { data, isPlaceholderData, refetch } = useQuery({
-    queryKey: ['itemList', queryParams],
-    queryFn: () => getItemList(queryParams.value),
-    placeholderData: keepPreviousData,
+    queryKey: ['lotList', queryParams],
+    queryFn: () => getLotList(queryParams.value),
     enabled: computed(() => authStore.isLoggedIn),
+    placeholderData: keepPreviousData,
   });
 
   const prevPage = () => {

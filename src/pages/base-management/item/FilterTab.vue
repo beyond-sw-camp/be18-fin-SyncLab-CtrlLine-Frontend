@@ -6,24 +6,35 @@
           Filter by
         </AccordionTrigger>
       </div>
-
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FilterInput label="공정명" v-model="localFilters.processName" />
-
-          <!-- 담당자 -->
-          <FilterInput label="담당자" v-model="localFilters.userName" />
-
-          <!-- 담당부서 -->
+          <!-- 품목명 -->
+          <FilterInput label="품목명" v-model="localFilters.itemName" />
+          <!-- 품목코드 -->
+          <FilterInput label="품목코드" v-model="localFilters.itemCode" />
+          <!-- 규격 -->
+          <FilterInput label="규격" v-model="localFilters.itemSpecification" />
+          <!-- 단위 -->
+          <FilterInput label="단위" v-model="localFilters.itemUnit" />
+          <!-- 품목구분 -->
           <FilterSelect
-            label="담당부서"
-            v-model="localFilters.userDepartment"
+            label="품목구분"
+            v-model="localFilters.itemStatus"
             :options="[
               { value: null, label: '전체' },
-              { value: '영업 1팀', label: '영업 1팀' },
-              { value: '영업 2팀', label: '영업 2팀' },
-              { value: '생산 1팀', label: '생산 1팀' },
-              { value: '생산 2팀', label: '생산 2팀' },
+              { value: 'RAW_MATERIAL', label: '원재료' },
+              { value: 'AUXILIARY_MATERIAL', label: '부재료' },
+              { value: 'SEMI_FINISHED_PRODUCT', label: '반제품' },
+              { value: 'FINISHED_PRODUCT', label: '완제품' },
+            ]"
+          />
+          <FilterSelect
+            label="사용여부"
+            v-model="localFilters.isActive"
+            :options="[
+              { value: null, label: '전체' },
+              { value: true, label: '사용' },
+              { value: false, label: '미사용' },
             ]"
           />
         </div>
@@ -69,11 +80,14 @@ const props = defineProps({
 
 const emit = defineEmits(['search']);
 
-// 공정용 필터 구조
+// 품목용 필터 구조
 const localFilters = reactive({
-  processName: props.filters.processName ?? '',
-  userName: props.filters.userName ?? '',
-  userDepartment: props.filters.userDepartment ?? null,
+  itemCode: props.filters.itemCode ?? '',
+  itemName: props.filters.itemName ?? '',
+  itemSpecification: props.filters.itemSpecification ?? null,
+  itemUnit: props.filters.itemUnit ?? '',
+  itemStatus: props.filters.itemStatus ?? null,
+  isActive: props.filters.isActive ?? null,
 });
 
 watch(
@@ -91,9 +105,12 @@ const applyFilters = () => {
 // 초기화
 const resetFilters = () => {
   Object.assign(localFilters, {
-    processName: '',
-    userName: '',
-    userDepartment: null,
+    itemCode: '',
+    itemName: '',
+    itemSpecification: '',
+    itemUnit: null,
+    itemStatus: null,
+    isActive: null,
   });
   emit('search', { ...localFilters });
 };

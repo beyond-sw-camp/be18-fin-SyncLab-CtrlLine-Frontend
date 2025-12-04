@@ -34,7 +34,6 @@
             >
               <Checkbox class="size-4 border-[1.5px]" />
             </TableCell>
-
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ line.lineCode }}
             </TableCell>
@@ -84,7 +83,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/line/FilterTab.vue';
-
 const route = useRoute();
 const router = useRouter();
 
@@ -95,7 +93,6 @@ const initialFilters = {
 };
 
 const { data: lineList, page, filters } = useGetLineList(initialFilters);
-
 const goToDetail = lineCode => {
   router.push(`/base-management/lines/${lineCode}`);
 };
