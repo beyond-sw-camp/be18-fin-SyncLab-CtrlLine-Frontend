@@ -430,7 +430,7 @@ const summariseEquipments = () => [];
 
 .pipeline__node {
   position: relative;
-  height: 160px;
+  height: 240px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -441,9 +441,17 @@ const summariseEquipments = () => [];
   justify-content: flex-end;
 }
 
+.pipeline__node[data-position='top'] .pipeline__machine {
+  transform: translateY(-70px);
+}
+
+.pipeline__node[data-position='bottom'] .pipeline__machine {
+  transform: translateY(70px);
+}
+
 .pipeline__machine {
-  width: 70px;
-  height: 70px;
+  width: 78px;
+  height: 96px;
   border-radius: 1.25rem;
   background: #e0e7d9;
   border: 2px solid rgba(91, 109, 76, 0.35);
@@ -492,13 +500,18 @@ const summariseEquipments = () => [];
   margin: 0.4rem 0 0;
   font-size: 0.72rem;
   text-align: center;
-  color: #475467;
-  font-weight: 500;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.pipeline__node[data-position='top'] .pipeline__equip-label {
+  order: -1;
+  margin: 0 0 0.4rem;
 }
 
 .pipeline__node[data-position='bottom'] .pipeline__equip-label {
-  order: -1;
-  margin: 0 0 0.4rem;
+  order: 1;
+  margin: 0.4rem 0 0;
 }
 
 .pipeline__lines {
