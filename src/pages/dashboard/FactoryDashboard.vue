@@ -66,7 +66,8 @@ const peakUsage = computed(() =>
 const usagePercent = computed(() => {
   const peak = peakUsage.value;
   if (!peak) return 0;
-  return Math.min(100, Math.max(0, (currentUsage.value / peak) * 100));
+  const gaugeMax = peak * 1.2;
+  return Math.min(100, Math.max(0, (currentUsage.value / gaugeMax) * 100));
 });
 
 const chartData1 = [
