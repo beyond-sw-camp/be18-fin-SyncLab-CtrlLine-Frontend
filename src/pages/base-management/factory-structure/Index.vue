@@ -158,12 +158,12 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { BatteryCharging, Boxes, Brush, Droplet, Puzzle, ShieldCheck, Zap } from 'lucide-vue-next';
+import { BatteryCharging, Boxes, Droplet, Puzzle, ShieldCheck, Sparkles, Zap } from 'lucide-vue-next';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const EQUIPMENT_GROUPS = [
-  { label: 'Tray Cleaner', icon: Brush },
+  { label: 'Tray Cleaner', icon: Sparkles },
   { label: 'Electrode Unit', icon: Zap },
   { label: 'Assembly Unit', icon: Puzzle },
   { label: 'Formation Unit', icon: BatteryCharging },
@@ -430,7 +430,7 @@ const summariseEquipments = () => [];
 
 .pipeline__node {
   position: relative;
-  height: 240px;
+  height: 210px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -442,16 +442,16 @@ const summariseEquipments = () => [];
 }
 
 .pipeline__node[data-position='top'] .pipeline__machine {
-  transform: translateY(-70px);
+  transform: translateY(-45px);
 }
 
 .pipeline__node[data-position='bottom'] .pipeline__machine {
-  transform: translateY(70px);
+  transform: translateY(45px);
 }
 
 .pipeline__machine {
-  width: 78px;
-  height: 96px;
+  width: 88px;
+  height: 88px;
   border-radius: 1.25rem;
   background: #e0e7d9;
   border: 2px solid rgba(91, 109, 76, 0.35);
