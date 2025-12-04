@@ -1,53 +1,56 @@
 <template>
-  <Card class="flex flex-col text-center">
-    <CardContent class="flex-1 pb-0">
-      <ChartContainer :config="chartConfig" class="mx-auto aspect-square max-h-[200px]">
-        <VisSingleContainer :data="data" :margin="{ top: 30, bottom: 30 }">
-          <VisDonut
-            :value="d => d.visitors"
-            :color="d => chartConfig[d.browser]?.color"
-            :arc-width="0"
-          />
+  <Card class="flex flex-col overflow-hidden text-left">
+    <CardContent class="flex flex-col gap-4 py-4">
+      <div class="flex items-center justify-between text-xs uppercase tracking-widest text-muted-foreground">
+        <span>NG 유형 분포</span>
+        <span class="text-[11px] text-muted-foreground/80">실시간</span>
+      </div>
 
-          <ChartTooltip
-            :triggers="{
-              [Donut.selectors.segment]: tooltipTemplate,
-            }"
-          />
-        </VisSingleContainer>
-      </ChartContainer>
+      <NgDistributionDetail :data="data" :config="config" :show-list="false" />
+
+      <div class="flex justify-end">
+        <Dialog>
+          <DialogTrigger as-child>
+            <Button variant="outline" size="sm" class="text-primary">NG 분포 상세보기</Button>
+          </DialogTrigger>
+          <DialogContent class="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>NG 분포 상세보기</DialogTitle>
+              <DialogDescription>선택한 공장의 NG 유형 분포를 자세히 확인합니다.</DialogDescription>
+            </DialogHeader>
+
+            <div class="max-h-[70vh] overflow-y-auto pr-2">
+              <NgDistributionDetail :data="data" :config="config" />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </CardContent>
-    <CardFooter class="flex-col gap-2 text-sm">NG Type</CardFooter>
+    <CardFooter class="bg-muted/50 py-3 text-xs text-muted-foreground">
+      NG Type 현황
+    </CardFooter>
   </Card>
 </template>
 
 <script setup>
-import { Donut } from '@unovis/ts';
-import { VisDonut, VisSingleContainer } from '@unovis/vue';
-import { computed } from 'vue';
-
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  componentToString,
-} from '@/components/ui/chart';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { PIE_CHART_CONFIG } from '@/constants/chartConfig';
+import NgDistributionDetail from '@/pages/dashboard/NgDistributionDetail.vue';
 
-const props = defineProps({
+defineProps({
   data: { type: Array, required: true },
   config: {
     type: Object,
     default: () => PIE_CHART_CONFIG,
   },
 });
-
-const chartConfig = computed(() => props.config ?? PIE_CHART_CONFIG);
-
-const tooltipTemplate = computed(() =>
-  componentToString(chartConfig.value, ChartTooltipContent, {
-    hideLabel: true,
-  }),
-);
 </script>
