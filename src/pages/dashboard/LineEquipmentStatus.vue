@@ -29,22 +29,35 @@
             </div>
           </div>
 
-          <div class="mt-4 flex flex-wrap gap-3">
+          <div class="mt-4 grid gap-2 lg:grid-cols-7">
             <div
-              v-for="equipment in line.equipments"
-              :key="equipment.equipmentId"
-              class="flex flex-col items-center gap-1 text-[11px]"
+              v-for="stageCode in STAGE_ORDER"
+              :key="stageCode"
+              class="rounded-2xl border border-slate-100 bg-slate-50 p-2"
             >
-              <div
-                class="flex h-12 w-12 items-center justify-center rounded-2xl border shadow-sm transition-colors"
-                :style="{ backgroundColor: STATUS_COLORS[equipment.status] }"
-                :title="`${equipment.label ?? 'Stage'} · ${STATUS_LABELS[equipment.status]}`"
-              >
-                <span class="text-xs font-semibold text-slate-900">
-                  {{ equipmentIconLabel(equipment) }}
-                </span>
+              <div class="flex items-center justify-between text-[11px] text-slate-500">
+                <span>{{ STAGE_LABELS[stageCode] }}</span>
+                <span class="font-semibold text-slate-900">{{ stageCode }}</span>
               </div>
-              <span class="text-slate-600">{{ equipment.equipmentCode }}</span>
+
+              <div class="mt-2 grid grid-cols-2 gap-2">
+                <div
+                  v-for="equipment in line.stageBuckets?.[stageCode] ?? []"
+                  :key="equipment.equipmentId"
+                  class="flex flex-col items-center gap-1 text-[11px]"
+                >
+                  <div
+                    class="flex h-10 w-10 items-center justify-center rounded-xl border shadow-sm transition-colors"
+                    :style="{ backgroundColor: STATUS_COLORS[equipment.status] }"
+                    :title="`${STAGE_LABELS[stageCode]} · ${STATUS_LABELS[equipment.status]}`"
+                  >
+                    <span class="text-[10px] font-semibold text-slate-900">
+                      {{ stageCode }}
+                    </span>
+                  </div>
+                  <span class="text-[10px] text-slate-500">{{ equipment.equipmentCode }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -56,6 +69,7 @@
 </template>
 
 <script setup>
+import { STAGE_DEFINITIONS } from '@/apis/query-hooks/factory/useGetFactoryLinesWithEquipments';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 const STATUS_COLORS = {
@@ -78,6 +92,12 @@ const STATUS_OPTIONS = [
   { value: 3, label: 'Low Warning' },
   { value: 4, label: 'High Warning' },
 ];
+
+const STAGE_ORDER = STAGE_DEFINITIONS.map(stage => stage.code);
+const STAGE_LABELS = STAGE_DEFINITIONS.reduce((acc, stage) => {
+  acc[stage.code] = stage.label;
+  return acc;
+}, {});
 
 const equipmentIconLabel = equipment => {
   if (equipment.code) {

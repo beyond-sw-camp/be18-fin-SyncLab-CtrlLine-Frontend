@@ -8,28 +8,40 @@ import { useAuthStore } from '@/stores/useAuthStore';
 const DEFAULT_LINE_PAGE_SIZE = 200;
 const DEFAULT_EQUIPMENT_PAGE_SIZE = 500;
 
-const STAGE_DEFINITIONS = {
-  TCP: { index: 0, label: 'Tray Cleaning' },
-  EU: { index: 1, label: 'Electrode Unit' },
-  AU: { index: 2, label: 'Assembly Unit' },
-  FAU: { index: 3, label: 'Formation & Aging' },
-  MAP: { index: 4, label: 'Module & Pack' },
-  CCP: { index: 5, label: 'Cell Cleaning' },
-  FIP: { index: 6, label: 'Final Inspection' },
-};
+export const STAGE_DEFINITIONS = [
+  { code: 'TCP', label: 'Tray Cleaning' },
+  { code: 'EU', label: 'Electrode Unit' },
+  { code: 'AU', label: 'Assembly Unit' },
+  { code: 'FAU', label: 'Formation & Aging' },
+  { code: 'MAP', label: 'Module & Pack' },
+  { code: 'CCP', label: 'Cell Cleaning' },
+  { code: 'FIP', label: 'Final Inspection' },
+];
+
+const STAGE_ORDER = STAGE_DEFINITIONS.map(stage => stage.code);
+const STAGE_MAP = STAGE_DEFINITIONS.reduce(
+  (acc, stage, index) => ({
+    ...acc,
+    [stage.code]: { ...stage, index },
+  }),
+  {},
+);
+const MATCH_PRIORITY_CODES = [...STAGE_DEFINITIONS]
+  .sort((a, b) => b.code.length - a.code.length)
+  .map(stage => stage.code);
 
 const resolveStage = equipment => {
   const candidates = [equipment.equipmentCode ?? '', equipment.equipmentType ?? ''].map(str =>
     str.toUpperCase(),
   );
 
-  for (const key of Object.keys(STAGE_DEFINITIONS)) {
-    if (candidates.some(token => token.includes(key))) {
-      return { index: STAGE_DEFINITIONS[key].index, label: STAGE_DEFINITIONS[key].label, code: key };
+  for (const code of MATCH_PRIORITY_CODES) {
+    if (candidates.some(token => token.includes(code))) {
+      return { code, label: STAGE_MAP[code].label, index: STAGE_MAP[code].index };
     }
   }
 
-  return { index: Number.MAX_SAFE_INTEGER, label: '기타', code: null };
+  return { code: null, label: '기타', index: Number.MAX_SAFE_INTEGER };
 };
 
 const normalizeEquipment = equipment => ({
@@ -83,15 +95,31 @@ export default function useGetFactoryLinesWithEquipments(factoryIdRef) {
         return acc;
       }, {});
 
-      return lines.map(line => ({
-        ...line,
-        equipments: (equipmentByLineId[line.lineId ?? line.lineCode] ?? []).sort((a, b) => {
-          const stageDiff = (a.index ?? Number.MAX_SAFE_INTEGER) - (b.index ?? Number.MAX_SAFE_INTEGER);
+      return lines.map(line => {
+        const equipments = (equipmentByLineId[line.lineId ?? line.lineCode] ?? []).sort((a, b) => {
+          const stageDiff =
+            (a.index ?? Number.MAX_SAFE_INTEGER) - (b.index ?? Number.MAX_SAFE_INTEGER);
           if (stageDiff !== 0) return stageDiff;
           if (!a.equipmentCode || !b.equipmentCode) return 0;
           return a.equipmentCode.localeCompare(b.equipmentCode);
-        }),
-      }));
+        });
+
+        const stageBuckets = STAGE_ORDER.reduce((acc, code) => {
+          acc[code] = [];
+          return acc;
+        }, {});
+
+        equipments.forEach(equipment => {
+          const bucketKey = STAGE_ORDER.includes(equipment.code) ? equipment.code : STAGE_ORDER.at(-1);
+          stageBuckets[bucketKey].push(equipment);
+        });
+
+        return {
+          ...line,
+          equipments,
+          stageBuckets,
+        };
+      });
     },
   });
 }
