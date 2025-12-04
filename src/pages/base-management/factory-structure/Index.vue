@@ -103,94 +103,10 @@
             </DialogContent>
           </Dialog>
 
-          <div class="sub-process-grid">
-            <div class="sub-process" data-type="assembly">
-              <header class="sub-process__header">
-                <h3>Assembly Process</h3>
-                <p>Dry Room</p>
-              </header>
-              <div class="sub-process__steps">
-                <div v-for="step in ASSEMBLY_STEPS" :key="step.key" class="sub-process__step">
-                  {{ step.label }}
-                </div>
-              </div>
-              <div class="sub-process__lines">
-                <span
-                  v-for="line in stageLineMap.assembly ?? []"
-                  :key="line.lineCode"
-                  class="line-token line-token--pl"
-                >
-                  {{ line.lineCode }}
-                </span>
-                <p v-if="!(stageLineMap.assembly ?? []).length" class="sub-process__empty">
-                  조립 라인 데이터가 없습니다.
-                </p>
-              </div>
-            </div>
-
-            <div class="sub-process" data-type="activation">
-              <header class="sub-process__header">
-                <h3>Activation Process</h3>
-                <p>Formation / Aging</p>
-              </header>
-              <div class="sub-process__steps">
-                <div v-for="step in ACTIVATION_STEPS" :key="step.key" class="sub-process__step">
-                  {{ step.label }}
-                </div>
-              </div>
-              <div class="sub-process__lines">
-                <span
-                  v-for="line in stageLineMap.activation ?? []"
-                  :key="line.lineCode"
-                  class="line-token line-token--cp"
-                >
-                  {{ line.lineCode }}
-                </span>
-                <p v-if="!(stageLineMap.activation ?? []).length" class="sub-process__empty">
-                  활성화 라인 데이터가 없습니다.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="zone-grid">
-            <article v-for="zone in planZones" :key="zone.key" class="zone-card">
-              <header class="zone-card__header">
-                <div>
-                  <p class="zone-card__title">{{ zone.title }}</p>
-                  <p class="zone-card__subtitle">{{ zone.subtitle }}</p>
-                </div>
-                <span class="zone-card__badge">{{ zone.lines.length }}개 라인</span>
-              </header>
-              <div class="zone-card__lines" :data-empty="!zone.lines.length">
-                <template v-if="zone.lines.length">
-                  <div v-for="line in zone.lines" :key="line.lineCode" class="line-chip">
-                    <div class="line-chip__header">
-                      <strong>{{ line.lineName || zone.codeLabel(line.lineCode) }}</strong>
-                      <span>{{ line.lineCode }}</span>
-                    </div>
-                    <div class="line-chip__equipments">
-                      <template v-if="line.equipments.length">
-                        <span
-                          v-for="meta in summariseEquipments(line.equipments)"
-                          :key="meta.key"
-                          class="equipment-pill"
-                          :class="meta.classes"
-                        >
-                          {{ meta.label }} {{ meta.count }}
-                        </span>
-                      </template>
-                      <span v-else class="text-xs text-gray-400">설비 데이터가 없습니다.</span>
-                    </div>
-                  </div>
-                </template>
-                <p v-else class="text-sm text-gray-400">해당 존에 연결된 라인이 없습니다.</p>
-              </div>
-            </article>
-          </div>
         </div>
       </div>
     </div>
+
   </section>
 </template>
 
@@ -299,30 +215,6 @@ const EQUIPMENT_LAYOUT = EQUIPMENT_GROUPS.flatMap((group, groupIndex) =>
     };
   }),
 );
-
-const PLAN_ZONES = [
-  {
-    key: 'cl',
-    title: '전극/코팅 존',
-    subtitle: 'Cell Line (CL)',
-    lineTypes: ['CL'],
-    codeLabel: code => `코드 ${code}`,
-  },
-  {
-    key: 'pl',
-    title: '조립 존',
-    subtitle: 'Pack Line (PL)',
-    lineTypes: ['PL'],
-    codeLabel: code => `코드 ${code}`,
-  },
-  {
-    key: 'cp',
-    title: '활성화 존',
-    subtitle: 'Cell Process (CP)',
-    lineTypes: ['CP'],
-    codeLabel: code => `코드 ${code}`,
-  },
-];
 
 const STATUS_META = {
   RUNNING: {
@@ -459,18 +351,6 @@ const lineStructures = computed(() => {
     equipments: [],
   }));
 });
-const planZones = computed(() =>
-  PLAN_ZONES.map(zone => ({
-    ...zone,
-    lines: lineStructures.value.filter(line => zone.lineTypes.includes(line.type)),
-  })),
-);
-
-const stageLineMap = computed(() => ({
-  assembly: lineStructures.value.filter(line => line.type === 'PL'),
-  activation: lineStructures.value.filter(line => line.type === 'CP'),
-}));
-
 const isEquipmentModalOpen = ref(false);
 const activeEquipment = ref(null);
 
@@ -483,7 +363,6 @@ const closeEquipmentModal = () => {
   isEquipmentModalOpen.value = false;
 };
 
-const summariseEquipments = () => [];
 </script>
 
 <style scoped>
@@ -703,161 +582,9 @@ const summariseEquipments = () => [];
   color: #065f46;
 }
 
-.sub-process-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-  margin-bottom: 2rem;
-}
-
-.sub-process {
-  border: 2px dashed rgba(148, 163, 184, 0.7);
-  border-radius: 1.5rem;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 1.25rem;
-  position: relative;
-}
-
-.sub-process__header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.sub-process__header p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #64748b;
-}
-
-.sub-process__steps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0;
-}
-
-.sub-process__step {
-  flex: 1;
-  min-width: 100px;
-  padding: 0.4rem 0.6rem;
-  border-radius: 0.75rem;
-  border: 1px dashed rgba(148, 163, 184, 0.7);
-  font-size: 0.78rem;
-  text-align: center;
-  background: linear-gradient(180deg, rgba(148, 163, 184, 0.08), rgba(148, 163, 184, 0.02));
-}
-
-.sub-process__lines {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.sub-process__empty {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #94a3b8;
-}
-
-.zone-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-}
-
-.zone-card {
-  border-radius: 1.25rem;
-  background: #ffffff;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  padding: 1.25rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-}
-
-.zone-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px dashed rgba(148, 163, 184, 0.5);
-}
-
-.zone-card__title {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #111827;
-  margin: 0;
-}
-
-.zone-card__subtitle {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #64748b;
-}
-
-.zone-card__badge {
-  border-radius: 9999px;
-  padding: 0.2rem 0.8rem;
-  background: #eef2ff;
-  color: #4338ca;
-  font-weight: 600;
-  font-size: 0.82rem;
-}
-
-.zone-card__lines {
-  padding-top: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.line-chip {
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  border-radius: 0.85rem;
-  padding: 0.75rem;
-  background: #f8fafc;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.line-chip__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9rem;
-  color: #0f172a;
-  margin-bottom: 0.5rem;
-}
-
-.line-chip__header span {
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
-.line-chip__equipments {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.equipment-pill {
-  border-radius: 9999px;
-  border: 1px solid;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.equipment-process-list {
-  list-style: disc;
-  margin: 0;
-  padding-left: 1.5rem;
-  color: #1f2937;
-  font-size: 0.9rem;
-}
-
-.equipment-process-list li {
-  margin-bottom: 0.25rem;
-}
 </style>
+.process-card__header p {
+  margin: 0.2rem 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
