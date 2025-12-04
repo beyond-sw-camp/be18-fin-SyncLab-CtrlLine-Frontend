@@ -15,8 +15,8 @@
               <SelectValue placeholder="변경할 상태를 선택하세요." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem :value="true">사용</SelectItem>
-              <SelectItem :value="false">미사용</SelectItem>
+              <SelectItem value="true">사용</SelectItem>
+              <SelectItem value="false">미사용</SelectItem>
             </SelectContent>
           </Select>
         </DialogDescription>
@@ -37,7 +37,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 
-import useUpdateEquipment from '@/apis/query-hooks/equipment/useUpdateEquipment';
+import useUpdateEquipmentStatusList from '@/apis/query-hooks/equipment/useUpdateEquipmentStatusList';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -70,18 +70,7 @@ const userStore = {
   userRole: 'ADMIN',
 };
 
-const { mutate: callUpdateEquipment } = useUpdateEquipment({
-  onSuccess: () => {
-    alert(`설비 ${props.rows.length}개의 사용여부가 성공적으로 변경되었습니다.`);
-    emit('updated');
-    selectedStatus.value = null;
-  },
-  onError: error => {
-    console.error('설비 사용여부 변경 오류:', error);
-    alert('설비 사용여부 변경 중 오류가 발생했습니다.');
-    selectedStatus.value = null;
-  },
-});
+const { mutate: callUpdateEquipment } = useUpdateEquipmentStatusList();
 
 const canEdit = computed(() => {
   if (props.rows.length === 0) return false;
