@@ -3,7 +3,7 @@ import { toast } from 'vue-sonner';
 
 import { updateItemStatusList } from '@/apis/query-functions/item';
 
-export default function useupdateItemStatusList() {
+export default function useUpdateItemStatusList() {
   const queryClient = useQueryClient();
 
   return useMutation({
