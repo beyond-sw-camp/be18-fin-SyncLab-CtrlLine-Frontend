@@ -5,7 +5,7 @@
 
   <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
     <ChartNgType :data="chartData1" />
-    <VerticalProgress :temperature="20" :humidity="20" />
+    <VerticalProgress :temperature="temperature" :humidity="humidity" />
     <PowerUsageGauge :usagePercent="70" :currentUsage="333.39" :peakUsage="221.2" />
   </div>
 
@@ -20,6 +20,9 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+
+import useGetFactoryEnvironmentLatest from '@/apis/query-hooks/factory/useGetFactoryEnvironmentLatest';
 import ChartNgType from '@/pages/dashboard/ChartNgType.vue';
 import DefectRateChart from '@/pages/dashboard/DefectRateChart.vue';
 import LineEquipmentStatus from '@/pages/dashboard/LineEquipmentStatus.vue';
@@ -27,6 +30,22 @@ import PowerUsageGauge from '@/pages/dashboard/PowerUsageGauge.vue';
 import ProductionChart from '@/pages/dashboard/ProductionChart.vue';
 import ProductionProgress from '@/pages/dashboard/ProductionProgress.vue';
 import VerticalProgress from '@/pages/dashboard/VerticalProgress.vue';
+
+const props = defineProps({
+  factoryCode: {
+    type: String,
+    required: true,
+  },
+});
+
+const { data: environmentData } = useGetFactoryEnvironmentLatest(props.factoryCode);
+
+const temperature = computed(() =>
+  environmentData.value?.temperature ? Number(environmentData.value.temperature) : 0,
+);
+const humidity = computed(() =>
+  environmentData.value?.humidity ? Number(environmentData.value.humidity) : 0,
+);
 
 const chartData1 = [
   { browser: 'chrome', visitors: 275, fill: 'var(--color-chrome)' },

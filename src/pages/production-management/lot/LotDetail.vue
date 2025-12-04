@@ -73,10 +73,7 @@
       </section>
     </div>
 
-    <div
-      v-else
-      class="border rounded-lg p-6 text-center text-sm text-muted-foreground"
-    >
+    <div v-else class="border rounded-lg p-6 text-center text-sm text-muted-foreground">
       Lot 정보를 불러오지 못했습니다. 목록으로 돌아가 다시 시도해 주세요.
     </div>
   </div>
@@ -156,7 +153,7 @@ const quantityFields = computed(() => {
   return [
     { label: '품목 코드', value: detail.itemCode },
     { label: '품목명', value: detail.itemName },
-    { label: 'LOT 수량', value: formatNumber(detail.lotQty) },
+    { label: '투입 수량', value: formatNumber(detail.lotQty) },
     { label: '생산 수량', value: formatNumber(detail.performanceQty) },
     { label: '불량 수량', value: formatNumber(detail.defectiveQty) },
     { label: '불량률', value: formatRate(calculateDefectiveRate(detail)) },

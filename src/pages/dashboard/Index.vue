@@ -17,7 +17,7 @@
       :key="factory.factoryCode + '-content'"
       :value="factory.factoryCode"
     >
-      <component :is="FACTORY_COMPONENT_LIST[index]" />
+      <component :is="FACTORY_COMPONENT_LIST[index]" :factory-code="factory.factoryCode" />
     </TabsContent>
   </Tabs>
 </template>
