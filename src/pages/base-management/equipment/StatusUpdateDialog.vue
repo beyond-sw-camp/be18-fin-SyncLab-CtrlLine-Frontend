@@ -102,15 +102,15 @@ watch(
 );
 
 const onUpdateStatus = () => {
-  const updates = props.rows.map(r => ({
-    equipmentCode: r.equipmentCode,
-    isActive: selectedStatus.value,
-  }));
+  const equipmentIds = props.rows.map(r => r.id);
+  const isActiveBoolean = selectedStatus.value == 'true';
 
   const params = {
-    equipments: updates,
+    equipmentIds: equipmentIds,
+    isActive: isActiveBoolean,
   };
 
   callUpdateEquipment(params);
+  emit('updated');
 };
 </script>
