@@ -11,25 +11,40 @@
         </div>
       </div>
 
-      <div class="flex flex-col gap-4">
-        <div v-for="line in lines.lines" :key="line.lineId" class="flex flex-col gap-2">
+      <div class="grid gap-4">
+        <div
+          v-for="line in lines.lines"
+          :key="line.lineId"
+          class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+        >
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="font-semibold text-sm">{{ line.lineName || line.lineCode }}</span>
-              <span class="text-xs text-muted-foreground">({{ line.lineCode }})</span>
+            <div>
+              <p class="text-sm font-semibold text-slate-900">
+                {{ line.lineName || line.lineCode }}
+              </p>
+              <p class="text-xs text-muted-foreground">{{ line.lineCode }}</p>
             </div>
-            <span class="text-xs text-muted-foreground">{{ line.equipments.length }}대</span>
+            <div class="text-xs text-muted-foreground">
+              총 {{ line.equipments.length }}대
+            </div>
           </div>
 
-          <div class="flex flex-1 flex-wrap gap-1">
+          <div class="mt-4 flex flex-wrap gap-3">
             <div
               v-for="equipment in line.equipments"
               :key="equipment.equipmentId"
-              class="flex items-center justify-center rounded-md border px-2 py-1 text-xs font-medium min-w-[80px] shadow-sm"
-              :title="`${equipment.equipmentName ?? equipment.equipmentCode} - ${STATUS_LABELS[equipment.status]}`"
-              :style="{ backgroundColor: STATUS_COLORS[equipment.status] }"
+              class="flex flex-col items-center gap-1 text-[11px]"
             >
-              {{ equipment.equipmentCode }}
+              <div
+                class="flex h-12 w-12 items-center justify-center rounded-2xl border shadow-sm transition-colors"
+                :style="{ backgroundColor: STATUS_COLORS[equipment.status] }"
+                :title="`${equipment.label ?? 'Stage'} · ${STATUS_LABELS[equipment.status]}`"
+              >
+                <span class="text-xs font-semibold text-slate-900">
+                  {{ equipmentIconLabel(equipment) }}
+                </span>
+              </div>
+              <span class="text-slate-600">{{ equipment.equipmentCode }}</span>
             </div>
           </div>
         </div>
@@ -63,6 +78,15 @@ const STATUS_OPTIONS = [
   { value: 3, label: 'Low Warning' },
   { value: 4, label: 'High Warning' },
 ];
+
+const equipmentIconLabel = equipment => {
+  if (equipment.code) {
+    return equipment.code;
+  }
+  const code = equipment.equipmentCode ?? '';
+  if (!code) return 'E';
+  return code.slice(-2);
+};
 
 defineProps({
   lines: Object,

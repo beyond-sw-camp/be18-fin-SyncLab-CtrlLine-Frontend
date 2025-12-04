@@ -8,13 +8,39 @@ import { useAuthStore } from '@/stores/useAuthStore';
 const DEFAULT_LINE_PAGE_SIZE = 200;
 const DEFAULT_EQUIPMENT_PAGE_SIZE = 500;
 
+const STAGE_DEFINITIONS = {
+  TCP: { index: 0, label: 'Tray Cleaning' },
+  EU: { index: 1, label: 'Electrode Unit' },
+  AU: { index: 2, label: 'Assembly Unit' },
+  FAU: { index: 3, label: 'Formation & Aging' },
+  MAP: { index: 4, label: 'Module & Pack' },
+  CCP: { index: 5, label: 'Cell Cleaning' },
+  FIP: { index: 6, label: 'Final Inspection' },
+};
+
+const resolveStage = equipment => {
+  const candidates = [equipment.equipmentCode ?? '', equipment.equipmentType ?? ''].map(str =>
+    str.toUpperCase(),
+  );
+
+  for (const key of Object.keys(STAGE_DEFINITIONS)) {
+    if (candidates.some(token => token.includes(key))) {
+      return { index: STAGE_DEFINITIONS[key].index, label: STAGE_DEFINITIONS[key].label, code: key };
+    }
+  }
+
+  return { index: Number.MAX_SAFE_INTEGER, label: '기타', code: null };
+};
+
 const normalizeEquipment = equipment => ({
   equipmentId: equipment.id ?? equipment.equipmentId,
   equipmentCode: equipment.equipmentCode,
   equipmentName: equipment.equipmentName,
+  equipmentType: equipment.equipmentType,
   lineCode: equipment.lineCode ?? equipment.line?.lineCode ?? null,
   lineId: equipment.lineId ?? equipment.line?.lineId ?? null,
   status: equipment.status ?? equipment.equipmentStatus ?? equipment.state ?? null,
+  ...resolveStage(equipment),
 });
 
 const normalizeLine = line => ({
@@ -60,6 +86,8 @@ export default function useGetFactoryLinesWithEquipments(factoryIdRef) {
       return lines.map(line => ({
         ...line,
         equipments: (equipmentByLineId[line.lineId ?? line.lineCode] ?? []).sort((a, b) => {
+          const stageDiff = (a.index ?? Number.MAX_SAFE_INTEGER) - (b.index ?? Number.MAX_SAFE_INTEGER);
+          if (stageDiff !== 0) return stageDiff;
           if (!a.equipmentCode || !b.equipmentCode) return 0;
           return a.equipmentCode.localeCompare(b.equipmentCode);
         }),
