@@ -13,11 +13,11 @@
 
     <TabsContent value="scheduler"> <Scheduler /> </TabsContent>
     <TabsContent
-      v-for="(factory, index) in factoryList.content"
+      v-for="factory in factoryList.content"
       :key="factory.factoryCode + '-content'"
       :value="factory.factoryCode"
     >
-      <component :is="FACTORY_COMPONENT_LIST[index]" :factory-code="factory.factoryCode" />
+      <FactoryDashboard :factory-code="factory.factoryCode" />
     </TabsContent>
   </Tabs>
 </template>
@@ -28,10 +28,8 @@ import { useRoute, useRouter } from 'vue-router';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import FirstFactory from '@/pages/dashboard/FirstFactory.vue';
 import Scheduler from '@/pages/dashboard/Scheduler.vue';
-import SecondFactory from '@/pages/dashboard/SecondFactory.vue';
-import ThirdFactory from '@/pages/dashboard/ThirdFactory.vue';
+import FactoryDashboard from '@/pages/dashboard/FactoryDashboard.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -39,8 +37,6 @@ const router = useRouter();
 const { data: factoryList } = useGetFactoryList();
 
 const currentTab = ref(route.query.tab ?? 'scheduler');
-
-const FACTORY_COMPONENT_LIST = [FirstFactory, SecondFactory, ThirdFactory];
 
 // 탭이 바뀌면 URL 업데이트
 watch(currentTab, value => {

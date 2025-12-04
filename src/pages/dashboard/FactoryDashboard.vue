@@ -56,8 +56,7 @@ const chartData1 = [
 ];
 
 const lines = {
-  factoryId: 1,
-  factoryName: '본사 공장',
+  factoryName: '공장',
   lines: [
     {
       lineId: 10,
