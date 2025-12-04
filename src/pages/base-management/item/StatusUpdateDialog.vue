@@ -15,8 +15,8 @@
               <SelectValue placeholder="변경할 상태를 선택하세요." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem :value="true">사용</SelectItem>
-              <SelectItem :value="false">미사용</SelectItem>
+              <SelectItem value="true">사용</SelectItem>
+              <SelectItem value="false">미사용</SelectItem>
             </SelectContent>
           </Select>
         </DialogDescription>
@@ -92,10 +92,11 @@ watch(
 
 const onUpdateStatus = () => {
   const itemIds = props.rows.map(r => r.id);
+  const isActiveBoolean = selectedStatus.value === 'true';
 
   const params = {
     itemIds: itemIds,
-    isActive: selectedStatus.value,
+    isActive: isActiveBoolean,
   };
 
   callUpdateItem(params);
