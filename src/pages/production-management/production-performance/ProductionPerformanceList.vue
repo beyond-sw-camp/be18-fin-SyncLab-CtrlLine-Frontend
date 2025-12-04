@@ -11,8 +11,8 @@
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 전표번호 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장코드 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 라인코드 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 라인 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목코드 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목명 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
