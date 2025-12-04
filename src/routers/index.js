@@ -145,6 +145,11 @@ const routes = [
         component: () => import('@/pages/production-management/defective/DefectiveList.vue'),
       },
       {
+        path: 'defectives/:planDefectiveId',
+        name: 'DefectiveDetail',
+        component: () => import('@/pages/production-management/defective/DefectiveDetail.vue'),
+      },
+      {
         path: 'lots',
         name: 'LotList',
         component: () => import('@/pages/production-management/lot/LotList.vue'),
@@ -188,6 +193,7 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
+  // @ts-ignore
   routes,
 });
 
