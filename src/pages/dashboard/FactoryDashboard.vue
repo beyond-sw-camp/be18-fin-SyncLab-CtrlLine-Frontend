@@ -16,20 +16,35 @@
   <div class="grid gap-4 pt-4">
     <LineEquipmentStatus :lines="lines" :status-map="equipmentStatuses" />
 
-    <div class="flex items-center justify-end gap-2 text-xs font-medium text-muted-foreground">
-      <span>데이터 단위</span>
-      <div class="inline-flex rounded-full border bg-background p-0.5">
-        <Button
-          v-for="option in GRANULARITY_OPTIONS"
-          :key="option.value"
-          size="sm"
-          variant="ghost"
-          class="rounded-full px-3 py-1 text-xs font-medium transition"
-          :class="chartGranularity === option.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'"
-          @click="chartGranularity = option.value"
-        >
-          {{ option.label }}
-        </Button>
+    <div class="flex flex-wrap items-center justify-between gap-3 text-xs font-medium text-muted-foreground">
+      <div class="flex items-center gap-2">
+        <span>품목</span>
+        <Select v-model="selectedItem">
+          <SelectTrigger class="h-8 w-[180px] rounded-full border bg-background px-3 text-xs font-medium">
+            <SelectValue placeholder="전체 품목" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem v-for="option in itemOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div class="flex items-center gap-2">
+        <span>데이터 단위</span>
+        <div class="inline-flex rounded-full border bg-background p-0.5">
+          <Button
+            v-for="option in GRANULARITY_OPTIONS"
+            :key="option.value"
+            size="sm"
+            variant="ghost"
+            class="rounded-full px-3 py-1 text-xs font-medium transition"
+            :class="chartGranularity === option.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'"
+            @click="chartGranularity = option.value"
+          >
+            {{ option.label }}
+          </Button>
+        </div>
       </div>
     </div>
 
@@ -41,7 +56,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import useGetFactoryEnergyLatest from '@/apis/query-hooks/factory/useGetFactoryEnergyLatest';
 import useGetFactoryEnergyTodayMax from '@/apis/query-hooks/factory/useGetFactoryEnergyTodayMax';
@@ -62,6 +77,7 @@ import { PIE_CHART_CONFIG } from '@/constants/chartConfig';
 import { buildDefectRateTrend } from '@/utils/defectTrend';
 import { buildProductionVolumeSeries } from '@/utils/productionVolume';
 import { Button } from '@/components/ui/button';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 
 const props = defineProps({
   factoryCode: {
@@ -86,6 +102,7 @@ const { data: defectiveTypes } = useGetDefectiveTypes(props.factoryCode);
 const { data: factoryLines } = useGetFactoryLinesWithEquipments(factoryIdRef);
 const { statusMap: equipmentStatuses } = useEquipmentStatusFeed(factoryIdRef);
 const chartGranularity = ref('week');
+const selectedItem = ref('all');
 const GRANULARITY_OPTIONS = [
   { value: 'day', label: '일별' },
   { value: 'week', label: '주별' },
@@ -158,13 +175,65 @@ const lines = computed(() => ({
   lines: factoryLines.value ?? [],
 }));
 
+const getRecordItemCode = record => record?.itemCode || record?.item?.itemCode || record?.itemId || null;
+const getRecordItemLabel = record => {
+  const code = getRecordItemCode(record);
+  if (!code) return null;
+  const name = record?.itemName || record?.item?.itemName || record?.item?.name || '';
+  return name ? `${code} - ${name}` : code;
+};
+
+const itemOptions = computed(() => {
+  const map = new Map();
+  const addRecord = record => {
+    const code = getRecordItemCode(record);
+    if (!code) return;
+    if (!map.has(code)) {
+      map.set(code, getRecordItemLabel(record) || code);
+    }
+  };
+
+  (productionPerformances.value ?? []).forEach(addRecord);
+  (defectTrendRaw.value ?? []).forEach(addRecord);
+
+  const options = Array.from(map.entries())
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  return [{ value: 'all', label: '전체 품목' }, ...options];
+});
+
+const filteredDefectRecords = computed(() => {
+  const list = defectTrendRaw.value ?? [];
+  if (selectedItem.value === 'all') return list;
+  return list.filter(record => getRecordItemCode(record) === selectedItem.value);
+});
+
+const filteredProductionRecords = computed(() => {
+  const list = productionPerformances.value ?? [];
+  if (selectedItem.value === 'all') return list;
+  return list.filter(record => getRecordItemCode(record) === selectedItem.value);
+});
+
 const defectRateChartData = computed(() =>
-  buildDefectRateTrend(defectTrendRaw.value ?? [], chartGranularity.value),
+  buildDefectRateTrend(filteredDefectRecords.value ?? [], chartGranularity.value),
 );
 
 const productionSeries = computed(() =>
-  buildProductionVolumeSeries(productionPerformances.value ?? [], chartGranularity.value),
+  buildProductionVolumeSeries(filteredProductionRecords.value ?? [], chartGranularity.value),
 );
 const productionChartData = computed(() => productionSeries.value.data);
 const productionChartMode = computed(() => productionSeries.value.mode);
+
+watch(
+  itemOptions,
+  options => {
+    if (selectedItem.value === 'all') return;
+    const exists = options.some(option => option.value === selectedItem.value);
+    if (!exists) {
+      selectedItem.value = 'all';
+    }
+  },
+  { immediate: true },
+);
 </script>
