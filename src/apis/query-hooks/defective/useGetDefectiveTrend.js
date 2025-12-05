@@ -5,9 +5,20 @@ import { getDefectiveAll } from '@/apis/query-functions/defective';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { buildDefectRateTrend } from '@/utils/defectTrend';
 
+const resolveValue = source => {
+  if (typeof source === 'function') {
+    try {
+      return source();
+    } catch {
+      return undefined;
+    }
+  }
+  return unref(source);
+};
+
 export default function useGetDefectiveTrend(factoryCodeRef, options = {}) {
   const authStore = useAuthStore();
-  const resolvedFactoryCode = computed(() => unref(factoryCodeRef));
+  const resolvedFactoryCode = computed(() => resolveValue(factoryCodeRef));
 
   const lookBackWeeks = options.weeks;
 
