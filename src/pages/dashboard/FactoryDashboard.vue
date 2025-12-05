@@ -98,8 +98,8 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 
-import useGetDefectiveTypes from '@/apis/query-hooks/defective/useGetDefectiveTypes';
 import useGetDefectiveTrend from '@/apis/query-hooks/defective/useGetDefectiveTrend';
+import useGetDefectiveTypes from '@/apis/query-hooks/defective/useGetDefectiveTypes';
 import useGetFactoryEnergyLatest from '@/apis/query-hooks/factory/useGetFactoryEnergyLatest';
 import useGetFactoryEnergyTodayMax from '@/apis/query-hooks/factory/useGetFactoryEnergyTodayMax';
 import useGetFactoryEnvironmentLatest from '@/apis/query-hooks/factory/useGetFactoryEnvironmentLatest';
