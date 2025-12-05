@@ -52,3 +52,13 @@ export async function deleteProductionPlanList(params) {
 
   return data.data;
 }
+
+// ============ 생산계획 현황 ============
+
+export async function getProductionPlanAll(params) {
+  const queryObj = buildQueryObject(params);
+  const search = new URLSearchParams(queryObj);
+
+  const { data } = await apiClient.get(`/production-plans/all?${search.toString()}`);
+  return data.data;
+}
