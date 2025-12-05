@@ -1,14 +1,47 @@
 <template>
   <Card>
-    <CardContent>
-      <div v-if="hasData" class="h-[260px]">
-        <ChartContainer :config="BAR_CHART_CONFIG">
-          <VisXYContainer :data="data">
+    <CardContent class="space-y-4">
+      <div
+        class="grid gap-4 rounded-xl border bg-muted/30 px-4 py-3 md:grid-cols-2"
+        v-if="hasData"
+      >
+        <div class="space-y-1">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground">총 생산량</p>
+          <p class="text-2xl font-semibold text-foreground">
+            {{ totalProduction.toLocaleString() }}
+            <span class="text-xs font-medium text-muted-foreground">EA</span>
+          </p>
+          <p class="text-xs text-muted-foreground">선택된 기간 총합</p>
+        </div>
+        <div class="text-right space-y-1">
+          <p class="text-xs uppercase tracking-wide text-muted-foreground">
+            최근 생산량 ({{ latestLabel }})
+          </p>
+          <p class="text-lg font-semibold text-foreground">
+            {{ latestProduction.toLocaleString() }}
+            <span class="text-xs font-medium text-muted-foreground">EA</span>
+          </p>
+          <p
+            class="text-xs font-medium"
+            :class="productionDelta >= 0 ? 'text-emerald-500' : 'text-rose-500'"
+          >
+            {{ productionDelta >= 0 ? '+' : '-' }}{{ Math.abs(productionDelta).toLocaleString() }}
+            EA vs. 이전
+          </p>
+        </div>
+      </div>
+      <div
+        v-if="hasData"
+        class="h-[260px] rounded-2xl border bg-gradient-to-b from-background to-muted/30 p-4"
+      >
+        <ChartContainer :config="BAR_CHART_CONFIG" class="h-full">
+          <VisXYContainer :data="colorizedData">
             <VisGroupedBar
               :x="d => d.date"
               :y="d => d.desktop"
-              :color="BAR_CHART_CONFIG.desktop.color"
-              :rounded-corners="5"
+              :color="d => d.color"
+              :rounded-corners="6"
+              :bar-padding="0.35"
               :orientation="Orientation.Horizontal"
             />
 
@@ -22,14 +55,18 @@
               :tick-values="tickValues"
             />
 
-            <ChartTooltip />
+            <ChartTooltip
+              :triggers="{
+                [GroupedBar.selectors.bar]: tooltipTemplate,
+              }"
+            />
             <ChartCrosshair :template="tooltipTemplate" color="#0000" />
           </VisXYContainer>
         </ChartContainer>
       </div>
       <p
         v-else
-        class="h-[260px] flex items-center justify-center text-sm text-muted-foreground"
+        class="h-[260px] flex items-center justify-center rounded-2xl border bg-muted/20 text-sm text-muted-foreground"
       >
         생산 데이터가 없습니다.
       </p>
@@ -40,7 +77,7 @@
 </template>
 
 <script setup>
-import { Orientation } from '@unovis/ts';
+import { GroupedBar, Orientation } from '@unovis/ts';
 import { VisGroupedBar, VisXYContainer, VisAxis } from '@unovis/vue';
 import { computed } from 'vue';
 
@@ -65,10 +102,45 @@ const props = defineProps({
 });
 
 const hasData = computed(() => props.data.length > 0);
-const tickValues = computed(() => props.data.map(entry => entry.date));
+const colorizedData = computed(() => {
+  const total = props.data.length || 1;
+  const palette = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
+  const getColor = index => palette[index % palette.length];
 
-const tooltipTemplate = componentToString(BAR_CHART_CONFIG, ChartTooltipContent, {
+  return props.data.map((entry, index) => ({
+    ...entry,
+    color: entry.color || getColor(index),
+    label: entry.label || formatTick(entry.date),
+  }));
+});
+
+const tickValues = computed(() => colorizedData.value.map(entry => entry.date));
+const totalProduction = computed(() =>
+  colorizedData.value.reduce((sum, entry) => sum + Number(entry.desktop || 0), 0),
+);
+const latestProduction = computed(() => colorizedData.value.at(-1)?.desktop ?? 0);
+const productionDelta = computed(() => {
+  if (colorizedData.value.length < 2) return 0;
+  const latest = colorizedData.value.at(-1)?.desktop ?? 0;
+  const prev = colorizedData.value.at(-2)?.desktop ?? 0;
+  return latest - prev;
+});
+const latestLabel = computed(() => {
+  const latest = colorizedData.value.at(-1);
+  if (!latest) return '';
+  return latest.label || formatTick(latest.date);
+});
+
+const tooltipConfig = {
+  desktop: {
+    label: '생산량',
+    color: BAR_CHART_CONFIG.desktop.color,
+  },
+};
+
+const tooltipTemplate = componentToString(tooltipConfig, ChartTooltipContent, {
   hideLabel: true,
+  valueFormatter: value => `${Number(value ?? 0).toLocaleString()} EA`,
 });
 
 const formatTick = value => formatProductionTick(props.mode, value);
