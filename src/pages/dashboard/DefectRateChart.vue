@@ -32,7 +32,8 @@
               :x="d => d.index"
               :y="d => d.value"
               :color="d => d.color"
-              :rounded-corners="10"
+              :rounded-corners="6"
+              :bar-padding="0.45"
             />
             <VisAxis
               type="x"
