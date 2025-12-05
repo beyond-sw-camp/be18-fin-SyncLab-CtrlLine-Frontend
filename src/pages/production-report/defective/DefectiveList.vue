@@ -344,7 +344,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
-import { getDefectiveList, getDefectiveDetail } from '@/apis/query-functions/defective';
+import { getDefectiveAll, getDefectiveDetail } from '@/apis/query-functions/defective';
 import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -414,7 +414,7 @@ const {
   refetch,
 } = useQuery({
   queryKey: ['defectiveAll', queryParams],
-  queryFn: () => getDefectiveList(queryParams.value),
+  queryFn: () => getDefectiveAll(queryParams.value),
   enabled: false,
   placeholderData: keepPreviousData,
 });

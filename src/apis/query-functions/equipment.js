@@ -29,3 +29,9 @@ export async function updateEquipment(equipmentCode, params) {
   const { data } = await apiClient.patch(`/equipments/${equipmentCode}`, params);
   return data;
 }
+
+// 설비 목록조회에서 업데이트
+export async function updateEquipmentStatusList(params) {
+  const { data } = await apiClient.patch('/equipments', params);
+  return data.data;
+}

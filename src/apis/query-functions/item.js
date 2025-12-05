@@ -21,8 +21,14 @@ export async function createItem(params) {
   return data.data;
 }
 
-// 품목 업데이트
+// 품목 상세조회에서 업데이트
 export async function updateItem(itemId, params) {
   const { data } = await apiClient.patch(`/items/${itemId}`, params);
+  return data.data;
+}
+
+// 품목 목록조회에서 업데이트
+export async function updateItemStatusList(params) {
+  const { data } = await apiClient.patch('/items', params);
   return data.data;
 }

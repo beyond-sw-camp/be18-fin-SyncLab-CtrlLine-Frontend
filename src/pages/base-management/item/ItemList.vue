@@ -1,6 +1,10 @@
 <template>
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">품목 목록</h3>
+
+    <div class="flex gap-2">
+      <StatusUpdateDialog :rows="selectedRows" @updated="onReset" />
+    </div>
   </div>
 
   <FilterTab :filters="filters" @search="onSearch" />
@@ -10,9 +14,14 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHeader class="flex items-center justify-center h-ful">
-              <Checkbox class="size-4 border-[1.5px]" />
-            </TableHeader>
+            <TableHead class="flex items-center justify-center h-ful">
+              <Checkbox
+                :modelValue="isAllChecked"
+                @update:modelValue="toggleAll"
+                @click.stop
+                class="size-4 border-[1.5px]"
+              />
+            </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">품목코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">규격</TableHead>
@@ -29,8 +38,17 @@
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(item.id)"
           >
-            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
-              <Checkbox :checked="item.isActive" class="size-4 border-[1.5px]" />
+            <TableCell
+              class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
+              @click.stop
+            >
+              <Checkbox
+                class="size-4 border-[1.5px]"
+                :modelValue="selectedRows.some(r => r.id === item.id)"
+                @update:modelValue="
+                  checked => toggleRow(checked, { id: item.id, status: item.status })
+                "
+              />
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ item.itemCode }}
@@ -68,7 +86,7 @@
 </template>
 
 <script setup>
-import { watch } from 'vue';
+import { watch, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
@@ -84,10 +102,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/item/FilterTab.vue';
+import StatusUpdateDialog from '@/pages/base-management/item/StatusUpdateDialog.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
+const selectedRows = ref([]);
 
 const initialFilters = {
   itemCode: route.query.itemCode || '',
@@ -99,6 +119,37 @@ const initialFilters = {
 };
 
 const { data: itemList, page, filters } = useGetItemList(initialFilters);
+
+const onReset = () => {
+  selectedRows.value = [];
+};
+
+const allRows = computed(
+  () =>
+    itemList.value?.content?.map(item => ({
+      id: item.id,
+      status: item.status,
+    })) ?? [],
+);
+
+const isAllChecked = computed(
+  () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
+);
+
+const toggleAll = checked => {
+  selectedRows.value = checked ? [...allRows.value] : [];
+};
+
+// 개별 체크
+const toggleRow = (checked, row) => {
+  if (checked) {
+    if (!selectedRows.value.find(r => r.id === row.id)) {
+      selectedRows.value.push(row);
+    }
+  } else {
+    selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
+  }
+};
 
 const goToDetail = itemId => {
   router.push(`/base-management/items/${itemId}`);
@@ -144,6 +195,10 @@ watch(
       newQuery.isActive === 'true' ? true : newQuery.isActive === 'false' ? false : null;
   },
 );
+
+watch([page, filters], () => {
+  onReset();
+});
 </script>
 
 <style scoped></style>

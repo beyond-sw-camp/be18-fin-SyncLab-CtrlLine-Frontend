@@ -1,6 +1,9 @@
 <template>
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">라인 목록</h3>
+    <div class="flex gap-2">
+      <StatusUpdateDialog :rows="selectedRows" @updated="onReset" />
+    </div>
   </div>
 
   <FilterTab :filters="filters" @search="onSearch" />
@@ -10,8 +13,13 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
-              <Checkbox class="size-4 border-[1.5px]" />
+            <TableHead class="flex items-center justify-center h-ful">
+              <Checkbox
+                :modelValue="isAllChecked"
+                @update:modelValue="toggleAll"
+                @click.stop
+                class="size-4 border-[1.5px]"
+              />
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">라인코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">라인명</TableHead>
@@ -32,7 +40,13 @@
               class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
               @click.stop
             >
-              <Checkbox class="size-4 border-[1.5px]" />
+              <Checkbox
+                class="size-4 border-[1.5px]"
+                :modelValue="selectedRows.some(r => r.id === line.lineId)"
+                @update:modelValue="
+                  checked => toggleRow(checked, { id: line.lineId, status: line.isActive })
+                "
+              />
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ line.lineCode }}
@@ -67,7 +81,7 @@
 </template>
 
 <script setup>
-import { watch } from 'vue';
+import { watch, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
@@ -83,8 +97,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/line/FilterTab.vue';
+import StatusUpdateDialog from '@/pages/base-management/line/StatusUpdateDialog.vue';
+import { buildQueryObject } from '@/utils/buildQueryObject';
+
 const route = useRoute();
 const router = useRouter();
+const selectedRows = ref([]);
 
 const initialFilters = {
   lineName: route.query.lineName || '',
@@ -93,6 +111,37 @@ const initialFilters = {
 };
 
 const { data: lineList, page, filters } = useGetLineList(initialFilters);
+
+const onReset = () => {
+  selectedRows.value = [];
+};
+
+const allRows = computed(
+  () =>
+    lineList.value?.content?.map(item => ({
+      id: item.lineId,
+      status: item.isActive,
+    })) ?? [],
+);
+
+const isAllChecked = computed(
+  () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
+);
+
+const toggleAll = checked => {
+  selectedRows.value = checked ? [...allRows.value] : [];
+};
+
+const toggleRow = (checked, row) => {
+  if (checked) {
+    if (!selectedRows.value.find(r => r.id === row.id)) {
+      selectedRows.value.push(row);
+    }
+  } else {
+    selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
+  }
+};
+
 const goToDetail = lineCode => {
   router.push(`/base-management/lines/${lineCode}`);
 };
@@ -104,16 +153,11 @@ const onSearch = newFilters => {
 };
 
 const syncQuery = () => {
-  const query = {
+  const query = buildQueryObject({
     ...filters,
     page: page.value,
-  };
-
-  const cleaned = Object.fromEntries(
-    Object.entries(query).filter(([, v]) => v !== null && v !== '' && v !== undefined),
-  );
-
-  router.replace({ query: cleaned });
+  });
+  router.replace({ query });
 };
 
 watch(
@@ -138,6 +182,10 @@ watch(
     filters.userDepartment = newQuery.userDepartment ?? null;
   },
 );
+
+watch([page, filters], () => {
+  onReset();
+});
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped></style>
