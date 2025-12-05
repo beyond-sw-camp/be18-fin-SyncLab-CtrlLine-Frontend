@@ -17,7 +17,7 @@
 
       <div class="relative mx-auto">
         <ChartContainer :config="COLOR_CONFIG" class="mx-auto aspect-square max-h-[200px]">
-          <VisSingleContainer :data="data" :margin="{ top: 20, bottom: 20 }">
+          <VisSingleContainer :data="donutData" :margin="{ top: 20, bottom: 20 }">
             <VisDonut
               :value="d => d.value"
               :color="d => COLOR_CONFIG[d.label]?.color"
@@ -78,6 +78,7 @@
 
 <script setup>
 import { VisDonut, VisSingleContainer } from '@unovis/vue';
+import { computed } from 'vue';
 
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
@@ -89,14 +90,14 @@ const props = defineProps({
   peakUsage: { type: Number, required: true },
 });
 
-const data = [
+const donutData = computed(() => [
   {
     label: 'current',
-    value: props.usagePercent,
+    value: Math.max(0, Math.min(100, Number(props.usagePercent ?? 0))),
   },
   {
     label: 'remaining',
-    value: Math.max(0, 100 - props.usagePercent),
+    value: Math.max(0, 100 - Math.max(0, Math.min(100, Number(props.usagePercent ?? 0)))),
   },
-];
+]);
 </script>
