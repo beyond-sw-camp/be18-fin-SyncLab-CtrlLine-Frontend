@@ -1,6 +1,46 @@
 <template>
-  <div class="flex gap-2 items-center py-4">
-    <ProductionProgress :value="20" />
+  <div class="py-4">
+    <div
+      class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-muted/30 px-4 py-3"
+    >
+      <div class="space-y-1">
+        <p class="text-xs uppercase tracking-wide text-muted-foreground">
+          RUNNING 라인 진행률
+        </p>
+        <p class="text-sm font-semibold text-foreground">
+          {{ productionProgressSummary.measuredCount }} / {{ productionProgressSummary.runningCount }}개
+          라인
+        </p>
+        <div class="text-xs text-muted-foreground flex flex-wrap gap-2">
+          <span>계획 전표:</span>
+          <span
+            v-for="doc in productionProgressSummary.documents"
+            :key="doc"
+            class="rounded-full border bg-background px-2 py-0.5 font-medium text-foreground"
+          >
+            {{ doc }}
+          </span>
+          <span v-if="!productionProgressSummary.documents.length">-</span>
+        </div>
+      </div>
+      <div class="flex-1 min-w-[200px]">
+        <ProductionProgress :value="productionProgressSummary.percent" />
+      </div>
+      <div class="text-right space-y-1">
+        <p class="text-xs uppercase tracking-wide text-muted-foreground">
+          생산량 합계
+        </p>
+        <p class="text-lg font-semibold text-foreground">
+          {{ productionProgressSummary.produced.toLocaleString() }}
+          <span class="text-xs text-muted-foreground">
+            / {{ productionProgressSummary.target.toLocaleString() }} EA
+          </span>
+        </p>
+        <p v-if="!productionProgressSummary.available" class="text-xs text-muted-foreground">
+          전체 라인 비가동 중입니다.
+        </p>
+      </div>
+    </div>
   </div>
 
   <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -100,6 +140,13 @@ const { data: energyPeak } = useGetFactoryEnergyTodayMax(props.factoryCode);
 const factoryIdRef = computed(() => props.factoryId);
 const { data: defectiveTypes } = useGetDefectiveTypes(props.factoryCode);
 const { data: factoryLines } = useGetFactoryLinesWithEquipments(factoryIdRef);
+const STATUS_LEVEL_MAP = {
+  STOPPED: 1,
+  RUNNING: 2,
+  LOW_WARNING: 3,
+  HIGH_WARNING: 4,
+};
+
 const { statusMap: equipmentStatuses } = useEquipmentStatusFeed(factoryIdRef);
 const chartGranularity = ref('week');
 const selectedItem = ref('all');
@@ -183,6 +230,36 @@ const getRecordItemLabel = record => {
   return name ? `${code} - ${name}` : code;
 };
 
+const getLineCode = record => record?.lineCode ?? record?.line?.lineCode ?? null;
+const toNumber = value => {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : 0;
+};
+const extractTargetQty = record =>
+  toNumber(
+    record?.totalQty ??
+      record?.planQty ??
+      record?.productionPlanQty ??
+      record?.planTotalQty ??
+      record?.targetQty ??
+      record?.orderQty ??
+      0,
+  );
+const extractProducedQty = record =>
+  toNumber(
+    record?.performanceQty ??
+      record?.producedQty ??
+      record?.productionQty ??
+      record?.currentQty ??
+      record?.resultQty ??
+      0,
+  );
+const getRecordTimestamp = record => {
+  const raw = record?.endTime ?? record?.startTime ?? record?.dueDate ?? record?.createdAt;
+  const date = raw ? new Date(raw) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.getTime() : 0;
+};
+
 const itemOptions = computed(() => {
   const map = new Map();
   const addRecord = record => {
@@ -215,6 +292,51 @@ const filteredProductionRecords = computed(() => {
   return list.filter(record => getRecordItemCode(record) === selectedItem.value);
 });
 
+const resolveEquipmentStatus = equipment => {
+  const code = equipment?.equipmentCode;
+  const external = code ? equipmentStatuses.value?.[code] : undefined;
+  if (typeof external === 'number') return external;
+  if (typeof external === 'string') {
+    return STATUS_LEVEL_MAP[external.toUpperCase()] ?? 1;
+  }
+  const raw = equipment?.status ?? equipment?.equipmentStatus ?? equipment?.state;
+  if (typeof raw === 'number') return raw;
+  if (typeof raw === 'string') {
+    return STATUS_LEVEL_MAP[raw.toUpperCase()] ?? 1;
+  }
+  return 1;
+};
+
+const runningLineCodes = computed(() => {
+  const lines = factoryLines.value ?? [];
+  const set = new Set();
+  lines.forEach(line => {
+    const equipments = line?.equipments ?? [];
+    const hasRunning = equipments.some(equipment => resolveEquipmentStatus(equipment) === 2);
+    if (hasRunning) {
+      const code = line.lineCode ?? line.lineId;
+      if (code) set.add(code);
+    }
+  });
+  return set;
+});
+
+const latestRunningLineRecords = computed(() => {
+  const map = new Map();
+  const runningSet = runningLineCodes.value;
+  if (!runningSet.size) return [];
+  (filteredProductionRecords.value ?? []).forEach(record => {
+    const lineCode = getLineCode(record);
+    if (!lineCode || !runningSet.has(lineCode)) return;
+    const timestamp = getRecordTimestamp(record);
+    const existing = map.get(lineCode);
+    if (!existing || timestamp > existing.timestamp) {
+      map.set(lineCode, { record, timestamp });
+    }
+  });
+  return Array.from(map.values()).map(entry => entry.record);
+});
+
 const defectRateChartData = computed(() =>
   buildDefectRateTrend(filteredDefectRecords.value ?? [], chartGranularity.value),
 );
@@ -224,7 +346,41 @@ const productionSeries = computed(() =>
 );
 const productionChartData = computed(() => productionSeries.value.data);
 const productionChartMode = computed(() => productionSeries.value.mode);
+const productionProgressSummary = computed(() => {
+  const runningCount = runningLineCodes.value.size;
+  const records = latestRunningLineRecords.value;
 
+  const totals = records.reduce(
+    (acc, record) => {
+      acc.produced += extractProducedQty(record);
+      acc.target += extractTargetQty(record);
+      return acc;
+    },
+    { produced: 0, target: 0 },
+  );
+
+  const percent =
+    totals.target > 0
+      ? Math.min(100, Math.max(0, Number(((totals.produced / totals.target) * 100).toFixed(1))))
+      : 0;
+
+  const documents = records
+    .map(
+      record =>
+        record?.productionPlanDocumentNo || record?.documentNo || record?.productionPerformanceDocNo,
+    )
+    .filter(Boolean);
+
+  return {
+    available: runningCount > 0 && totals.target > 0,
+    runningCount,
+    measuredCount: records.length,
+    produced: totals.produced,
+    target: totals.target,
+    percent,
+    documents,
+  };
+});
 watch(
   itemOptions,
   options => {
