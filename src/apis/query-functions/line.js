@@ -24,8 +24,14 @@ export async function getLine(lineCode) {
   return data.data;
 }
 
-// 라인 업데이트
+// 라인 상세조회에서 업데이트
 export async function updateLine(lineCode, params) {
   const { data } = await apiClient.patch(`/lines/${lineCode}`, params);
   return data;
+}
+
+// 라인 목록조회에서 업데이트
+export async function updateLineStatusList(params) {
+  const { data } = await apiClient.patch('/lines', params);
+  return data.data;
 }

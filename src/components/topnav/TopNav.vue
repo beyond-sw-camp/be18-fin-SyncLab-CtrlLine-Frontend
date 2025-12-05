@@ -15,20 +15,10 @@
     </div>
 
     <div class="flex items-center gap-4">
-      <Sheet>
-        <SheetTrigger>
-          <div class="relative rounded-full p-2 hover:bg-muted transition">
-            <BellIcon class="h-5 w-5 text-foreground cursor-pointer" />
-            <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500"></span>
-          </div>
-        </SheetTrigger>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>알림 목록</SheetTitle>
-            <SheetDescription> 알림 기록 모음 </SheetDescription>
-          </SheetHeader>
-        </SheetContent>
-      </Sheet>
+      <Button variant="outline" size="sm" class="cursor-pointer" @click="openCurrentPageInNewTab">
+        <ExternalLinkIcon :size="15" class="mr-1" />
+        <span class="text-xs">새 탭에서 열기</span>
+      </Button>
 
       <NavigationMenu>
         <NavigationMenuList>
@@ -39,7 +29,11 @@
                   {{ userStore.userEmail?.[0] ?? '?' }}
                 </AvatarFallback>
               </Avatar>
-              <span class="font-medium">{{ userStore.userName || '사용자' }}</span>
+              <span
+                class="block font-medium max-w-[100px] min-w-0 whitespace-nowrap overflow-hidden text-ellipsis"
+              >
+                {{ userStore.userName || '사용자' }}
+              </span>
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
@@ -55,7 +49,8 @@
 
 <script setup>
 import { useQueryClient } from '@tanstack/vue-query';
-import { BellIcon, LogOutIcon } from 'lucide-vue-next';
+import { LogOutIcon, ExternalLinkIcon } from 'lucide-vue-next';
+import { useRoute } from 'vue-router';
 
 import useLogout from '@/apis/query-hooks/auth/useLogout';
 import BreadcrumbBar from '@/components/topnav/BreadcrumbBar.vue';
@@ -67,20 +62,18 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from '@/components/ui/navigation-menu';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
 import { useUserStore } from '@/stores/useUserStore';
 
 const { mutate: logout } = useLogout();
 
 const userStore = useUserStore();
 const queryClient = useQueryClient();
+const route = useRoute();
+
+const openCurrentPageInNewTab = () => {
+  const fullPath = route.fullPath;
+  window.open(fullPath, '_blank');
+};
 
 const logoutAndClear = () => {
   logout();

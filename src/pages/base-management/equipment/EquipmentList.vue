@@ -1,6 +1,9 @@
 <template>
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">설비 목록</h3>
+    <div class="flex gap-2">
+      <StatusUpdateDialog :rows="selectedRows" @updated="onReset" />
+    </div>
   </div>
 
   <FilterTab :filters="filters" @search="onSearch" />
@@ -11,7 +14,12 @@
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
-              <Checkbox class="size-4 border-[1.5px]" />
+              <Checkbox
+                :modelValue="isAllChecked"
+                @update:modelValue="toggleAll"
+                @click.stop
+                class="size-4 border-[1.5px]"
+              />
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">설비코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">설비명</TableHead>
@@ -29,9 +37,18 @@
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(equipment.equipmentCode)"
           >
-            <!-- 왼쪽: isActive 편집 토글 -->
-            <TableCell class="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
-              <Checkbox :checked="equipment.isActive" class="size-4 border-[1.5px]" />
+            <TableCell
+              class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
+              @click.stop
+            >
+              <Checkbox
+                class="size-4 border-[1.5px]"
+                :modelValue="selectedRows.some(r => r.id === equipment.equipmentId)"
+                @update:modelValue="
+                  checked =>
+                    toggleRow(checked, { id: equipment.equipmentId, status: equipment.isActive })
+                "
+              />
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ equipment.equipmentCode }}
@@ -64,19 +81,12 @@
         </TableBody>
       </Table>
     </div>
-    <!-- 사용여부 저장 버튼 추가-->
-    <div class="flex justify-end mt-4">
-      <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-        사용여부 저장
-      </button>
-    </div>
-
     <BasePagination v-model="page" :total-pages="equipmentList?.pageInfo?.totalPages ?? 1" />
   </div>
 </template>
 
 <script setup>
-import { watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
@@ -92,16 +102,49 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
+import StatusUpdateDialog from '@/pages/base-management/equipment/StatusUpdateDialog.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
+const selectedRows = ref([]);
 
 const initialFilters = {
   equipmentName: route.query.equipmentName || '',
   equipmentType: route.query.equipmentType || null,
   userName: route.query.userName || '',
   userDepartment: route.query.userDepartment || null,
+};
+
+const onReset = () => {
+  selectedRows.value = [];
+};
+
+const allRows = computed(
+  () =>
+    equipmentList.value?.content?.map(item => ({
+      id: item.equipmentId,
+      status: item.isActive,
+    })) ?? [],
+);
+
+const isAllChecked = computed(
+  () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
+);
+
+// 전체 선택/해제
+const toggleAll = checked => {
+  selectedRows.value = checked ? [...allRows.value] : [];
+};
+
+const toggleRow = (checked, row) => {
+  if (checked) {
+    if (!selectedRows.value.find(r => r.id === row.id)) {
+      selectedRows.value.push(row);
+    }
+  } else {
+    selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
+  }
 };
 
 const { data: equipmentList, page, filters } = useGetEquipmentList(initialFilters);
@@ -150,6 +193,10 @@ watch(
     filters.userDepartment = newQuery.userDepartment ?? null;
   },
 );
+
+watch([page, filters], () => {
+  onReset();
+});
 </script>
 
 <style scoped></style>

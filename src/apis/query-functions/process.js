@@ -21,3 +21,9 @@ export async function updateProcess(processCode, params) {
   const { data } = await apiClient.patch(`/processes/${processCode}`, params);
   return data;
 }
+
+// 공정 목록조회, 업데이트
+export async function updateProcessStatusList(params) {
+  const { data } = await apiClient.patch('/processes', params);
+  return data.data;
+}

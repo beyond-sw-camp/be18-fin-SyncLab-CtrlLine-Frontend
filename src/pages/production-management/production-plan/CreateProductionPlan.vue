@@ -271,6 +271,12 @@
         </div>
       </div>
       <ItemTable :itemDetail="itemDetail" />
+      <ScheduleData
+        :factoryId="selectedFactoryId"
+        :factoryCode="factoryDetail?.factoryCode"
+        :lineCode="lineDetail?.lineCode"
+        mode="create"
+      />
     </form>
   </div>
 </template>
@@ -301,6 +307,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
+import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
 
 const formSchema = toTypedSchema(
@@ -335,6 +342,7 @@ const form = useForm({
 
 const selectedFactoryId = ref(null);
 const selectedItemId = ref(null);
+const factoryDetail = ref({});
 const itemDetail = ref({});
 const lineDetail = ref({});
 
@@ -345,6 +353,7 @@ const { mutate: createProductionPlan } = useCreateProductionPlan();
 function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
   selectedFactoryId.value = selected?.factoryId ?? null;
+  factoryDetail.value = selected ?? null;
 
   selectedItemId.value = null;
   form.setFieldValue('itemCode', '', false);
