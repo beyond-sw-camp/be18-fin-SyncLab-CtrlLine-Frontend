@@ -20,8 +20,8 @@
       />
       <SidebarGroup title="출력물" group-key="production-report" :children="productionReport" />
     </nav>
-    <div class="border-t border-primary-700 p-4 text-sm flex items-center justify-between">
-      ⚙ 설정
+    <div class="border-t border-primary-700 py-1.5 px-2 text-[10px] flex flex-col gap-0.5">
+      <p>Copyright {{ new Date().getFullYear() }}. CtrlLine. All rights reserved.</p>
     </div>
   </aside>
 </template>
