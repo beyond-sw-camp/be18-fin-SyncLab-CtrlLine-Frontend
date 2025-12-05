@@ -1,6 +1,6 @@
 export const baseManagement = [
   {
-    icon: '👤',
+    icon: 'UsersIcon',
     label: '사용자 관리',
     children: [
       {
@@ -17,7 +17,7 @@ export const baseManagement = [
     ],
   },
   {
-    icon: '📦',
+    icon: 'PackageIcon',
     label: '품목 관리',
     children: [
       {
@@ -34,7 +34,7 @@ export const baseManagement = [
     ],
   },
   {
-    icon: '🏭',
+    icon: 'FactoryIcon',
     label: '공장 관리',
     children: [
       {
@@ -50,7 +50,7 @@ export const baseManagement = [
     ],
   },
   {
-    icon: '🔧',
+    icon: 'Grid3x2Icon',
     label: '라인 관리',
     children: [
       {
@@ -66,7 +66,7 @@ export const baseManagement = [
     ],
   },
   {
-    icon: '🧰',
+    icon: 'CableIcon',
     label: '설비 관리',
     children: [
       {
@@ -82,7 +82,7 @@ export const baseManagement = [
     ],
   },
   {
-    icon: '⚙️',
+    icon: 'MicrochipIcon',
     label: '공정 관리',
     children: [
       {
@@ -97,12 +97,12 @@ export const baseManagement = [
       },
     ],
   },
-  { label: '공장 계층 구조도', to: '/base-management/factory-structure' },
+  { icon: 'LayersIcon', label: '공장 계층 구조도', to: '/base-management/factory-structure' },
 ];
 
 export const productionManagement = [
   {
-    icon: '🗓',
+    icon: 'SquareChartGanttIcon',
     label: '생산계획 관리',
     children: [
       {
@@ -119,7 +119,7 @@ export const productionManagement = [
     ],
   },
   {
-    icon: '📦',
+    icon: 'ChartNoAxesCombinedIcon',
     label: '생산실적 관리',
     children: [
       {
@@ -135,7 +135,7 @@ export const productionManagement = [
     ],
   },
   {
-    icon: '🚨',
+    icon: 'BugIcon',
     label: '불량 관리',
     children: [
       {
@@ -151,7 +151,7 @@ export const productionManagement = [
     ],
   },
   {
-    icon: '#️⃣',
+    icon: 'QrCodeIcon',
     label: 'Lot No. 관리',
     children: [
       {
@@ -169,8 +169,16 @@ export const productionManagement = [
 ];
 
 export const productionReport = [
-  { label: '생산 계획 현황', to: '/production-report/production-plans/all' },
-  { label: '생산 실적 현황', to: '/production-report/production-performances/all' },
-  { label: '불량 현황', to: '/production-report/defectives/all' },
-  { label: '로그 현황', to: '/production-report/logs/all' },
+  {
+    icon: 'ClipboardMinus',
+    label: '생산 계획 현황',
+    to: '/production-report/production-plans/all',
+  },
+  {
+    icon: 'FileChartLine',
+    label: '생산 실적 현황',
+    to: '/production-report/production-performances/all',
+  },
+  { icon: 'BugPlay', label: '불량 현황', to: '/production-report/defectives/all' },
+  { icon: 'FileClock', label: '로그 현황', to: '/production-report/logs/all' },
 ];
