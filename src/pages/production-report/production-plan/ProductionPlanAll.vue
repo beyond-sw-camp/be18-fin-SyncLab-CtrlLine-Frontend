@@ -1,6 +1,7 @@
 <template>
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 현황</h3>
+    <Button size="sm" class="cursor-pointer w-[70px]" @click="exportCsv"> Export </Button>
   </div>
 
   <FilterTab :filters="filters" @search="onSearch" />
@@ -111,6 +112,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import useGetProductionPlanAll from '@/apis/query-hooks/production-plan/useGetProductionPlanAll';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -150,6 +152,62 @@ const syncQuery = () => {
   });
 
   router.replace({ query });
+};
+
+const exportCsv = () => {
+  if (!productionPlanAll.value || productionPlanAll.value.length === 0) {
+    return;
+  }
+
+  // CSV 헤더
+  const headers = [
+    '전표번호',
+    '상태',
+    '공장명',
+    '라인명',
+    '품목명',
+    '품코드',
+    '생산계획수량',
+    '납기일자',
+    '생산시작시간',
+    '생산종료시간',
+    '생산담당자',
+    '영업담당자',
+  ];
+
+  // CSV 데이터
+  const rows = productionPlanAll.value.map(item => [
+    item.documentNo,
+    item.status,
+    item.factoryName,
+    item.lineName,
+    item.itemName,
+    item.itemCode,
+    item.plannedQty,
+    item.dueDate,
+    formatDate(item.startTime),
+    formatDate(item.endTime),
+    item.productionManagerName,
+    item.salesManagerName,
+  ]);
+
+  // CSV 문자열 생성
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(r => r.map(v => `"${v ?? ''}"`).join(',')),
+  ].join('\n');
+
+  // Blob 생성 후 다운로드
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+
+  link.download = `production-plan-${new Date().toISOString().slice(0, 10)}.csv`;
+
+  link.click();
+  URL.revokeObjectURL(url);
 };
 
 watch(
