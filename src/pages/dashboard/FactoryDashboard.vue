@@ -16,6 +16,23 @@
   <div class="grid gap-4 pt-4">
     <LineEquipmentStatus :lines="lines" :status-map="equipmentStatuses" />
 
+    <div class="flex items-center justify-end gap-2 text-xs font-medium text-muted-foreground">
+      <span>데이터 단위</span>
+      <div class="inline-flex rounded-full border bg-background p-0.5">
+        <Button
+          v-for="option in GRANULARITY_OPTIONS"
+          :key="option.value"
+          size="sm"
+          variant="ghost"
+          class="rounded-full px-3 py-1 text-xs font-medium transition"
+          :class="chartGranularity === option.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'"
+          @click="chartGranularity = option.value"
+        >
+          {{ option.label }}
+        </Button>
+      </div>
+    </div>
+
     <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
       <DefectRateChart :data="defectRateChartData" />
       <ProductionChart :data="productionChartData" :mode="productionChartMode" />
@@ -24,7 +41,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 import useGetFactoryEnergyLatest from '@/apis/query-hooks/factory/useGetFactoryEnergyLatest';
 import useGetFactoryEnergyTodayMax from '@/apis/query-hooks/factory/useGetFactoryEnergyTodayMax';
@@ -42,7 +59,9 @@ import ProductionProgress from '@/pages/dashboard/ProductionProgress.vue';
 import VerticalProgress from '@/pages/dashboard/VerticalProgress.vue';
 import useGetProductionPerformanceAll from '@/apis/query-hooks/production-performance/useGetProductionPerformanceAll';
 import { PIE_CHART_CONFIG } from '@/constants/chartConfig';
+import { buildDefectRateTrend } from '@/utils/defectTrend';
 import { buildProductionVolumeSeries } from '@/utils/productionVolume';
+import { Button } from '@/components/ui/button';
 
 const props = defineProps({
   factoryCode: {
@@ -66,7 +85,14 @@ const factoryIdRef = computed(() => props.factoryId);
 const { data: defectiveTypes } = useGetDefectiveTypes(props.factoryCode);
 const { data: factoryLines } = useGetFactoryLinesWithEquipments(factoryIdRef);
 const { statusMap: equipmentStatuses } = useEquipmentStatusFeed(factoryIdRef);
-const { data: defectTrend } = useGetDefectiveTrend(() => props.factoryCode);
+const chartGranularity = ref('week');
+const GRANULARITY_OPTIONS = [
+  { value: 'day', label: '일별' },
+  { value: 'week', label: '주별' },
+  { value: 'month', label: '월별' },
+];
+
+const { data: defectTrendRaw } = useGetDefectiveTrend(() => props.factoryCode);
 const { data: productionPerformances } = useGetProductionPerformanceAll(() => props.factoryCode);
 
 const temperature = computed(() =>
@@ -132,9 +158,13 @@ const lines = computed(() => ({
   lines: factoryLines.value ?? [],
 }));
 
-const defectRateChartData = computed(() => defectTrend.value ?? []);
+const defectRateChartData = computed(() =>
+  buildDefectRateTrend(defectTrendRaw.value ?? [], chartGranularity.value),
+);
 
-const productionSeries = computed(() => buildProductionVolumeSeries(productionPerformances.value ?? []));
+const productionSeries = computed(() =>
+  buildProductionVolumeSeries(productionPerformances.value ?? [], chartGranularity.value),
+);
 const productionChartData = computed(() => productionSeries.value.data);
 const productionChartMode = computed(() => productionSeries.value.mode);
 </script>

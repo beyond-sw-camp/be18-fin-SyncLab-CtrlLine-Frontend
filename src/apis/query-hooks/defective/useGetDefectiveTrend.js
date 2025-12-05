@@ -3,8 +3,6 @@ import { computed, unref } from 'vue';
 
 import { getDefectiveAll } from '@/apis/query-functions/defective';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { buildDefectRateTrend } from '@/utils/defectTrend';
-
 const resolveValue = source => {
   if (typeof source === 'function') {
     try {
@@ -48,7 +46,6 @@ export default function useGetDefectiveTrend(factoryCodeRef, options = {}) {
     queryKey: ['defectiveTrend', params],
     queryFn: () => getDefectiveAll(params.value),
     enabled: computed(() => authStore.isLoggedIn && Boolean(params.value)),
-    select: data => buildDefectRateTrend(data ?? []),
   });
 
   return query;

@@ -62,7 +62,14 @@ const getBucketKey = (date, mode) => {
   };
 };
 
-export function buildDefectRateTrend(records = []) {
+const isValidMode = mode => ['day', 'week', 'month'].includes(mode);
+const clampRange = (mode, sortedBuckets) => {
+  const limit = mode === 'day' ? 7 : mode === 'week' ? 6 : 6;
+  if (sortedBuckets.length <= limit) return sortedBuckets;
+  return sortedBuckets.slice(-limit);
+};
+
+export function buildDefectRateTrend(records = [], preferredMode) {
   const entries = records
     .map(record => ({
       date: parseRecordDate(record),
@@ -78,7 +85,10 @@ export function buildDefectRateTrend(records = []) {
   const max = entries[entries.length - 1].date;
   const spanDays = Math.max(1, Math.round((max - min) / MS_PER_DAY) + 1);
 
-  const mode = spanDays <= 7 ? 'day' : spanDays <= 42 ? 'week' : 'month';
+  let mode = spanDays <= 7 ? 'day' : spanDays <= 42 ? 'week' : 'month';
+  if (isValidMode(preferredMode)) {
+    mode = preferredMode;
+  }
 
   const buckets = new Map();
   entries.forEach(entry => {
@@ -89,12 +99,12 @@ export function buildDefectRateTrend(records = []) {
     buckets.set(keyInfo.key, bucket);
   });
 
-  return Array.from(buckets.values())
-    .sort((a, b) => a.sortKey - b.sortKey)
-    .map((bucket, index) => ({
-      index,
-      label: bucket.label,
-      value: bucket.count ? bucket.sum / bucket.count : 0,
-      sortKey: bucket.sortKey,
-    }));
+  const sortedBuckets = Array.from(buckets.values()).sort((a, b) => a.sortKey - b.sortKey);
+  const limitedBuckets = clampRange(mode, sortedBuckets);
+  return limitedBuckets.map((bucket, index) => ({
+    index,
+    label: bucket.label,
+    value: bucket.count ? bucket.sum / bucket.count : 0,
+    sortKey: bucket.sortKey,
+  }));
 }

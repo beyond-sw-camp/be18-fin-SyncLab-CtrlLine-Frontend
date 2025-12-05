@@ -35,25 +35,31 @@
         class="h-[260px] rounded-2xl border bg-gradient-to-b from-background to-muted/30 p-4"
       >
         <ChartContainer :config="BAR_CHART_CONFIG" class="h-full">
-          <VisXYContainer :data="colorizedData">
+          <VisXYContainer :data="normalizedData" :margin="{ left: 0, bottom: 24 }">
             <VisGroupedBar
-              :x="d => d.date"
+              :x="d => d.index"
               :y="d => d.desktop"
               :color="d => d.color"
               :rounded-corners="6"
               :bar-padding="0.35"
-              :orientation="Orientation.Horizontal"
             />
 
             <VisAxis
-              type="y"
+              type="x"
+              :x="d => d.index"
               :tick-line="false"
               :domain-line="false"
               :grid-line="false"
               :num-ticks="6"
-              :tick-format="formatTick"
+              :tick-format="tickFormatter"
               :tick-values="tickValues"
             />
+
+            <VisAxis type="y" :num-ticks="4" :tick-line="false" :domain-line="false">
+              <template #tickFormat="{ value }">
+                {{ Number(value ?? 0).toLocaleString() }}
+              </template>
+            </VisAxis>
 
             <ChartTooltip
               :triggers="{
@@ -77,7 +83,7 @@
 </template>
 
 <script setup>
-import { GroupedBar, Orientation } from '@unovis/ts';
+import { GroupedBar } from '@unovis/ts';
 import { VisGroupedBar, VisXYContainer, VisAxis } from '@unovis/vue';
 import { computed } from 'vue';
 
@@ -101,7 +107,8 @@ const props = defineProps({
   },
 });
 
-const hasData = computed(() => props.data.length > 0);
+const formatTickLabel = value => formatProductionTick(props.mode, value);
+
 const colorizedData = computed(() => {
   const total = props.data.length || 1;
   const palette = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
@@ -110,25 +117,35 @@ const colorizedData = computed(() => {
   return props.data.map((entry, index) => ({
     ...entry,
     color: entry.color || getColor(index),
-    label: entry.label || formatTick(entry.date),
+    label: entry.label || formatTickLabel(entry.date),
   }));
 });
 
-const tickValues = computed(() => colorizedData.value.map(entry => entry.date));
-const totalProduction = computed(() =>
-  colorizedData.value.reduce((sum, entry) => sum + Number(entry.desktop || 0), 0),
+const normalizedData = computed(() =>
+  colorizedData.value.map((entry, index) => ({
+    ...entry,
+    index,
+  })),
 );
-const latestProduction = computed(() => colorizedData.value.at(-1)?.desktop ?? 0);
+
+const hasData = computed(() => normalizedData.value.length > 0);
+
+
+const tickValues = computed(() => normalizedData.value.map(entry => entry.index));
+const totalProduction = computed(() =>
+  normalizedData.value.reduce((sum, entry) => sum + Number(entry.desktop || 0), 0),
+);
+const latestProduction = computed(() => normalizedData.value.at(-1)?.desktop ?? 0);
 const productionDelta = computed(() => {
-  if (colorizedData.value.length < 2) return 0;
-  const latest = colorizedData.value.at(-1)?.desktop ?? 0;
-  const prev = colorizedData.value.at(-2)?.desktop ?? 0;
+  if (normalizedData.value.length < 2) return 0;
+  const latest = normalizedData.value.at(-1)?.desktop ?? 0;
+  const prev = normalizedData.value.at(-2)?.desktop ?? 0;
   return latest - prev;
 });
 const latestLabel = computed(() => {
-  const latest = colorizedData.value.at(-1);
+  const latest = normalizedData.value.at(-1);
   if (!latest) return '';
-  return latest.label || formatTick(latest.date);
+  return latest.label || formatTickLabel(latest.date);
 });
 
 const tooltipConfig = {
@@ -143,5 +160,9 @@ const tooltipTemplate = componentToString(tooltipConfig, ChartTooltipContent, {
   valueFormatter: value => `${Number(value ?? 0).toLocaleString()} EA`,
 });
 
-const formatTick = value => formatProductionTick(props.mode, value);
+const formatTick = value => formatTickLabel(value);
+const tickFormatter = value => {
+  const target = normalizedData.value.find(entry => entry.index === value);
+  return target?.label ?? '';
+};
 </script>

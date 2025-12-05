@@ -58,6 +58,8 @@ const getBucketKey = (date, mode) => {
   };
 };
 
+const isValidMode = mode => ['day', 'week', 'month'].includes(mode);
+
 const formatTickLabel = (mode, value) => {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '';
@@ -81,7 +83,13 @@ const formatTickLabel = (mode, value) => {
   }
 };
 
-export function buildProductionVolumeSeries(records = []) {
+const clampRange = (mode, sortedBuckets) => {
+  const limit = mode === 'day' ? 7 : mode === 'week' ? 6 : 6;
+  if (sortedBuckets.length <= limit) return sortedBuckets;
+  return sortedBuckets.slice(-limit);
+};
+
+export function buildProductionVolumeSeries(records = [], preferredMode) {
   const entries = records
     .map(record => ({
       date: parseProductionDate(record),
@@ -108,6 +116,9 @@ export function buildProductionVolumeSeries(records = []) {
   } else if (spanDays > 7) {
     mode = 'week';
   }
+  if (isValidMode(preferredMode)) {
+    mode = preferredMode;
+  }
 
   const buckets = new Map();
   entries.forEach(entry => {
@@ -117,13 +128,13 @@ export function buildProductionVolumeSeries(records = []) {
     buckets.set(keyInfo.key, bucket);
   });
 
-  const data = Array.from(buckets.values())
-    .sort((a, b) => a.sortKey - b.sortKey)
-    .map(bucket => ({
-      date: new Date(bucket.sortKey),
-      desktop: bucket.sum,
-      label: bucket.label,
-    }));
+  const sortedBuckets = Array.from(buckets.values()).sort((a, b) => a.sortKey - b.sortKey);
+  const limitedBuckets = clampRange(mode, sortedBuckets);
+  const data = limitedBuckets.map(bucket => ({
+    date: new Date(bucket.sortKey),
+    desktop: bucket.sum,
+    label: bucket.label,
+  }));
 
   return {
     data,
