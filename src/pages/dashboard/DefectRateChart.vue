@@ -21,7 +21,11 @@
               :tick-values="tickValues"
             />
             <VisAxis type="y" :num-ticks="3" :tick-line="false" :domain-line="false" />
-            <ChartTooltip />
+            <ChartTooltip
+              :triggers="{
+                [GroupedBar.selectors.bar]: tooltipTemplate,
+              }"
+            />
             <ChartCrosshair :template="tooltipTemplate" color="#0000" />
           </VisXYContainer>
         </ChartContainer>
@@ -35,6 +39,7 @@
 </template>
 
 <script setup>
+import { GroupedBar } from '@unovis/ts';
 import { VisGroupedBar, VisXYContainer, VisAxis } from '@unovis/vue';
 import { computed } from 'vue';
 
@@ -80,8 +85,16 @@ const tickFormatter = value => {
   return target?.label ?? '';
 };
 
-const tooltipTemplate = componentToString(BAR_CHART_CONFIG, ChartTooltipContent, {
+const tooltipConfig = {
+  value: {
+    label: '불량률',
+    color: BAR_CHART_CONFIG.desktop.color,
+  },
+};
+
+const tooltipTemplate = componentToString(tooltipConfig, ChartTooltipContent, {
   hideLabel: true,
+  valueFormatter: value => `${Number(value ?? 0).toFixed(1)}%`,
 });
 
 const formatMonth = d => {

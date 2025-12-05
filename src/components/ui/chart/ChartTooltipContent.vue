@@ -9,6 +9,7 @@ const props = defineProps({
   nameKey: { type: String, required: false },
   labelKey: { type: String, required: false },
   labelFormatter: { type: Function, required: false },
+  valueFormatter: { type: Function, required: false },
   payload: { type: Object, required: false, default: () => ({}) },
   config: { type: null, required: false, default: () => ({}) },
   class: { type: null, required: false },
@@ -111,7 +112,11 @@ const tooltipLabel = computed(() => {
               v-if="value"
               class="text-foreground font-mono font-medium tabular-nums"
             >
-              {{ value.toLocaleString() }}
+              {{
+                valueFormatter
+                  ? valueFormatter(value)
+                  : value.toLocaleString()
+              }}
             </span>
           </div>
         </div>
