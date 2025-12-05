@@ -110,15 +110,6 @@ const STATUS_LEVEL_MAP = {
   HIGH_WARNING: 4,
 };
 
-const equipmentIconLabel = equipment => {
-  if (equipment.code) {
-    return equipment.code;
-  }
-  const code = equipment.equipmentCode ?? '';
-  if (!code) return 'E';
-  return code.slice(-2);
-};
-
 const resolveStatusLevel = (equipment, statusMap) => {
   const externalLevel = statusMap?.[equipment.equipmentCode];
   if (externalLevel !== undefined) {
@@ -134,7 +125,7 @@ const resolveStatusLevel = (equipment, statusMap) => {
   return 1;
 };
 
-const props = defineProps({
+defineProps({
   lines: Object,
   statusMap: {
     type: Object,

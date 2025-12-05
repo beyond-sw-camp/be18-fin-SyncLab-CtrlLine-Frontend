@@ -110,7 +110,6 @@ const props = defineProps({
 const formatTickLabel = value => formatProductionTick(props.mode, value);
 
 const colorizedData = computed(() => {
-  const total = props.data.length || 1;
   const palette = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
   const getColor = index => palette[index % palette.length];
 
@@ -160,7 +159,6 @@ const tooltipTemplate = componentToString(tooltipConfig, ChartTooltipContent, {
   valueFormatter: value => `${Number(value ?? 0).toLocaleString()} EA`,
 });
 
-const formatTick = value => formatTickLabel(value);
 const tickFormatter = value => {
   const target = normalizedData.value.find(entry => entry.index === value);
   return target?.label ?? '';

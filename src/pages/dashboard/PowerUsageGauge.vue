@@ -82,6 +82,7 @@ import { computed } from 'vue';
 
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
+import { Progress } from '@/components/ui/progress';
 import { COLOR_CONFIG } from '@/constants/chartConfig';
 
 const props = defineProps({

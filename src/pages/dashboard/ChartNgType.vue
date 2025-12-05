@@ -58,6 +58,9 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -67,9 +70,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { computed } from 'vue';
-
 import { PIE_CHART_CONFIG } from '@/constants/chartConfig';
 import NgDistributionDetail from '@/pages/dashboard/NgDistributionDetail.vue';
 

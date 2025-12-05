@@ -98,13 +98,17 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 
+import useGetDefectiveTypes from '@/apis/query-hooks/defective/useGetDefectiveTypes';
+import useGetDefectiveTrend from '@/apis/query-hooks/defective/useGetDefectiveTrend';
 import useGetFactoryEnergyLatest from '@/apis/query-hooks/factory/useGetFactoryEnergyLatest';
 import useGetFactoryEnergyTodayMax from '@/apis/query-hooks/factory/useGetFactoryEnergyTodayMax';
 import useGetFactoryEnvironmentLatest from '@/apis/query-hooks/factory/useGetFactoryEnvironmentLatest';
 import useGetFactoryLinesWithEquipments from '@/apis/query-hooks/factory/useGetFactoryLinesWithEquipments';
-import useGetDefectiveTypes from '@/apis/query-hooks/defective/useGetDefectiveTypes';
-import useGetDefectiveTrend from '@/apis/query-hooks/defective/useGetDefectiveTrend';
+import useGetProductionPerformanceAll from '@/apis/query-hooks/production-performance/useGetProductionPerformanceAll';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useEquipmentStatusFeed from '@/composables/useEquipmentStatusFeed';
+import { PIE_CHART_CONFIG } from '@/constants/chartConfig';
 import ChartNgType from '@/pages/dashboard/ChartNgType.vue';
 import DefectRateChart from '@/pages/dashboard/DefectRateChart.vue';
 import LineEquipmentStatus from '@/pages/dashboard/LineEquipmentStatus.vue';
@@ -112,12 +116,8 @@ import PowerUsageGauge from '@/pages/dashboard/PowerUsageGauge.vue';
 import ProductionChart from '@/pages/dashboard/ProductionChart.vue';
 import ProductionProgress from '@/pages/dashboard/ProductionProgress.vue';
 import VerticalProgress from '@/pages/dashboard/VerticalProgress.vue';
-import useGetProductionPerformanceAll from '@/apis/query-hooks/production-performance/useGetProductionPerformanceAll';
-import { PIE_CHART_CONFIG } from '@/constants/chartConfig';
 import { buildDefectRateTrend } from '@/utils/defectTrend';
 import { buildProductionVolumeSeries } from '@/utils/productionVolume';
-import { Button } from '@/components/ui/button';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 
 const props = defineProps({
   factoryCode: {

@@ -32,8 +32,8 @@ import { useRoute, useRouter } from 'vue-router';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import Scheduler from '@/pages/dashboard/Scheduler.vue';
 import FactoryDashboard from '@/pages/dashboard/FactoryDashboard.vue';
+import Scheduler from '@/pages/dashboard/Scheduler.vue';
 
 const route = useRoute();
 const router = useRouter();

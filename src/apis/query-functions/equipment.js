@@ -44,3 +44,9 @@ export async function getEquipmentStatuses(params = {}) {
   const { data } = await apiClient.get(url);
   return data.data;
 }
+
+// 설비 상태 일괄 업데이트
+export async function updateEquipmentStatusList(params) {
+  const { data } = await apiClient.patch('/equipments', params);
+  return data.data;
+}
