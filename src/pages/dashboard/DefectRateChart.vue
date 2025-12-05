@@ -31,7 +31,7 @@
             <VisGroupedBar
               :x="d => d.index"
               :y="d => d.value"
-              :color="BAR_CHART_CONFIG.desktop.color"
+              :color="d => d.color"
               :rounded-corners="10"
             />
             <VisAxis
@@ -81,8 +81,8 @@ const props = defineProps({
   data: { type: Array, required: true },
 });
 
-const normalizedData = computed(() =>
-  (props.data ?? []).map((entry, index) => {
+const normalizedData = computed(() => {
+  const mapped = (props.data ?? []).map((entry, index) => {
     if (entry && typeof entry === 'object' && 'value' in entry) {
       return {
         index: entry.index ?? index,
@@ -97,8 +97,14 @@ const normalizedData = computed(() =>
       label: formatMonth(date),
       value: Number(entry?.desktop ?? 0),
     };
-  }),
-);
+  });
+
+  const total = mapped.length || 1;
+  return mapped.map((item, index) => ({
+    ...item,
+    color: getBarColor(index, total),
+  }));
+});
 
 const hasData = computed(() => normalizedData.value.length > 0);
 
@@ -124,6 +130,20 @@ const tooltipTemplate = componentToString(tooltipConfig, ChartTooltipContent, {
 const formatMonth = d => {
   const date = new Date(d);
   return date.toLocaleDateString('en-US', { month: 'short' });
+};
+
+const dashboardPalette = [
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+];
+
+const getBarColor = (index, total) => {
+  if (!total) return dashboardPalette[0];
+  const paletteIndex = index % dashboardPalette.length;
+  return dashboardPalette[paletteIndex];
 };
 
 const averageRate = computed(() => {

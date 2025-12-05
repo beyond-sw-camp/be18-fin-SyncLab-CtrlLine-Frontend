@@ -39,9 +39,17 @@ const getBucketKey = (date, mode) => {
   }
   if (mode === 'week') {
     const info = getISOWeekInfo(date);
+    const start = info.start;
+    const yearShort = String(info.year % 100).padStart(2, '0');
+    const monthIndex =
+      typeof start.getUTCMonth === 'function' ? start.getUTCMonth() : start.getMonth();
+    const month = String(monthIndex + 1).padStart(2, '0');
+    const day =
+      typeof start.getUTCDate === 'function' ? start.getUTCDate() : start.getDate();
+    const weekOfMonth = Math.floor((day - 1) / 7) + 1;
     return {
       key: `${info.year}-W${String(info.week).padStart(2, '0')}`,
-      label: `${info.year % 100}년 ${String(info.week).padStart(2, '0')}주`,
+      label: `${yearShort}년 ${month}월 ${weekOfMonth}주차`,
       sortKey: info.start.getTime(),
     };
   }
