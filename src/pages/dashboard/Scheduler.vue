@@ -14,6 +14,7 @@
       :resources="availableLineResource"
       :created="onAvailableCreated"
       :eventRendered="onEventRendered"
+      @actionComplete="onAvailableScheduleAction"
       :eventClick="onEventClick"
     />
 
@@ -142,6 +143,14 @@ watch(availableEvents, () => {
 function onAvailableCreated() {
   const inst = availableScheduleRef.value?.ej2Instances;
   if (inst) onAvailableNavigation(inst);
+}
+
+function onAvailableScheduleAction(args) {
+  // 기존의 dateNavigate/viewNavigate 로직은 유지하거나 제거
+  if (['dateNavigate', 'viewNavigate'].includes(args.requestType)) {
+    const inst = availableScheduleRef.value?.ej2Instances;
+    if (inst) onAvailableNavigation(inst);
+  }
 }
 
 function onPopupOpen(args) {
