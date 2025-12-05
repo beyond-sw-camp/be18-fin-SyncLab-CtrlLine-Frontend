@@ -1,11 +1,12 @@
 <template>
   <div
     class="ml-3"
-    @mouseenter="isHovered = true"
-    @mouseleave="isHovered = false"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
     :class="[isActiveSub ? 'bg-primary-700 text-white rounded' : '']"
   >
     <div
+      @click="handleClick"
       class="flex items-center justify-between py-1.5 px-2 cursor-pointer rounded hover:bg-primary-400 transition"
     >
       <span class="flex gap-1 items-center">
@@ -16,10 +17,13 @@
         />
         {{ label }}
       </span>
-      <span>{{ showChildren ? '▾' : '▸' }}</span>
+      <!-- 고정 상태 표시 -->
+      <span :class="isPinned ? 'text-emerald-200' : ''">
+        {{ showChildren ? '▾' : '▸' }}
+      </span>
     </div>
 
-    <transition name="fade">
+    <transition name="slide-fade">
       <div v-if="showChildren" class="ml-3 mt-1 space-y-1">
         <SidebarLink
           v-for="child in filteredChildren"
@@ -60,27 +64,23 @@ const props = defineProps({
 const userStore = useUserStore();
 const route = useRoute();
 const isHovered = ref(false);
+const isPinned = ref(false); // 클릭으로 고정된 상태
+let closeTimer = null;
 
-// ":param" 포함된 path 제외
 const filteredChildren = computed(() => {
   const role = userStore.userRole;
 
   return props.children.filter(child => {
-    // (1) 상세조회(:id) 숨기기
     if (child.to?.includes(':')) return false;
-
-    // (2) role 기반 숨기기 (ADMIN만 접근 가능한 메뉴)
     if (child.role && child.role !== role) return false;
-
-    // (3) 그 외는 모두 보임
     return true;
   });
 });
 
-// 현재 route가 하위 children 중 하나라도 포함하면 강조
 const isActiveSub = computed(() => props.children?.some(c => route.path.startsWith(c.to)));
 
-const showChildren = computed(() => isHovered.value || isActiveSub.value);
+// 호버 중이거나, 고정되었거나, 현재 활성 경로면 열림
+const showChildren = computed(() => isHovered.value || isPinned.value || isActiveSub.value);
 
 const ICON_COMPONENTS = {
   UsersIcon,
@@ -94,5 +94,51 @@ const ICON_COMPONENTS = {
   BugIcon,
   QrCodeIcon,
 };
+
+function handleMouseEnter() {
+  if (closeTimer) {
+    clearTimeout(closeTimer);
+    closeTimer = null;
+  }
+  isHovered.value = true;
+}
+
+function handleMouseLeave() {
+  // 고정되어 있으면 닫지 않음
+  if (isPinned.value) return;
+
+  closeTimer = setTimeout(() => {
+    isHovered.value = false;
+  }, 500);
+}
+
+function handleClick() {
+  // 클릭 시 고정 상태 토글
+  isPinned.value = !isPinned.value;
+
+  // 고정 해제 시 호버도 해제
+  if (!isPinned.value) {
+    isHovered.value = false;
+  }
+}
 </script>
-<style></style>
+
+<style scoped>
+.slide-fade-enter-active {
+  transition: all 0.4s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.4s ease-in;
+}
+
+.slide-fade-enter-from {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+.slide-fade-leave-to {
+  transform: translateY(-5px);
+  opacity: 0;
+}
+</style>
