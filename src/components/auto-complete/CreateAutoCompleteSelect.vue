@@ -10,7 +10,7 @@
           @compositionstart="isComposing = true"
           @compositionend="onCompositionEnd"
           @keydown.enter.prevent="onEnter"
-          class="pr-8 text-sm"
+          :class="cn('pr-8 text-sm', props.class)"
           :disabled="disabled"
         />
         <Button
@@ -21,7 +21,7 @@
           class="absolute right-2 top-1/2 -translate-y-1/2"
           :disabled="disabled"
         >
-          <SearchIcon class="w-4 h-4" />
+          <SearchIcon  :class="cn('w-4 h-4', props.iconClass)"/>
         </Button>
         <ul
           v-if="autoItems.length > 0 && !isItemSelected"
@@ -38,7 +38,12 @@
         </ul>
       </div>
 
-      <Input type="text" :value="value" readonly class="w-28 bg-gray-100 text-sm" />
+      <Input
+        type="text"
+        :value="value"
+        readonly
+        :class="cn('w-28 bg-gray-100 text-sm', props.class)"
+      />
     </div>
     <SelectModal
       :open="showModal"
@@ -64,6 +69,7 @@ import { toast } from 'vue-sonner';
 import SelectModal from '@/components/auto-complete/SelectModal.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 const props = defineProps({
   label: { type: String, required: true },
@@ -78,6 +84,8 @@ const props = defineProps({
   disabled: { type: Boolean, default: false },
   initialText: { type: String, default: '' },
   componentField: { type: Object, default: () => ({}) },
+  class: { type: String, default: '' },
+  iconClass: { type: String, default: '' },
 });
 
 const emit = defineEmits(['selectedFullItem', 'clear']);

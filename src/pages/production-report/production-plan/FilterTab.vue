@@ -14,9 +14,41 @@
             v-model="localFilters.factoryName"
             :options="factoryOptions"
           />
-          <FilterInput label="라인명" v-model="localFilters.lineName" />
-          <FilterInput label="품목명" v-model="localFilters.itemName" />
           <FilterInput label="납기일자" type="date" v-model="localFilters.dueDate" />
+
+          <div>
+            <Label class="text-xs">품목명</Label>
+            <CreateAutoCompleteSelect
+              label="품목명"
+              :value="localFilters.itemCode"
+              :setValue="setItemCodeFilter"
+              :fetchList="() => useGetItemList({ isActive: true })"
+              keyField="itemCode"
+              nameField="itemName"
+              :fields="[
+                'itemCode',
+                'itemName',
+                'itemSpecification',
+                'itemUnit',
+                'itemStatus',
+                'isActive',
+              ]"
+              :tableHeaders="['품목코드', '품목명', '규격', '단위', '품목구분', '사용여부']"
+              :emitFullItem="true"
+              @selectedFullItem="onItemSelected"
+              @clear="onItemCleared"
+              class="h-7 placeholder:text-xs text-xs"
+              inputClass="h-7 text-xs placeholder:text-xs"
+              iconClass="!w-3 !h-3"
+            />
+          </div>
+
+          <FilterInput label="생산담당자" v-model="localFilters.productionManagerName" />
+
+          <FilterSelect label="라인명" v-model="localFilters.lineName" :options="lineOptions" />
+
+          <FilterInput label="영업담당자" v-model="localFilters.salesManagerName" />
+
           <div>
             <Label class="text-xs">생산기간</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
@@ -39,8 +71,6 @@
               </div>
             </div>
           </div>
-          <FilterInput label="생산담당자" v-model="localFilters.productionManagerName" />
-          <FilterInput label="영업담당자" v-model="localFilters.salesManagerName" />
         </div>
 
         <div class="flex justify-end mt-4 gap-2">
@@ -66,9 +96,12 @@
 </template>
 
 <script setup>
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
+import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
+import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
+import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import FilterInput from '@/components/filter/FilterInput.vue';
 import FilterSelect from '@/components/filter/FilterSelect.vue';
 import {
@@ -87,8 +120,11 @@ const props = defineProps({
 const emit = defineEmits(['search']);
 
 const localFilters = reactive({
+  factoryCode: props.filters.factoryCode ?? null,
   factoryName: props.filters.factoryName ?? null,
+  lineCode: props.filters.lineCode ?? '',
   lineName: props.filters.lineName ?? '',
+  itemCode: props.filters.itemCode ?? '',
   itemName: props.filters.itemName ?? '',
   productionManagerName: props.filters.productionManagerName ?? '',
   salesManagerName: props.filters.salesManagerName ?? '',
@@ -105,37 +141,106 @@ watch(
   { deep: true },
 );
 
-const applyFilters = () => {
-  emit('search', { ...localFilters });
-};
+const selectedFactoryId = ref(null);
+const selectedItemId = ref(null);
 
 const { data: factoryList } = useGetFactoryList();
+const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 
 const factoryOptions = computed(() => {
-  if (!factoryList.value || !factoryList.value.content) return [{ value: null, label: '전체' }];
+  if (!factoryList.value || !factoryList.value.content)
+    return [{ value: null, label: '전체', id: null }];
 
   return [
-    { value: null, label: '전체' },
+    { value: null, label: '전체', id: null },
     ...factoryList.value.content.map(factory => ({
       value: factory.factoryName,
       label: factory.factoryName,
+      id: factory.factoryId,
     })),
   ];
 });
 
+watch(
+  () => localFilters.factoryName,
+  newFactoryName => {
+    const selectedOption = factoryOptions.value.find(opt => opt.value === newFactoryName);
+
+    selectedFactoryId.value = selectedOption ? selectedOption.id : null;
+    localFilters.lineName = '';
+    localFilters.lineCode = '';
+    localFilters.itemCode = '';
+    localFilters.itemName = '';
+    selectedItemId.value = null;
+  },
+);
+
+const lineOptions = computed(() => {
+  if (!lineList.value || !lineList.value.content) {
+    return [{ value: null, label: '전체' }];
+  }
+
+  if (selectedFactoryId.value === null || localFilters.factoryName === null) {
+    // 라인 이름만 추출하여 Set으로 중복을 제거 (9개 -> 3개 이름만)
+    const uniqueLineNames = new Set(lineList.value.content.map(line => line.lineName));
+
+    // 이름만 포함하는 간결한 옵션 목록을 생성
+    const simpleOptions = Array.from(uniqueLineNames).map(name => ({
+      value: `ALL_${name}`,
+      label: name,
+    }));
+
+    return [{ value: null, label: '전체' }, ...simpleOptions];
+  }
+
+  return [
+    { value: null, label: '전체' },
+    ...lineList.value.content.map(line => ({
+      value: `${line.lineName}_${line.lineCode}`,
+      label: `${line.lineName} (${line.lineCode})`,
+    })),
+  ];
+});
+
+function onItemSelected(item) {
+  selectedItemId.value = item.id;
+}
+
+function onItemCleared() {
+  selectedItemId.value = null;
+}
+
+const setItemCodeFilter = newCode => {
+  localFilters.itemCode = newCode;
+  localFilters.itemName = '';
+
+  if (!newCode) {
+    localFilters.itemName = '';
+    selectedItemId.value = null;
+  }
+};
+
+const applyFilters = () => {
+  emit('search', { ...localFilters });
+};
+
 const resetFilters = () => {
-  // 초기화하고 바로 조회
   Object.assign(localFilters, {
     factoryName: null,
     lineName: '',
     salesManagerName: '',
     productionManagerName: '',
-    itemName: '',
     itemCode: '',
     dueDate: null,
     startTime: null,
     endTime: null,
   });
+
+  selectedFactoryId.value = null;
+  selectedItemId.value = null;
+
   emit('search', { ...localFilters });
 };
 </script>
+
+<style scoped></style>

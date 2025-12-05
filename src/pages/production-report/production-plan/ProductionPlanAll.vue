@@ -12,7 +12,7 @@
           <TableHeader class="border-b-2 border-primary">
             <TableRow>
               <TableHead
-                class="sticky left-0 z-10 bg-white shadow-md text-center whitespace-nowrap overflow-hidden"
+                class="sticky left-0 z-10 min-w-28 bg-white shadow-md text-center whitespace-nowrap overflow-hidden"
               >
                 전표번호
               </TableHead>
@@ -53,7 +53,7 @@
               class="text-center transition-all border-b border-dotted border-gray-300"
             >
               <TableCell
-                class="sticky left-0 z-10 bg-white py-3 whitespace-nowrap overflow-hidden text-ellipsis"
+                class="sticky left-0 z-10 min-w-28 bg-white py-3 whitespace-nowrap overflow-hidden text-ellipsis"
               >
                 {{ productionPlan.documentNo }}
               </TableCell>
@@ -94,7 +94,7 @@
               </TableCell>
             </TableRow>
             <TableRow v-if="productionPlanAll.length === 0">
-              <TableCell colspan="9" class="text-center py-10 text-gray-500">
+              <TableCell colspan="12" class="text-center py-10 text-gray-500">
                 검색 결과가 없습니다.
               </TableCell>
             </TableRow>
@@ -131,7 +131,7 @@ const initialFilters = {
   lineName: route.query.lineName || '',
   salesManagerName: route.query.salesManagerName || '',
   productionManagerName: route.query.productionManagerName || '',
-  itemName: route.query.itemName || '',
+  itemCode: route.query.itemCode || '',
   dueDate: route.query.dueDate || null,
   startTime: route.query.startTime || null,
   endTime: route.query.endTime || null,
@@ -158,7 +158,7 @@ watch(
     filters.factoryName = newQuery.factoryName ?? null;
     filters.salesManagerName = newQuery.salesManagerName ?? '';
     filters.productionManagerName = newQuery.productionManagerName ?? '';
-    filters.itemName = newQuery.itemName ?? '';
+    filters.itemCode = newQuery.itemCode ?? '';
     filters.dueDate = newQuery.dueDate ?? null;
     filters.startTime = newQuery.startTime ?? null;
     filters.endTime = newQuery.endTime ?? null;

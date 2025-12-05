@@ -169,7 +169,7 @@ const routes = [
       {
         path: 'production-plans/all',
         name: 'ReportProductionPlanList',
-        component: () => import('@/pages/production-report/production-plan/ProductionPlanList.vue'),
+        component: () => import('@/pages/production-report/production-plan/ProductionPlanAll.vue'),
       },
       {
         path: 'production-performances/all',
