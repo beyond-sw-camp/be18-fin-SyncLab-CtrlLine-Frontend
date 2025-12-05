@@ -30,7 +30,22 @@ export async function updateEquipment(equipmentCode, params) {
   return data;
 }
 
-// 설비 목록조회에서 업데이트
+export async function getEquipmentStatuses(params = {}) {
+  const query = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      query.append(key, value);
+    }
+  }
+
+  const queryString = query.toString();
+  const url = queryString ? `/equipments/statuses?${queryString}` : '/equipments/statuses';
+  const { data } = await apiClient.get(url);
+  return data.data;
+}
+
+// 설비 상태 일괄 업데이트
 export async function updateEquipmentStatusList(params) {
   const { data } = await apiClient.patch('/equipments', params);
   return data.data;

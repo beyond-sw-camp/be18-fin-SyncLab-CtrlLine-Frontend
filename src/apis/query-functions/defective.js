@@ -1,27 +1,41 @@
 import apiClient from '@/apis/query-functions/apiClient';
-import { buildQueryObject } from '@/utils/buildQueryObject';
 
-export async function getDefectiveAll(params = {}) {
-  const queryObj = buildQueryObject(params);
-  const search = new URLSearchParams(queryObj).toString();
-  const endpoint = search ? `/defectives/all?${search}` : '/defectives/all';
-  const { data } = await apiClient.get(endpoint);
+export async function getDefectiveList(params = {}) {
+  const query = new URLSearchParams();
 
-  return data.data ?? [];
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      query.append(key, value);
+    }
+  }
+
+  const search = query.toString();
+  const { data } = await apiClient.get(`/defectives?${search}`);
+  return data.data;
 }
 
-// 불량 상세조회
+export async function getDefectiveAll(params = {}) {
+  const query = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== '') {
+      query.append(key, value);
+    }
+  }
+
+  const search = query.toString();
+  const { data } = await apiClient.get(`/defectives/all?${search}`);
+  return data.data;
+}
+
 export async function getDefectiveDetail(planDefectiveId) {
   const { data } = await apiClient.get(`/defectives/${planDefectiveId}`);
   return data.data;
 }
 
-// 불량 목록조회
-export async function getDefectiveList(params) {
-  const queryObj = buildQueryObject(params);
-  const search = new URLSearchParams(queryObj);
-
-  const { data } = await apiClient.get(`/defectives?${search.toString()}`);
-
+export async function getDefectiveTypes(factoryCode) {
+  const { data } = await apiClient.get('/defectives/types', {
+    params: { factoryCode },
+  });
   return data.data;
 }
