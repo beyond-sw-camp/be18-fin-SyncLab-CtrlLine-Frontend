@@ -18,7 +18,7 @@
 
     <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
       <DefectRateChart :data="defectRateChartData" />
-      <ProductionChart :data="productionChartData" />
+      <ProductionChart :data="productionChartData" :mode="productionChartMode" />
     </div>
   </div>
 </template>
@@ -40,7 +40,9 @@ import PowerUsageGauge from '@/pages/dashboard/PowerUsageGauge.vue';
 import ProductionChart from '@/pages/dashboard/ProductionChart.vue';
 import ProductionProgress from '@/pages/dashboard/ProductionProgress.vue';
 import VerticalProgress from '@/pages/dashboard/VerticalProgress.vue';
+import useGetProductionPerformanceAll from '@/apis/query-hooks/production-performance/useGetProductionPerformanceAll';
 import { PIE_CHART_CONFIG } from '@/constants/chartConfig';
+import { buildProductionVolumeSeries } from '@/utils/productionVolume';
 
 const props = defineProps({
   factoryCode: {
@@ -65,6 +67,7 @@ const { data: defectiveTypes } = useGetDefectiveTypes(props.factoryCode);
 const { data: factoryLines } = useGetFactoryLinesWithEquipments(factoryIdRef);
 const { statusMap: equipmentStatuses } = useEquipmentStatusFeed(factoryIdRef);
 const { data: defectTrend } = useGetDefectiveTrend(() => props.factoryCode);
+const { data: productionPerformances } = useGetProductionPerformanceAll(() => props.factoryCode);
 
 const temperature = computed(() =>
   environmentData.value?.temperature ? Number(environmentData.value.temperature) : 0,
@@ -131,12 +134,7 @@ const lines = computed(() => ({
 
 const defectRateChartData = computed(() => defectTrend.value ?? []);
 
-const productionChartData = [
-  { date: new Date('2024-01-01'), desktop: 186 },
-  { date: new Date('2024-02-01'), desktop: 305 },
-  { date: new Date('2024-03-01'), desktop: 237 },
-  { date: new Date('2024-04-01'), desktop: 73 },
-  { date: new Date('2024-05-01'), desktop: 209 },
-  { date: new Date('2024-06-01'), desktop: 214 },
-];
+const productionSeries = computed(() => buildProductionVolumeSeries(productionPerformances.value ?? []));
+const productionChartData = computed(() => productionSeries.value.data);
+const productionChartMode = computed(() => productionSeries.value.mode);
 </script>

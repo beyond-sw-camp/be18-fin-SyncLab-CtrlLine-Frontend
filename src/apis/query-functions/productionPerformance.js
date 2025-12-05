@@ -21,3 +21,11 @@ export async function getProductionPerformanceMonthlyDefectiveRate(factoryCode, 
 
   return data.data;
 }
+
+export async function getProductionPerformanceAll(params = {}) {
+  const queryObj = buildQueryObject(params);
+  const search = new URLSearchParams(queryObj);
+
+  const { data } = await apiClient.get(`/production-performances/all?${search.toString()}`);
+  return data;
+}
