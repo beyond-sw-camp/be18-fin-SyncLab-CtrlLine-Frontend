@@ -159,6 +159,7 @@ watch(
     filters.salesManagerName = newQuery.salesManagerName ?? '';
     filters.productionManagerName = newQuery.productionManagerName ?? '';
     filters.itemCode = newQuery.itemCode ?? '';
+    filters.lineName = newQuery.lineName ?? null;
     filters.dueDate = newQuery.dueDate ?? null;
     filters.startTime = newQuery.startTime ?? null;
     filters.endTime = newQuery.endTime ?? null;

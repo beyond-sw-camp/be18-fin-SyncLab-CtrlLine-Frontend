@@ -133,14 +133,6 @@ const localFilters = reactive({
   endTime: props.filters.endTime ?? null,
 });
 
-watch(
-  () => props.filters,
-  newVal => {
-    Object.assign(localFilters, newVal);
-  },
-  { deep: true },
-);
-
 const selectedFactoryId = ref(null);
 const selectedItemId = ref(null);
 
@@ -161,20 +153,6 @@ const factoryOptions = computed(() => {
   ];
 });
 
-watch(
-  () => localFilters.factoryName,
-  newFactoryName => {
-    const selectedOption = factoryOptions.value.find(opt => opt.value === newFactoryName);
-
-    selectedFactoryId.value = selectedOption ? selectedOption.id : null;
-    localFilters.lineName = '';
-    localFilters.lineCode = '';
-    localFilters.itemCode = '';
-    localFilters.itemName = '';
-    selectedItemId.value = null;
-  },
-);
-
 const lineOptions = computed(() => {
   if (!lineList.value || !lineList.value.content) {
     return [{ value: null, label: '전체' }];
@@ -186,7 +164,7 @@ const lineOptions = computed(() => {
 
     // 이름만 포함하는 간결한 옵션 목록을 생성
     const simpleOptions = Array.from(uniqueLineNames).map(name => ({
-      value: `ALL_${name}`,
+      value: name,
       label: name,
     }));
 
@@ -197,7 +175,7 @@ const lineOptions = computed(() => {
     { value: null, label: '전체' },
     ...lineList.value.content.map(line => ({
       value: `${line.lineName}_${line.lineCode}`,
-      label: `${line.lineName} (${line.lineCode})`,
+      label: `${line.lineName}`,
     })),
   ];
 });
@@ -241,6 +219,14 @@ const resetFilters = () => {
 
   emit('search', { ...localFilters });
 };
+
+watch(
+  () => props.filters,
+  newVal => {
+    Object.assign(localFilters, newVal);
+  },
+  { deep: true },
+);
 </script>
 
 <style scoped></style>
