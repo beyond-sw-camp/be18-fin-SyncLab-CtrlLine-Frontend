@@ -2,6 +2,7 @@
   <div class="min-h-screen">
     <component :is="layout">
       <router-view />
+      <ScrollToTop />
     </component>
   </div>
   <Toaster richColors />
@@ -12,6 +13,7 @@
 import { VueQueryDevtools } from '@tanstack/vue-query-devtools';
 import { computed } from 'vue';
 
+import ScrollToTop from '@/components/scroll-to-top/ScrollToTop.vue';
 import { Toaster } from '@/components/ui/sonner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
