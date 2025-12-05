@@ -8,7 +8,15 @@
     <div
       class="flex items-center justify-between py-1.5 px-2 cursor-pointer hover:bg-primary-400 transition"
     >
-      <span class="font-semibold">{{ title }}</span>
+      <div class="flex gap-1 items-center">
+        <component
+          v-if="icon && ICON_COMPONENTS[icon]"
+          :is="ICON_COMPONENTS[icon]"
+          class="w-5 h-5 text-gray-300"
+        />
+        <span class="font-semibold">{{ title }}</span>
+      </div>
+
       <span>{{ showChildren ? '▾' : '▸' }}</span>
     </div>
 
@@ -24,6 +32,7 @@
 </template>
 
 <script setup>
+import { ChartGanttIcon, FolderKanban, SheetIcon } from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -34,6 +43,7 @@ const props = defineProps({
   title: String,
   groupKey: String,
   children: Array,
+  icon: String,
 });
 
 const route = useRoute();
@@ -43,4 +53,12 @@ const isHovered = ref(false);
 const isActiveGroup = computed(() => route.path.startsWith(`/${props.groupKey}/`));
 
 const showChildren = computed(() => isHovered.value || isActiveGroup.value);
+
+const ICON_COMPONENTS = {
+  FolderKanban,
+  ChartGanttIcon,
+  SheetIcon,
+};
 </script>
+
+<style></style>

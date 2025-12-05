@@ -29,7 +29,11 @@
                   {{ userStore.userEmail?.[0] ?? '?' }}
                 </AvatarFallback>
               </Avatar>
-              <span class="font-medium">{{ userStore.userName || '사용자' }}</span>
+              <span
+                class="block font-medium max-w-[100px] min-w-0 whitespace-nowrap overflow-hidden text-ellipsis"
+              >
+                {{ userStore.userName || '사용자' }}
+              </span>
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>

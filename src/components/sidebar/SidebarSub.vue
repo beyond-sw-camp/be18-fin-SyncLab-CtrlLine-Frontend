@@ -8,7 +8,14 @@
     <div
       class="flex items-center justify-between py-1.5 px-2 cursor-pointer rounded hover:bg-primary-400 transition"
     >
-      <span>{{ icon }} {{ label }}</span>
+      <span class="flex gap-1 items-center">
+        <component
+          v-if="icon && ICON_COMPONENTS[icon]"
+          :is="ICON_COMPONENTS[icon]"
+          class="w-4 h-4 text-gray-300"
+        />
+        {{ label }}
+      </span>
       <span>{{ showChildren ? '▾' : '▸' }}</span>
     </div>
 
@@ -26,6 +33,18 @@
 </template>
 
 <script setup>
+import {
+  BugIcon,
+  CableIcon,
+  ChartNoAxesCombinedIcon,
+  FactoryIcon,
+  Grid3x2Icon,
+  MicrochipIcon,
+  PackageIcon,
+  QrCodeIcon,
+  SquareChartGanttIcon,
+  UsersIcon,
+} from 'lucide-vue-next';
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -62,4 +81,18 @@ const filteredChildren = computed(() => {
 const isActiveSub = computed(() => props.children?.some(c => route.path.startsWith(c.to)));
 
 const showChildren = computed(() => isHovered.value || isActiveSub.value);
+
+const ICON_COMPONENTS = {
+  UsersIcon,
+  PackageIcon,
+  FactoryIcon,
+  Grid3x2Icon,
+  CableIcon,
+  MicrochipIcon,
+  SquareChartGanttIcon,
+  ChartNoAxesCombinedIcon,
+  BugIcon,
+  QrCodeIcon,
+};
 </script>
+<style></style>
