@@ -2,7 +2,7 @@
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">사용자 목록</h3>
     <RouterLink to="/base-management/users/new">
-      <Button size="sm"> New <ChevronRightIcon class="ml-1" /> </Button>
+      <Button size="sm" v-if="isAdmin"> New <ChevronRightIcon class="ml-1" /> </Button>
     </RouterLink>
   </div>
 
@@ -104,10 +104,12 @@ import {
 } from '@/components/ui/table';
 import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 import FilterTab from '@/pages/base-management/user/FilterTab.vue';
+import { canView } from '@/utils/canView';
 
 const router = useRouter();
 const deniedModal = ref(false);
 
+const isAdmin = canView(['ADMIN']);
 const { data: userList, refetch, page, filters } = useGetUserList();
 
 const onSearch = newFilters => {
