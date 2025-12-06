@@ -14,6 +14,10 @@ export default function useUpdateProductionPlan(productionPlanId) {
       toast.success('생산게획을 수정했습니다.');
       queryClient.invalidateQueries({ queryKey: ['productionPlan', productionPlanId] });
       queryClient.invalidateQueries({ queryKey: ['productionPlanList'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanScheduleList'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanAll'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanBoundary'] });
+      
       router.push('/production-management/production-plans');
     },
     onError: error => {
