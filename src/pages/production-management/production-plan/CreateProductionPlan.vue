@@ -140,7 +140,7 @@
             <FormItem class="w-full">
               <FormLabel>생산시작시간</FormLabel>
               <FormControl>
-                <Input type="datetime-local" :value="componentField" readonly class="text-sm" />
+                <Input type="datetime-local" v-bind="componentField" readonly class="text-sm" />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -157,7 +157,7 @@
                   label="영업담당자"
                   :value="value"
                   :setValue="setValue"
-                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })"
                   keyField="empNo"
                   nameField="userName"
                   :fields="[
@@ -285,13 +285,14 @@
 import { toTypedSchema } from '@vee-validate/zod';
 import { InfoIcon } from 'lucide-vue-next';
 import { useForm } from 'vee-validate';
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { z } from 'zod';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useCreateProductionPlan from '@/apis/query-hooks/production-plan/useCreateProductionPlan';
+import useGetProductionPlanBoundary from '@/apis/query-hooks/production-plan/useGetProductionPlanBoundary';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
@@ -309,6 +310,7 @@ import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
 import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
+import formatDate from '@/utils/formatDate';
 
 const formSchema = toTypedSchema(
   z.object({
@@ -323,6 +325,7 @@ const formSchema = toTypedSchema(
     salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }),
     lineCode: z.string({ required_error: '라인명은 필수입니다.' }).min(1, '라인명은 필수입니다.'),
     status: z.string({ required_error: '상태는 필수입니다.' }),
+    startTime: z.string().optional(),
     plannedQty: z.coerce
       .number({ required_error: '생산계획수량은 필수입니다.' })
       .positive('생산계획수량은 1 이상이어야 합니다.'),
@@ -348,6 +351,15 @@ const lineDetail = ref({});
 
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
+const { data: boundaryData } = useGetProductionPlanBoundary({
+  factoryCode: computed(() => factoryDetail.value.factoryCode),
+  lineCode: computed(() => lineDetail.value.lineCode),
+});
+
+console.log('357', factoryDetail, lineDetail);
+
+console.log('359', boundaryData);
+
 const { mutate: createProductionPlan } = useCreateProductionPlan();
 
 function onFactorySelected(factoryCode) {
@@ -405,6 +417,14 @@ const onSubmit = form.handleSubmit(values => {
   // @ts-ignore
   createProductionPlan(params);
 });
+
+watch(
+  () => boundaryData.value?.latestEndTime,
+  latestEndTime => {
+    if (!latestEndTime) return;
+    form.setFieldValue('startTime', formatDate(latestEndTime, 'datetime-local'));
+  },
+);
 </script>
 
 <style scoped></style>

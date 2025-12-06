@@ -1,41 +1,27 @@
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
-import { computed, reactive } from 'vue';
+import { computed } from 'vue';
 
 import { getProductionPlanBoundary } from '@/apis/query-functions/productionPlan';
 import { useAuthStore } from '@/stores/useAuthStore';
 
-export default function useGetProductionPlanBoundary(initialFilters = {}) {
+export default function useGetProductionPlanBoundary({ factoryCode, lineCode }) {
   const authStore = useAuthStore();
 
-  const filters = reactive({
-    factoryCode: initialFilters.factoryCode ?? null,
-    lineCode: initialFilters.lineCode ?? null,
-  });
-
-  const queryParams = computed(() => {
-    const cleaned = {};
-
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null && value !== '') {
-        cleaned[key] = value;
-      }
-    });
-
-    return cleaned;
-  });
+  const queryKey = computed(() => ['productionPlanBoundary', factoryCode.value, lineCode.value]);
 
   const { data, refetch } = useQuery({
-    queryKey: ['productionPlanBoundary', queryParams],
-    queryFn: () => getProductionPlanBoundary(queryParams.value),
-    enabled: computed(() => authStore.isLoggedIn),
+    queryKey,
+    queryFn: () =>
+      getProductionPlanBoundary({
+        factoryCode: factoryCode.value,
+        lineCode: lineCode.value,
+      }),
+    enabled: computed(() => authStore.isLoggedIn && !!factoryCode.value && !!lineCode.value),
     placeholderData: keepPreviousData,
   });
-
-  
 
   return {
     data,
     refetch,
-    filters,
   };
 }
