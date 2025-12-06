@@ -14,7 +14,7 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="flex items-center justify-center h-ful">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
@@ -46,7 +46,7 @@
                 class="size-4 border-[1.5px]"
                 :modelValue="selectedRows.some(r => r.id === item.id)"
                 @update:modelValue="
-                  checked => toggleRow(checked, { id: item.id, status: item.status })
+                  checked => toggleRow(checked, { id: item.id, isActive: item.isActive })
                 "
               />
             </TableCell>
@@ -63,7 +63,7 @@
               {{ item.itemUnit }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ item.itemStatus }}
+              {{ ITEM_STATUS_LABELS[item.itemStatus] }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
@@ -101,6 +101,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ITEM_STATUS_LABELS } from '@/constants/enumLabels';
 import FilterTab from '@/pages/base-management/item/FilterTab.vue';
 import StatusUpdateDialog from '@/pages/base-management/item/StatusUpdateDialog.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
@@ -128,7 +129,7 @@ const allRows = computed(
   () =>
     itemList.value?.content?.map(item => ({
       id: item.id,
-      status: item.status,
+      isActive: item.isActive,
     })) ?? [],
 );
 
