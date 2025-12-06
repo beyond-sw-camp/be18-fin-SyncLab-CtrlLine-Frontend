@@ -74,8 +74,6 @@ const isAdmin = canView(['ADMIN']);
 const canEdit = computed(() => {
   if (props.rows.length === 0) return false;
 
-  console.log(props.rows);
-
   const first = props.rows[0].isActive;
 
   const isSameState = props.rows.every(row => row.isActive === first);

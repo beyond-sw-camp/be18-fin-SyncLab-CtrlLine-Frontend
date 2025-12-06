@@ -55,7 +55,7 @@
         <FormField v-slot="{ componentField, errorMessage }" name="isActive">
           <FormItem>
             <FormLabel>라인 사용여부</FormLabel>
-            <FormControl>
+            <FormControl :disabled="!isAdmin">
               <RadioGroup v-bind="componentField" class="flex">
                 <div class="flex items-center space-x-2">
                   <RadioGroupItem value="true" id="r1" />
@@ -74,7 +74,7 @@
       </div>
     </Form>
   </div>
-  <div class="flex justify-end pt-6 pb-5">
+  <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
     <Button
       type="submit"
       form="lineUpdateForm"
@@ -96,10 +96,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { canView } from '@/utils/canView';
 
 const route = useRoute();
 const { data: lineDetail } = useGetLine(route.params.lineCode);
 const { mutate: updateLine } = useUpdateLine(route.params.lineCode);
+const isAdmin = canView(['ADMIN']);
 
 const initialValues = computed(() => {
   if (!lineDetail.value) return {};

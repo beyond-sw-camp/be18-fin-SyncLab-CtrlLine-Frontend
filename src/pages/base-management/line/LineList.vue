@@ -13,7 +13,7 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="flex items-center justify-center h-ful">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
@@ -44,7 +44,7 @@
                 class="size-4 border-[1.5px]"
                 :modelValue="selectedRows.some(r => r.id === line.lineId)"
                 @update:modelValue="
-                  checked => toggleRow(checked, { id: line.lineId, status: line.isActive })
+                  checked => toggleRow(checked, { id: line.lineId, isActive: line.isActive })
                 "
               />
             </TableCell>
@@ -118,9 +118,9 @@ const onReset = () => {
 
 const allRows = computed(
   () =>
-    lineList.value?.content?.map(item => ({
-      id: item.lineId,
-      status: item.isActive,
+    lineList.value?.content?.map(line => ({
+      id: line.lineId,
+      isActive: line.isActive,
     })) ?? [],
 );
 
