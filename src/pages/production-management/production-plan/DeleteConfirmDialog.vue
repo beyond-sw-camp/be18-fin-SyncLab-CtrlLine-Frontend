@@ -1,7 +1,12 @@
 <template>
   <Dialog>
     <DialogTrigger as-child>
-      <Button variant="outline" size="sm" class="cursor-pointer w-[70px]" :disabled="!canDelete">
+      <Button
+        variant="outline"
+        size="sm"
+        class="cursor-pointer w-[70px]"
+        :disabled="!canDelete"
+      >
         Delete
       </Button>
     </DialogTrigger>
@@ -61,7 +66,7 @@ const canDelete = computed(() => {
   if (props.rows.length === 0) return false;
 
   // RUNNING/COMPLETED 포함 시 삭제 불가 (상세조회와 동일)
-  if ([...uniqueStatuses].some(s => ['RUNNING', 'COMPLETED'].includes(s))) {
+  if ([...uniqueStatuses].some(s => ['RUNNING', 'COMPLETED', 'RETURNED'].includes(s))) {
     return false;
   }
 
