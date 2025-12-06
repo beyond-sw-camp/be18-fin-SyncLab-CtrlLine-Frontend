@@ -4,12 +4,11 @@
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row">
-    <Form
+    <form
       v-if="processDetail?.processCode"
       id="processUpdateForm"
       @submit="onSubmit"
       class="flex-1 flex flex-col gap-10"
-      :initial-values="initialValues"
     >
       <fieldset :disabled="!isAdmin">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -43,7 +42,9 @@
                   :value="value"
                   :componentField="componentField"
                   :setValue="setValue"
-                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                  :fetchList="
+                    () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })
+                  "
                   key-field="empNo"
                   nameField="userName"
                   :fields="[
@@ -58,18 +59,19 @@
                   :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
                   :initialText="processDetail.userName"
                   :emitFullItem="true"
-                  @selectedFullItem="item => (selectedUserName = item.userName)"
+                  @selectedFullItem="onUserSelected"
+                  @clear="onUserCleared"
                 />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="department">
+          <FormField v-slot="{ componentField, errorMessage }" name="userDepartment">
             <FormItem>
               <FormLabel>담당부서</FormLabel>
               <FormControl>
-                <Input type="text" v-bind="componentField" autocomplete="department" disabled />
+                <Input type="text" v-bind="componentField" autocomplete="userDepartment" readonly />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -106,64 +108,89 @@
           Save
         </Button>
       </div>
-    </Form>
+    </form>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { toTypedSchema } from '@vee-validate/zod';
+import { useForm } from 'vee-validate';
+import { watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { z } from 'zod';
 
 import useGetProcess from '@/apis/query-hooks/process/useGetProcess.js';
 import useUpdateProcess from '@/apis/query-hooks/process/useUpdateProcess.js';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { canView } from '@/utils/canView';
+
+const formSchema = toTypedSchema(
+  z.object({
+    processCode: z.string().optional(),
+    processName: z.string().optional(),
+    empNo: z.string({ required_error: '담당자는 필수입니다.' }).min(1, '담당자는 필수입니다.'),
+    userName: z.string().optional(),
+    userDepartment: z
+      .string({ required_error: '담당부서는 필수입니다.' })
+      .min(1, '담당부서는 필수입니다.'),
+    isActive: z.string().optional(),
+  }),
+);
 
 const route = useRoute();
 const { data: processDetail } = useGetProcess(route.params.processCode);
 const { mutate: updateProcess } = useUpdateProcess(route.params.processCode);
 const isAdmin = canView(['ADMIN']);
 
-const initialValues = computed(() => {
-  if (!processDetail.value) return {};
-
-  return {
-    processCode: processDetail.value.processCode,
-    processName: processDetail.value.processName,
-    department: processDetail.value.userDepartment,
-    empNo: processDetail.value.empNo,
-    isActive: processDetail.value.isActive ? 'true' : 'false',
-  };
+const form = useForm({
+  validationSchema: formSchema,
+  initialValues: {},
 });
 
-const selectedUserName = ref('');
+function onUserSelected(value) {
+  form.setFieldValue('empNo', value.empNo);
+  form.setFieldValue('userName', value.userName);
+  form.setFieldValue('userDepartment', value.userDepartment);
+}
+
+function onUserCleared() {
+  form.setFieldValue('empNo', '');
+  form.setFieldValue('userName', '');
+  form.setFieldValue('userDepartment', '');
+}
+
+const onSubmit = form.handleSubmit(values => {
+  const params = {
+    userName: values.userName,
+    empNo: values.empNo,
+    isActive: values.isActive === 'true',
+  };
+
+  // @ts-ignore
+  updateProcess(params);
+});
 
 watch(
   processDetail,
   val => {
-    if (val) {
-      selectedUserName.value = val.userName;
-    }
+    if (!val) return;
+
+    form.setValues({
+      processCode: processDetail.value.processCode,
+      processName: processDetail.value.processName,
+      userDepartment: processDetail.value.userDepartment,
+      empNo: processDetail.value.empNo,
+      isActive: processDetail.value.isActive ? 'true' : 'false',
+    });
   },
   { immediate: true },
 );
-
-const onSubmit = values => {
-  const params = {
-    userName: selectedUserName.value,
-    empNo: values.empNo,
-    isActive: values.isActive === 'true',
-    processCode: values.processCode,
-  };
-  // @ts-ignore
-  updateProcess(params);
-};
 </script>
 
 <style scoped></style>
