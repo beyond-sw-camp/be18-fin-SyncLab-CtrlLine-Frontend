@@ -18,12 +18,9 @@
             v-model="localFilters.equipmentType"
             :options="[
               { value: null, label: '전체' },
-              { value: '유형 1', label: '유형 1' },
-              { value: '유형 2', label: '유형 2' },
-              { value: '유형 3', label: '유형 3' },
-              { value: '유형 4', label: '유형 4' },
-              { value: '유형 5', label: '유형 5' },
-              { value: '유형 6', label: '유형 6' },
+              { value: 'BEOL', label: 'BEOL' },
+              { value: 'CMIP', label: 'CMIP' },
+              { value: 'FEOL', label: 'FEOL' },
             ]"
           />
 

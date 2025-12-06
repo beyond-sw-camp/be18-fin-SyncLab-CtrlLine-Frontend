@@ -1,11 +1,19 @@
 <template>
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">설비 상세 조회</h3>
+    <Button
+      v-if="isAdmin"
+      type="submit"
+      size="sm"
+      form="equipmentUpdateForm"
+      class="bg-primary text-white hover:bg-primary-600"
+    >
+      Save
+    </Button>
   </div>
 
   <div class="flex flex-col gap-10 md:flex-row">
     <Form
-      as="form"
       v-if="equipmentDetail"
       id="equipmentUpdateForm"
       @submit="onSubmit"
@@ -27,114 +35,117 @@
     >
       <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">기본 정보</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField name="equipmentCode" v-slot="{ componentField, errorMessage }">
-            <FormItem>
-              <FormLabel>설비코드</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" disabled />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+        <fieldset :disabled="!isAdmin">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField name="equipmentCode" v-slot="{ componentField, errorMessage }">
+              <FormItem>
+                <FormLabel>설비코드</FormLabel>
+                <FormControl>
+                  <Input type="text" v-bind="componentField" disabled />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField name="equipmentName" v-slot="{ componentField, errorMessage }">
-            <FormItem>
-              <FormLabel>설비명</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" disabled />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField name="equipmentName" v-slot="{ componentField, errorMessage }">
+              <FormItem>
+                <FormLabel>설비명</FormLabel>
+                <FormControl>
+                  <Input type="text" v-bind="componentField" disabled />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField name="equipmentType" v-slot="{ componentField, errorMessage }">
-            <FormItem>
-              <FormLabel>설비유형</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" disabled />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField name="equipmentType" v-slot="{ componentField, errorMessage }">
+              <FormItem>
+                <FormLabel>설비유형</FormLabel>
+                <FormControl>
+                  <Input type="text" v-bind="componentField" disabled />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField name="empNo" v-slot="{ value, componentField, setValue, errorMessage }">
-            <FormItem>
-              <FormLabel>담당자</FormLabel>
-              <FormControl>
-                <UpdateAutoCompleteSelect
-                  :key="`empNo-${equipmentDetail?.empNo}`"
-                  label="담당자"
-                  :value="value"
-                  :componentField="componentField"
-                  :setValue="setValue"
-                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
-                  keyField="empNo"
-                  nameField="userName"
-                  :fields="[
-                    'empNo',
-                    'userName',
-                    'userEmail',
-                    'userDepartment',
-                    'userPhoneNumber',
-                    'userStatus',
-                    'userRole',
-                  ]"
-                  :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
-                  :initialText="equipmentDetail.userName"
-                  :emitFullItem="true"
-                  @selectedFullItem="item => (selectedUserName = item.userName)"
-                />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField name="empNo" v-slot="{ value, componentField, setValue, errorMessage }">
+              <FormItem>
+                <FormLabel>담당자</FormLabel>
+                <FormControl>
+                  <UpdateAutoCompleteSelect
+                    :key="`empNo-${equipmentDetail?.empNo}`"
+                    label="담당자"
+                    :value="value"
+                    :componentField="componentField"
+                    :setValue="setValue"
+                    :fetchList="
+                      () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })
+                    "
+                    keyField="empNo"
+                    nameField="userName"
+                    :fields="[
+                      'empNo',
+                      'userName',
+                      'userEmail',
+                      'userDepartment',
+                      'userPhoneNumber',
+                      'userStatus',
+                      'userRole',
+                    ]"
+                    :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                    :initialText="equipmentDetail.userName"
+                    :emitFullItem="true"
+                    @selectedFullItem="item => (selectedUserName = item.userName)"
+                  />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="userDepartment">
-            <FormItem>
-              <FormLabel>부서</FormLabel>
-              <FormControl>
-                <Select v-bind="componentField" disabled>
-                  <SelectTrigger class="w-full">
-                    <SelectValue placeholder="부서를 선택하세요." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="(label, value) in DEPARTMENT_LABELS"
-                      :key="value"
-                      :value="value"
-                    >
-                      {{ label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField, errorMessage }" name="userDepartment">
+              <FormItem>
+                <FormLabel>부서</FormLabel>
+                <FormControl>
+                  <Select v-bind="componentField" disabled>
+                    <SelectTrigger class="w-full">
+                      <SelectValue placeholder="부서를 선택하세요." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="(label, value) in DEPARTMENT_LABELS"
+                        :key="value"
+                        :value="value"
+                      >
+                        {{ label }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="isActive">
-            <FormItem>
-              <FormLabel>설비 사용여부</FormLabel>
-              <FormControl>
-                <RadioGroup v-bind="componentField" class="flex">
-                  <div class="flex items-center space-x-2">
-                    <RadioGroupItem value="true" id="r1" />
-                    <Label for="r1" class="font-normal">설비 사용</Label>
-                  </div>
+            <FormField v-slot="{ componentField, errorMessage }" name="isActive">
+              <FormItem>
+                <FormLabel>설비 사용여부</FormLabel>
+                <FormControl>
+                  <RadioGroup v-bind="componentField" class="flex">
+                    <div class="flex items-center space-x-2">
+                      <RadioGroupItem value="true" id="r1" />
+                      <Label for="r1" class="font-normal">설비 사용</Label>
+                    </div>
 
-                  <div class="flex items-center space-x-2">
-                    <RadioGroupItem value="false" id="r2" />
-                    <Label for="r2" class="font-normal">설비 미사용</Label>
-                  </div>
-                </RadioGroup>
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
-        </div>
+                    <div class="flex items-center space-x-2">
+                      <RadioGroupItem value="false" id="r2" />
+                      <Label for="r2" class="font-normal">설비 미사용</Label>
+                    </div>
+                  </RadioGroup>
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
+        </fieldset>
       </div>
-
       <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">주요 지표</h4>
 
@@ -196,15 +207,6 @@
           </FormField>
         </div>
       </div>
-      <div class="flex justify-end pt-6 pb-5">
-        <Button
-          type="submit"
-          form="equipmentUpdateForm"
-          class="bg-primary text-white hover:bg-primary-600"
-        >
-          Save
-        </Button>
-      </div>
     </Form>
   </div>
 </template>
@@ -230,12 +232,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DEPARTMENT_LABELS } from '@/constants/enumLabels';
+import { canView } from '@/utils/canView';
 import getAccumulatedHours from '@/utils/getAccumulatedHours';
+
 const route = useRoute();
 const { data: equipmentDetail } = useGetEquipment(route.params.equipmentCode);
 const { mutate: updateEquipment } = useUpdateEquipment(route.params.equipmentCode);
 
 const selectedUserName = ref('');
+const isAdmin = canView(['ADMIN']);
+
 watch(
   equipmentDetail,
   val => {

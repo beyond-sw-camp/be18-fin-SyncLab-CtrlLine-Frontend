@@ -46,7 +46,7 @@
                 :modelValue="selectedRows.some(r => r.id === equipment.equipmentId)"
                 @update:modelValue="
                   checked =>
-                    toggleRow(checked, { id: equipment.equipmentId, status: equipment.isActive })
+                    toggleRow(checked, { id: equipment.equipmentId, isActive: equipment.isActive })
                 "
               />
             </TableCell>
@@ -122,9 +122,9 @@ const onReset = () => {
 
 const allRows = computed(
   () =>
-    equipmentList.value?.content?.map(item => ({
-      id: item.equipmentId,
-      status: item.isActive,
+    equipmentList.value?.content?.map(equipment => ({
+      id: equipment.equipmentId,
+      isActive: equipment.isActive,
     })) ?? [],
 );
 

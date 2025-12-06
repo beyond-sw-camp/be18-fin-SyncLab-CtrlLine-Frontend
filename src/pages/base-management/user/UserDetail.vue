@@ -261,6 +261,7 @@
     <Button
       v-if="canView(['ADMIN'])"
       type="submit"
+      size="sm"
       form="userUpdateForm"
       class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
     >

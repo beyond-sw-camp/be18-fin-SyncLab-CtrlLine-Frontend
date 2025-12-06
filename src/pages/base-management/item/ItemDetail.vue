@@ -130,6 +130,7 @@
       <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
         <Button
           type="submit"
+          size="sm"
           form="itemUpdateForm"
           class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
         >
