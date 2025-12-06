@@ -13,11 +13,10 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10" @click.stop>
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
-                @click.stop
                 class="size-4 border-[1.5px]"
               />
             </TableHead>
