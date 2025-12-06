@@ -1,14 +1,33 @@
 <template>
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 등록</h3>
-    <Button
-      type="submit"
-      form="productionPlanCreateForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
-      size="sm"
-    >
-      Save
-    </Button>
+    <div class="flex gap-3">
+      <div class="flex gap-2 items-center">
+        <label class="flex gap-1 items-center text-sm font-medium">
+          우선작업
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+              <TooltipContent side="top">
+                <p>우선작업은 관리자에 의해 우선 실행되는 주문입니다.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </label>
+        <FormField name="isEmergent" v-slot="{ value, setValue }">
+          <Switch :modelValue="value" @update:modelValue="setValue" />
+        </FormField>
+      </div>
+
+      <Button
+        type="submit"
+        form="productionPlanCreateForm"
+        class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
+        size="sm"
+      >
+        Save
+      </Button>
+    </div>
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row">
@@ -157,7 +176,9 @@
                   label="영업담당자"
                   :value="value"
                   :setValue="setValue"
-                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })"
+                  :fetchList="
+                    () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })
+                  "
                   keyField="empNo"
                   nameField="userName"
                   :fields="[
@@ -305,6 +326,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
@@ -329,6 +351,7 @@ const formSchema = toTypedSchema(
     plannedQty: z.coerce
       .number({ required_error: '생산계획수량은 필수입니다.' })
       .positive('생산계획수량은 1 이상이어야 합니다.'),
+    isEmergent: z.boolean().optional(),
     remark: z.string().optional(),
   }),
 );
@@ -340,6 +363,7 @@ const form = useForm({
   initialValues: {
     status: userStore.userRole === 'ADMIN' ? 'CONFIRMED' : 'PENDING',
     plannedQty: 0,
+    isEmergent: false,
   },
 });
 
@@ -355,10 +379,6 @@ const { data: boundaryData } = useGetProductionPlanBoundary({
   factoryCode: computed(() => factoryDetail.value.factoryCode),
   lineCode: computed(() => lineDetail.value.lineCode),
 });
-
-console.log('357', factoryDetail, lineDetail);
-
-console.log('359', boundaryData);
 
 const { mutate: createProductionPlan } = useCreateProductionPlan();
 
@@ -412,6 +432,7 @@ const onSubmit = form.handleSubmit(values => {
     status: values.status,
     remark: values.remark,
     plannedQty: values.plannedQty,
+    isEmergent: values.isEmergent ? 'true' : 'false',
   };
 
   // @ts-ignore
@@ -419,10 +440,17 @@ const onSubmit = form.handleSubmit(values => {
 });
 
 watch(
-  () => boundaryData.value?.latestEndTime,
-  latestEndTime => {
-    if (!latestEndTime) return;
-    form.setFieldValue('startTime', formatDate(latestEndTime, 'datetime-local'));
+  [
+    () => boundaryData.value?.latestEndTime,
+    () => boundaryData.value?.earliestStartTime,
+    () => form.values.isEmergent,
+  ],
+  ([latestEndTime, earliestStartTime, isEmergent]) => {
+    const timeToUse = isEmergent ? earliestStartTime : latestEndTime;
+    console.log(isEmergent);
+    if (!timeToUse) return;
+
+    form.setFieldValue('startTime', formatDate(timeToUse, 'datetime-local'));
   },
 );
 </script>
