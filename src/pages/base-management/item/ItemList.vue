@@ -199,6 +199,7 @@ watch(
     filters.isActive =
       newQuery.isActive === 'true' ? true : newQuery.isActive === 'false' ? false : null;
   },
+  { immediate: true },
 );
 
 watch([page, filters], () => {

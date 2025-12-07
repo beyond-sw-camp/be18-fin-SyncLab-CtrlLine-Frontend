@@ -185,6 +185,7 @@ watch(
     filters.userName = newQuery.userName ?? '';
     filters.userDepartment = newQuery.userDepartment ?? null;
   },
+  { immediate: true },
 );
 
 watch([page, filters], () => {

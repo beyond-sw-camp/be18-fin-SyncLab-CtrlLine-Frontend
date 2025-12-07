@@ -196,6 +196,7 @@ watch(
     filters.userName = newQuery.userName ?? null;
     filters.userDepartment = newQuery.userDepartment ?? null;
   },
+  { immediate: true },
 );
 
 watch([page, filters], () => {

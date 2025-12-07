@@ -168,6 +168,7 @@ watch(
     filters.minDefectRate = parseNumberQuery(newQuery.minDefectRate);
     filters.maxDefectRate = parseNumberQuery(newQuery.maxDefectRate);
   },
+  { immediate: true },
 );
 </script>
 

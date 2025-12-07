@@ -64,7 +64,6 @@ import { useRoute, useRouter } from 'vue-router';
 
 import useGetDefectiveList from '@/apis/query-hooks/defective/useGetDefectiveList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -130,6 +129,7 @@ watch(
     filters.itemName = newQuery.itemName ?? '';
     filters.lineName = newQuery.lineName ?? '';
   },
+  { immediate: true },
 );
 </script>
 

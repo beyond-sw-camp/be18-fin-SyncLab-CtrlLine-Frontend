@@ -250,6 +250,7 @@ watch(
     filters.startTime = newQuery.startTime ?? null;
     filters.endTime = newQuery.endTime ?? null;
   },
+  { immediate: true },
 );
 
 // 페이지, 필터링, 상태 변경 시 체크 해제
