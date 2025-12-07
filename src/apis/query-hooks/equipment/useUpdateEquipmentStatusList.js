@@ -11,6 +11,7 @@ export default function useUpdateEquipmentStatusList() {
     onSuccess: () => {
       toast.success('설비 사용 여부를 수정했습니다.');
       queryClient.invalidateQueries({ queryKey: ['equipmentList'] });
+      queryClient.invalidateQueries({ queryKey: ['equipment'] });
     },
     onError: error => {
       toast.error(error.response.data.message);

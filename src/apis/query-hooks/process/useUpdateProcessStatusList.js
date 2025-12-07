@@ -10,6 +10,7 @@ export default function useUpdateProcessStatusList() {
     mutationFn: params => updateProcessStatusList(params),
     onSuccess: () => {
       toast.success('공정 사용여부를 수정했습니다.');
+      queryClient.invalidateQueries({ queryKey: ['process'] });
       queryClient.invalidateQueries({ queryKey: ['processList'] });
     },
     onError: error => {
