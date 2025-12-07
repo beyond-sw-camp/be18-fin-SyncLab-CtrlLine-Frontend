@@ -43,7 +43,8 @@
                 class="size-4 border-[1.5px]"
                 :modelValue="selectedRows.some(r => r.id === process.processId)"
                 @update:modelValue="
-                  checked => toggleRow(checked, { id: process.processId, isActive: process.isActive })
+                  checked =>
+                    toggleRow(checked, { id: process.processId, isActive: process.isActive })
                 "
               />
             </TableCell>
@@ -70,6 +71,11 @@
               >
                 {{ process.isActive ? '사용' : '미사용' }}
               </Badge>
+            </TableCell>
+          </TableRow>
+          <TableRow v-if="processList.content.length === 0">
+            <TableCell colspan="6" class="text-center py-10 text-gray-500">
+              검색 결과가 없습니다.
             </TableCell>
           </TableRow>
         </TableBody>

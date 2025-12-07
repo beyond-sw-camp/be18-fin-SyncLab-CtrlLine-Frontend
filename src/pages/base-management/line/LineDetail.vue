@@ -41,7 +41,7 @@
                 :value="value"
                 :componentField="componentField"
                 :setValue="setValue"
-                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
                 key-field="empNo"
                 nameField="userName"
                 :fields="[

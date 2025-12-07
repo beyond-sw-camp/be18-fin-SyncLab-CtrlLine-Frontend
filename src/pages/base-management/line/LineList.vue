@@ -72,6 +72,11 @@
               </Badge>
             </TableCell>
           </TableRow>
+          <TableRow v-if="lineList.content.length === 0">
+            <TableCell colspan="6" class="text-center py-10 text-gray-500">
+              검색 결과가 없습니다.
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </div>
