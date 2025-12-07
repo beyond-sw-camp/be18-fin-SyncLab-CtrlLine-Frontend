@@ -23,7 +23,7 @@
           <TableRow
             v-for="lot in lotList.content"
             :key="lot.lotId ?? lot.lotNo"
-            class="hover:bg-gray-50 text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
+            class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(lot.lotId)"
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">

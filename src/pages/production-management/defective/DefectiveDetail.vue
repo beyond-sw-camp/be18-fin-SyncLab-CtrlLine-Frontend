@@ -8,18 +8,29 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
         <div class="flex flex-col">
           <Label class="text-sm font-medium mb-1" for="factoryName">공장명</Label>
-          <Input id="factoryName" type="text" :model-value="defectiveDetail.factoryName" class="text-sm" />
+          <Input
+            id="factoryName"
+            type="text"
+            :model-value="defectiveDetail.factoryName"
+            class="text-sm"
+          />
         </div>
 
         <div class="flex flex-col">
           <Label class="text-sm font-medium mb-1" for="lineName">라인명</Label>
-          <Input id="lineName" type="text" :model-value="defectiveDetail.lineName" readonly class="text-sm" />
+          <Input
+            id="lineName"
+            type="text"
+            :model-value="defectiveDetail.lineName"
+            readonly
+            class="text-sm"
+          />
         </div>
 
         <div class="flex flex-col">
           <Label for="itemName" class="text-sm font-medium mb-1">품목명</Label>
           <Input
-          id="itemName"
+            id="itemName"
             type="text"
             :model-value="`${defectiveDetail.itemName} (${defectiveDetail.itemCode})`"
             readonly
@@ -30,7 +41,7 @@
         <div class="flex flex-col">
           <Label for="defectiveDocNo" class="text-sm font-medium mb-1">불량 전표번호</Label>
           <Input
-          id="defectiveDocNo"
+            id="defectiveDocNo"
             class="text-sm"
             type="text"
             :model-value="defectiveDetail.defectiveDocNo"
@@ -41,7 +52,7 @@
         <div class="flex flex-col">
           <Label for="itemSpecification" class="text-sm font-medium mb-1">규격</Label>
           <Input
-          id="itemSpecification"
+            id="itemSpecification"
             class="text-sm"
             type="text"
             :model-value="defectiveDetail.itemSpecification"
@@ -51,7 +62,13 @@
 
         <div class="flex flex-col">
           <Label for="itemUnit" class="text-sm font-medium mb-1">단위</Label>
-          <Input id="itemUnit" class="text-sm" type="text" :model-value="defectiveDetail.itemUnit" readonly />
+          <Input
+            id="itemUnit"
+            class="text-sm"
+            type="text"
+            :model-value="defectiveDetail.itemUnit"
+            readonly
+          />
         </div>
       </div>
 
@@ -64,7 +81,6 @@
 </template>
 
 <script setup>
-import { watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import useGetDefective from '@/apis/query-hooks/defective/useGetDefective';
@@ -74,14 +90,4 @@ import DefectiveTable from '@/pages/production-management/defective/DefectiveTab
 
 const route = useRoute();
 const { data: defectiveDetail } = useGetDefective(route.params.planDefectiveId);
-
-watch(
-  defectiveDetail,
-  val => {
-    console.log('전체 데이터:', val);
-    console.log('factoryName:', val?.factoryName);
-    console.log('defectives:', val?.defectives);
-  },
-  { immediate: true },
-);
 </script>
