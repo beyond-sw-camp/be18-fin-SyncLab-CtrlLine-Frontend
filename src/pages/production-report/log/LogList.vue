@@ -1,217 +1,176 @@
 <template>
-  <section class="space-y-6">
-    <header class="flex items-center justify-between border-b border-gray-200 pb-4">
-      <div>
-        <h3 class="text-2xl font-semibold text-gray-900">로그 조회</h3>
+  <div class="flex justify-between items-center">
+    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">로그 현황</h3>
+    <Button size="sm" class="cursor-pointer w-[70px]" @click="exportCsv" :disabled="!hasSearched">
+      Export
+    </Button>
+  </div>
+
+  <FilterTab :filters="filters" @search="onSearch" @reset="onReset" />
+
+  <div class="flex flex-col mt-4">
+    <div class="min-h-[550px] flex-1">
+      <div class="overflow-x-auto">
+        <Table class="w-full">
+          <TableHeader class="border-b-2 border-primary">
+            <TableRow>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden"> 일자 </TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden"> 테이블 </TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden"> 담당자 </TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden"> 속성 </TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody v-if="!hasSearched">
+            <TableRow>
+              <TableCell colspan="4" class="text-center py-10 text-gray-500">
+                필터를 설정한 뒤 조회 버튼을 눌러주세요.
+              </TableCell>
+            </TableRow>
+          </TableBody>
+
+          <TableBody v-else-if="isLogsLoading">
+            <TableRow>
+              <TableCell colspan="4" class="text-center py-10 text-gray-500">
+                로그 데이터를 불러오는 중입니다...
+              </TableCell>
+            </TableRow>
+          </TableBody>
+
+          <TableBody v-else-if="logList && logList.length">
+            <TableRow
+              v-for="log in logList"
+              :key="log.logId"
+              class="text-center transition-all border-b border-dotted border-gray-300 hover:bg-gray-50"
+            >
+              <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+                {{ formatDate(log.createdAt) }}
+              </TableCell>
+              <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+                {{ log.entityName }}
+              </TableCell>
+              <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+                {{
+                  userNameMap[log.userId]
+                    ? `${userNameMap[log.userId]} (${log.userId})`
+                    : `사용자 #${log.userId}`
+                }}
+              </TableCell>
+              <TableCell
+                class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-primary"
+              >
+                {{ log.actionType }}
+              </TableCell>
+            </TableRow>
+          </TableBody>
+
+          <TableBody v-else>
+            <TableRow>
+              <TableCell colspan="4" class="text-center py-10 text-gray-500">
+                검색 결과가 없습니다.
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
       </div>
-
-      <div class="flex items-center">
-        <Button
-          class="rounded-full bg-[#5B6D4C] px-6 py-2 text-white hover:bg-[#4C5C3F]"
-          :disabled="!hasSearched || isLogsLoading || !logRows.length"
-          @click="exportCsv"
-        >
-          Export
-        </Button>
-      </div>
-    </header>
-
-    <Dialog v-model:open="isFilterOpen">
-      <DialogTrigger as-child>
-        <button
-          class="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600 transition hover:bg-gray-200"
-        >
-          Filter by
-          <ChevronDown class="size-4" />
-        </button>
-      </DialogTrigger>
-      <DialogContent class="max-w-[600px] rounded-3xl border border-gray-300 p-8 shadow-xl">
-        <DialogHeader class="flex items-center justify-between p-0">
-          <DialogTitle class="text-lg font-semibold text-gray-800">필터 설정</DialogTitle>
-        </DialogHeader>
-
-        <div class="mt-4 space-y-4">
-          <div class="filter-row">
-            <span class="filter-label">일자</span>
-            <div class="flex flex-wrap items-center gap-2">
-              <input v-model="filterForm.fromDate" type="date" class="filter-input w-36" />
-              <span class="text-gray-400">~</span>
-              <input v-model="filterForm.toDate" type="date" class="filter-input w-36" />
-            </div>
-          </div>
-
-          <div class="filter-row">
-            <span class="filter-label">테이블</span>
-            <div class="relative flex-1">
-              <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-              <input
-                v-model="filterForm.table"
-                placeholder="검색"
-                class="filter-input filter-input--icon w-full"
-                type="text"
-              />
-            </div>
-          </div>
-
-          <div class="filter-row">
-            <span class="filter-label">담당자</span>
-            <div class="relative flex-1">
-              <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-              <input
-                v-model="filterForm.user"
-                placeholder="검색"
-                class="filter-input filter-input--icon w-full"
-                type="text"
-              />
-            </div>
-          </div>
-
-          <div class="filter-row">
-            <span class="filter-label">속성</span>
-            <div class="filter-field">
-              <select v-model="filterForm.property" class="filter-input w-full">
-                <option value="">전체</option>
-                <option value="CREATE">CREATE</option>
-                <option value="UPDATE">UPDATE</option>
-                <option value="DELETE">DELETE</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter class="mt-6 flex justify-end">
-          <Button
-            class="rounded-full bg-[#5B6D4C] px-6 py-2 text-white hover:bg-[#4C5C3F]"
-            :disabled="isApplying"
-            @click="applyFilters"
-          >
-            조회
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-
-    <div class="rounded-xl border border-gray-200 bg-white">
-      <table class="w-full table-fixed">
-        <thead class="text-sm font-semibold text-gray-600">
-          <tr class="border-b border-gray-200">
-            <th class="px-4 py-3 text-center">일자</th>
-            <th class="px-4 py-3 text-center">테이블</th>
-            <th class="px-4 py-3 text-center">담당자</th>
-            <th class="px-4 py-3 text-center">속성</th>
-          </tr>
-        </thead>
-        <tbody v-if="!hasSearched">
-          <tr>
-            <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="4">
-              필터를 설정한 뒤 조회 버튼을 눌러주세요.
-            </td>
-          </tr>
-        </tbody>
-        <tbody v-else-if="isLogsLoading">
-          <tr>
-            <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="4">
-              로그 데이터를 불러오는 중입니다...
-            </td>
-          </tr>
-        </tbody>
-        <tbody v-else-if="logRows.length">
-          <tr
-            v-for="log in logRows"
-            :key="log.logId"
-            class="border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50"
-          >
-            <td class="px-4 py-3 text-center">{{ formatDate(log.createdAt) }}</td>
-            <td class="px-4 py-3 text-center">{{ log.entityName }}</td>
-            <td class="px-4 py-3 text-center">
-              {{ userNameMap[log.userId] ?? `사용자 #${log.userId}` }}
-            </td>
-            <td class="px-4 py-3 text-center font-semibold text-[#5B6D4C]">{{ log.actionType }}</td>
-          </tr>
-        </tbody>
-        <tbody v-else>
-          <tr>
-            <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="4">
-              조건에 맞는 로그가 없습니다.
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
-  </section>
+  </div>
 </template>
 
 <script setup>
-import { keepPreviousData, useQuery } from '@tanstack/vue-query';
-import { ChevronDown, Search } from 'lucide-vue-next';
-import { computed, reactive, ref, watch } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
-import { getLogList } from '@/apis/query-functions/log';
 import { getUser, getUserList } from '@/apis/query-functions/user';
+import useGetLogList from '@/apis/query-hooks/log/useGetLogList';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import FilterTab from '@/pages/production-report/log/FilterTab.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
+import formatDate from '@/utils/formatDate';
 
-const isFilterOpen = ref(false);
-const isApplying = ref(false);
-const hasSearched = ref(false);
+const route = useRoute();
+const router = useRouter();
 
-const defaultFilter = () => ({
-  fromDate: '',
-  toDate: '',
-  table: '',
-  user: '',
-  property: '',
-});
-
-const filterForm = reactive(defaultFilter());
-const activeFilters = reactive({
-  userId: null,
+const initialFilters = {
+  formDate: null,
+  toDate: null,
   entityName: '',
-  actionType: '',
-  fromDate: '',
-  toDate: '',
-});
+  userId: '',
+  actionType: null,
+};
 
-const queryParams = computed(() =>
-  buildQueryObject({
-    userId: activeFilters.userId,
-    entityName: activeFilters.entityName,
-    actionType: activeFilters.actionType,
-    fromDate: activeFilters.fromDate,
-    toDate: activeFilters.toDate,
-  }),
-);
+const hasSearched = ref(false);
 
 const {
   data: logList,
   isFetching: isLogsLoading,
-  refetch: refetchLogs,
-} = useQuery({
-  queryKey: ['logList', queryParams],
-  queryFn: () => getLogList(queryParams.value),
-  enabled: false,
-  placeholderData: keepPreviousData,
-});
+  filters,
+} = useGetLogList(initialFilters, hasSearched);
 
-const logRows = computed(() => logList.value ?? []);
+const resolveUserId = async keyword => {
+  const trimmed = (keyword ?? '').trim();
+
+  // 아무 것도 안 넣으면 필터 없음
+  if (!trimmed) return '';
+
+  // 전부 숫자면 그대로 userId로 사용
+  if (/^\d+$/.test(trimmed)) {
+    return trimmed; // 문자열로 두어도 백엔드에서 숫자로 파싱 가능할 듯
+  }
+
+  // 이름인 경우: 이름으로 유저 목록 조회
+  try {
+    const result = await getUserList({
+      userName: trimmed,
+    });
+
+    const matches = result?.content ?? [];
+    const total = result?.pageInfo?.totalElements ?? matches.length;
+
+    // 결과 없음
+    if (total === 0) {
+      toast.error('해당 이름의 사용자를 찾을 수 없습니다. userId로 다시 입력해주세요.');
+      return null;
+    }
+
+    // 동명이인 여러 명
+    if (total > 1) {
+      toast.error('동명이인이 여러 명입니다. userId로 검색해주세요.');
+      return null;
+    }
+
+    //  딱 한 명일 때 그 사람 id 사용
+    const user = matches[0];
+    return String(user.id);
+  } catch (e) {
+    console.error(e);
+    toast.error('사용자 조회 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    return null; // 에러 나면 검색 중단
+  }
+};
+
 const userNameMap = reactive({});
+// 중복 요청 방지용
 const pendingUserFetch = new Set();
 
 const fetchUserName = async userId => {
-  if (!userId || pendingUserFetch.has(userId)) return;
+  if (!userId) return;
+  // 이미 가지고 있거나 요청 중이면 스킵
+  if (userNameMap[userId] || pendingUserFetch.has(userId)) return;
+
   pendingUserFetch.add(userId);
   try {
     const user = await getUser(userId);
-    userNameMap[userId] = user.userName ?? `사용자 #${userId}`;
+    userNameMap[userId] = user?.userName ?? `사용자 #${userId}`;
   } catch {
     userNameMap[userId] = `사용자 #${userId}`;
   } finally {
@@ -220,108 +179,84 @@ const fetchUserName = async userId => {
 };
 
 watch(
-  logRows,
+  logList,
   logs => {
-    const missingIds = [
-      ...new Set(logs.map(log => log.userId).filter(id => id && !userNameMap[id])),
-    ];
-    missingIds.forEach(fetchUserName);
+    if (!logs) return;
+    logs.forEach(log => {
+      const id = log.userId;
+      if (id != null) {
+        fetchUserName(id);
+      }
+    });
   },
   { immediate: true },
 );
 
-const resolveUserId = async () => {
-  const trimmed = filterForm.user.trim();
-  if (!trimmed) return null;
+const onSearch = async newFilters => {
+  // 담당자 인풋에 들어온 값 (이름 or id)
+  const keyword = newFilters.userId;
 
-  if (/^\d+$/.test(trimmed)) {
-    return Number(trimmed);
+  // 이름/숫자 해석해서 실제 userId 결정
+  const resolvedUserId = await resolveUserId(keyword);
+
+  // null이면 (에러 or 동명이인) → 검색 중단
+  if (resolvedUserId === null) {
+    return;
   }
 
-  const userResult = await getUserList({ userName: trimmed, page: 0, size: 5 });
-  const matches = userResult?.content ?? [];
+  Object.assign(filters, {
+    ...filters,
+    ...newFilters,
+    userId: resolvedUserId, // 👈 백엔드로 나가는 건 항상 이 값
+  });
 
-  if (!matches.length) {
-    throw new Error('USER_NOT_FOUND');
-  }
-
-  const exactMatch = matches.find(user => user.userName === trimmed);
-
-  if (!exactMatch && matches.length > 1) {
-    throw new Error('USER_AMBIGUOUS');
-  }
-
-  const selected = exactMatch ?? matches[0];
-  filterForm.user = selected.userName;
-  return selected.id;
+  hasSearched.value = true;
+  syncQuery();
 };
 
-const applyFilters = async () => {
-  if (isApplying.value) return;
+const onReset = newFilters => {
+  Object.assign(filters, newFilters);
+  hasSearched.value = false;
+  router.replace({ path: route.path, query: {} });
+};
 
-  try {
-    isApplying.value = true;
-    let resolvedUserId = null;
+const syncQuery = () => {
+  const query = buildQueryObject({
+    ...filters,
+  });
 
-    try {
-      resolvedUserId = await resolveUserId();
-    } catch (error) {
-      if (error.message === 'USER_NOT_FOUND') {
-        toast.error('일치하는 담당자가 없습니다.');
-        return;
-      }
-      if (error.message === 'USER_AMBIGUOUS') {
-        toast.error('담당자 이름이 여러 명과 일치합니다. 전체 이름을 입력해주세요.');
-        return;
-      }
-      throw error;
-    }
-
-    Object.assign(activeFilters, {
-      userId: resolvedUserId,
-      entityName: filterForm.table.trim(),
-      actionType: filterForm.property,
-      fromDate: filterForm.fromDate,
-      toDate: filterForm.toDate,
-    });
-
-    hasSearched.value = true;
-    await refetchLogs();
-    isFilterOpen.value = false;
-  } catch (error) {
-    console.error(error);
-    toast.error('필터 적용 중 오류가 발생했습니다.');
-  } finally {
-    isApplying.value = false;
-  }
+  router.replace({ query });
 };
 
 const exportCsv = () => {
-  if (!hasSearched.value) {
-    toast.error('먼저 조회를 실행해주세요.');
+  // 아직 조회 전이면 막기
+  if (!hasSearched.value || !logList.value || logList.value.length === 0) {
     return;
   }
 
-  if (!logRows.value.length) {
-    toast.error('내보낼 로그가 없습니다.');
-    return;
-  }
+  const logs = logList.value ?? [];
 
+  // 헤더 정의
   const headers = ['일자', '테이블', '담당자', '속성'];
 
+  // CSV 특수문자 이스케이프 함수
   const escapeCsv = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
 
-  const rows = logRows.value.map(log => [
-    formatDate(log.createdAt),
-    log.entityName ?? '',
-    userNameMap[log.userId] ?? `사용자 #${log.userId}`,
-    log.actionType ?? '',
-  ]);
+  // 로그 → CSV row 변환
+  const rows = logs.map(log => {
+    const userLabel = userNameMap[log.userId]
+      ? `${userNameMap[log.userId]} (${log.userId})`
+      : `사용자 #${log.userId}`;
 
+    return [formatDate(log.createdAt), log.entityName ?? '', userLabel, log.actionType ?? ''];
+  });
+
+  // 최종 CSV 문자열 만들기
   const csvContent = [headers.map(escapeCsv).join(',')]
     .concat(rows.map(row => row.map(escapeCsv).join(',')))
     .join('\n');
 
+  // Blob + 다운로드 트리거
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -333,57 +268,15 @@ const exportCsv = () => {
   URL.revokeObjectURL(url);
 };
 
-const formatDate = value => {
-  if (!value) return '-';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '-';
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}.${month}.${day}`;
-};
+onMounted(() => {
+  // 쿼리스트링이 남아 쿼리 비우기
+  if (Object.keys(route.query).length > 0) {
+    router.replace({
+      path: route.path, // 현재 경로 유지
+      query: {},
+    });
+  }
+});
 </script>
 
-<style scoped>
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.filter-label {
-  width: 5rem;
-  border-radius: 0.5rem;
-  background-color: #5b6d4c;
-  padding: 0.5rem 0.75rem;
-  text-align: center;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.filter-input {
-  border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
-  background-color: #f7f8f9;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  color: #374151;
-}
-
-.filter-input:focus {
-  border-color: #5b6d4c;
-  background-color: #ffffff;
-  outline: none;
-}
-
-.filter-input--icon {
-  padding-left: 2.5rem;
-}
-
-.filter-field {
-  flex: 1;
-  width: 100%;
-}
-</style>
+<style scoped></style>

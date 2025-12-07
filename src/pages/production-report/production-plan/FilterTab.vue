@@ -117,7 +117,7 @@ const props = defineProps({
   filters: { type: Object, required: true },
 });
 
-const emit = defineEmits(['search']);
+const emit = defineEmits(['search', 'reset']);
 
 const localFilters = reactive({
   factoryCode: props.filters.factoryCode ?? null,
@@ -217,7 +217,7 @@ const resetFilters = () => {
   selectedFactoryId.value = null;
   selectedItemId.value = null;
 
-  emit('search', { ...localFilters });
+  emit('reset', { ...localFilters });
 };
 
 watch(
