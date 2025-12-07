@@ -36,6 +36,11 @@
               {{ defective.defectiveRate }}
             </TableCell>
           </TableRow>
+          <TableRow v-if="props.defectives.length === 0" class="border-b">
+            <TableCell :colspan="5" class="text-center py-8 text-gray-500">
+              불량 데이터가 없습니다.
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </div>
