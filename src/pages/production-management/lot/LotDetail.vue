@@ -16,9 +16,9 @@
         <h4 class="text-lg font-semibold">기본 정보</h4>
         <div class="grid gap-4 md:grid-cols-3">
           <div v-for="field in basicFields" :key="field.label" class="flex flex-col gap-2">
-            <span class="text-xs text-muted-foreground tracking-wide">{{ field.label }}</span>
+            <Label>{{ field.label }}</Label>
             <div
-              class="rounded-lg border bg-muted/15 px-4 py-3 text-base font-medium break-words"
+              class="border rounded-md px-3 py-2 text-sm"
               :class="field.isStatus ? field.statusWrapperClass : ''"
             >
               {{ displayValue(field.value) }}
@@ -31,8 +31,8 @@
         <h4 class="text-lg font-semibold">품목 및 수량</h4>
         <div class="grid gap-4 md:grid-cols-3">
           <div v-for="field in quantityFields" :key="field.label" class="flex flex-col gap-2">
-            <span class="text-xs text-muted-foreground tracking-wide">{{ field.label }}</span>
-            <div class="rounded-lg border bg-muted/15 px-4 py-3 text-base font-medium break-words">
+            <Label>{{ field.label }}</Label>
+            <div class="border rounded-md px-3 py-2 text-sm">
               {{ displayValue(field.value) }}
             </div>
           </div>
@@ -86,6 +86,7 @@ import { toast } from 'vue-sonner';
 
 import useGetLotDetail from '@/apis/query-hooks/lot/useGetLotDetail';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,

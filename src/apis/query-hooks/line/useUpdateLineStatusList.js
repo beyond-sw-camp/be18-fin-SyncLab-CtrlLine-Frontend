@@ -10,6 +10,7 @@ export default function useUpdateLineStatusList() {
     mutationFn: params => updateLineStatusList(params),
     onSuccess: () => {
       toast.success('라인 사용여부를 수정했습니다.');
+      queryClient.invalidateQueries({ queryKey: ['line'] });
       queryClient.invalidateQueries({ queryKey: ['lineList'] });
     },
     onError: error => {

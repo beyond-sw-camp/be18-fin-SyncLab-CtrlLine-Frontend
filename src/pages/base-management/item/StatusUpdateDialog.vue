@@ -1,9 +1,9 @@
 <template>
   <Dialog>
     <DialogTrigger as-child>
-      <Button size="sm" class="cursor-pointer w-[70px]" :disabled="!canEdit">
-        품목 사용여부 변경</Button
-      >
+      <Button size="sm" class="cursor-pointer w-[90px]" :disabled="!canEdit" v-if="isAdmin">
+        사용여부 변경
+      </Button>
     </DialogTrigger>
     <DialogContent class="rounded-2xl p-6 sm:max-w-[400px]">
       <DialogHeader>
@@ -56,6 +56,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { canView } from '@/utils/canView';
 
 const props = defineProps({
   rows: {
@@ -66,20 +67,18 @@ const props = defineProps({
 
 const emit = defineEmits(['updated']);
 const selectedStatus = ref(null);
-const userStore = {
-  userRole: 'ADMIN',
-};
 
 const { mutate: callUpdateItem } = useUpdateItemStatusList();
+const isAdmin = canView(['ADMIN']);
 
 const canEdit = computed(() => {
   if (props.rows.length === 0) return false;
 
-  const role = userStore.userRole;
-  if (role !== 'ADMIN') {
-    return false;
-  }
-  return true;
+  const first = props.rows[0].isActive;
+
+  const isSameState = props.rows.every(row => row.isActive === first);
+
+  return isSameState;
 });
 
 watch(

@@ -171,12 +171,12 @@ export const productionManagement = [
 export const productionReport = [
   {
     icon: 'ClipboardMinus',
-    label: '생산 계획 현황',
+    label: '생산계획 현황',
     to: '/production-report/production-plans/all',
   },
   {
     icon: 'FileChartLine',
-    label: '생산 실적 현황',
+    label: '생산실적 현황',
     to: '/production-report/production-performances/all',
   },
   { icon: 'BugPlay', label: '불량 현황', to: '/production-report/defectives/all' },

@@ -6,13 +6,10 @@
   <FilterTab :filters="filters" @search="onSearch" />
 
   <div class="flex flex-col">
-    <div class="min-h-[600px] flex-1">
+    <div class="min-h-[550px] flex-1">
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
-              <Checkbox class="size-4 border-[1.5px]" />
-            </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">전표번호</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">품목코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>
@@ -30,11 +27,9 @@
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(defective.planDefectiveId)"
           >
-            <TableCell lass="table-checkbox-cell py-3 whitespace-nowrap" @click.stop>
-              <Checkbox class="size-4 border--[1.5px]" />
-            </TableCell>
-
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableCell
+              class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
+            >
               {{ defective.defectiveDocNo }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
@@ -69,7 +64,6 @@ import { useRoute, useRouter } from 'vue-router';
 
 import useGetDefectiveList from '@/apis/query-hooks/defective/useGetDefectiveList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -135,6 +129,7 @@ watch(
     filters.itemName = newQuery.itemName ?? '';
     filters.lineName = newQuery.lineName ?? '';
   },
+  { immediate: true },
 );
 </script>
 

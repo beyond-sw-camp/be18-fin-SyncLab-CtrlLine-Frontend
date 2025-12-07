@@ -9,15 +9,14 @@
   <FilterTab :filters="filters" @search="onSearch" />
 
   <div class="flex flex-col">
-    <div class="min-h-[600px] flex-1">
+    <div class="min-h-[550px] flex-1">
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="flex items-center justify-center h-ful">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10" @click.stop>
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
-                @click.stop
                 class="size-4 border-[1.5px]"
               />
             </TableHead>
@@ -44,7 +43,7 @@
                 class="size-4 border-[1.5px]"
                 :modelValue="selectedRows.some(r => r.id === line.lineId)"
                 @update:modelValue="
-                  checked => toggleRow(checked, { id: line.lineId, status: line.isActive })
+                  checked => toggleRow(checked, { id: line.lineId, isActive: line.isActive })
                 "
               />
             </TableCell>
@@ -71,6 +70,11 @@
               >
                 {{ line.isActive ? '사용' : '미사용' }}
               </Badge>
+            </TableCell>
+          </TableRow>
+          <TableRow v-if="lineList.content.length === 0">
+            <TableCell colspan="6" class="text-center py-10 text-gray-500">
+              검색 결과가 없습니다.
             </TableCell>
           </TableRow>
         </TableBody>
@@ -118,9 +122,9 @@ const onReset = () => {
 
 const allRows = computed(
   () =>
-    lineList.value?.content?.map(item => ({
-      id: item.lineId,
-      status: item.isActive,
+    lineList.value?.content?.map(line => ({
+      id: line.lineId,
+      isActive: line.isActive,
     })) ?? [],
 );
 
@@ -181,6 +185,7 @@ watch(
     filters.userName = newQuery.userName ?? '';
     filters.userDepartment = newQuery.userDepartment ?? null;
   },
+  { immediate: true },
 );
 
 watch([page, filters], () => {

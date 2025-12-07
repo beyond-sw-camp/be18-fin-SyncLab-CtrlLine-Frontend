@@ -9,15 +9,14 @@
   <FilterTab :filters="filters" @search="onSearch" />
 
   <div class="flex flex-col">
-    <div class="min-h-[600px] flex-1">
+    <div class="min-h-[550px] flex-1">
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="flex items-center justify-center h-ful">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10" @click.stop>
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
-                @click.stop
                 class="size-4 border-[1.5px]"
               />
             </TableHead>
@@ -44,7 +43,8 @@
                 class="size-4 border-[1.5px]"
                 :modelValue="selectedRows.some(r => r.id === process.processId)"
                 @update:modelValue="
-                  checked => toggleRow(checked, { id: process.processId, status: process.isActive })
+                  checked =>
+                    toggleRow(checked, { id: process.processId, isActive: process.isActive })
                 "
               />
             </TableCell>
@@ -71,6 +71,11 @@
               >
                 {{ process.isActive ? '사용' : '미사용' }}
               </Badge>
+            </TableCell>
+          </TableRow>
+          <TableRow v-if="processList.content.length === 0">
+            <TableCell colspan="6" class="text-center py-10 text-gray-500">
+              검색 결과가 없습니다.
             </TableCell>
           </TableRow>
         </TableBody>
@@ -116,9 +121,9 @@ const onReset = () => {
 
 const allRows = computed(
   () =>
-    processList.value?.content?.map(item => ({
-      id: item.processId,
-      status: item.isActive,
+    processList.value?.content?.map(process => ({
+      id: process.processId,
+      isActive: process.isActive,
     })) ?? [],
 );
 
@@ -183,6 +188,7 @@ watch(
     filters.userName = newQuery.userName ?? null;
     filters.userDepartment = newQuery.userDepartment ?? null;
   },
+  { immediate: true },
 );
 
 watch([page, filters], () => {

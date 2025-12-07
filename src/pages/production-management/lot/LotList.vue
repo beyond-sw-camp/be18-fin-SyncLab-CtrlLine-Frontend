@@ -6,7 +6,7 @@
   <LotFilterTab :filters="filters" @search="onSearch" />
 
   <div class="flex flex-col">
-    <div class="min-h-[600px] flex-1">
+    <div class="min-h-[550px] flex-1">
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
@@ -23,7 +23,7 @@
           <TableRow
             v-for="lot in lotList.content"
             :key="lot.lotId ?? lot.lotNo"
-            class="hover:bg-gray-50 text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
+            class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goToDetail(lot.lotId)"
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
@@ -168,5 +168,4 @@ const calculateDefectiveRate = lot => {
   if (!lotQty) return 0;
   return (defectiveQty / lotQty) * 100;
 };
-
 </script>

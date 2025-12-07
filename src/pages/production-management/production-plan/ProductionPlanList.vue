@@ -26,7 +26,7 @@
   <FilterTab :filters="filters" @search="onSearch" />
 
   <div class="flex flex-col">
-    <div class="min-h-[600px] flex-1">
+    <div class="min-h-[550px] flex-1">
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
@@ -104,6 +104,11 @@
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ productionPlan.remark ?? '-' }}
+            </TableCell>
+          </TableRow>
+          <TableRow v-if="productionPlanList.content.length === 0">
+            <TableCell colspan="10" class="text-center py-10 text-gray-500">
+              검색 결과가 없습니다.
             </TableCell>
           </TableRow>
         </TableBody>
@@ -248,6 +253,7 @@ watch(
     filters.startTime = newQuery.startTime ?? null;
     filters.endTime = newQuery.endTime ?? null;
   },
+  { immediate: true },
 );
 
 // 페이지, 필터링, 상태 변경 시 체크 해제

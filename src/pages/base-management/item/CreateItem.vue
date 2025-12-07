@@ -122,6 +122,7 @@
   <div class="flex justify-end pt-6 pb-5">
     <Button
       type="submit"
+      size="sm"
       form="itemCreateForm"
       class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
     >

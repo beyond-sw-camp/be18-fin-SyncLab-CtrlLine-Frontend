@@ -10,15 +10,14 @@
   <FilterTab :filters="filters" @search="onSearch" />
 
   <div class="flex flex-col">
-    <div class="min-h-[600px] flex-1">
+    <div class="min-h-[550px] flex-1">
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="flex items-center justify-center h-ful">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10" @click.stop>
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
-                @click.stop
                 class="size-4 border-[1.5px]"
               />
             </TableHead>
@@ -46,7 +45,7 @@
                 class="size-4 border-[1.5px]"
                 :modelValue="selectedRows.some(r => r.id === item.id)"
                 @update:modelValue="
-                  checked => toggleRow(checked, { id: item.id, status: item.status })
+                  checked => toggleRow(checked, { id: item.id, isActive: item.isActive })
                 "
               />
             </TableCell>
@@ -63,7 +62,7 @@
               {{ item.itemUnit }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ item.itemStatus }}
+              {{ ITEM_STATUS_LABELS[item.itemStatus] }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
@@ -76,6 +75,11 @@
               >
                 {{ item.isActive ? '사용' : '미사용' }}
               </Badge>
+            </TableCell>
+          </TableRow>
+          <TableRow v-if="itemList.content.length === 0">
+            <TableCell colspan="7" class="text-center py-10 text-gray-500">
+              검색 결과가 없습니다.
             </TableCell>
           </TableRow>
         </TableBody>
@@ -101,6 +105,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ITEM_STATUS_LABELS } from '@/constants/enumLabels';
 import FilterTab from '@/pages/base-management/item/FilterTab.vue';
 import StatusUpdateDialog from '@/pages/base-management/item/StatusUpdateDialog.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
@@ -128,7 +133,7 @@ const allRows = computed(
   () =>
     itemList.value?.content?.map(item => ({
       id: item.id,
-      status: item.status,
+      isActive: item.isActive,
     })) ?? [],
 );
 
@@ -194,6 +199,7 @@ watch(
     filters.isActive =
       newQuery.isActive === 'true' ? true : newQuery.isActive === 'false' ? false : null;
   },
+  { immediate: true },
 );
 
 watch([page, filters], () => {

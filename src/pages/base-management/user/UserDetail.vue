@@ -129,7 +129,7 @@
               <FormItem>
                 <FormLabel>부서</FormLabel>
                 <FormControl>
-                  <Select v-bind="componentField">
+                  <Select v-bind="componentField" :disabled="!isEditableInput">
                     <SelectTrigger class="w-full">
                       <SelectValue placeholder="부서를 선택하세요." />
                     </SelectTrigger>
@@ -167,7 +167,7 @@
               <FormItem>
                 <FormLabel>직급</FormLabel>
                 <FormControl>
-                  <Select v-bind="componentField">
+                  <Select v-bind="componentField" :disabled="!isEditableInput">
                     <SelectTrigger class="w-full">
                       <SelectValue placeholder="직급을 선택하세요." />
                     </SelectTrigger>
@@ -190,7 +190,7 @@
               <FormItem>
                 <FormLabel>권한</FormLabel>
                 <FormControl>
-                  <Select v-bind="componentField">
+                  <Select v-bind="componentField" :disabled="!isEditableInput">
                     <SelectTrigger class="w-full">
                       <SelectValue placeholder="권한을 선택하세요." />
                     </SelectTrigger>
@@ -209,7 +209,7 @@
               <FormItem>
                 <FormLabel>상태</FormLabel>
                 <FormControl>
-                  <Select v-bind="componentField">
+                  <Select v-bind="componentField" :disabled="!isEditableInput">
                     <SelectTrigger class="w-full">
                       <SelectValue placeholder="재직 상태를 선택하세요" />
                     </SelectTrigger>
@@ -261,6 +261,7 @@
     <Button
       v-if="canView(['ADMIN'])"
       type="submit"
+      size="sm"
       form="userUpdateForm"
       class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
     >

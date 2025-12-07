@@ -9,34 +9,31 @@
 
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- 설비명 -->
-          <FilterInput label="설비명" v-model="localFilters.equipmentName" />
+          <div>
+            <Label class="text-xs">일자</Label>
+            <div class="flex flex-wrap gap-1 mt-1 items-center">
+              <div class="flex-1 min-w-[180px]">
+                <FilterInput type="date" v-model="localFilters.formDate" placeholder="시작일" />
+              </div>
 
-          <!-- 설비유형 -->
+              <span class="block text-gray-400 w-full lg:w-fit">~</span>
+
+              <div class="flex-1 min-w-[180px]">
+                <FilterInput type="date" v-model="localFilters.toDate" placeholder="종료일" />
+              </div>
+            </div>
+          </div>
+          <FilterInput label="테이블" v-model="localFilters.entityName" />
+          <FilterInput label="담당자" v-model="localFilters.userId" />
+
           <FilterSelect
-            label="설비유형"
-            v-model="localFilters.equipmentType"
+            label="속성"
+            v-model="localFilters.actionType"
             :options="[
               { value: null, label: '전체' },
-              { value: 'BEOL', label: 'BEOL' },
-              { value: 'CMIP', label: 'CMIP' },
-              { value: 'FEOL', label: 'FEOL' },
-            ]"
-          />
-
-          <!-- 담당자 -->
-          <FilterInput label="담당자" v-model="localFilters.userName" />
-
-          <!-- 담당부서 -->
-          <FilterSelect
-            label="담당부서"
-            v-model="localFilters.userDepartment"
-            :options="[
-              { value: null, label: '전체' },
-              { value: '영업 1팀', label: '영업 1팀' },
-              { value: '영업 2팀', label: '영업 2팀' },
-              { value: '생산 1팀', label: '생산 1팀' },
-              { value: '생산 2팀', label: '생산 2팀' },
+              { value: 'CREATE', label: 'CREATE' },
+              { value: 'UPDATE', label: 'UPDATE' },
+              { value: 'DELETE', label: 'DELETE' },
             ]"
           />
         </div>
@@ -75,19 +72,21 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 const props = defineProps({
   filters: { type: Object, required: true },
+  userOptions: { type: Array, default: () => [] },
 });
 
-const emit = defineEmits(['search']);
+const emit = defineEmits(['search', 'reset']);
 
-// 설비용 필터 구조
 const localFilters = reactive({
-  equipmentName: props.filters.equipmentName ?? '',
-  equipmentType: props.filters.equipmentType ?? null,
-  userName: props.filters.userName ?? '',
-  userDepartment: props.filters.userDepartment ?? null,
+  formDate: props.filters.formDate ?? null,
+  toDate: props.filters.toDate ?? null,
+  entityName: props.filters.entityName ?? '',
+  userId: props.filters.userId ?? '',
+  actionType: props.filters.actionType ?? null,
 });
 
 watch(
@@ -98,19 +97,19 @@ watch(
   { deep: true },
 );
 
-
 const applyFilters = () => {
   emit('search', { ...localFilters });
 };
 
-// 초기화
 const resetFilters = () => {
+  // 초기화하고 바로 조회
   Object.assign(localFilters, {
-    equipmentName: '',
-    equipmentType: null,
-    userName: '',
-    userDepartment: null,
+    formDate: null,
+    toDate: null,
+    entityName: '',
+    userId: '',
+    actionType: null,
   });
-  emit('search', { ...localFilters });
+  emit('reset', { ...localFilters });
 };
 </script>

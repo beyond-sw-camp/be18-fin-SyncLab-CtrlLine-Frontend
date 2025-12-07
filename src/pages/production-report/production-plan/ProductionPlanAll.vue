@@ -1,13 +1,15 @@
 <template>
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 현황</h3>
-    <Button size="sm" class="cursor-pointer w-[70px]" @click="exportCsv"> Export </Button>
+    <Button size="sm" class="cursor-pointer w-[70px]" @click="exportCsv" :disabled="!hasSearched">
+      Export
+    </Button>
   </div>
 
-  <FilterTab :filters="filters" @search="onSearch" />
+  <FilterTab :filters="filters" @search="onSearch" @reset="onReset" />
 
   <div class="flex flex-col">
-    <div class="min-h-[600px] flex-1">
+    <div class="min-h-[550px] flex-1">
       <div class="overflow-x-auto">
         <Table class="w-full">
           <TableHeader class="border-b-2 border-primary">
@@ -47,7 +49,7 @@
             </TableRow>
           </TableHeader>
 
-          <TableBody v-if="productionPlanAll && productionPlanAll">
+          <TableBody v-if="hasSearched && productionPlanAll && productionPlanAll.length">
             <TableRow
               v-for="(productionPlan, index) in productionPlanAll"
               :key="index"
@@ -94,9 +96,18 @@
                 {{ productionPlan.salesManagerName }}
               </TableCell>
             </TableRow>
-            <TableRow v-if="productionPlanAll.length === 0">
+          </TableBody>
+          <TableBody v-else-if="hasSearched && productionPlanAll && !productionPlanAll.length">
+            <TableRow>
               <TableCell colspan="12" class="text-center py-10 text-gray-500">
                 검색 결과가 없습니다.
+              </TableCell>
+            </TableRow>
+          </TableBody>
+          <TableBody v-else>
+            <TableRow>
+              <TableCell colspan="12" class="text-center py-10 text-gray-500">
+                필터를 설정한 뒤 조회 버튼을 눌러주세요.
               </TableCell>
             </TableRow>
           </TableBody>
@@ -107,7 +118,7 @@
 </template>
 
 <script setup>
-import { watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetProductionPlanAll from '@/apis/query-hooks/production-plan/useGetProductionPlanAll';
@@ -125,25 +136,35 @@ import { STATUS_CLASSES } from '@/constants/productionPlanStatus';
 import FilterTab from '@/pages/production-report/production-plan/FilterTab.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 import formatDate from '@/utils/formatDate';
+
 const route = useRoute();
 const router = useRouter();
 
 const initialFilters = {
-  factoryName: route.query.factoryName || '',
-  lineName: route.query.lineName || '',
-  salesManagerName: route.query.salesManagerName || '',
-  productionManagerName: route.query.productionManagerName || '',
-  itemCode: route.query.itemCode || '',
-  dueDate: route.query.dueDate || null,
-  startTime: route.query.startTime || null,
-  endTime: route.query.endTime || null,
+  factoryName: '',
+  lineName: '',
+  salesManagerName: '',
+  productionManagerName: '',
+  itemCode: '',
+  dueDate: null,
+  startTime: null,
+  endTime: null,
 };
 
-const { data: productionPlanAll, filters } = useGetProductionPlanAll(initialFilters);
+const hasSearched = ref(false);
+
+const { data: productionPlanAll, filters } = useGetProductionPlanAll(initialFilters, hasSearched);
 
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
+  hasSearched.value = true; // ← 여기 중요!
   syncQuery();
+};
+
+const onReset = newFilters => {
+  Object.assign(filters, newFilters);
+  hasSearched.value = false;
+  router.replace({ path: route.path, query: {} });
 };
 
 const syncQuery = () => {
@@ -210,19 +231,15 @@ const exportCsv = () => {
   URL.revokeObjectURL(url);
 };
 
-watch(
-  () => route.query,
-  newQuery => {
-    filters.factoryName = newQuery.factoryName ?? null;
-    filters.salesManagerName = newQuery.salesManagerName ?? '';
-    filters.productionManagerName = newQuery.productionManagerName ?? '';
-    filters.itemCode = newQuery.itemCode ?? '';
-    filters.lineName = newQuery.lineName ?? null;
-    filters.dueDate = newQuery.dueDate ?? null;
-    filters.startTime = newQuery.startTime ?? null;
-    filters.endTime = newQuery.endTime ?? null;
-  },
-);
+onMounted(() => {
+  // 쿼리스트링이 남아 쿼리 비우기
+  if (Object.keys(route.query).length > 0) {
+    router.replace({
+      path: route.path, // 현재 경로 유지
+      query: {},
+    });
+  }
+});
 </script>
 
 <style scoped></style>

@@ -61,7 +61,7 @@
         <FormField v-slot="{ componentField, errorMessage }" name="isActive">
           <FormItem>
             <FormLabel>공장 사용여부</FormLabel>
-            <FormControl>
+            <FormControl :disabled="!isAdmin">
               <RadioGroup v-bind="componentField" class="flex">
                 <div class="flex items-center space-x-2">
                   <RadioGroupItem value="true" id="r1" />
@@ -80,7 +80,7 @@
       </div>
     </Form>
   </div>
-  <div class="flex justify-end pt-6 pb-5">
+  <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
     <Button
       type="submit"
       form="factoryUpdateForm"
@@ -101,11 +101,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { canView } from '@/utils/canView';
 
 const route = useRoute();
 
 const { data: factoryDetail } = useGetFactory(route.params.factoryCode);
 const { mutate: updateFactoryStatus } = useUpdateFactoryStatus(route.params.factoryCode);
+const isAdmin = canView(['ADMIN']);
 
 const onSubmit = values => {
   const params = {
