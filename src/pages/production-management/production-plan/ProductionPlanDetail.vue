@@ -2,6 +2,23 @@
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 상세 조회</h3>
     <div class="flex gap-2">
+      <div class="flex gap-2 items-center" v-if="isAdmin">
+        <label class="flex gap-1 items-center text-sm font-medium">
+          우선작업
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+              <TooltipContent side="top">
+                <p>우선작업은 관리자에 의해 우선 실행되는 주문입니다.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </label>
+        <FormField name="isEmergent" v-slot="{ value, setValue }">
+          <Switch :modelValue="value" @update:modelValue="setValue" />
+        </FormField>
+      </div>
+
       <Badge v-if="productionPlanDetail" variant="secondary">
         {{ productionPlanDetail.planDocumentNo }}</Badge
       >
@@ -81,35 +98,36 @@
           </div>
 
           <div class="order-7 md:order-0">
-            <FormField name="productionManagerNo" v-slot="{ componentField, errorMessage }">
-              <FormItem>
-                <FormLabel>
-                  생산담당자
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
-                      <TooltipContent side="top">
-                        <p>라인 담당자가 생산담당자로 자동 지정됩니다.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </FormLabel>
-                <FormControl class="w-full truncate min-w-0">
-                  <div class="flex gap-2 items-center">
-                    <Input
-                      type="text"
-                      placeholder="생산담당자는 자동 지정됩니다."
-                      readonly
-                      v-model="lineDetail.userName"
-                      class="text-sm"
-                    />
-                    <Input
-                      type="text"
-                      v-bind="componentField"
-                      class="max-w-30 bg-gray-100 text-sm"
-                      readonly
-                    />
-                  </div>
+            <FormField
+              name="productionManagerNo"
+              v-slot="{ value, componentField, setValue, errorMessage }"
+            >
+              <FormItem class="w-full">
+                <FormLabel>생산담당자</FormLabel>
+                <FormControl class="w-full min-w-0">
+                  <UpdateAutoCompleteSelect
+                    :key="`productionManagerNo-${productionPlanDetail?.productionManagerNo}`"
+                    label="생산담당자"
+                    :value="value"
+                    :componentField="componentField"
+                    :setValue="setValue"
+                    :fetchList="
+                      () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })
+                    "
+                    keyField="empNo"
+                    nameField="userName"
+                    :fields="[
+                      'empNo',
+                      'userName',
+                      'userEmail',
+                      'userDepartment',
+                      'userPhoneNumber',
+                      'userStatus',
+                      'userRole',
+                    ]"
+                    :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                    :initialText="productionPlanDetail.productionManagerName"
+                  />
                   <p class="text-red-500 text-xs">{{ errorMessage }}</p>
                 </FormControl>
               </FormItem>
@@ -185,7 +203,9 @@
                     :value="value"
                     :componentField="componentField"
                     :setValue="setValue"
-                    :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                    :fetchList="
+                      () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })
+                    "
                     keyField="empNo"
                     nameField="userName"
                     :fields="[
@@ -316,6 +336,8 @@
           :lineCode="productionPlanDetail.lineCode"
           mode="detail"
           @updateStartEndTime="onStartTimeEndTimeChanged"
+          :updatedStartTime="form.values.startTime"
+          :updatedEndTime="form.values.endTime"
         />
       </form>
     </fieldset>
@@ -324,6 +346,7 @@
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
+import { useDebounceFn } from '@vueuse/core';
 import { InfoIcon } from 'lucide-vue-next';
 import { useForm } from 'vee-validate';
 import { computed, ref, watch } from 'vue';
@@ -333,6 +356,7 @@ import { z } from 'zod';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
+import useCreateProductionPlanEndTime from '@/apis/query-hooks/production-plan/useCreateProductionPlanEndTime';
 import useDeleteProductionPlan from '@/apis/query-hooks/production-plan/useDeleteProductionPlan';
 import useGetProductionPlan from '@/apis/query-hooks/production-plan/useGetProductionPlan';
 import useUpdateProductionPlan from '@/apis/query-hooks/production-plan/useUpdateProductionPlan';
@@ -349,6 +373,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
@@ -483,6 +508,7 @@ const shouldDisableStatus = value => {
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 const { mutate: updateProductionPlan } = useUpdateProductionPlan(route.params.productionPlanId);
+const { mutate: updateEndTime } = useCreateProductionPlanEndTime();
 
 function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
@@ -491,7 +517,6 @@ function onFactorySelected(factoryCode) {
   selectedItemId.value = null;
   form.setFieldValue('itemCode', '', false);
   form.setFieldValue('lineCode', '', false);
-  form.setFieldValue('productionManagerNo', '', false);
   itemDetail.value = {};
   lineDetail.value = {};
 }
@@ -505,7 +530,6 @@ function onItemSelected(item) {
 function onItemCleared() {
   selectedItemId.value = null;
   form.setFieldValue('lineCode', '', false);
-  form.setFieldValue('productionManagerNo', '', false);
   itemDetail.value = {};
   lineDetail.value = {};
 }
@@ -515,19 +539,14 @@ function onLineSelected(lineCode) {
 
   if (selected) {
     lineDetail.value = selected;
-    form.setFieldValue('productionManagerNo', selected.empNo, false);
   } else {
     lineDetail.value = {};
-    form.setFieldValue('productionManagerNo', '', false);
   }
 }
 
 function onStartTimeEndTimeChanged(ev) {
   const start = formatDate(ev.StartTime, 'local-datetime');
-  const end = formatDate(ev.EndTime, 'local-datetime');
-
   form.setFieldValue('startTime', start);
-  form.setFieldValue('endTime', end);
 }
 
 const onSubmit = form.handleSubmit(values => {
@@ -545,6 +564,31 @@ const onSubmit = form.handleSubmit(values => {
   };
 
   updateProductionPlan(params);
+});
+
+const debouncedUpdateEndTime = useDebounceFn(({ startTime, plannedQty, lineCode }) => {
+  updateEndTime(
+    // @ts-ignore
+    { startTime, plannedQty, lineCode },
+    {
+      onSuccess: data => {
+        if (!data) return;
+        form.setFieldValue('endTime', data.endTime, false);
+      },
+    },
+  );
+}, 400);
+
+watch([() => form.values.startTime, () => form.values.plannedQty], ([startTime, plannedQty]) => {
+  const formattedStartTime = formatDate(startTime, 'local-datetime');
+
+  if (!startTime || !plannedQty || !lineDetail.value?.lineCode || !formattedStartTime) return;
+
+  debouncedUpdateEndTime({
+    startTime: formattedStartTime,
+    plannedQty,
+    lineCode: lineDetail.value.lineCode,
+  });
 });
 
 watch(
@@ -581,11 +625,7 @@ watch(
       lineCode: val.lineCode,
       lineName: val.lineName,
       userName: val.productionManagerName, // 생산담당자명 표시
-      empNo: val.productionManagerNo,
     };
-
-    form.setFieldValue('itemCode', val.itemCode);
-    form.setFieldValue('salesManagerNo', val.salesManagerNo);
   },
   { immediate: true },
 );

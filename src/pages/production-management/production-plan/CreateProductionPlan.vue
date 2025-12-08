@@ -449,7 +449,6 @@ watch(
   ],
   ([latestEndTime, earliestStartTime, isEmergent]) => {
     const timeToUse = isEmergent ? earliestStartTime : latestEndTime;
-    console.log(isEmergent);
     if (!timeToUse) return;
 
     form.setFieldValue('startTime', formatDate(timeToUse, 'datetime-local'));
@@ -473,8 +472,6 @@ watch([() => form.values.startTime, () => form.values.plannedQty], ([startTime, 
   const formattedStartTime = formatDate(startTime, 'local-datetime');
 
   if (!startTime || !plannedQty || !lineDetail.value?.lineCode || !formattedStartTime) return;
-
-  console.log(typeof formattedStartTime);
 
   debouncedUpdateEndTime({
     startTime: formattedStartTime,

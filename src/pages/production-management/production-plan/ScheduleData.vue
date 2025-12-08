@@ -82,6 +82,8 @@ const props = defineProps({
   draftEndTime: String,
   draftItem: Object,
   draftQty: Number,
+  updatedStartTime: String,
+  updatedEndTime: String,
 });
 
 const userStore = useUserStore();
@@ -261,7 +263,7 @@ const makeEvent = ev => {
 
 const selectedEvents = computed(() => {
   const base = selectedLineData.value?.map(makeEvent) ?? [];
-  if (draftEvent.value && props.lineCode) {
+  if (props.mode === 'create' && draftEvent.value && props.lineCode) {
     base.push(draftEvent.value);
   }
   return base;
@@ -269,7 +271,7 @@ const selectedEvents = computed(() => {
 
 const availableEvents = computed(() => {
   const base = availableLineData.value?.map(makeEvent) ?? [];
-  if (draftEvent.value && props.lineCode) {
+  if (props.mode === 'create' && draftEvent.value && props.lineCode) {
     base.push(draftEvent.value);
   }
   return base;
@@ -495,6 +497,34 @@ function onSelectedDragStart(args) {
 function onDragStart(args) {
   args.cancel = true;
 }
+
+watch(
+  () => props.updatedEndTime,
+  (newEndTime, oldEndTime) => {
+    // NewEndTime이 없거나 변경되지 않았으면 무시
+    if (!newEndTime || newEndTime === oldEndTime) return;
+
+    // 상세 조회 모드가 아니거나, 상세 ID가 없으면 무시
+    if (props.mode !== 'detail' || !props.productionPlanDetailId) return;
+
+    // 데이터 원본을 업데이트하고 스케줄러를 새로고침
+    const updatedEvent = {
+      Id: props.productionPlanDetailId,
+      StartTime: new Date(props.updatedStartTime), // 시작 시간도 함께 사용
+      EndTime: new Date(newEndTime),
+      LineCode: props.lineCode,
+    };
+
+    // 일정 밀어내는 함수 호출
+    processEventPushLogic(updatedEvent);
+
+    nextTick(() => {
+      selectedScheduleRef.value?.ej2Instances?.refreshEvents();
+      availableScheduleRef.value?.ej2Instances?.refreshEvents();
+    });
+  },
+  { immediate: false }, // 초기에는 실행하지 않음
+);
 </script>
 
 <style>

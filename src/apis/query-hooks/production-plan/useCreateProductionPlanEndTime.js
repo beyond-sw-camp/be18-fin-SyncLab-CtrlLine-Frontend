@@ -10,7 +10,6 @@ export default function useCreateProductionPlanEndTime() {
     mutationFn: params => createProductionPlanEndTime(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['productionPlanScheduleList'] });
-      queryClient.invalidateQueries({ queryKey: ['productionPlanAll'] });
     },
     onError: error => {
       toast.error(error.response.data.message);
