@@ -9,43 +9,80 @@
 
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FilterInput label="전표번호" v-model="localFilters.productionPlanDocumentNo" />
-          <FilterInput label="공장코드" v-model="localFilters.factoryCode" />
-          <FilterInput label="라인코드" v-model="localFilters.lineCode" />
-          <FilterInput label="품목코드" v-model="localFilters.itemCode" />
-          <FilterInput label="영업 담당자" v-model="localFilters.salesManagerNo" />
-          <FilterInput label="생산 담당자" v-model="localFilters.productionManagerNo" />
+          <FilterSelect label="공장" v-model="localFilters.factoryCode" :options="factoryOptions" />
+          <FilterInput label="납기일자" type="date" v-model="localFilters.dueDate" />
 
-          <!-- ────────── 투입수량 ────────── -->
           <div>
-            <Label class="text-xs">투입수량</Label>
-            <div class="flex flex-wrap gap-1 mt-1 items-center">
-              <FilterInput
-                type="number"
-                v-model="localFilters.minTotalQty"
-                placeholder="최소"
-                class="flex-1 min-w-[180px]"
-              />
-              <span class="block text-gray-400 w-full lg:w-fit">~</span>
-
-              <FilterInput
-                type="number"
-                v-model="localFilters.maxTotalQty"
-                placeholder="최대"
-                class="flex-1 min-w-[180px]"
-              />
-            </div>
+            <Label class="text-xs">품목명</Label>
+            <CreateAutoCompleteSelect
+              label="품목명"
+              :value="localFilters.itemCode"
+              :setValue="setItemCodeFilter"
+              :fetchList="() => useGetItemList({ isActive: true })"
+              keyField="itemCode"
+              nameField="itemName"
+              :fields="[
+                'itemCode',
+                'itemName',
+                'itemSpecification',
+                'itemUnit',
+                'itemStatus',
+                'isActive',
+              ]"
+              :tableHeaders="['품목코드', '품목명', '규격', '단위', '품목구분', '사용여부']"
+              :emitFullItem="true"
+              @selectedFullItem="onItemSelected"
+              @clear="onItemCleared"
+              class="h-7 placeholder:text-xs text-xs"
+              inputClass="h-7 text-xs placeholder:text-xs"
+              iconClass="!w-3 !h-3"
+            />
           </div>
 
-          <!-- ────────── 실적수량 ────────── -->
+          <FilterInput label="생산담당자" v-model="localFilters.productionManagerName" />
+
+          <FilterSelect label="라인" v-model="localFilters.lineCode" :options="lineOptions" />
+
+          <FormField
+            name="salesManagerNo"
+            v-slot="{ value, componentField, setValue, errorMessage }"
+          >
+            <FormItem class="w-full">
+              <FormLabel>영업담당자</FormLabel>
+              <FormControl class="w-full min-w-0">
+                <UpdateAutoCompleteSelect
+                  :key="`salesManagerNo-${productionPerformanceDetail?.salesManagerNo}`"
+                  label="영업담당자"
+                  :value="value"
+                  :componentField="componentField"
+                  :setValue="setValue"
+                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                  keyField="empNo"
+                  nameField="userName"
+                  :fields="[
+                    'empNo',
+                    'userName',
+                    'userEmail',
+                    'userDepartment',
+                    'userPhoneNumber',
+                    'userStatus',
+                    'userRole',
+                  ]"
+                  :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                  :initialText="productionPerformanceDetail.salesManagerName"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
           <div>
-            <Label class="text-xs">실적수량</Label>
+            <Label class="text-xs">생산기간</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <div class="flex-1 min-w-[180px]">
                 <FilterInput
-                  type="number"
-                  v-model="localFilters.minPerformanceQty"
-                  placeholder="최소"
+                  type="datetime-local"
+                  v-model="localFilters.startTime"
+                  placeholder="시작일"
                 />
               </div>
 
@@ -53,102 +90,12 @@
 
               <div class="flex-1 min-w-[180px]">
                 <FilterInput
-                  type="number"
-                  v-model="localFilters.maxPerformanceQty"
-                  placeholder="최대"
+                  type="datetime-local"
+                  v-model="localFilters.endTime"
+                  placeholder="종료일"
                 />
               </div>
             </div>
-          </div>
-
-          <!-- ────────── 불량률 ────────── -->
-          <div>
-            <Label class="text-xs">불량률</Label>
-            <div class="flex flex-wrap gap-1 mt-1 items-center">
-              <FilterInput
-                type="number"
-                v-model="localFilters.minDefectRate"
-                placeholder="최소"
-                class="flex-1 min-w-[180px]"
-              />
-
-              <span class="block text-gray-400 w-full lg:w-fit">~</span>
-
-              <FilterInput
-                type="number"
-                v-model="localFilters.maxDefectRate"
-                placeholder="최대"
-                class="flex-1 min-w-[180px]"
-              />
-            </div>
-          </div>
-
-          <!-- ────────── 생산 시작시각 ────────── -->
-          <div>
-            <Label class="text-xs">생산 시작시각</Label>
-            <div class="flex flex-wrap gap-1 mt-1 items-center">
-              <FilterInput
-                type="datetime-local"
-                v-model="localFilters.startTimeFrom"
-                class="flex-1 min-w-[180px]"
-                placeholder="From"
-              />
-              <span class="block text-gray-400 w-full lg:w-fit">~</span>
-              <FilterInput
-                type="datetime-local"
-                v-model="localFilters.startTimeTo"
-                class="flex-1 min-w-[180px]"
-                placeholder="To"
-              />
-            </div>
-          </div>
-
-          <!-- ────────── 생산 종료시각 ────────── -->
-          <div>
-            <Label class="text-xs">생산 종료시각</Label>
-            <div class="flex flex-wrap gap-1 mt-1 items-center">
-              <FilterInput
-                type="datetime-local"
-                v-model="localFilters.endTimeFrom"
-                class="flex-1 min-w-[180px]"
-                placeholder="From"
-              />
-              <span class="block text-gray-400 w-full lg:w-fit">~</span>
-              <FilterInput
-                type="datetime-local"
-                v-model="localFilters.endTimeTo"
-                class="flex-1 min-w-[180px]"
-                placeholder="To"
-              />
-            </div>
-          </div>
-
-          <!-- ────────── 납기일자 ────────── -->
-          <div>
-            <Label class="text-xs">납기일자</Label>
-            <div class="flex flex-wrap gap-1 mt-1 items-center">
-              <FilterInput
-                type="date"
-                v-model="localFilters.dueDateFrom"
-                class="flex-1 min-w-[180px]"
-                placeholder="From"
-              />
-              <span class="block text-gray-400 w-full lg:w-fit">~</span>
-              <FilterInput
-                type="date"
-                v-model="localFilters.dueDateTo"
-                class="flex-1 min-w-[180px]"
-                placeholder="To"
-              />
-            </div>
-          </div>
-          <!-- ────────── 비고 ────────── -->
-          <FilterInput label="비고" v-model="localFilters.remark" />
-
-          <!-- ────────── 삭제 여부 ────────── -->
-          <div class="flex items-center gap-2">
-            <Label class="text-xs">삭제 여부</Label>
-            <input type="checkbox" v-model="localFilters.isDeleted" class="size-4" />
           </div>
         </div>
 
@@ -175,14 +122,19 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 
+import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
+import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
+import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
+import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import FilterInput from '@/components/filter/FilterInput.vue';
+import FilterSelect from '@/components/filter/FilterSelect.vue';
 import {
   Accordion,
-  AccordionContent,
   AccordionItem,
   AccordionTrigger,
+  AccordionContent,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -191,38 +143,107 @@ const props = defineProps({
   filters: { type: Object, required: true },
 });
 
-const emit = defineEmits(['search']);
+const emit = defineEmits(['search', 'reset']);
 
 const localFilters = reactive({
-  productionPlanDocumentNo: props.filters.productionPlanDocumentNo ?? '',
-  lotNo: props.filters.lotNo ?? '',
-  factoryCode: props.filters.factoryCode ?? '',
+  factoryCode: props.filters.factoryCode ?? null,
   lineCode: props.filters.lineCode ?? '',
+  lineName: props.filters.lineName ?? '',
   itemCode: props.filters.itemCode ?? '',
-  salesManagerNo: props.filters.salesManagerNo ?? '',
-  productionManagerNo: props.filters.productionManagerNo ?? '',
-
-  minTotalQty: props.filters.minTotalQty ?? null,
-  maxTotalQty: props.filters.maxTotalQty ?? null,
-
-  minPerformanceQty: props.filters.minPerformanceQty ?? null,
-  maxPerformanceQty: props.filters.maxPerformanceQty ?? null,
-
-  minDefectRate: props.filters.minDefectRate ?? null,
-  maxDefectRate: props.filters.maxDefectRate ?? null,
-
-  startTimeFrom: props.filters.startTimeFrom ?? null,
-  startTimeTo: props.filters.startTimeTo ?? null,
-
-  endTimeFrom: props.filters.endTimeFrom ?? null,
-  endTimeTo: props.filters.endTimeTo ?? null,
-
-  dueDateFrom: props.filters.dueDateFrom ?? null,
-  dueDateTo: props.filters.dueDateTo ?? null,
-
-  remark: props.filters.remark ?? '',
-  isDeleted: props.filters.isDeleted ?? null,
+  itemName: props.filters.itemName ?? '',
+  productionManagerName: props.filters.productionManagerName ?? '',
+  salesManagerName: props.filters.salesManagerName ?? '',
+  dueDate: props.filters.dueDate ?? null,
+  startTime: props.filters.startTime ?? null,
+  endTime: props.filters.endTime ?? null,
 });
+
+const selectedFactoryId = ref(null);
+const selectedItemId = ref(null);
+
+const { data: factoryList } = useGetFactoryList();
+const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
+
+const factoryOptions = computed(() => {
+  if (!factoryList.value || !factoryList.value.content)
+    return [{ value: null, label: '전체', id: null }];
+
+  return [
+    { value: null, label: '전체', id: null },
+    ...factoryList.value.content.map(factory => ({
+      value: factory.factoryCode,
+      label: factory.factoryCode,
+      id: factory.factoryId,
+    })),
+  ];
+});
+
+const lineOptions = computed(() => {
+  if (!lineList.value || !lineList.value.content) {
+    return [{ value: null, label: '전체' }];
+  }
+
+  if (selectedFactoryId.value === null || localFilters.factoryCode === null) {
+    // 라인 이름만 추출하여 Set으로 중복을 제거 (9개 -> 3개 이름만)
+    const uniqueLineNames = new Set(lineList.value.content.map(line => line.lineCode));
+
+    // 이름만 포함하는 간결한 옵션 목록을 생성
+    const simpleOptions = Array.from(uniqueLineNames).map(name => ({
+      value: name,
+      label: name,
+    }));
+
+    return [{ value: null, label: '전체' }, ...simpleOptions];
+  }
+
+  return [
+    { value: null, label: '전체' },
+    ...lineList.value.content.map(line => ({
+      value: `${line.lineCode}`,
+      label: `${line.lineCode}`,
+    })),
+  ];
+});
+
+function onItemSelected(item) {
+  selectedItemId.value = item.id;
+}
+
+function onItemCleared() {
+  selectedItemId.value = null;
+}
+
+const setItemCodeFilter = newCode => {
+  localFilters.itemCode = newCode;
+  localFilters.itemName = '';
+
+  if (!newCode) {
+    localFilters.itemName = '';
+    selectedItemId.value = null;
+  }
+};
+
+const applyFilters = () => {
+  emit('search', { ...localFilters });
+};
+
+const resetFilters = () => {
+  Object.assign(localFilters, {
+    factoryCode: null,
+    lineCode: '',
+    salesManagerName: '',
+    productionManagerName: '',
+    itemCode: '',
+    dueDate: null,
+    startTime: null,
+    endTime: null,
+  });
+
+  selectedFactoryId.value = null;
+  selectedItemId.value = null;
+
+  emit('reset', { ...localFilters });
+};
 
 watch(
   () => props.filters,
@@ -231,51 +252,6 @@ watch(
   },
   { deep: true },
 );
-
-const normalizeNumber = value => {
-  if (value === '' || value === null || value === undefined) return null;
-  const parsed = Number(value);
-  return Number.isNaN(parsed) ? null : parsed;
-};
-
-const applyFilters = () => {
-  emit('search', {
-    ...localFilters,
-    minTotalQty: normalizeNumber(localFilters.minTotalQty),
-    maxTotalQty: normalizeNumber(localFilters.maxTotalQty),
-    minPerformanceQty: normalizeNumber(localFilters.minPerformanceQty),
-    maxPerformanceQty: normalizeNumber(localFilters.maxPerformanceQty),
-    minDefectRate: normalizeNumber(localFilters.minDefectRate),
-    maxDefectRate: normalizeNumber(localFilters.maxDefectRate),
-  });
-};
-
-// 초기화
-const resetFilters = () => {
-  Object.assign(localFilters, {
-    productionPlanDocumentNo: '',
-    lotNo: '',
-    factoryCode: '',
-    lineCode: '',
-    itemCode: '',
-    salesManagerNo: '',
-    productionManagerNo: '',
-    minTotalQty: null,
-    maxTotalQty: null,
-    minPerformanceQty: null,
-    maxPerformanceQty: null,
-    minDefectRate: null,
-    maxDefectRate: null,
-    startTimeFrom: null,
-    startTimeTo: null,
-    endTimeFrom: null,
-    endTimeTo: null,
-    dueDateFrom: null,
-    dueDateTo: null,
-    remark: '',
-    isDeleted: null,
-  });
-};
 </script>
 
 <style scoped></style>

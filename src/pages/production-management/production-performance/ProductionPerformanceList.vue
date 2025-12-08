@@ -31,7 +31,7 @@
           <TableRow
             v-for="(performance, index) in productionPerformanceList.content"
             :key="index"
-            class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300"
+            class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300 cursor-pointer"
             @click="goDetail(performance.id)"
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">

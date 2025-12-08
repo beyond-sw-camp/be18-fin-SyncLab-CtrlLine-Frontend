@@ -27,7 +27,9 @@
               <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장명 </TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden"> 라인명 </TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목명 </TableHead>
-              <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품코드 </TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden">
+                품목코드
+              </TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">
                 생산계획수량
               </TableHead>

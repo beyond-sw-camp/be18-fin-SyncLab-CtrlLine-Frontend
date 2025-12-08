@@ -8,7 +8,7 @@ export default function useGetProductionPerformance(id) {
   const authStore = useAuthStore();
 
   return useQuery({
-    queryKey: ['productionPerformanceDetail', id],
+    queryKey: ['productionPerformance', id],
     queryFn: () => getProductionPerformance(id),
     enabled: computed(() => authStore.isLoggedIn),
   });
