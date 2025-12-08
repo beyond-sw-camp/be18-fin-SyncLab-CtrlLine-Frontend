@@ -17,6 +17,7 @@ export default function useUpdateProductionPerformance(id) {
       router.push('/production-management/production-performances');
     },
     onError: error => {
+      // @ts-ignore
       toast.error(error.response.data.message);
     },
   });
