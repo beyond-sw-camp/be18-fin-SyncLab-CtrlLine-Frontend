@@ -2,7 +2,7 @@
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 등록</h3>
     <div class="flex gap-3">
-      <div class="flex gap-2 items-center">
+      <div class="flex gap-2 items-center" v-if="isAdmin">
         <label class="flex gap-1 items-center text-sm font-medium">
           우선작업
           <TooltipProvider>
@@ -78,35 +78,31 @@
         </div>
 
         <div class="order-7 md:order-0">
-          <FormField name="productionManagerNo" v-slot="{ componentField, errorMessage }">
-            <FormItem>
-              <FormLabel>
-                생산담당자
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p>라인 담당자가 생산담당자로 자동 지정됩니다.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </FormLabel>
-              <FormControl class="w-full truncate min-w-0">
-                <div class="flex gap-2 items-center">
-                  <Input
-                    type="text"
-                    placeholder="생산담당자는 자동 지정됩니다."
-                    readonly
-                    :value="lineDetail?.userName || ''"
-                    class="text-sm"
-                  />
-                  <Input
-                    type="text"
-                    v-bind="componentField"
-                    class="max-w-20 bg-gray-100 text-sm"
-                    readonly
-                  />
-                </div>
+          <FormField name="productionManagerNo" v-slot="{ value, setValue, errorMessage }">
+            <FormItem class="w-full">
+              <FormLabel>생산담당자</FormLabel>
+              <FormControl class="w-full min-w-0">
+                <CreateAutoCompleteSelect
+                  :key="`autocomplete-${'productionManagerNo'}`"
+                  label="생산담당자"
+                  :value="value"
+                  :setValue="setValue"
+                  :fetchList="
+                    () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })
+                  "
+                  keyField="empNo"
+                  nameField="userName"
+                  :fields="[
+                    'empNo',
+                    'userName',
+                    'userEmail',
+                    'userDepartment',
+                    'userPhoneNumber',
+                    'userStatus',
+                    'userRole',
+                  ]"
+                  :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -338,6 +334,7 @@ import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
 import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
+import { canView } from '@/utils/canView';
 import formatDate from '@/utils/formatDate';
 
 const formSchema = toTypedSchema(
@@ -364,6 +361,7 @@ const formSchema = toTypedSchema(
 );
 
 const userStore = useUserStore();
+const isAdmin = canView(['ADMIN']);
 
 const form = useForm({
   validationSchema: formSchema,
@@ -398,7 +396,6 @@ function onFactorySelected(factoryCode) {
   selectedItemId.value = null;
   form.setFieldValue('itemCode', '', false);
   form.setFieldValue('lineCode', '', false);
-  form.setFieldValue('productionManagerNo', '', false);
   itemDetail.value = {};
   lineDetail.value = {};
 }
@@ -412,7 +409,6 @@ function onItemSelected(item) {
 function onItemCleared() {
   selectedItemId.value = null;
   form.setFieldValue('lineCode', '', false);
-  form.setFieldValue('productionManagerNo', '', false);
   itemDetail.value = {};
   lineDetail.value = {};
 }
@@ -422,10 +418,8 @@ function onLineSelected(lineCode) {
 
   if (selected) {
     lineDetail.value = selected;
-    form.setFieldValue('productionManagerNo', selected.empNo, false);
   } else {
     lineDetail.value = {};
-    form.setFieldValue('productionManagerNo', '', false);
   }
 }
 
