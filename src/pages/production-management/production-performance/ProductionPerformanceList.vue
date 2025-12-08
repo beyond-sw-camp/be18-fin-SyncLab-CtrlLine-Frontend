@@ -30,6 +30,7 @@
             v-for="(performance, index) in productionPerformanceList.content"
             :key="index"
             class="hover:bg-gray-50 hover:font-medium hover:underline text-center transition-all border-b border-dotted border-gray-300"
+            @click="goDetail(performance.id)"
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.documentNo }}
@@ -113,6 +114,10 @@ const initialFilters = {
   maxPerformanceQty: parseNumberQuery(route.query.maxPerformanceQty),
   minDefectRate: parseNumberQuery(route.query.minDefectRate),
   maxDefectRate: parseNumberQuery(route.query.maxDefectRate),
+};
+
+const goDetail = id => {
+  router.push(`/production-management/production-performances/${id}`);
 };
 
 const {

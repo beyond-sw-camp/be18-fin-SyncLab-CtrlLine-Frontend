@@ -29,3 +29,8 @@ export async function getProductionPerformanceAll(params = {}) {
   const { data } = await apiClient.get(`/production-performances/all?${search.toString()}`);
   return data;
 }
+
+export async function getProductionPerformance(id) {
+  const { data } = await apiClient.get(`/production-performances/${id}`);
+  return data.data;
+}
