@@ -129,8 +129,8 @@ import { useForm } from 'vee-validate';
 import { ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-import useUpdateProductionPerformance from '@/apis/query-hooks/production-performance/test';
 import useGetProductionPerformance from '@/apis/query-hooks/production-performance/useGetProductionPerformance';
+import useupdateProductionPerformance from '@/apis/query-hooks/production-performance/useUpdateProductionPerformance';
 import { Button } from '@/components/ui/button';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -139,7 +139,7 @@ import { useUserStore } from '@/stores/useUserStore';
 
 const route = useRoute();
 const { data: productionPerformanceDetail } = useGetProductionPerformance(route.params.id);
-const { mutate: updateProductionPerformance } = useUpdateProductionPerformance(route.params.id);
+const { mutate: updateProductionPerformance } = useupdateProductionPerformance(route.params.id);
 
 const userStore = useUserStore();
 const form = useForm();
