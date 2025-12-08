@@ -11,9 +11,9 @@
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 전표번호 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장코드 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 라인코드 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목코드 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장명 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 라인명 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목명 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
               영업담당자
             </TableHead>
@@ -21,7 +21,9 @@
               생산담당자
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 실적수량 </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 불량률 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              불량률 (%)
+            </TableHead>
           </TableRow>
         </TableHeader>
 
@@ -36,25 +38,25 @@
               {{ performance.documentNo }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.factoryCode }}
+              {{ performance.factoryName }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.lineCode }}
+              {{ performance.lineName }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.itemCode }}
+              {{ performance.itemName }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.salesManagerNo }}
+              {{ performance.salesManagerName }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.productionManagerNo }}
+              {{ performance.productionManagerName }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.performanceQty }} EA.
+              {{ performance.performanceQty }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.defectRate }} %
+              {{ performance.defectRate }}
             </TableCell>
           </TableRow>
           <TableRow v-if="productionPerformanceList.content.length === 0">
@@ -89,6 +91,10 @@ import {
 import FilterTab from '@/pages/production-management/production-performance/FilterTab.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
+const goDetail = id => {
+  router.push(`/production-management/production-performances/${id}`);
+};
+
 const route = useRoute();
 const router = useRouter();
 
@@ -105,19 +111,15 @@ const parsePage = value => {
 
 const initialFilters = {
   productionPlanDocumentNo: route.query.productionPlanDocumentNo || '',
-  factoryCode: route.query.factoryCode || '',
-  lineCode: route.query.lineCode || '',
-  itemCode: route.query.itemCode || '',
-  salesManagerNo: route.query.salesManagerNo || '',
-  productionManagerNo: route.query.productionManagerNo || '',
+  factoryName: route.query.factoryName || '',
+  lineName: route.query.lineName || '',
+  itemName: route.query.itemName || '',
+  salesManagerName: route.query.salesManagerName || '',
+  productionManagerName: route.query.productionManagerName || '',
   minPerformanceQty: parseNumberQuery(route.query.minPerformanceQty),
   maxPerformanceQty: parseNumberQuery(route.query.maxPerformanceQty),
   minDefectRate: parseNumberQuery(route.query.minDefectRate),
   maxDefectRate: parseNumberQuery(route.query.maxDefectRate),
-};
-
-const goDetail = id => {
-  router.push(`/production-management/production-performances/${id}`);
 };
 
 const {
@@ -163,11 +165,11 @@ watch(
     page.value = parsePage(newQuery.page ?? 1);
 
     filters.productionPlanDocumentNo = newQuery.productionPlanDocumentNo ?? '';
-    filters.factoryCode = newQuery.factoryCode ?? '';
-    filters.lineCode = newQuery.lineCode ?? '';
-    filters.itemCode = newQuery.itemCode ?? '';
-    filters.salesManagerNo = newQuery.salesManagerNo ?? '';
-    filters.productionManagerNo = newQuery.productionManagerNo ?? '';
+    filters.factoryName = newQuery.factoryName ?? '';
+    filters.lineName = newQuery.lineName ?? '';
+    filters.itemName = newQuery.itemName ?? '';
+    filters.salesManagerName = newQuery.salesManagerName ?? '';
+    filters.productionManagerName = newQuery.productionManagerName ?? '';
     filters.minPerformanceQty = parseNumberQuery(newQuery.minPerformanceQty);
     filters.maxPerformanceQty = parseNumberQuery(newQuery.maxPerformanceQty);
     filters.minDefectRate = parseNumberQuery(newQuery.minDefectRate);

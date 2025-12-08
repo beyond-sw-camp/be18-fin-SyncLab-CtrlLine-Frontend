@@ -12,11 +12,11 @@ export default function useGetProductionPerformanceList(initialFilters = {}) {
 
   const filters = reactive({
     productionPlanDocumentNo: initialFilters.productionPlanDocumentNo ?? '',
-    factoryCode: initialFilters.factoryCode ?? '',
-    lineCode: initialFilters.lineCode ?? '',
-    itemCode: initialFilters.itemCode ?? '',
-    salesManagerNo: initialFilters.salesManagerNo ?? '',
-    productionManagerNo: initialFilters.productionManagerNo ?? '',
+    factoryName: initialFilters.factoryName ?? '',
+    lineName: initialFilters.lineName ?? '',
+    itemName: initialFilters.itemName ?? '',
+    salesManagerName: initialFilters.salesManagerName ?? '',
+    productionManagerName: initialFilters.productionManagerName ?? '',
     minPerformanceQty: initialFilters.minPerformanceQty ?? null,
     maxPerformanceQty: initialFilters.maxPerformanceQty ?? null,
     minDefectRate: initialFilters.minDefectRate ?? null,
