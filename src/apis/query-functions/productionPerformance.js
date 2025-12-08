@@ -33,16 +33,13 @@ export async function getProductionPerformanceAll(params = {}) {
 }
 
 // 생산 실적 상세조회
-export async function getProductionPerformance(productionPerformanceId) {
-  const { data } = await apiClient.get(`/production-performances/${productionPerformanceId}`);
+export async function getProductionPerformance(id) {
+  const { data } = await apiClient.get(`/production-performances/${id}`);
   return data.data;
 }
 
 // 생산 실적 업데이트('비고'만 가능)
-export async function updateProductionPerformance(productionPerformanceId, params) {
-  const { data } = await apiClient.patch(
-    `/production-performances/${productionPerformanceId}`,
-    params,
-  );
+export async function updateProductionPerformance(id, params) {
+  const { data } = await apiClient.patch(`/production-performances/${id}`, params);
   return data;
 }

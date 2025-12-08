@@ -139,9 +139,7 @@ import { useUserStore } from '@/stores/useUserStore';
 
 const route = useRoute();
 const { data: productionPerformanceDetail } = useGetProductionPerformance(route.params.id);
-const { mutate: updateProductionPerformance } = useUpdateProductionPerformances(
-  route.params.productionPerformanceId,
-);
+const { mutate: updateProductionPerformance } = useUpdateProductionPerformances(route.params.id);
 
 const userStore = useUserStore();
 const form = useForm();

@@ -12,9 +12,7 @@ export default function useUpdateProductionPerformance(id) {
     mutationFn: params => updateProductionPerformance(id, params),
     onSuccess: () => {
       toast.success('생산 실적을 수정했습니다.');
-      queryClient.invalidateQueries({
-        queryKey: ['productionPerformance', id],
-      });
+      queryClient.invalidateQueries({ queryKey: ['productionPerformance', id] });
       queryClient.invalidateQueries({ queryKey: ['productionPerformanceList'] });
       router.push('/production-management/production-performances');
     },
