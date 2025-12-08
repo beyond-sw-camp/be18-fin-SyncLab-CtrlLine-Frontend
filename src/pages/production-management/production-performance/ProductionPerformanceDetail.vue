@@ -148,10 +148,14 @@ import { Form } from 'vee-validate';
 import { useRoute } from 'vue-router';
 
 import useGetProductionPerformance from '@/apis/query-hooks/production-performance/useGetProductionPerformance';
+import useUpdateProductionPerformance from '@/apis/query-hooks/production-performance/useUpdateProductionPerformance';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
 const route = useRoute();
+const { mutate: updateProductionPerformance } = useUpdateProductionPerformance(
+  route.params.productionPerformanceId,
+);
 
 const {
   data: detail,

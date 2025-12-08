@@ -1,6 +1,7 @@
 import apiClient from '@/apis/query-functions/apiClient';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
+// 생산 실적 목록조회
 export async function getProductionPerformanceList(params) {
   const queryObj = buildQueryObject(params);
   const search = new URLSearchParams(queryObj);
@@ -22,6 +23,7 @@ export async function getProductionPerformanceMonthlyDefectiveRate(factoryCode, 
   return data.data;
 }
 
+// 생산실적 출력물
 export async function getProductionPerformanceAll(params = {}) {
   const queryObj = buildQueryObject(params);
   const search = new URLSearchParams(queryObj);
@@ -30,7 +32,17 @@ export async function getProductionPerformanceAll(params = {}) {
   return data;
 }
 
-export async function getProductionPerformance(id) {
-  const { data } = await apiClient.get(`/production-performances/${id}`);
+// 생산 실적 상세조회
+export async function getProductionPerformance(productionPerformanceId) {
+  const { data } = await apiClient.get(`/production-performances/${productionPerformanceId}`);
   return data.data;
+}
+
+// 생산 실적 업데이트('비고'만 가능)
+export async function updateProductionPerformance(productionPerformanceId, params) {
+  const { data } = await apiClient.patch(
+    `/production-performances/${productionPerformanceId}`,
+    params,
+  );
+  return data;
 }
