@@ -73,6 +73,8 @@
 </template>
 
 <script setup>
+import { unref } from 'vue';
+
 import { STAGE_DEFINITIONS } from '@/apis/query-hooks/factory/useGetFactoryLinesWithEquipments';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
@@ -111,7 +113,11 @@ const STATUS_LEVEL_MAP = {
 };
 
 const resolveStatusLevel = (equipment, statusMap) => {
-  const externalLevel = statusMap?.[equipment.equipmentCode];
+  const map = unref(statusMap) || {};
+  const code = equipment.equipmentCode;
+  const id = equipment.equipmentId;
+  const externalLevel =
+    (code ? map[code] : undefined) ?? (id ? map[`#id:${id}`] : undefined);
   if (externalLevel !== undefined) {
     if (typeof externalLevel === 'number') return externalLevel;
     return STATUS_LEVEL_MAP[`${externalLevel}`.toUpperCase()] ?? equipment.status ?? 1;

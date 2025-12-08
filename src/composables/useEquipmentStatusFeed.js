@@ -37,13 +37,27 @@ export default function useEquipmentStatusFeed(factoryIdRef) {
     list.forEach(item => {
       if (!item) return;
       const code = item.equipmentCode ?? item.code;
-      if (!code) return;
-      const level =
-        normaliseLevel(item.runtimeStatusLevel) ??
-        normaliseLevel(item.statusLevel) ??
-        normaliseLevel(item.level);
-      if (level !== undefined) {
+      const id = item.equipmentId ?? item.id ?? null;
+      const levelCandidates = [
+        item.runtimeStatusLevel,
+        item.runtimeStatus,
+        item.statusLevel,
+        item.status,
+        item.state,
+        item.equipmentStatus,
+        item.level,
+      ];
+      const level = levelCandidates.reduce((acc, candidate) => {
+        if (acc !== undefined) return acc;
+        return normaliseLevel(candidate);
+      }, undefined);
+      if (level === undefined) return;
+      if (code) {
         next[code] = level;
+      }
+
+      if (id) {
+        next[`#id:${id}`] = level;
       }
     });
     statusMap.value = next;
@@ -121,7 +135,8 @@ export default function useEquipmentStatusFeed(factoryIdRef) {
     eventSource.onmessage = event => {
       try {
         const payload = JSON.parse(event.data);
-        updateStatusMap([payload]);
+        const list = Array.isArray(payload) ? payload : [payload];
+        updateStatusMap(list);
       } catch (error) {
         console.error('Failed to parse SSE payload', error);
       }
