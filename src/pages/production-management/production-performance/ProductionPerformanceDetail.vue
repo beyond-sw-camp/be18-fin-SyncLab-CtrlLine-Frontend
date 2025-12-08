@@ -129,8 +129,8 @@ import { useForm } from 'vee-validate';
 import { ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-import useGetProductionPerformance from '@/apis/query-hooks/production-performance/useGetProductionPerformance.js';
-import useUpdateProductionPerformance from '@/apis/query-hooks/production-performance/useUpdateProductionPerformance.js';
+import useGetProductionPerformance from '@/apis/query-hooks/production-performance/useGetProductionPerformance';
+import useUpdateProductionPerformance from '@/apis/query-hooks/production-performance/useUpdateProductionPerformance';
 import { Button } from '@/components/ui/button';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
