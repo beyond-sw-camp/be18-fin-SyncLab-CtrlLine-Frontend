@@ -1,6 +1,7 @@
 import { onBeforeUnmount, onMounted, ref, unref, watch } from 'vue';
 
 import { getEquipmentStatuses } from '@/apis/query-functions/equipment';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '';
 const SSE_PATH = '/api/v1/equipments/status-stream';
@@ -10,6 +11,11 @@ const RECONNECT_DELAY = 3000;
 export default function useEquipmentStatusFeed(factoryIdRef) {
   const statusMap = ref({});
   const isSseConnected = ref(false);
+  const authStore = useAuthStore();
+  const getStoredAccessToken = () => {
+    if (typeof window === 'undefined') return null;
+    return window.localStorage.getItem('access_token');
+  };
 
   let eventSource = null;
   let pollingTimer = null;
@@ -93,6 +99,10 @@ export default function useEquipmentStatusFeed(factoryIdRef) {
 
     const url = new URL(SSE_PATH, API_BASE_URL);
     url.searchParams.append('factoryId', factoryId);
+    const accessToken = authStore.accessToken ?? getStoredAccessToken();
+    if (accessToken) {
+      url.searchParams.append('access_token', accessToken);
+    }
 
     try {
       eventSource = new EventSource(url.toString(), { withCredentials: true });
