@@ -65,8 +65,26 @@ import { Badge } from '@/components/ui/badge';
 import { DETAIL_HIGHLIGHT, STATUS_COLORS } from '@/constants/productionPlanStatus';
 import { useScheduleRangeManager } from '@/hooks/useScheduleRangeManager';
 import ScheduleTooltip from '@/pages/production-management/production-plan/ScheduleTooltip.vue';
+import { useUserStore } from '@/stores/useUserStore';
 
 provide('schedule', [TimelineViews, Day, Week, TimelineMonth, DragAndDrop]);
+
+const props = defineProps({
+  factoryId: Number,
+  factoryCode: String,
+  lineCode: String,
+  productionPlanDetailId: Number,
+  mode: {
+    type: String,
+    default: 'detail',
+  },
+  draftStartTime: String,
+  draftEndTime: String,
+  draftItem: Object,
+  draftQty: Number,
+});
+
+const userStore = useUserStore();
 
 const tooltip = ref({
   show: false,
@@ -98,8 +116,45 @@ function onEventClick(args) {
   };
 }
 
+const draftEvent = computed(() => {
+  if (
+    props.mode !== 'create' ||
+    !props.lineCode ||
+    !props.draftStartTime ||
+    !props.draftEndTime ||
+    !props.draftItem ||
+    !props.draftQty
+  ) {
+    return null;
+  }
+
+  return {
+    Id: 'draft', // 임시 ID
+    Subject: '신규 생산계획',
+    StartTime: new Date(props.draftStartTime),
+    EndTime: new Date(props.draftEndTime),
+    LineCode: props.lineCode,
+    ItemName: props.draftItem.itemName,
+    ItemQty: props.draftQty,
+    Status: userStore.userRole === 'ADMIN' ? 'CONFIRMED' : 'PENDING',
+  };
+});
+
 function onEventRendered(args) {
   const ev = args.data;
+
+  // 신규 등록 시
+  if (ev.Id === 'draft') {
+    args.element.style.setProperty('background-color', 'var(--primary)', 'important');
+    args.element.style.setProperty('border-color', 'var(--primary)', 'important');
+
+    const subject = args.element.querySelector('.e-subject');
+    if (subject) {
+      subject.style.setProperty('color', 'white', 'important');
+      subject.style.opacity = '1';
+    }
+    return; // 아래 status 로직은 진행 X
+  }
 
   // 상세 조회 중인 이벤트인 경우
   if (props.productionPlanDetailId && ev.Id === props.productionPlanDetailId) {
@@ -128,17 +183,6 @@ function onEventRendered(args) {
     subject.style.opacity = '1';
   }
 }
-
-const props = defineProps({
-  factoryId: Number,
-  factoryCode: String,
-  lineCode: String,
-  productionPlanDetailId: Number,
-  mode: {
-    type: String,
-    default: 'detail',
-  },
-});
 
 const emit = defineEmits(['updateStartEndTime']);
 
@@ -215,9 +259,21 @@ const makeEvent = ev => {
   };
 };
 
-const selectedEvents = computed(() => selectedLineData.value?.map(makeEvent) ?? []);
+const selectedEvents = computed(() => {
+  const base = selectedLineData.value?.map(makeEvent) ?? [];
+  if (draftEvent.value && props.lineCode) {
+    base.push(draftEvent.value);
+  }
+  return base;
+});
 
-const availableEvents = computed(() => availableLineData.value?.map(makeEvent) ?? []);
+const availableEvents = computed(() => {
+  const base = availableLineData.value?.map(makeEvent) ?? [];
+  if (draftEvent.value && props.lineCode) {
+    base.push(draftEvent.value);
+  }
+  return base;
+});
 
 const selectedEventSettings = computed(() => ({
   dataSource: [...selectedEvents.value],

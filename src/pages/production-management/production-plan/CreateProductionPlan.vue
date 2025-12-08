@@ -247,7 +247,7 @@
             <FormItem>
               <FormLabel>생산종료시간</FormLabel>
               <FormControl class="w-full">
-                <Input type="datetime-local" :value="componentField" disabled class="text-sm" />
+                <Input type="datetime-local" v-bind="componentField" disabled class="text-sm" />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -296,6 +296,10 @@
         :factoryId="selectedFactoryId"
         :factoryCode="factoryDetail?.factoryCode"
         :lineCode="lineDetail?.lineCode"
+        :draftStartTime="form.values.startTime"
+        :draftEndTime="form.values.endTime"
+        :draftItem="itemDetail"
+        :draftQty="form.values.plannedQty"
         mode="create"
       />
     </form>
@@ -304,6 +308,7 @@
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
+import { useDebounceFn } from '@vueuse/core';
 import { InfoIcon } from 'lucide-vue-next';
 import { useForm } from 'vee-validate';
 import { computed, ref, watch } from 'vue';
@@ -313,6 +318,7 @@ import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useCreateProductionPlan from '@/apis/query-hooks/production-plan/useCreateProductionPlan';
+import useCreateProductionPlanEndTime from '@/apis/query-hooks/production-plan/useCreateProductionPlanEndTime';
 import useGetProductionPlanBoundary from '@/apis/query-hooks/production-plan/useGetProductionPlanBoundary';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
@@ -348,6 +354,7 @@ const formSchema = toTypedSchema(
     lineCode: z.string({ required_error: '라인명은 필수입니다.' }).min(1, '라인명은 필수입니다.'),
     status: z.string({ required_error: '상태는 필수입니다.' }),
     startTime: z.string().optional(),
+    endTime: z.string().optional(),
     plannedQty: z.coerce
       .number({ required_error: '생산계획수량은 필수입니다.' })
       .positive('생산계획수량은 1 이상이어야 합니다.'),
@@ -376,11 +383,12 @@ const lineDetail = ref({});
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 const { data: boundaryData } = useGetProductionPlanBoundary({
-  factoryCode: computed(() => factoryDetail.value.factoryCode),
-  lineCode: computed(() => lineDetail.value.lineCode),
+  factoryCode: computed(() => factoryDetail.value?.factoryCode),
+  lineCode: computed(() => lineDetail.value?.lineCode),
 });
 
 const { mutate: createProductionPlan } = useCreateProductionPlan();
+const { mutate: updateEndTime } = useCreateProductionPlanEndTime();
 
 function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
@@ -453,6 +461,33 @@ watch(
     form.setFieldValue('startTime', formatDate(timeToUse, 'datetime-local'));
   },
 );
+
+const debouncedUpdateEndTime = useDebounceFn(({ startTime, plannedQty, lineCode }) => {
+  updateEndTime(
+    // @ts-ignore
+    { startTime, plannedQty, lineCode },
+    {
+      onSuccess: data => {
+        if (!data) return;
+        form.setFieldValue('endTime', data.endTime, false);
+      },
+    },
+  );
+}, 400);
+
+watch([() => form.values.startTime, () => form.values.plannedQty], ([startTime, plannedQty]) => {
+  const formattedStartTime = formatDate(startTime, 'local-datetime');
+
+  if (!startTime || !plannedQty || !lineDetail.value?.lineCode || !formattedStartTime) return;
+
+  console.log(typeof formattedStartTime);
+
+  debouncedUpdateEndTime({
+    startTime: formattedStartTime,
+    plannedQty,
+    lineCode: lineDetail.value.lineCode,
+  });
+});
 </script>
 
 <style scoped></style>
