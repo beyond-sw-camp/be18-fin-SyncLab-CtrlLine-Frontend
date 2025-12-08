@@ -1,16 +1,26 @@
 <template>
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산실적 상세 조회</h3>
+
+    <Button
+      v-if="canEdit"
+      type="submit"
+      form="productionPerformanceForm"
+      class="bg-primary text-white hover:bg-primary-600 cursor-pointer w-[60px]"
+      size="sm"
+    >
+      Save
+    </Button>
   </div>
 
-  <div class="flex flex-col gap-8 md:flex-row">
+  <div class="flex flex-col gap-8 md:flex-row w-full">
     <form
       v-if="productionPerformanceDetail?.id"
       id="productionPerformanceForm"
       @submit="onSubmit"
-      class="flex-1 flex flex-col gap-10"
+      class="flex-1 flex flex-col gap-10 w-full"
     >
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-x-10 gap-y-2">
         <div class="order-1 md:order-0">
           <FormField name="factoryName" v-slot="{ componentField }">
             <FormItem>
@@ -100,7 +110,7 @@
           <FormItem class="md:col-span-3">
             <FormLabel>비고</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" />
+              <Input type="text" v-bind="componentField" :readonly="!canEdit" />
             </FormControl>
           </FormItem>
         </FormField>
@@ -116,14 +126,16 @@
 
 <script setup>
 import { useForm } from 'vee-validate';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue'; // ✅ computed 임포트
 import { useRoute } from 'vue-router';
 
 import useGetProductionPerformance from '@/apis/query-hooks/production-performance/useGetProductionPerformance';
 import useUpdateProductionPerformances from '@/apis/query-hooks/production-performance/useUpdateProductionPerformance';
+import { Button } from '@/components/ui/button';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import PPTable from '@/pages/production-management/production-performance/PPTable.vue';
+import { useUserStore } from '@/stores/useUserStore';
 
 const route = useRoute();
 const { data: productionPerformanceDetail } = useGetProductionPerformance(route.params.id);
@@ -131,8 +143,14 @@ const { mutate: updateProductionPerformance } = useUpdateProductionPerformances(
   route.params.productionPerformanceId,
 );
 
+const userStore = useUserStore();
 const form = useForm();
 const PPDetail = ref({});
+
+const canEdit = computed(() => {
+  const role = userStore.userRole;
+  return role === 'ADMIN';
+});
 
 const onSubmit = form.handleSubmit(values => {
   const params = {
@@ -168,7 +186,7 @@ watch(
       totalQty: val.totalQty,
       performanceQty: val.performanceQty,
       defectiveQty: val.defectiveQty,
-      defectiveRate: val.defectRate,
+      defectiveRate: val.defectiveRate,
     };
   },
   { immediate: true },

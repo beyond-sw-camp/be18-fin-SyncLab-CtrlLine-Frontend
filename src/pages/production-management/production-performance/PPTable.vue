@@ -9,7 +9,7 @@
         <TableHead class="text-center">총 수량</TableHead>
         <TableHead class="text-center">생산 실적 수량</TableHead>
         <TableHead class="text-center">불량 수량</TableHead>
-        <TableHead class="text-center">불량률</TableHead>
+        <TableHead class="text-center">불량률 (%)</TableHead>
       </TableRow>
     </TableHeader>
 
@@ -28,16 +28,16 @@
           {{ PPDetail.itemUnit }}
         </TableCell>
 
-        <TableCell class="py-3 text-end">
+        <TableCell class="py-3 text-center">
           {{ PPDetail.totalQty }}
         </TableCell>
-        <TableCell class="py-3 text-end">
+        <TableCell class="py-3 text-center">
           {{ PPDetail.performanceQty }}
         </TableCell>
-        <TableCell class="py-3 text-end">
+        <TableCell class="py-3 text-center">
           {{ PPDetail.defectiveQty }}
         </TableCell>
-        <TableCell class="py-3 text-end">
+        <TableCell class="py-3 text-center">
           {{ PPDetail.defectiveRate }}
         </TableCell>
       </TableRow>
@@ -55,7 +55,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-// defineProps 이름 itemDetail -> PPDetail로 변경
 defineProps({
   PPDetail: {
     type: Object,
