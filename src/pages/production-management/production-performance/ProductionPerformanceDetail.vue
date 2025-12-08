@@ -42,10 +42,9 @@
       defectiveQty: detail.defectiveQty,
       defectiveRate: detail.defectRate,
     }"
-    class="flex flex-col gap-8 md:flex-row"
   >
-    <div class="flex-1 flex flex-col gap-2">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+      <div class="order-1 md:order-0">
         <FormField name="factoryName" v-slot="{ componentField }">
           <FormItem>
             <FormLabel>공장명</FormLabel>
@@ -54,16 +53,9 @@
             </FormControl>
           </FormItem>
         </FormField>
+      </div>
 
-        <FormField name="lineName" v-slot="{ componentField }">
-          <FormItem>
-            <FormLabel>라인명</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
-        </FormField>
-
+      <div class="order-4 md:order-0">
         <FormField name="dueDate" v-slot="{ componentField }">
           <FormItem>
             <FormLabel>납기일</FormLabel>
@@ -72,138 +64,80 @@
             </FormControl>
           </FormItem>
         </FormField>
+      </div>
 
-        <FormField name="salesManagerName" v-slot="{ componentField }">
-          <FormItem>
-            <FormLabel>영업담당자</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
-        </FormField>
+      <FormField name="productionManagerName" v-slot="{ componentField }">
+        <FormItem>
+          <FormLabel>생산담당자</FormLabel>
+          <FormControl>
+            <Input type="text" v-bind="componentField" readonly class="text-sm" />
+          </FormControl>
+        </FormItem>
+      </FormField>
 
-        <FormField name="productionManagerName" v-slot="{ componentField }">
-          <FormItem>
-            <FormLabel>생산담당자</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
-        </FormField>
+      <FormField name="itemName" v-slot="{ componentField }">
+        <FormItem>
+          <FormLabel>품목명</FormLabel>
+          <FormControl>
+            <Input type="text" v-bind="componentField" readonly class="text-sm" />
+          </FormControl>
+        </FormItem>
+      </FormField>
 
-        <FormField name="startTime" v-slot="{ componentField }">
-          <FormItem>
-            <FormLabel>생산 시작시각</FormLabel>
-            <FormControl>
-              <Input type="datetime-local" v-bind="componentField" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
-        </FormField>
+      <FormField name="startTime" v-slot="{ componentField }">
+        <FormItem>
+          <FormLabel>생산 시작시각</FormLabel>
+          <FormControl>
+            <Input type="datetime-local" v-bind="componentField" readonly class="text-sm" />
+          </FormControl>
+        </FormItem>
+      </FormField>
 
-        <FormField name="endTime" v-slot="{ componentField }">
-          <FormItem>
-            <FormLabel>생산 종료시각</FormLabel>
-            <FormControl>
-              <Input type="datetime-local" v-bind="componentField" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
-        </FormField>
+      <FormField name="salesManagerName" v-slot="{ componentField }">
+        <FormItem>
+          <FormLabel>영업담당자</FormLabel>
+          <FormControl>
+            <Input type="text" v-bind="componentField" readonly class="text-sm" />
+          </FormControl>
+        </FormItem>
+      </FormField>
 
-        <FormField name="lotNo" v-slot="{ componentField }">
-          <FormItem>
-            <FormLabel>LOT 번호</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
-        </FormField>
+      <FormField name="lineName" v-slot="{ componentField }">
+        <FormItem>
+          <FormLabel>라인명</FormLabel>
+          <FormControl>
+            <Input type="text" v-bind="componentField" readonly class="text-sm" />
+          </FormControl>
+        </FormItem>
+      </FormField>
 
+      <FormField name="endTime" v-slot="{ componentField }">
+        <FormItem>
+          <FormLabel>생산 종료시각</FormLabel>
+          <FormControl>
+            <Input type="datetime-local" v-bind="componentField" readonly class="text-sm" />
+          </FormControl>
+        </FormItem>
+      </FormField>
+
+      <FormField name="lotNo" v-slot="{ componentField }">
+        <FormItem>
+          <FormLabel>LOT 번호</FormLabel>
+          <FormControl>
+            <Input type="text" v-bind="componentField" readonly class="text-sm" />
+          </FormControl>
+        </FormItem>
+      </FormField>
+
+      <div class="order-10 md:order-0 col-span-1 md:col-span-3">
         <FormField name="remark" v-slot="{ componentField }">
           <FormItem class="md:col-span-3">
             <FormLabel>비고</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+              <Input type="text" v-bind="componentField" />
             </FormControl>
           </FormItem>
         </FormField>
-      </div>
-
-      <div class="mt-6 border-t pt-4">
-        <h4 class="scroll-m-20 text-xl font-semibold mb-4">품목 및 생산 정보</h4>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <FormField name="itemCode" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>품목코드</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" readonly class="text-sm" />
-              </FormControl>
-            </FormItem>
-          </FormField>
-
-          <FormField name="itemName" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>품목명</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" readonly class="text-sm" />
-              </FormControl>
-            </FormItem>
-          </FormField>
-
-          <FormField name="itemSpecification" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>규격</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" readonly class="text-sm" />
-              </FormControl>
-            </FormItem>
-          </FormField>
-
-          <FormField name="itemUnit" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>단위</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" readonly class="text-sm" />
-              </FormControl>
-            </FormItem>
-          </FormField>
-
-          <FormField name="totalQty" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>총 투입수량 (EA)</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="componentField" readonly class="text-sm" />
-              </FormControl>
-            </FormItem>
-          </FormField>
-
-          <FormField name="performanceQty" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>실적수량 (EA)</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="componentField" readonly class="text-sm" />
-              </FormControl>
-            </FormItem>
-          </FormField>
-
-          <FormField name="defectiveQty" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>불량수량 (EA)</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="componentField" readonly class="text-sm" />
-              </FormControl>
-            </FormItem>
-          </FormField>
-
-          <FormField name="defectiveRate" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>불량률 (%)</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" readonly class="text-sm" />
-              </FormControl>
-            </FormItem>
-          </FormField>
-        </div>
       </div>
     </div>
   </Form>
