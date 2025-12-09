@@ -19,8 +19,8 @@
 
     <Accordion type="single" collapsible class="mt-4">
       <AccordionItem value="defectiveFilters">
-        <div class="flex w-fit items-center gap-2 rounded-full bg-gray-100 px-2 py-1 hover:bg-gray-200">
-          <AccordionTrigger class="p-0 hover:no-underline cursor-pointer text-sm font-normal text-gray-600">
+        <div class="flex w-fit px-2 py-1 rounded-full bg-gray-100 hover:bg-gray-200">
+          <AccordionTrigger class="p-0 hover:no-underline cursor-pointer">
             Filter by
           </AccordionTrigger>
         </div>
