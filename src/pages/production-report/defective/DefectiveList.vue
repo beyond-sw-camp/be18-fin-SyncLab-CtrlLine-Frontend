@@ -294,6 +294,13 @@ import { toast } from 'vue-sonner';
 
 import { getDefectiveAll, getDefectiveDetail } from '@/apis/query-functions/defective';
 import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
+import FilterInput from '@/components/filter/FilterInput.vue';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import {
@@ -304,14 +311,6 @@ import {
   componentToString,
 } from '@/components/ui/chart';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import FilterInput from '@/components/filter/FilterInput.vue';
-import { buildQueryObject } from '@/utils/buildQueryObject';
-import {
   Table,
   TableBody,
   TableCell,
@@ -319,6 +318,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const isApplying = ref(false);
 const hasSearched = ref(false);

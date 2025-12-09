@@ -17,9 +17,10 @@
 </template>
 
 <script setup>
+import { Search } from 'lucide-vue-next';
+
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Search } from 'lucide-vue-next';
 
 defineProps({
   label: String,
