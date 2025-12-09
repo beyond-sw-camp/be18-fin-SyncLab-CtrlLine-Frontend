@@ -1,6 +1,6 @@
 <template>
-  <section class="space-y-6">
-    <header class="flex items-center justify-between border-b border-gray-200 pb-4">
+    <section class="space-y-6">
+    <header class="flex items-center justify-between pb-4">
       <div>
         <h3 class="text-2xl font-semibold text-gray-900">불량 현황</h3>
       </div>
