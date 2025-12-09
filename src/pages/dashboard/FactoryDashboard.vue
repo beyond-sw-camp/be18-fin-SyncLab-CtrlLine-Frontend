@@ -104,6 +104,7 @@ import useGetFactoryEnergyLatest from '@/apis/query-hooks/factory/useGetFactoryE
 import useGetFactoryEnergyTodayMax from '@/apis/query-hooks/factory/useGetFactoryEnergyTodayMax';
 import useGetFactoryEnvironmentLatest from '@/apis/query-hooks/factory/useGetFactoryEnvironmentLatest';
 import useGetFactoryLinesWithEquipments from '@/apis/query-hooks/factory/useGetFactoryLinesWithEquipments';
+import useGetLineProductionProgress from '@/apis/query-hooks/production-progress/useGetLineProductionProgress';
 import useGetProductionPerformanceAll from '@/apis/query-hooks/production-performance/useGetProductionPerformanceAll';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -159,6 +160,7 @@ const GRANULARITY_OPTIONS = [
 
 const { data: defectTrendRaw } = useGetDefectiveTrend(() => props.factoryCode);
 const { data: productionPerformances } = useGetProductionPerformanceAll(() => props.factoryCode);
+const { data: lineProgressData } = useGetLineProductionProgress(() => props.factoryCode);
 
 const temperature = computed(() =>
   environmentData.value?.temperature ? Number(environmentData.value.temperature) : 0,
@@ -231,7 +233,16 @@ const getRecordItemLabel = record => {
   return name ? `${code} - ${name}` : code;
 };
 
-const getLineCode = record => record?.lineCode ?? record?.line?.lineCode ?? null;
+const normalizeLineValue = value => {
+  if (value === undefined || value === null) return null;
+  return String(value);
+};
+
+const getLineCode = record => {
+  const raw = record?.lineCode ?? record?.line?.lineCode ?? record?.lineId ?? null;
+  return normalizeLineValue(raw);
+};
+
 const toNumber = value => {
   const num = Number(value);
   return Number.isFinite(num) ? num : 0;
@@ -250,6 +261,8 @@ const extractProducedQty = record =>
   toNumber(
     record?.performanceQty ??
       record?.producedQty ??
+      record?.order_prodeced_qty ??
+      record?.orderProducedQty ??
       record?.productionQty ??
       record?.currentQty ??
       record?.resultQty ??
@@ -293,6 +306,8 @@ const filteredProductionRecords = computed(() => {
   return list.filter(record => getRecordItemCode(record) === selectedItem.value);
 });
 
+const lineProgressEntries = computed(() => lineProgressData.value ?? []);
+
 const resolveEquipmentStatus = equipment => {
   const code = equipment?.equipmentCode;
   const external = code ? equipmentStatuses.value?.[code] : undefined;
@@ -315,27 +330,11 @@ const runningLineCodes = computed(() => {
     const equipments = line?.equipments ?? [];
     const hasRunning = equipments.some(equipment => resolveEquipmentStatus(equipment) === 2);
     if (hasRunning) {
-      const code = line.lineCode ?? line.lineId;
+      const code = normalizeLineValue(line.lineCode ?? line.lineId);
       if (code) set.add(code);
     }
   });
   return set;
-});
-
-const latestRunningLineRecords = computed(() => {
-  const map = new Map();
-  const runningSet = runningLineCodes.value;
-  if (!runningSet.size) return [];
-  (filteredProductionRecords.value ?? []).forEach(record => {
-    const lineCode = getLineCode(record);
-    if (!lineCode || !runningSet.has(lineCode)) return;
-    const timestamp = getRecordTimestamp(record);
-    const existing = map.get(lineCode);
-    if (!existing || timestamp > existing.timestamp) {
-      map.set(lineCode, { record, timestamp });
-    }
-  });
-  return Array.from(map.values()).map(entry => entry.record);
 });
 
 const defectRateChartData = computed(() =>
@@ -348,13 +347,18 @@ const productionSeries = computed(() =>
 const productionChartData = computed(() => productionSeries.value.data);
 const productionChartMode = computed(() => productionSeries.value.mode);
 const productionProgressSummary = computed(() => {
-  const runningCount = runningLineCodes.value.size;
-  const records = latestRunningLineRecords.value;
+  const runningSet = runningLineCodes.value;
+  const entries = lineProgressEntries.value.filter(entry => {
+    const lineCode = normalizeLineValue(entry.lineCode);
+    return lineCode && runningSet.has(lineCode);
+  });
 
-  const totals = records.reduce(
-    (acc, record) => {
-      acc.produced += extractProducedQty(record);
-      acc.target += extractTargetQty(record);
+  const totals = entries.reduce(
+    (acc, entry) => {
+      const produced = toNumber(entry.producedQty);
+      const target = toNumber(entry.targetQty);
+      acc.produced += produced;
+      acc.target += target;
       return acc;
     },
     { produced: 0, target: 0 },
@@ -365,17 +369,14 @@ const productionProgressSummary = computed(() => {
       ? Math.min(100, Math.max(0, Number(((totals.produced / totals.target) * 100).toFixed(1))))
       : 0;
 
-  const documents = records
-    .map(
-      record =>
-        record?.productionPlanDocumentNo || record?.documentNo || record?.productionPerformanceDocNo,
-    )
-    .filter(Boolean);
+  const documents = Array.from(
+    new Set(entries.map(entry => entry.orderNo).filter(Boolean)),
+  );
 
   return {
-    available: runningCount > 0 && totals.target > 0,
-    runningCount,
-    measuredCount: records.length,
+    available: runningSet.size > 0 && totals.target > 0,
+    runningCount: runningSet.size,
+    measuredCount: entries.length,
     produced: totals.produced,
     target: totals.target,
     percent,
