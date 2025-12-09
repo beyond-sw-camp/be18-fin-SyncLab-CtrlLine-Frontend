@@ -75,7 +75,7 @@
       </Table>
     </div>
     <BasePagination
-      v-model:page="page"
+      v-model="page"
       :total-pages="productionPerformanceList?.pageInfo?.totalPages ?? 1"
     />
   </div>
