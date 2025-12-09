@@ -138,6 +138,7 @@ const { data: environmentData } = useGetFactoryEnvironmentLatest(props.factoryCo
 const { data: energyLatest } = useGetFactoryEnergyLatest(props.factoryCode);
 const { data: energyPeak } = useGetFactoryEnergyTodayMax(props.factoryCode);
 const factoryIdRef = computed(() => props.factoryId);
+const factoryCodeRef = computed(() => props.factoryCode);
 const { data: defectiveTypes } = useGetDefectiveTypes(props.factoryCode);
 const { data: factoryLines } = useGetFactoryLinesWithEquipments(factoryIdRef);
 const STATUS_LEVEL_MAP = {
@@ -147,7 +148,7 @@ const STATUS_LEVEL_MAP = {
   HIGH_WARNING: 4,
 };
 
-const { statusMap: equipmentStatuses } = useEquipmentStatusFeed(factoryIdRef);
+const { statusMap: equipmentStatuses } = useEquipmentStatusFeed(factoryIdRef, factoryCodeRef);
 const chartGranularity = ref('week');
 const selectedItem = ref('all');
 const GRANULARITY_OPTIONS = [
