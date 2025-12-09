@@ -1,16 +1,21 @@
 <template>
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산실적 상세 조회</h3>
+    <div class="flex gap-2">
+      <Badge v-if="productionPerformanceDetail" variant="secondary">
+        {{ productionPerformanceDetail.documentNo }}
+      </Badge>
 
-    <Button
-      v-if="canEdit"
-      type="submit"
-      form="productionPerformanceForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer w-[60px]"
-      size="sm"
-    >
-      Save
-    </Button>
+      <Button
+        v-if="canEdit"
+        type="submit"
+        form="productionPerformanceForm"
+        class="bg-primary text-white hover:bg-primary-600 cursor-pointer w-[60px]"
+        size="sm"
+      >
+        Save
+      </Button>
+    </div>
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row w-full">
@@ -35,7 +40,7 @@
         <div class="order-4 md:order-0">
           <FormField name="dueDate" v-slot="{ componentField }">
             <FormItem>
-              <FormLabel>납기일</FormLabel>
+              <FormLabel>납기일자</FormLabel>
               <FormControl>
                 <Input type="date" v-bind="componentField" readonly class="text-sm" />
               </FormControl>
@@ -72,7 +77,7 @@
 
         <FormField name="salesManagerName" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>영업담당자</FormLabel>
+            <FormLabel>영업 담당자</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -99,7 +104,16 @@
 
         <FormField name="lotNo" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>LOT 번호</FormLabel>
+            <FormLabel>LOT No.</FormLabel>
+            <FormControl>
+              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
+
+        <FormField name="defectiveDocumentNo" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>불량 전표번호</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -131,6 +145,7 @@ import { useRoute } from 'vue-router';
 
 import useGetProductionPerformance from '@/apis/query-hooks/production-performance/useGetProductionPerformance';
 import useupdateProductionPerformance from '@/apis/query-hooks/production-performance/useUpdateProductionPerformance';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -159,6 +174,13 @@ const onSubmit = form.handleSubmit(values => {
   updateProductionPerformance(params);
 });
 
+const formatQuantity = (quantity, unit) => {
+  if (quantity === null || quantity === undefined) return '';
+  // 숫자를 세 자리마다 쉼표를 넣어 문자열로 포맷팅
+  const formattedQty = Number(quantity).toLocaleString('ko-KR');
+  return `${formattedQty} ${unit || ''}`.trim();
+};
+
 watch(
   productionPerformanceDetail,
   val => {
@@ -173,17 +195,19 @@ watch(
       startTime: val.startTime,
       endTime: val.endTime,
       lotNo: val.lotNo,
+      defectiveDocumentNo: val.defectiveDocumentNo,
       remark: val.remark,
     });
 
+    const unit = val.itemUnit || 'EA';
     PPDetail.value = {
       itemCode: val.itemCode,
       itemName: val.itemName,
       itemSpecification: val.itemSpecification,
       itemUnit: val.itemUnit,
-      totalQty: val.totalQty,
-      performanceQty: val.performanceQty,
-      defectiveQty: val.defectiveQty,
+      totalQty: formatQuantity(val.totalQty, unit),
+      performanceQty: formatQuantity(val.performanceQty, unit),
+      defectiveQty: formatQuantity(val.defectiveQty, unit),
       defectiveRate: val.defectiveRate,
     };
   },
