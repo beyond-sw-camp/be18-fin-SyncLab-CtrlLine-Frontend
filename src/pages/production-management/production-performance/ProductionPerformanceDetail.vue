@@ -29,7 +29,7 @@
         <div class="order-1 md:order-0">
           <FormField name="factoryName" v-slot="{ componentField }">
             <FormItem>
-              <FormLabel>공장명</FormLabel>
+              <FormLabel>공장</FormLabel>
               <FormControl>
                 <Input type="text" v-bind="componentField" readonly class="text-sm" />
               </FormControl>
@@ -50,7 +50,7 @@
 
         <FormField name="productionManagerName" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>생산담당자</FormLabel>
+            <FormLabel>생산 담당자</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -59,7 +59,7 @@
 
         <FormField name="itemName" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>품목명</FormLabel>
+            <FormLabel>품목</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -68,7 +68,7 @@
 
         <FormField name="startTime" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>생산 시작시각</FormLabel>
+            <FormLabel>생산 시작 시각</FormLabel>
             <FormControl>
               <Input type="datetime-local" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -86,7 +86,7 @@
 
         <FormField name="lineName" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>라인명</FormLabel>
+            <FormLabel>라인</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -95,9 +95,27 @@
 
         <FormField name="endTime" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>생산 종료시각</FormLabel>
+            <FormLabel>생산 종료 시각</FormLabel>
             <FormControl>
               <Input type="datetime-local" v-bind="componentField" readonly class="text-sm" />
+            </FormControl>
+          </FormItem>
+        </FormField>
+
+        <FormField name="remark" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>비고</FormLabel>
+            <FormControl>
+              <Input type="text" v-bind="componentField" :readonly="!canEdit" />
+            </FormControl>
+          </FormItem>
+        </FormField>
+
+        <FormField name="productionPlanDocumentNo" v-slot="{ componentField }">
+          <FormItem>
+            <FormLabel>생산 실적 전표</FormLabel>
+            <FormControl>
+              <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
           </FormItem>
         </FormField>
@@ -116,15 +134,6 @@
             <FormLabel>불량 전표번호</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
-            </FormControl>
-          </FormItem>
-        </FormField>
-
-        <FormField name="remark" v-slot="{ componentField }">
-          <FormItem class="md:col-span-3">
-            <FormLabel>비고</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" :readonly="!canEdit" />
             </FormControl>
           </FormItem>
         </FormField>
@@ -196,18 +205,18 @@ watch(
       endTime: val.endTime,
       lotNo: val.lotNo,
       defectiveDocumentNo: val.defectiveDocumentNo,
+      productionPlanDocumentNo: val.productionPlanDocumentNo,
       remark: val.remark,
     });
 
-    const unit = val.itemUnit || 'EA';
     PPDetail.value = {
       itemCode: val.itemCode,
       itemName: val.itemName,
       itemSpecification: val.itemSpecification,
       itemUnit: val.itemUnit,
-      totalQty: formatQuantity(val.totalQty, unit),
-      performanceQty: formatQuantity(val.performanceQty, unit),
-      defectiveQty: formatQuantity(val.defectiveQty, unit),
+      totalQty: formatQuantity(val.totalQty),
+      performanceQty: formatQuantity(val.performanceQty),
+      defectiveQty: formatQuantity(val.defectiveQty),
       defectiveRate: val.defectiveRate,
     };
   },
