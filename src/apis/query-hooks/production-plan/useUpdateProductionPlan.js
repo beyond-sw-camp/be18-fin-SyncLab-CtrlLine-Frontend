@@ -11,7 +11,7 @@ export default function useUpdateProductionPlan(productionPlanId) {
   return useMutation({
     mutationFn: params => updateProductionPlan(productionPlanId, params),
     onSuccess: () => {
-      toast.success('생산게획을 수정했습니다.');
+      toast.success('생산계획을 수정했습니다.');
       queryClient.invalidateQueries({ queryKey: ['productionPlan', productionPlanId] });
       queryClient.invalidateQueries({ queryKey: ['productionPlanList'] });
       router.push('/production-management/production-plans');
