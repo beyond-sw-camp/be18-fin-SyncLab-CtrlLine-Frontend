@@ -104,8 +104,8 @@ import useGetFactoryEnergyLatest from '@/apis/query-hooks/factory/useGetFactoryE
 import useGetFactoryEnergyTodayMax from '@/apis/query-hooks/factory/useGetFactoryEnergyTodayMax';
 import useGetFactoryEnvironmentLatest from '@/apis/query-hooks/factory/useGetFactoryEnvironmentLatest';
 import useGetFactoryLinesWithEquipments from '@/apis/query-hooks/factory/useGetFactoryLinesWithEquipments';
-import useGetLineProductionProgress from '@/apis/query-hooks/production-progress/useGetLineProductionProgress';
 import useGetProductionPerformanceAll from '@/apis/query-hooks/production-performance/useGetProductionPerformanceAll';
+import useGetLineProductionProgress from '@/apis/query-hooks/production-progress/useGetLineProductionProgress';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useEquipmentStatusFeed from '@/composables/useEquipmentStatusFeed';
@@ -238,42 +238,10 @@ const normalizeLineValue = value => {
   return String(value);
 };
 
-const getLineCode = record => {
-  const raw = record?.lineCode ?? record?.line?.lineCode ?? record?.lineId ?? null;
-  return normalizeLineValue(raw);
-};
-
 const toNumber = value => {
   const num = Number(value);
   return Number.isFinite(num) ? num : 0;
 };
-const extractTargetQty = record =>
-  toNumber(
-    record?.totalQty ??
-      record?.planQty ??
-      record?.productionPlanQty ??
-      record?.planTotalQty ??
-      record?.targetQty ??
-      record?.orderQty ??
-      0,
-  );
-const extractProducedQty = record =>
-  toNumber(
-    record?.performanceQty ??
-      record?.producedQty ??
-      record?.order_prodeced_qty ??
-      record?.orderProducedQty ??
-      record?.productionQty ??
-      record?.currentQty ??
-      record?.resultQty ??
-      0,
-  );
-const getRecordTimestamp = record => {
-  const raw = record?.endTime ?? record?.startTime ?? record?.dueDate ?? record?.createdAt;
-  const date = raw ? new Date(raw) : null;
-  return date && !Number.isNaN(date.getTime()) ? date.getTime() : 0;
-};
-
 const itemOptions = computed(() => {
   const map = new Map();
   const addRecord = record => {
