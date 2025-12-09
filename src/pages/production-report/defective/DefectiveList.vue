@@ -1,13 +1,14 @@
 <template>
-  <section class="space-y-6">
-    <header class="flex items-center justify-between border-b border-gray-200 pb-4">
+    <section class="space-y-6">
+    <header class="flex items-center justify-between pb-4">
       <div>
         <h3 class="text-2xl font-semibold text-gray-900">불량 현황</h3>
       </div>
 
       <div class="flex items-center">
         <Button
-          class="rounded-full bg-[#5B6D4C] px-6 py-2 text-white hover:bg-[#4C5C3F]"
+          size="sm"
+          class="cursor-pointer w-[70px]"
           :disabled="!hasSearched || isLoading || !visibleRecords.length"
           @click="exportCsv"
         >
@@ -16,149 +17,87 @@
       </div>
     </header>
 
-    <Dialog v-model:open="isFilterOpen">
-      <DialogTrigger as-child>
-        <button
-          class="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600 transition hover:bg-gray-200"
-        >
-          Filter by
-          <ChevronDown class="size-4" />
-        </button>
-      </DialogTrigger>
-
-      <DialogContent
-        class="w-full max-w-[1040px] sm:max-w-[1040px] rounded-3xl border border-gray-300 p-8 shadow-xl"
-      >
-        <DialogHeader class="flex items-center justify-between p-0">
-          <DialogTitle class="text-lg font-semibold text-gray-800">필터 설정</DialogTitle>
-        </DialogHeader>
-
-        <div class="mt-4 space-y-5">
-          <div class="space-y-3">
-            <div class="filter-line">
-              <span class="filter-chip">시작 일자</span>
-              <input
-                v-model="filterForm.fromDate"
-                type="date"
-                class="filter-input flex-1 min-w-[220px]"
-                placeholder="연도. 월. 일."
-              />
-            </div>
-
-            <div class="filter-line">
-              <span class="filter-chip">종료 일자</span>
-              <input
-                v-model="filterForm.toDate"
-                type="date"
-                class="filter-input flex-1 min-w-[220px]"
-                placeholder="연도. 월. 일."
-              />
-            </div>
-
-            <div class="filter-line">
-              <span class="filter-chip">납기 일자</span>
-              <input
-                v-model="filterForm.dueDate"
-                type="date"
-                class="filter-input flex-1 min-w-[220px]"
-                placeholder="연도. 월. 일."
-              />
-            </div>
-          </div>
-
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <div class="filter-grid-item">
-              <span class="filter-chip">생산 공장</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.factoryCode"
-                  placeholder="공장 코드 검색"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div class="filter-grid-item">
-              <span class="filter-chip">생산 라인</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.lineCode"
-                  placeholder="라인 코드 검색"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div class="filter-grid-item">
-              <span class="filter-chip">품목 ID</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.itemId"
-                  placeholder="품목 ID 또는 코드"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div class="filter-grid-item">
-              <span class="filter-chip">생산 담당자</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.productionManagerNo"
-                  placeholder="사번 검색"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div class="filter-grid-item">
-              <span class="filter-chip">영업 담당자</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.salesManagerNo"
-                  placeholder="사번 검색"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div class="filter-grid-item">
-              <span class="filter-chip">전표 번호</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.productionPerformanceDocNo"
-                  placeholder="전표 번호"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-          </div>
+    <Accordion type="single" collapsible class="mt-4">
+      <AccordionItem value="defectiveFilters">
+        <div class="flex w-fit px-2 py-1 rounded-full bg-gray-100 hover:bg-gray-200">
+          <AccordionTrigger class="p-0 hover:no-underline cursor-pointer">
+            Filter by
+          </AccordionTrigger>
         </div>
 
-        <DialogFooter class="mt-6 flex justify-end gap-2">
-          <Button variant="outline" class="rounded-full px-6" @click="resetFilters">초기화</Button>
-          <Button
-            class="rounded-full bg-[#5B6D4C] px-6 py-2 text-white hover:bg-[#4C5C3F]"
-            :disabled="isApplying"
-            @click="applyFilters"
-          >
-            조회
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <AccordionContent class="mt-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <FilterInput
+              label="시작 일자"
+              type="date"
+              placeholder="연도. 월. 일."
+              v-model="filterForm.fromDate"
+            />
+            <FilterInput
+              label="종료 일자"
+              type="date"
+              placeholder="연도. 월. 일."
+              v-model="filterForm.toDate"
+            />
+            <FilterInput
+              label="납기 일자"
+              type="date"
+              placeholder="연도. 월. 일."
+              v-model="filterForm.dueDate"
+            />
+            <FilterInput
+              label="생산 공장"
+              placeholder="공장 코드 검색"
+              v-model="filterForm.factoryCode"
+              search-icon
+            />
+            <FilterInput
+              label="생산 라인"
+              placeholder="라인 코드 검색"
+              v-model="filterForm.lineCode"
+              search-icon
+            />
+            <FilterInput
+              label="품목 ID"
+              placeholder="품목 ID 또는 코드"
+              v-model="filterForm.itemId"
+              search-icon
+            />
+            <FilterInput
+              label="생산 담당자"
+              placeholder="사번 검색"
+              v-model="filterForm.productionManagerNo"
+              search-icon
+            />
+            <FilterInput
+              label="영업 담당자"
+              placeholder="사번 검색"
+              v-model="filterForm.salesManagerNo"
+              search-icon
+            />
+            <FilterInput
+              label="전표 번호"
+              placeholder="전표 번호"
+              v-model="filterForm.productionPerformanceDocNo"
+              search-icon
+            />
+          </div>
+
+          <div class="flex justify-end mt-4 gap-2">
+            <Button variant="outline" class="rounded-full px-6" @click="resetFilters">
+              초기화
+            </Button>
+            <Button
+              class="rounded-full bg-[#5B6D4C] px-6 py-2 text-white hover:bg-[#4C5C3F]"
+              :disabled="isApplying"
+              @click="applyFilters"
+            >
+              조회
+            </Button>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
 
     <div v-if="chartsVisible" class="grid gap-4 lg:grid-cols-2">
       <Card class="h-[340px]">
@@ -241,97 +180,107 @@
       </Card>
     </div>
 
-    <div class="rounded-xl border border-gray-200 bg-white p-5">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-sm text-gray-500">
-          총 <span class="font-semibold text-gray-900">{{ visibleRecords.length }}</span
-          >건
-        </p>
-        <div class="relative w-full sm:w-64">
-          <Search
-            class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            v-model="tableSearch"
-            placeholder="전표, 품목, 공장 검색"
-            class="filter-input filter-input--icon w-full"
-            type="text"
-          />
-        </div>
-      </div>
+    <div class="mt-4 overflow-x-auto">
+      <Table class="w-full min-w-[920px] table-fixed">
+        <TableHeader class="border-b-2 border-primary">
+          <TableRow>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[160px]">
+              전표번호
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[150px]">
+              품목 코드
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[180px]">
+              품목명
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              공장
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[140px]">
+              라인
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              불량률
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              생산 담당자
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              영업 담당자
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              비고
+            </TableHead>
+          </TableRow>
+        </TableHeader>
 
-      <div class="mt-4 overflow-x-auto">
-        <table class="w-full min-w-[920px] table-fixed">
-          <thead class="text-sm font-semibold text-gray-600">
-            <tr class="border-b border-gray-200">
-              <th class="px-4 py-3 text-center w-[160px]">전표번호</th>
-              <th class="px-4 py-3 text-center w-[150px]">품목 코드</th>
-              <th class="px-4 py-3 text-center w-[180px]">품목명</th>
-              <th class="px-4 py-3 text-center">공장</th>
-              <th class="px-4 py-3 text-center w-[140px]">라인</th>
-              <th class="px-4 py-3 text-center">불량률</th>
-              <th class="px-4 py-3 text-center">생산 담당자</th>
-              <th class="px-4 py-3 text-center">영업 담당자</th>
-              <th class="px-4 py-3 text-center">비고</th>
-            </tr>
-          </thead>
+        <TableBody v-if="!hasSearched">
+          <TableRow>
+            <TableCell colspan="9" class="text-center py-10 text-sm text-gray-400">
+              필터를 설정한 뒤 조회 버튼을 눌러주세요.
+            </TableCell>
+          </TableRow>
+        </TableBody>
 
-          <tbody v-if="!hasSearched">
-            <tr>
-              <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="9">
-                필터를 설정한 뒤 조회 버튼을 눌러주세요.
-              </td>
-            </tr>
-          </tbody>
+        <TableBody v-else-if="isLoading">
+          <TableRow>
+            <TableCell colspan="9" class="text-center py-10 text-sm text-gray-500">
+              불량 데이터를 불러오는 중입니다...
+            </TableCell>
+          </TableRow>
+        </TableBody>
 
-          <tbody v-else-if="isLoading">
-            <tr>
-              <td class="px-4 py-10 text-center text-sm text-gray-500" colspan="9">
-                불량 데이터를 불러오는 중입니다...
-              </td>
-            </tr>
-          </tbody>
+        <TableBody v-else-if="visibleRecords.length">
+          <TableRow
+            v-for="record in visibleRecords"
+            :key="detailKeyOf(record)"
+            class="text-center transition-all border-b border-dotted border-gray-300 hover:bg-gray-50"
+          >
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
+              <button
+                class="text-[#2765C4] underline-offset-2 hover:underline"
+                @click="
+                  goToDefectiveDetail(record.defectiveDocNo || record.productionPerformanceDocNo)
+                "
+              >
+                {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
+              </button>
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.itemCode }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.itemName }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.factoryName }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.lineName }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[#5B6D4C]">
+              {{ formatPercent(record.defectiveTotalRate) }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.productionManagerName }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.salesManagerName }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-pre-wrap whitespace-normal text-gray-600">
+              {{ remarksMap[remarkKeyOf(record)] ?? '' }}
+            </TableCell>
+          </TableRow>
+        </TableBody>
 
-          <tbody v-else-if="visibleRecords.length">
-            <tr
-              v-for="record in visibleRecords"
-              :key="detailKeyOf(record)"
-              class="border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50"
-            >
-              <td class="px-4 py-3 text-center font-medium">
-                <button
-                  class="text-[#2765C4] underline-offset-2 hover:underline"
-                  @click="
-                    goToDefectiveDetail(record.defectiveDocNo || record.productionPerformanceDocNo)
-                  "
-                >
-                  {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
-                </button>
-              </td>
-              <td class="px-4 py-3 text-center">{{ record.itemCode }}</td>
-              <td class="px-4 py-3 text-center">{{ record.itemName }}</td>
-              <td class="px-4 py-3 text-center">{{ record.factoryName }}</td>
-              <td class="px-4 py-3 text-center">{{ record.lineName }}</td>
-              <td class="px-4 py-3 text-center font-semibold text-[#5B6D4C]">
-                {{ formatPercent(record.defectiveTotalRate) }}
-              </td>
-              <td class="px-4 py-3 text-center">{{ record.productionManagerName }}</td>
-              <td class="px-4 py-3 text-center">{{ record.salesManagerName }}</td>
-              <td class="px-4 py-3 whitespace-pre-wrap text-center text-gray-600">
-                {{ remarksMap[remarkKeyOf(record)] ?? '' }}
-              </td>
-            </tr>
-          </tbody>
-
-          <tbody v-else>
-            <tr>
-              <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="9">
-                조건에 맞는 불량 데이터가 없습니다.
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <TableBody v-else>
+          <TableRow>
+            <TableCell colspan="9" class="text-center py-10 text-sm text-gray-400">
+              조건에 맞는 불량 데이터가 없습니다.
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
   </section>
 </template>
@@ -339,13 +288,19 @@
 <script setup>
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { VisDonut, VisSingleContainer, VisXYContainer, VisAxis, VisLine } from '@unovis/vue';
-import { ChevronDown, Search } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
 import { getDefectiveAll, getDefectiveDetail } from '@/apis/query-functions/defective';
 import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
+import FilterInput from '@/components/filter/FilterInput.vue';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import {
@@ -356,16 +311,15 @@ import {
   componentToString,
 } from '@/components/ui/chart';
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
-const isFilterOpen = ref(false);
 const isApplying = ref(false);
 const hasSearched = ref(false);
 const router = useRouter();
@@ -420,28 +374,8 @@ const {
 });
 
 const defectiveRows = computed(() => defectiveData.value ?? []);
-const tableSearch = ref('');
 
-const visibleRecords = computed(() => {
-  if (!hasSearched.value) return [];
-  const keyword = tableSearch.value.trim().toLowerCase();
-  if (!keyword) return defectiveRows.value;
-
-  return defectiveRows.value.filter(record => {
-    const candidates = [
-      record.productionPerformanceDocNo,
-      record.defectiveDocNo,
-      record.itemCode,
-      record.itemName,
-      record.factoryName,
-      record.lineName,
-    ]
-      .filter(Boolean)
-      .map(value => String(value).toLowerCase());
-
-    return candidates.some(value => value.includes(keyword));
-  });
-});
+const visibleRecords = computed(() => (hasSearched.value ? defectiveRows.value : []));
 
 const isLoading = computed(() => isFetching.value);
 const remarksMap = reactive({});
@@ -555,7 +489,6 @@ const applyFilters = async () => {
 
     hasSearched.value = true;
     await refetch();
-    isFilterOpen.value = false;
   } catch (error) {
     console.error(error);
     toast.error('불량 데이터를 불러오지 못했습니다.');
@@ -835,43 +768,6 @@ const chartsVisible = computed(() => hasSearched.value && chartRecords.value.len
 </script>
 
 <style scoped>
-.filter-line {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.filter-chip {
-  flex-shrink: 0;
-  border-radius: 999px;
-  background-color: #5b6d4c;
-  padding: 0.5rem 0.9rem;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #ffffff;
-  min-width: 96px;
-}
-
-.filter-grid-item {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 1rem;
-  padding: 0.75rem;
-  background-color: #fbfbfb;
-}
-
-.filter-icon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  pointer-events: none;
-}
-
 .filter-input {
   border-radius: 0.75rem;
   border: 1px solid #e5e7eb;
@@ -887,7 +783,4 @@ const chartsVisible = computed(() => hasSearched.value && chartRecords.value.len
   outline: none;
 }
 
-.filter-input--icon {
-  padding-left: 2.5rem;
-}
 </style>

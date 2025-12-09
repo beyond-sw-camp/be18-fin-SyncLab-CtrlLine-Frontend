@@ -11,11 +11,6 @@
             :pad-angle="0.01"
           />
 
-          <ChartTooltip
-            :triggers="{
-              [Donut.selectors.segment]: tooltipTemplate,
-            }"
-          />
         </VisSingleContainer>
       </ChartContainer>
       <div
@@ -52,16 +47,10 @@
 </template>
 
 <script setup>
-import { Donut } from '@unovis/ts';
 import { VisDonut, VisSingleContainer } from '@unovis/vue';
 import { computed } from 'vue';
 
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  componentToString,
-} from '@/components/ui/chart';
+import { ChartContainer } from '@/components/ui/chart';
 import { PIE_CHART_CONFIG } from '@/constants/chartConfig';
 
 const props = defineProps({
@@ -91,9 +80,4 @@ const sortedData = computed(() => {
     .sort((a, b) => b.visitors - a.visitors);
 });
 
-const tooltipTemplate = computed(() =>
-  componentToString(chartConfig.value, ChartTooltipContent, {
-    hideLabel: true,
-  }),
-);
 </script>
