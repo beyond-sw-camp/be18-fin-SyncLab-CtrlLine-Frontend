@@ -27,6 +27,7 @@
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "event-source-polyfill": "^1.0.31",
     "lucide-vue-next": "^0.552.0",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.7.1",
