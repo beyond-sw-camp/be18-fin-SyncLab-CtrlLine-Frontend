@@ -37,24 +37,31 @@
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.documentNo }}
             </TableCell>
+
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.factoryName }}
             </TableCell>
+
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.lineName }}
             </TableCell>
+
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.itemName }}
             </TableCell>
+
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.salesManagerName }}
             </TableCell>
+
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.productionManagerName }}
             </TableCell>
+
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ performance.performanceQty }}
+              {{ formatQuantityWithUnit(performance.performanceQty, performance.itemUnit) }}
             </TableCell>
+
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ performance.defectRate }}
             </TableCell>
@@ -142,6 +149,12 @@ const initialFilters = {
   maxPerformanceQty: parseNumberQuery(route.query.maxPerformanceQty),
   minDefectRate: parseNumberQuery(route.query.minDefectRate),
   maxDefectRate: parseNumberQuery(route.query.maxDefectRate),
+};
+
+const formatQuantityWithUnit = (quantity, unit) => {
+  if (quantity === null || quantity === undefined || quantity === '') return '';
+  const formattedQty = Number(quantity).toLocaleString('ko-KR');
+  return `${formattedQty} ${unit || ''}`.trim();
 };
 
 const {
