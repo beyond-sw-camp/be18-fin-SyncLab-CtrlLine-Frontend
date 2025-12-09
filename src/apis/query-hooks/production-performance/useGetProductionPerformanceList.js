@@ -19,14 +19,18 @@ export default function useGetProductionPerformanceList(initialFilters = {}) {
     lotNo: initialFilters.lotNo ?? '',
 
     factoryName: initialFilters.factoryName ?? '',
+    lineName: initialFilters.lineName ?? '',
     lineCode: initialFilters.lineCode ?? '',
     itemCode: initialFilters.itemCode ?? '',
+    itemName: initialFilters.itemName ?? '',
 
-    salesManagerNo: initialFilters.salesManagerNo ?? '',
-    producerManagerNo: initialFilters.producerManagerNo ?? '',
+    salesManagerName: initialFilters.salesManagerNo ?? '',
+    productionManagerName: initialFilters.producerManagerNo ?? '',
 
     startTimeFrom: initialFilters.startTimeFrom ?? null,
     startTimeTo: initialFilters.startTimeTo ?? null,
+    endTimeFrom: initialFilters.endTimeFrom ?? null,
+    endTimeTo: initialFilters.endTimeTo ?? null,
 
     dueDateFrom: initialFilters.dueDateFrom ?? null,
     dueDateTo: initialFilters.dueDateTo ?? null,

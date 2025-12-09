@@ -68,7 +68,7 @@
       </Table>
     </div>
     <BasePagination
-      v-model="page"
+      v-model:page="page"
       :total-pages="productionPerformanceList?.pageInfo?.totalPages ?? 1"
     />
   </div>
@@ -88,6 +88,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+// 필터 컴포넌트 이름이 FilterTab.vue로 가정하고 유지합니다.
 import FilterTab from '@/pages/production-management/production-performance/FilterTab.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
@@ -109,13 +110,33 @@ const parsePage = value => {
   return Number.isNaN(parsed) || parsed < 1 ? 1 : parsed;
 };
 
+// ✅ 필터 컴포넌트에서 추가/변경된 모든 필드 반영
 const initialFilters = {
+  // 문서/전표/Lot
+  documentDateFrom: route.query.documentDateFrom || null,
+  documentDateTo: route.query.documentDateTo || null,
   productionPlanDocumentNo: route.query.productionPlanDocumentNo || '',
-  factoryName: route.query.factoryName || '',
+  defectiveDocumentNo: route.query.defectiveDocumentNo || '',
+  lotNo: route.query.lotNo || '',
+
+  // 공장/라인/품목/담당자 (Name 기준)
+  factoryName: route.query.factoryName || null,
   lineName: route.query.lineName || '',
   itemName: route.query.itemName || '',
   salesManagerName: route.query.salesManagerName || '',
   productionManagerName: route.query.productionManagerName || '',
+
+  // 기간 필드
+  dueDateFrom: route.query.dueDateFrom || null,
+  dueDateTo: route.query.dueDateTo || null,
+  startTimeFrom: route.query.startTimeFrom || null,
+  startTimeTo: route.query.startTimeTo || null,
+  endTimeFrom: route.query.endTimeFrom || null,
+  endTimeTo: route.query.endTimeTo || null,
+
+  // 수량/비율 범위
+  minTotalQty: parseNumberQuery(route.query.minTotalQty),
+  maxTotalQty: parseNumberQuery(route.query.maxTotalQty),
   minPerformanceQty: parseNumberQuery(route.query.minPerformanceQty),
   maxPerformanceQty: parseNumberQuery(route.query.maxPerformanceQty),
   minDefectRate: parseNumberQuery(route.query.minDefectRate),
@@ -159,17 +180,36 @@ watch(page, () => {
   syncQuery();
 });
 
+// 3. URL 쿼리가 변경될 때 필터 상태 업데이트 (뒤로가기/URL 직접 입력 등)
 watch(
   () => route.query,
   newQuery => {
     page.value = parsePage(newQuery.page ?? 1);
 
+    filters.documentDateFrom = newQuery.documentDateFrom || null;
+    filters.documentDateTo = newQuery.documentDateTo || null;
+
     filters.productionPlanDocumentNo = newQuery.productionPlanDocumentNo ?? '';
-    filters.factoryName = newQuery.factoryName ?? '';
+    filters.defectiveDocumentNo = newQuery.defectiveDocumentNo ?? '';
+    filters.lotNo = newQuery.lotNo ?? '';
+
+    filters.factoryName = newQuery.factoryName ?? null;
     filters.lineName = newQuery.lineName ?? '';
+    filters.itemCode = newQuery.itemCode ?? '';
     filters.itemName = newQuery.itemName ?? '';
-    filters.salesManagerName = newQuery.salesManagerName ?? '';
+
     filters.productionManagerName = newQuery.productionManagerName ?? '';
+    filters.salesManagerName = newQuery.salesManagerName ?? '';
+
+    filters.startTimeFrom = newQuery.startTimeFrom || null;
+    filters.startTimeTo = newQuery.startTimeTo || null;
+    filters.endTimeFrom = newQuery.endTimeFrom || null;
+    filters.endTimeTo = newQuery.endTimeTo || null;
+    filters.dueDateFrom = newQuery.dueDateFrom || null;
+    filters.dueDateTo = newQuery.dueDateTo || null;
+
+    filters.minTotalQty = parseNumberQuery(newQuery.minTotalQty);
+    filters.maxTotalQty = parseNumberQuery(newQuery.maxTotalQty);
     filters.minPerformanceQty = parseNumberQuery(newQuery.minPerformanceQty);
     filters.maxPerformanceQty = parseNumberQuery(newQuery.maxPerformanceQty);
     filters.minDefectRate = parseNumberQuery(newQuery.minDefectRate);
@@ -178,5 +218,3 @@ watch(
   { immediate: true },
 );
 </script>
-
-<style scoped></style>
