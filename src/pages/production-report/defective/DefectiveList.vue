@@ -180,38 +180,19 @@
       </Card>
     </div>
 
-    <div class="rounded-xl border border-gray-200 bg-white p-5">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-sm text-gray-500">
-          총 <span class="font-semibold text-gray-900">{{ visibleRecords.length }}</span
-          >건
-        </p>
-        <div class="relative w-full sm:w-64">
-          <Search
-            class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            v-model="tableSearch"
-            placeholder="전표, 품목, 공장 검색"
-            class="filter-input filter-input--icon w-full"
-            type="text"
-          />
-        </div>
-      </div>
-
-      <div class="mt-4 overflow-x-auto">
+    <div class="mt-4 overflow-x-auto">
         <table class="w-full min-w-[920px] table-fixed">
-          <thead class="text-sm font-semibold text-gray-600">
-            <tr class="border-b border-gray-200">
-              <th class="px-4 py-3 text-center w-[160px]">전표번호</th>
-              <th class="px-4 py-3 text-center w-[150px]">품목 코드</th>
-              <th class="px-4 py-3 text-center w-[180px]">품목명</th>
-              <th class="px-4 py-3 text-center">공장</th>
-              <th class="px-4 py-3 text-center w-[140px]">라인</th>
-              <th class="px-4 py-3 text-center">불량률</th>
-              <th class="px-4 py-3 text-center">생산 담당자</th>
-              <th class="px-4 py-3 text-center">영업 담당자</th>
-              <th class="px-4 py-3 text-center">비고</th>
+          <thead class="border-b-2 border-primary text-sm font-semibold text-gray-600">
+            <tr>
+              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden w-[160px]">전표번호</th>
+              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden w-[150px]">품목 코드</th>
+              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden w-[180px]">품목명</th>
+              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden">공장</th>
+              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden w-[140px]">라인</th>
+              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden">불량률</th>
+              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden">생산 담당자</th>
+              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden">영업 담당자</th>
+              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden">비고</th>
             </tr>
           </thead>
 
@@ -235,9 +216,9 @@
             <tr
               v-for="record in visibleRecords"
               :key="detailKeyOf(record)"
-              class="border-b border-gray-100 text-sm text-gray-700 hover:bg-gray-50"
+              class="text-center transition-all border-b border-dotted border-gray-300 hover:bg-gray-50 text-sm text-gray-700"
             >
-              <td class="px-4 py-3 text-center font-medium">
+              <td class="px-4 py-3 font-medium">
                 <button
                   class="text-[#2765C4] underline-offset-2 hover:underline"
                   @click="
@@ -270,7 +251,6 @@
             </tr>
           </tbody>
         </table>
-      </div>
     </div>
   </section>
 </template>
@@ -278,7 +258,6 @@
 <script setup>
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { VisDonut, VisSingleContainer, VisXYContainer, VisAxis, VisLine } from '@unovis/vue';
-import { Search } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
@@ -357,28 +336,8 @@ const {
 });
 
 const defectiveRows = computed(() => defectiveData.value ?? []);
-const tableSearch = ref('');
 
-const visibleRecords = computed(() => {
-  if (!hasSearched.value) return [];
-  const keyword = tableSearch.value.trim().toLowerCase();
-  if (!keyword) return defectiveRows.value;
-
-  return defectiveRows.value.filter(record => {
-    const candidates = [
-      record.productionPerformanceDocNo,
-      record.defectiveDocNo,
-      record.itemCode,
-      record.itemName,
-      record.factoryName,
-      record.lineName,
-    ]
-      .filter(Boolean)
-      .map(value => String(value).toLowerCase());
-
-    return candidates.some(value => value.includes(keyword));
-  });
-});
+const visibleRecords = computed(() => (hasSearched.value ? defectiveRows.value : []));
 
 const isLoading = computed(() => isFetching.value);
 const remarksMap = reactive({});
@@ -786,7 +745,4 @@ const chartsVisible = computed(() => hasSearched.value && chartRecords.value.len
   outline: none;
 }
 
-.filter-input--icon {
-  padding-left: 2.5rem;
-}
 </style>
