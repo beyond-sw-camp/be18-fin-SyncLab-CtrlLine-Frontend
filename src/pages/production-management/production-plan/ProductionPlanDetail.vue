@@ -42,7 +42,7 @@
                 <FormLabel>공장명</FormLabel>
                 <FormControl>
                   <Select v-bind="componentField" @update:modelValue="onFactorySelected">
-                    <SelectTrigger class="w-full truncate min-w-0">
+                    <SelectTrigger :class="['w-full', canEdit ? '' : 'pointer-events-none']">
                       <SelectValue placeholder="공장을 선택해주세요." />
                     </SelectTrigger>
 
@@ -220,7 +220,7 @@
                     :key="`factory-${selectedFactoryId}-item-${selectedItemId}`"
                     @update:modelValue="onLineSelected"
                   >
-                    <SelectTrigger class="w-full truncate min-w-0">
+                    <SelectTrigger :class="['w-full', canEdit ? '' : 'pointer-events-none']">
                       <SelectValue placeholder="라인을 선택해주세요." />
                     </SelectTrigger>
 
@@ -433,7 +433,7 @@ const canEdit = computed(() => {
   if (!status || !role) return false;
 
   // RUNNING, COMPLETED 은 누구든 수정 불가
-  if (['RUNNING', 'COMPLETED'].includes(status)) return false;
+  if (['RUNNING', 'COMPLETED', 'RETURNED'].includes(status)) return false;
 
   // ADMIN: PENDING, CONFIRMED 에서만 수정 가능
   if (role === 'ADMIN') {
