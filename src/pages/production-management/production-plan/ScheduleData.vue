@@ -139,15 +139,6 @@ const draftEvent = computed(() => {
     return null;
   }
 
-  console.log(
-    'startTime',
-    props.draftStartTime,
-    'endTime',
-    props.draftEndTime,
-    'qty',
-    props.draftQty,
-  );
-
   return {
     Id: 'draft', // 임시 ID
     Subject: '신규 생산계획',
@@ -475,6 +466,82 @@ function onSelectedDragStart(args) {
 function onDragStart(args) {
   args.cancel = true;
 }
+
+function reorderEventsAfterTimeChange(changedEventId, newStartTime, newEndTime) {
+  const lineCode = props.lineCode;
+  if (!lineCode) return;
+
+  // 현재 라인의 모든 이벤트 복사 (draft 제외)
+  let events = selectedEvents.value
+    .filter(e => e.LineCode === lineCode && e.Id !== 'draft')
+    .map(e => ({
+      ...e,
+      StartTime: new Date(e.StartTime),
+      EndTime: new Date(e.EndTime),
+    }));
+
+  if (!events.length) return;
+
+  // 변경된 이벤트 찾기
+  const changedIndex = events.findIndex(e => e.Id === changedEventId);
+  if (changedIndex === -1) return;
+
+  // 변경된 이벤트의 시간 업데이트
+  events[changedIndex].StartTime = new Date(newStartTime);
+  events[changedIndex].EndTime = new Date(newEndTime);
+
+  // 시작 시간 기준으로 정렬
+  events.sort((a, b) => a.StartTime.getTime() - b.StartTime.getTime());
+
+  // 가장 이른 시작 시간 찾기
+  const earliestMs = Math.min(...events.map(e => e.StartTime.getTime()));
+
+  // 전체 타임라인 재정렬
+  let currentStart = new Date(earliestMs);
+
+  isProgrammaticUpdate.value = true;
+  try {
+    for (const ev of events) {
+      const durationMs = ev.EndTime.getTime() - ev.StartTime.getTime();
+
+      ev.StartTime = new Date(currentStart);
+      ev.EndTime = new Date(currentStart.getTime() + durationMs);
+      currentStart = new Date(ev.EndTime);
+
+      applyEventToSchedules(ev);
+    }
+  } finally {
+    isProgrammaticUpdate.value = false;
+  }
+
+  // 스케줄 새로고침
+  nextTick(() => {
+    selectedScheduleRef.value?.ej2Instances?.refreshEvents();
+    availableScheduleRef.value?.ej2Instances?.refreshEvents();
+  });
+}
+
+watch(
+  () => [props.updatedStartTime, props.updatedEndTime, props.productionPlanDetailId],
+  ([newStartTime, newEndTime, planId]) => {
+    if (props.mode === 'detail' && planId && newStartTime && newEndTime) {
+      // 시간이 실제로 변경되었는지 확인
+      const currentEvent = selectedEvents.value.find(e => e.Id === planId);
+      if (currentEvent) {
+        const currentStart = new Date(currentEvent.StartTime).getTime();
+        const currentEnd = new Date(currentEvent.EndTime).getTime();
+        const newStart = new Date(newStartTime).getTime();
+        const newEnd = new Date(newEndTime).getTime();
+
+        // 시간이 변경된 경우에만 재정렬
+        if (currentStart !== newStart || currentEnd !== newEnd) {
+          reorderEventsAfterTimeChange(planId, newStartTime, newEndTime);
+        }
+      }
+    }
+  },
+  { deep: true },
+);
 </script>
 
 <style>
