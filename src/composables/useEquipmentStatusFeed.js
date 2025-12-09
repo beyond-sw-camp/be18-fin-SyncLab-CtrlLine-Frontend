@@ -1,5 +1,5 @@
-import { onBeforeUnmount, onMounted, ref, unref, watch } from 'vue';
 import { EventSourcePolyfill } from 'event-source-polyfill';
+import { onBeforeUnmount, onMounted, ref, unref, watch } from 'vue';
 
 import { getEquipmentStatuses } from '@/apis/query-functions/equipment';
 import { useAuthStore } from '@/stores/useAuthStore';
