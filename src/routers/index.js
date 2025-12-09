@@ -114,6 +114,7 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       {
+        // 생산 계획
         path: 'production-plans',
         name: 'ProductionPlanList',
         component: () =>
@@ -131,6 +132,7 @@ const routes = [
         component: () =>
           import('@/pages/production-management/production-plan/CreateProductionPlan.vue'),
       },
+      // 생산 실적
       {
         path: 'production-performances',
         name: 'ProductionPerformanceList',
@@ -139,6 +141,15 @@ const routes = [
             '@/pages/production-management/production-performance/ProductionPerformanceList.vue'
           ),
       },
+      {
+        path: 'production-performances/:id',
+        name: 'ProductionPerformanceDetail',
+        component: () =>
+          import(
+            '@/pages/production-management/production-performance/ProductionPerformanceDetail.vue'
+          ),
+      },
+      // 불량
       {
         path: 'defectives',
         name: 'DefectiveList',
