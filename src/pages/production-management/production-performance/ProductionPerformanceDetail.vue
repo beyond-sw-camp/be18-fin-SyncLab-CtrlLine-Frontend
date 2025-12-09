@@ -209,14 +209,15 @@ watch(
       remark: val.remark,
     });
 
+    const unit = val.itemUnit || 'EA';
     PPDetail.value = {
       itemCode: val.itemCode,
       itemName: val.itemName,
       itemSpecification: val.itemSpecification,
       itemUnit: val.itemUnit,
-      totalQty: formatQuantity(val.totalQty),
-      performanceQty: formatQuantity(val.performanceQty),
-      defectiveQty: formatQuantity(val.defectiveQty),
+      totalQty: formatQuantity(val.totalQty, unit),
+      performanceQty: formatQuantity(val.performanceQty, unit),
+      defectiveQty: formatQuantity(val.defectiveQty, unit),
       defectiveRate: val.defectiveRate,
     };
   },
