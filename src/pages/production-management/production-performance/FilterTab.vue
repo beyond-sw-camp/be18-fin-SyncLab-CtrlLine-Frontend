@@ -9,9 +9,56 @@
 
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FilterSelect label="공장" v-model="localFilters.factoryCode" :options="factoryOptions" />
-          <FilterInput label="납기일자" type="date" v-model="localFilters.dueDate" />
+          <div>
+            <Label class="text-xs">생산실적 전표번호</Label>
+            <div class="flex items-center gap-1 mt-1">
+              <FilterInput
+                type="text"
+                v-model="localFilters.documentDateFrom"
+                placeholder="시작일"
+                class="w-1/2"
+              />
+              <span class="block text-gray-400">~</span>
+              <FilterInput
+                type="text"
+                v-model="localFilters.documentDateTo"
+                placeholder="종료일"
+                class="w-1/2"
+              />
+            </div>
+          </div>
 
+          <FilterInput label="생산계획 전표번호" v-model="localFilters.producerManagerNo" />
+
+          <FilterInput label="불량 전표번호" v-model="localFilters.defectiveDocumentNo" />
+
+          <FilterInput label="로트 번호" v-model="localFilters.lotNo" />
+
+          <FilterSelect
+            label="공장명"
+            v-model="localFilters.factoryName"
+            :options="factoryOptions"
+          />
+
+          <FilterSelect label="라인" v-model="localFilters.lineCode" :options="lineOptions" />
+          <div>
+            <Label class="text-xs">납기일자</Label>
+            <div class="flex items-center gap-1 mt-1">
+              <FilterInput
+                type="date"
+                v-model="localFilters.dueDateFrom"
+                placeholder="시작일"
+                class="w-1/2"
+              />
+              <span class="block text-gray-400">~</span>
+              <FilterInput
+                type="date"
+                v-model="localFilters.dueDateTo"
+                placeholder="종료일"
+                class="w-1/2"
+              />
+            </div>
+          </div>
           <div>
             <Label class="text-xs">품목명</Label>
             <CreateAutoCompleteSelect
@@ -39,50 +86,18 @@
             />
           </div>
 
-          <FilterInput label="생산담당자" v-model="localFilters.productionManagerName" />
+          <FilterInput label="생산담당자" v-model="localFilters.producerManagerNo" />
 
-          <FilterSelect label="라인" v-model="localFilters.lineCode" :options="lineOptions" />
+          <FilterInput label="영업담당자" v-model="localFilters.salesManagerNo" />
 
-          <FormField
-            name="salesManagerNo"
-            v-slot="{ value, componentField, setValue, errorMessage }"
-          >
-            <FormItem class="w-full">
-              <FormLabel>영업담당자</FormLabel>
-              <FormControl class="w-full min-w-0">
-                <UpdateAutoCompleteSelect
-                  :key="`salesManagerNo-${productionPerformanceDetail?.salesManagerNo}`"
-                  label="영업담당자"
-                  :value="value"
-                  :componentField="componentField"
-                  :setValue="setValue"
-                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
-                  keyField="empNo"
-                  nameField="userName"
-                  :fields="[
-                    'empNo',
-                    'userName',
-                    'userEmail',
-                    'userDepartment',
-                    'userPhoneNumber',
-                    'userStatus',
-                    'userRole',
-                  ]"
-                  :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
-                  :initialText="productionPerformanceDetail.salesManagerName"
-                />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
           <div>
-            <Label class="text-xs">생산기간</Label>
+            <Label class="text-xs">생산 시작 기간</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <div class="flex-1 min-w-[180px]">
                 <FilterInput
                   type="datetime-local"
-                  v-model="localFilters.startTime"
-                  placeholder="시작일"
+                  v-model="localFilters.startTimeFrom"
+                  placeholder="생산 시작"
                 />
               </div>
 
@@ -91,8 +106,8 @@
               <div class="flex-1 min-w-[180px]">
                 <FilterInput
                   type="datetime-local"
-                  v-model="localFilters.endTime"
-                  placeholder="종료일"
+                  v-model="localFilters.startTimeTo"
+                  placeholder="생산 시자"
                 />
               </div>
             </div>
@@ -120,7 +135,6 @@
     </AccordionItem>
   </Accordion>
 </template>
-
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
 
@@ -143,26 +157,45 @@ const props = defineProps({
   filters: { type: Object, required: true },
 });
 
-const emit = defineEmits(['search', 'reset']);
+const emit = defineEmits(['search']);
 
 const localFilters = reactive({
-  factoryCode: props.filters.factoryCode ?? null,
+  documentDateFrom: props.filters.documentDateFrom ?? null,
+  documentDateTo: props.filters.ducoumentDateTo ?? null,
+
+  productionPlanDocument: props.filters.productionPlanDocument ?? '',
+  defectiveDocumentNo: props.filters.defectiveDocumentNo ?? '',
+  lotNo: props.filters.lotNo ?? '',
+
+  factoryName: props.filters.factoryName ?? null,
   lineCode: props.filters.lineCode ?? '',
-  lineName: props.filters.lineName ?? '',
   itemCode: props.filters.itemCode ?? '',
   itemName: props.filters.itemName ?? '',
-  productionManagerName: props.filters.productionManagerName ?? '',
-  salesManagerName: props.filters.salesManagerName ?? '',
-  dueDate: props.filters.dueDate ?? null,
-  startTime: props.filters.startTime ?? null,
-  endTime: props.filters.endTime ?? null,
+  producerManagerNo: props.filters.producerManagerNo ?? '',
+  salesManagerNo: props.filters.salesManagerNo ?? '',
+
+  startTimeFrom: props.filters.startTimeFrom ?? null,
+  startTimeTo: props.filters.startTimeTo ?? null,
+  dueDateFrom: props.filters.dueDateFrom ?? null,
+  dueDateTo: props.filters.dueDateTo ?? null,
+
+  minTotalQty: props.filters.minTotalQty ?? null,
+  maxTotalQty: props.filters.maxTotalQty ?? null,
+  minPerformanceQty: props.filters.minPerformanceQty ?? null,
+  maxPerformanceQty: props.filters.maxPerformanceQty ?? null,
+  minDefectRate: props.filters.minDefectRate ?? null,
+  maxDefectRate: props.filters.maxDefectRate ?? null,
 });
 
-const selectedFactoryId = ref(null);
-const selectedItemId = ref(null);
+watch(
+  () => props.filters,
+  newVal => {
+    Object.assign(localFilters, newVal);
+  },
+  { deep: true },
+);
 
 const { data: factoryList } = useGetFactoryList();
-const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 
 const factoryOptions = computed(() => {
   if (!factoryList.value || !factoryList.value.content)
@@ -171,57 +204,12 @@ const factoryOptions = computed(() => {
   return [
     { value: null, label: '전체', id: null },
     ...factoryList.value.content.map(factory => ({
-      value: factory.factoryCode,
-      label: factory.factoryCode,
+      value: factory.factoryName,
+      label: factory.factoryName,
       id: factory.factoryId,
     })),
   ];
 });
-
-const lineOptions = computed(() => {
-  if (!lineList.value || !lineList.value.content) {
-    return [{ value: null, label: '전체' }];
-  }
-
-  if (selectedFactoryId.value === null || localFilters.factoryCode === null) {
-    // 라인 이름만 추출하여 Set으로 중복을 제거 (9개 -> 3개 이름만)
-    const uniqueLineNames = new Set(lineList.value.content.map(line => line.lineCode));
-
-    // 이름만 포함하는 간결한 옵션 목록을 생성
-    const simpleOptions = Array.from(uniqueLineNames).map(name => ({
-      value: name,
-      label: name,
-    }));
-
-    return [{ value: null, label: '전체' }, ...simpleOptions];
-  }
-
-  return [
-    { value: null, label: '전체' },
-    ...lineList.value.content.map(line => ({
-      value: `${line.lineCode}`,
-      label: `${line.lineCode}`,
-    })),
-  ];
-});
-
-function onItemSelected(item) {
-  selectedItemId.value = item.id;
-}
-
-function onItemCleared() {
-  selectedItemId.value = null;
-}
-
-const setItemCodeFilter = newCode => {
-  localFilters.itemCode = newCode;
-  localFilters.itemName = '';
-
-  if (!newCode) {
-    localFilters.itemName = '';
-    selectedItemId.value = null;
-  }
-};
 
 const applyFilters = () => {
   emit('search', { ...localFilters });
@@ -229,20 +217,37 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   Object.assign(localFilters, {
-    factoryCode: null,
+    documentDateFrom: null,
+    documentDateTo: null,
+
+    productionPlanDocumentNo: '',
+    defectiveDocumentNo: '',
+
+    factoryName: null,
     lineCode: '',
-    salesManagerName: '',
-    productionManagerName: '',
+    lotNo: '',
+
+    salesManagerNo: '',
+    producerManagerNo: '',
     itemCode: '',
-    dueDate: null,
-    startTime: null,
-    endTime: null,
+    itemName: '',
+
+    // 기간 필드 초기화
+    startTimeFrom: null,
+    startTimeTo: null,
+    dueDateFrom: null,
+    dueDateTo: null,
+
+    // 수량/비율 필드 초기화
+    minTotalQty: null,
+    maxTotalQty: null,
+    minPerformanceQty: null,
+    maxPerformanceQty: null,
+    minDefectRate: null,
+    maxDefectRate: null,
   });
 
-  selectedFactoryId.value = null;
-  selectedItemId.value = null;
-
-  emit('reset', { ...localFilters });
+  emit('search', { ...localFilters });
 };
 
 watch(

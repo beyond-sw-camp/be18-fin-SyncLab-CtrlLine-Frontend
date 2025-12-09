@@ -11,12 +11,28 @@ export default function useGetProductionPerformanceList(initialFilters = {}) {
   const fixedSort = ['documentNo,desc'];
 
   const filters = reactive({
+    documentDateFrom: initialFilters.documentDateFrom ?? null,
+    documentDateTo: initialFilters.documentDateTo ?? null,
+
     productionPlanDocumentNo: initialFilters.productionPlanDocumentNo ?? '',
+    defectiveDocumentNo: initialFilters.defectiveDocumentNo ?? '',
+    lotNo: initialFilters.lotNo ?? '',
+
     factoryName: initialFilters.factoryName ?? '',
-    lineName: initialFilters.lineName ?? '',
-    itemName: initialFilters.itemName ?? '',
-    salesManagerName: initialFilters.salesManagerName ?? '',
-    productionManagerName: initialFilters.productionManagerName ?? '',
+    lineCode: initialFilters.lineCode ?? '',
+    itemCode: initialFilters.itemCode ?? '',
+
+    salesManagerNo: initialFilters.salesManagerNo ?? '',
+    producerManagerNo: initialFilters.producerManagerNo ?? '',
+
+    startTimeFrom: initialFilters.startTimeFrom ?? null,
+    startTimeTo: initialFilters.startTimeTo ?? null,
+
+    dueDateFrom: initialFilters.dueDateFrom ?? null,
+    dueDateTo: initialFilters.dueDateTo ?? null,
+
+    minTotalQty: initialFilters.minTotalQty ?? null,
+    maxTotalQty: initialFilters.maxTotalQty ?? null,
     minPerformanceQty: initialFilters.minPerformanceQty ?? null,
     maxPerformanceQty: initialFilters.maxPerformanceQty ?? null,
     minDefectRate: initialFilters.minDefectRate ?? null,
