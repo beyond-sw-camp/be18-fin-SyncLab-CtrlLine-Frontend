@@ -101,7 +101,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetProductionPerformanceReport from '@/apis/query-hooks/production-performance/useGetProductionPerformanceReport';
@@ -121,9 +121,9 @@ import formatDate from '@/utils/formatDate';
 const route = useRoute();
 const router = useRouter();
 
-const initialFilters = {
-  factoryName: null,
-  lineName: '',
+const defaultFilters = {
+  factoryCode: null,
+  lineCode: null,
   productionPlanDocumentNo: '',
   itemCode: '',
   productionManagerName: '',
@@ -138,10 +138,51 @@ const initialFilters = {
   endTimeTo: null,
 };
 
-const hasSearched = ref(false);
+const parseNumericFilter = (value, fallback) => {
+  if (value === undefined || value === null || value === '') {
+    return fallback;
+  }
+  const numberValue = Number(value);
+  return Number.isNaN(numberValue) ? fallback : numberValue;
+};
+
+const buildFiltersFromQuery = query => ({
+  factoryCode: query.factoryCode ?? defaultFilters.factoryCode,
+  lineCode: query.lineCode ?? defaultFilters.lineCode,
+  productionPlanDocumentNo:
+    query.productionPlanDocumentNo ?? defaultFilters.productionPlanDocumentNo,
+  itemCode: query.itemCode ?? defaultFilters.itemCode,
+  productionManagerName:
+    query.productionManagerName ?? defaultFilters.productionManagerName,
+  salesManagerName: query.salesManagerName ?? defaultFilters.salesManagerName,
+  minPerformanceQty: parseNumericFilter(query.minPerformanceQty, defaultFilters.minPerformanceQty),
+  maxPerformanceQty: parseNumericFilter(query.maxPerformanceQty, defaultFilters.maxPerformanceQty),
+  minDefectRate: parseNumericFilter(query.minDefectRate, defaultFilters.minDefectRate),
+  maxDefectRate: parseNumericFilter(query.maxDefectRate, defaultFilters.maxDefectRate),
+  startTimeFrom: query.startTimeFrom ?? defaultFilters.startTimeFrom,
+  startTimeTo: query.startTimeTo ?? defaultFilters.startTimeTo,
+  endTimeFrom: query.endTimeFrom ?? defaultFilters.endTimeFrom,
+  endTimeTo: query.endTimeTo ?? defaultFilters.endTimeTo,
+});
+
+const hasFilterValues = filters =>
+  Object.values(filters).some(value => value !== null && value !== '');
+
+const initialFilters = buildFiltersFromQuery(route.query);
+const hasSearched = ref(hasFilterValues(initialFilters));
 const { data: productionPerformanceAll, filters } = useGetProductionPerformanceReport(
   initialFilters,
   hasSearched,
+);
+
+watch(
+  () => route.query,
+  newQuery => {
+    const parsed = buildFiltersFromQuery(newQuery ?? {});
+    Object.assign(filters, parsed);
+    hasSearched.value = hasFilterValues(parsed);
+  },
+  { immediate: true },
 );
 
 const performanceRows = computed(() => productionPerformanceAll.value ?? []);
@@ -221,12 +262,6 @@ const exportCsv = () => {
   link.click();
   URL.revokeObjectURL(url);
 };
-
-onMounted(() => {
-  if (Object.keys(route.query).length > 0) {
-    router.replace({ path: route.path, query: {} });
-  }
-});
 </script>
 
 <style scoped></style>

@@ -9,7 +9,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FilterSelect
             label="공장명"
-            v-model="localFilters.factoryName"
+            v-model="localFilters.factoryCode"
             :options="factoryOptions"
           />
           <FilterInput
@@ -52,7 +52,7 @@
             label="영업담당자"
             v-model="localFilters.salesManagerName"
           />
-          <FilterSelect label="라인명" v-model="localFilters.lineName" :options="lineOptions" />
+          <FilterSelect label="라인명" v-model="localFilters.lineCode" :options="lineOptions" />
 
           <div>
             <Label class="text-xs">실적수량</Label>
@@ -178,8 +178,8 @@ const props = defineProps({
 const emit = defineEmits(['search', 'reset']);
 
 const localFilters = reactive({
-  factoryName: props.filters.factoryName ?? null,
-  lineName: props.filters.lineName ?? '',
+  factoryCode: props.filters.factoryCode ?? null,
+  lineCode: props.filters.lineCode ?? null,
   productionPlanDocumentNo: props.filters.productionPlanDocumentNo ?? '',
   itemCode: props.filters.itemCode ?? '',
   productionManagerName: props.filters.productionManagerName ?? '',
@@ -201,13 +201,14 @@ const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 
 const factoryOptions = computed(() => {
-  if (!factoryList.value || !factoryList.value.content)
+  if (!factoryList.value || !factoryList.value.content) {
     return [{ value: null, label: '전체', id: null }];
+  }
 
   return [
     { value: null, label: '전체', id: null },
     ...factoryList.value.content.map(factory => ({
-      value: factory.factoryName,
+      value: factory.factoryCode,
       label: factory.factoryName,
       id: factory.factoryId,
     })),
@@ -219,23 +220,22 @@ const lineOptions = computed(() => {
     return [{ value: null, label: '전체' }];
   }
 
-  if (selectedFactoryId.value === null || localFilters.factoryName === null) {
-    const uniqueLineNames = new Set(lineList.value.content.map(line => line.lineName));
-    const simpleOptions = Array.from(uniqueLineNames).map(name => ({
-      value: name,
-      label: name,
-    }));
+  const entries = lineList.value.content;
+  const relevantLines = entries;
 
-    return [{ value: null, label: '전체' }, ...simpleOptions];
+  const uniqueLines = new Map();
+  for (const line of relevantLines) {
+    if (!uniqueLines.has(line.lineCode)) {
+      uniqueLines.set(line.lineCode, line);
+    }
   }
 
-  return [
-    { value: null, label: '전체' },
-    ...lineList.value.content.map(line => ({
-      value: `${line.lineName}_${line.lineCode}`,
-      label: `${line.lineName}`,
-    })),
-  ];
+  const options = Array.from(uniqueLines.values()).map(line => ({
+    value: line.lineCode,
+    label: `${line.lineName} (${line.lineCode})`,
+  }));
+
+  return [{ value: null, label: '전체' }, ...options];
 });
 
 const normalizeNumber = value => {
@@ -261,8 +261,8 @@ const setItemCodeFilter = newCode => {
 
 const applyFilters = () => {
   emit('search', {
-    factoryName: localFilters.factoryName,
-    lineName: localFilters.lineName,
+    factoryCode: localFilters.factoryCode,
+    lineCode: localFilters.lineCode,
     productionPlanDocumentNo: localFilters.productionPlanDocumentNo,
     itemCode: localFilters.itemCode,
     productionManagerName: localFilters.productionManagerName,
@@ -280,8 +280,8 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   Object.assign(localFilters, {
-    factoryName: null,
-    lineName: '',
+    factoryCode: null,
+    lineCode: null,
     productionPlanDocumentNo: '',
     itemCode: '',
     productionManagerName: '',
@@ -300,8 +300,8 @@ const resetFilters = () => {
   selectedItemId.value = null;
 
   emit('reset', {
-    factoryName: null,
-    lineName: '',
+    factoryCode: null,
+    lineCode: null,
     productionPlanDocumentNo: '',
     itemCode: '',
     productionManagerName: '',
@@ -317,20 +317,28 @@ const resetFilters = () => {
   });
 };
 
+const assignFilters = newFilters => {
+  Object.assign(localFilters, newFilters);
+};
+
 watch(
   () => props.filters,
   newFilters => {
-    Object.assign(localFilters, newFilters);
+    assignFilters(newFilters);
   },
   { deep: true },
 );
 
 watch(
-  () => localFilters.factoryName,
-  newValue => {
-    const match = factoryList.value?.content?.find(factory => factory.factoryName === newValue);
+  () => localFilters.factoryCode,
+  (newCode, oldCode) => {
+    const match = factoryList.value?.content?.find(factory => factory.factoryCode === newCode);
     selectedFactoryId.value = match?.factoryId ?? null;
+    if (newCode !== oldCode) {
+      localFilters.lineCode = null;
+    }
   },
+  { immediate: true },
 );
 </script>
 
