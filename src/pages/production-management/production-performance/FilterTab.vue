@@ -426,7 +426,7 @@ const applyFilters = () => {
 
   const finalFilters = Object.fromEntries(
     Object.entries(filtersToSend).filter(
-      ([key, value]) => value !== undefined && value !== null && value !== '',
+      ([value]) => value !== undefined && value !== null && value !== '',
     ),
   );
 
