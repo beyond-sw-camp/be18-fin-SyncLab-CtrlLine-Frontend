@@ -155,7 +155,7 @@
             <FormItem class="w-full">
               <FormLabel>생산시작시간</FormLabel>
               <FormControl>
-                <Input type="datetime-local" v-bind="componentField" readonly class="text-sm" />
+                <Input type="datetime-local" v-bind="componentField" disabled class="text-sm" />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -448,8 +448,17 @@ watch(
     () => form.values.isEmergent,
   ],
   ([latestEndTime, earliestStartTime, isEmergent]) => {
-    const timeToUse = isEmergent ? earliestStartTime : latestEndTime;
+    let timeToUse = isEmergent ? earliestStartTime : latestEndTime;
+
     if (!timeToUse) return;
+    let startDate = new Date(timeToUse);
+    const now = new Date();
+
+    // 시작 시간이 현재 시간보다 과거거나 같으면 30분 추가
+    if (startDate <= now) {
+      startDate.setMinutes(startDate.getMinutes() + 30);
+      timeToUse = startDate.toISOString();
+    }
 
     form.setFieldValue('startTime', formatDate(timeToUse, 'datetime-local'));
   },
@@ -472,6 +481,8 @@ watch([() => form.values.startTime, () => form.values.plannedQty], ([startTime, 
   const formattedStartTime = formatDate(startTime, 'local-datetime');
 
   if (!startTime || !plannedQty || !lineDetail.value?.lineCode || !formattedStartTime) return;
+
+  console.log(formattedStartTime);
 
   debouncedUpdateEndTime({
     startTime: formattedStartTime,

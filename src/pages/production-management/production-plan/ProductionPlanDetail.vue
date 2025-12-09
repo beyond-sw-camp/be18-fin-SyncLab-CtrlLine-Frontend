@@ -2,23 +2,6 @@
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 상세 조회</h3>
     <div class="flex gap-2">
-      <div class="flex gap-2 items-center" v-if="isAdmin">
-        <label class="flex gap-1 items-center text-sm font-medium">
-          우선작업
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
-              <TooltipContent side="top">
-                <p>우선작업은 관리자에 의해 우선 실행되는 주문입니다.</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </label>
-        <FormField name="isEmergent" v-slot="{ value, setValue }">
-          <Switch :modelValue="value" @update:modelValue="setValue" />
-        </FormField>
-      </div>
-
       <Badge v-if="productionPlanDetail" variant="secondary">
         {{ productionPlanDetail.planDocumentNo }}</Badge
       >
@@ -347,7 +330,6 @@
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
 import { useDebounceFn } from '@vueuse/core';
-import { InfoIcon } from 'lucide-vue-next';
 import { useForm } from 'vee-validate';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -373,8 +355,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
 import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
