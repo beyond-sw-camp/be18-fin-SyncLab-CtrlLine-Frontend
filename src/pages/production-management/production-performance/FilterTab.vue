@@ -28,6 +28,10 @@
             </div>
           </div>
 
+          <FilterInput label="생산계획 전표번호" v-model="localFilters.productionPlanDocumentNo" />
+
+          <FilterInput label="Lot No." v-model="localFilters.lotNo" />
+
           <FilterSelect
             label="공장명"
             v-model="localFilters.factoryName"
@@ -36,32 +40,7 @@
 
           <FilterSelect label="라인명" v-model="localFilters.lineName" :options="lineOptions" />
 
-          <FilterInput label="생산계획 전표번호" v-model="localFilters.productionPlanDocumentNo" />
-
-          <FilterInput label="Lot No." v-model="localFilters.lotNo" />
-
           <FilterInput label="불량 전표번호" v-model="localFilters.defectiveDocumentNo" />
-
-          <FilterInput label="생산담당자" v-model="localFilters.producerManagerName" />
-
-          <div>
-            <Label class="text-xs">납기일자</Label>
-            <div class="flex items-center gap-1 mt-1">
-              <FilterInput
-                type="date"
-                v-model="localFilters.dueDateFrom"
-                placeholder="시작일"
-                class="w-1/2"
-              />
-              <span class="block text-gray-400">~</span>
-              <FilterInput
-                type="date"
-                v-model="localFilters.dueDateTo"
-                placeholder="종료일"
-                class="w-1/2"
-              />
-            </div>
-          </div>
 
           <div>
             <Label class="text-xs">품목명</Label>
@@ -90,7 +69,33 @@
             />
           </div>
 
-          <FilterInput label="영업 담당자" v-model="localFilters.salesManagerName" />
+          <div>
+            <Label class="text-xs">생산 담당자</Label>
+            <CreateAutoCompleteSelect
+              label="생산 담당자"
+              :value="localFilters.producerManagerName"
+              :setValue="setProducerManagerFilter"
+              :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+              keyField="empNo"
+              nameField="userName"
+              :fields="[
+                'empNo',
+                'userName',
+                'userEmail',
+                'userDepartment',
+                'userPhoneNumber',
+                'userStatus',
+                'userRole',
+              ]"
+              :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+              :emitFullItem="true"
+              @selectedFullItem="onProducerManagerSelected"
+              @clear="onProducerManagerCleared"
+              class="h-7 placeholder:text-xs text-xs"
+              inputClass="h-7 text-xs placeholder:text-xs"
+              iconClass="!w-3 !h-3"
+            />
+          </div>
 
           <div>
             <Label class="text-xs">생산 시작시각</Label>
@@ -109,6 +114,53 @@
                 class="w-1/2"
               />
             </div>
+          </div>
+
+          <div>
+            <Label class="text-xs">납기일자</Label>
+            <div class="flex items-center gap-1 mt-1">
+              <FilterInput
+                type="date"
+                v-model="localFilters.dueDateFrom"
+                placeholder="시작일"
+                class="w-1/2"
+              />
+              <span class="block text-gray-400">~</span>
+              <FilterInput
+                type="date"
+                v-model="localFilters.dueDateTo"
+                placeholder="종료일"
+                class="w-1/2"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label class="text-xs">영업 담당자</Label>
+            <CreateAutoCompleteSelect
+              label="영업 담당자"
+              :value="localFilters.salesManagerName"
+              :setValue="setSalesManagerFilter"
+              :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+              keyField="empNo"
+              nameField="userName"
+              :fields="[
+                'empNo',
+                'userName',
+                'userEmail',
+                'userDepartment',
+                'userPhoneNumber',
+                'userStatus',
+                'userRole',
+              ]"
+              :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+              :emitFullItem="true"
+              @selectedFullItem="onSalesManagerSelected"
+              @clear="onSalesManagerCleared"
+              class="h-7 placeholder:text-xs text-xs"
+              inputClass="h-7 text-xs placeholder:text-xs"
+              iconClass="!w-3 !h-3"
+            />
           </div>
 
           <div>
@@ -216,6 +268,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import FilterInput from '@/components/filter/FilterInput.vue';
 import FilterSelect from '@/components/filter/FilterSelect.vue';
@@ -240,14 +293,14 @@ const selectedItemId = ref(null);
 const localFilters = reactive({
   // 기간 필드
   documentDateFrom: props.filters.documentDateFrom ?? null,
-  documentDateTo: props.filters.documentDateTo ?? null, // 오타 수정 완료
+  documentDateTo: props.filters.documentDateTo ?? null,
 
   // 전표/Lot 번호
   productionPlanDocumentNo: props.filters.productionPlanDocumentNo ?? '',
   defectiveDocumentNo: props.filters.defectiveDocumentNo ?? '',
   lotNo: props.filters.lotNo ?? '',
 
-  // 공장/라인 (Name 기준으로 UI 바인딩)
+  // 공장/라인/품목
   factoryName: props.filters.factoryName ?? null,
   lineName: props.filters.lineName ?? '',
   itemCode: props.filters.itemCode ?? '',
@@ -255,13 +308,15 @@ const localFilters = reactive({
 
   // 담당자
   producerManagerName: props.filters.producerManagerName ?? '',
+  producerManagerNo: props.filters.producerManagerNo ?? '',
   salesManagerName: props.filters.salesManagerName ?? '',
+  salesManagerNo: props.filters.salesManagerNo ?? '',
 
   // 시간 기간 필드
   startTimeFrom: props.filters.startTimeFrom ?? null,
   startTimeTo: props.filters.startTimeTo ?? null,
   endTimeFrom: props.filters.endTimeFrom ?? null,
-  endTimeTo: props.filters.endTimeTo ?? null, // endTimeFrom/To 추가
+  endTimeTo: props.filters.endTimeTo ?? null,
   dueDateFrom: props.filters.dueDateFrom ?? null,
   dueDateTo: props.filters.dueDateTo ?? null,
 
@@ -277,7 +332,7 @@ const localFilters = reactive({
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 
-// --- Computed Options ---
+// --- Computed Options (변경 없음) ---
 
 const factoryOptions = computed(() => {
   if (!factoryList.value || !factoryList.value.content)
@@ -286,8 +341,8 @@ const factoryOptions = computed(() => {
   return [
     { value: null, label: '전체', id: null },
     ...factoryList.value.content.map(factory => ({
-      value: factory.factoryName, // value: Name (드롭다운 선택 값)
-      label: factory.factoryName, // label: Name (UI 표시)
+      value: factory.factoryName,
+      label: factory.factoryName,
       id: factory.factoryId,
     })),
   ];
@@ -296,28 +351,22 @@ const factoryOptions = computed(() => {
 const lineOptions = computed(() => {
   if (!lineList.value || !lineList.value.content) return [{ value: null, label: '전체', id: null }];
 
-  // 공장이 선택되지 않았을 때 (null) 또는 선택되었을 때 모두 라인명으로 표시
   const options = lineList.value.content.map(line => ({
-    value: line.lineName, // value: Name (드롭다운 선택 값)
-    label: line.lineName, // label: Name (UI 표시)
+    value: line.lineName,
+    label: line.lineName,
     id: line.lineId,
-    code: line.lineCode, // DTO에 lineCode가 필요하다면 이 값이 전송되어야 함
+    code: line.lineCode,
   }));
 
-  // 라인 이름 중복 제거 로직 (필요시 추가)
   const uniqueOptions = options.filter(
-    (item, index, self) =>
-      index ===
-      self.findIndex(
-        t => t.value === item.value, // lineName 기준으로 중복 제거
-      ),
+    (item, index, self) => index === self.findIndex(t => t.value === item.value),
   );
 
   return [{ value: null, label: '전체', id: null }, ...uniqueOptions];
 });
 
 // --- Functions ---
-
+// 품목 관련 함수 (변경 없음)
 function onItemSelected(item) {
   selectedItemId.value = item.id;
   localFilters.itemCode = item.itemCode;
@@ -338,9 +387,55 @@ const setItemCodeFilter = newCode => {
   }
 };
 
+// 💡 [추가] 생산 담당자 선택 로직
+function onProducerManagerSelected(manager) {
+  localFilters.producerManagerName = manager.userName; // UI 표시용 이름 저장
+  localFilters.producerManagerNo = manager.empNo; // DTO 전송용 사번 저장
+}
+
+// 💡 [추가] 생산 담당자 초기화 로직
+function onProducerManagerCleared() {
+  localFilters.producerManagerName = '';
+  localFilters.producerManagerNo = '';
+}
+
+// 💡 [추가] 생산 담당자 직접 입력 시 로직
+const setProducerManagerFilter = newName => {
+  localFilters.producerManagerName = newName;
+  localFilters.producerManagerNo = '';
+};
+
+// 영업 담당자 관련 함수 (변경 없음)
+function onSalesManagerSelected(manager) {
+  localFilters.salesManagerName = manager.userName;
+  localFilters.salesManagerNo = manager.empNo;
+}
+
+function onSalesManagerCleared() {
+  localFilters.salesManagerName = '';
+  localFilters.salesManagerNo = '';
+}
+
+const setSalesManagerFilter = newName => {
+  localFilters.salesManagerName = newName;
+  localFilters.salesManagerNo = '';
+};
+
 const applyFilters = () => {
-  // DTO가 factoryName과 lineName을 받는다면 그대로 전송
-  emit('search', { ...localFilters });
+  // 💡 [유지] DTO 전송 시 UI 표시용 Name 필드는 제거하고 No 필드를 사용
+  const filtersToSend = {
+    ...localFilters,
+    salesManagerName: undefined,
+    producerManagerName: undefined,
+  };
+
+  const finalFilters = Object.fromEntries(
+    Object.entries(filtersToSend).filter(
+      ([key, value]) => value !== undefined && value !== null && value !== '',
+    ),
+  );
+
+  emit('search', finalFilters);
 };
 
 const resetFilters = () => {
@@ -352,18 +447,24 @@ const resetFilters = () => {
     defectiveDocumentNo: '',
     lotNo: '',
 
+    // 💡 [유지] 담당자 Name/No 모두 초기화
+    salesManagerName: '',
+    salesManagerNo: '',
+    producerManagerName: '',
+    producerManagerNo: '',
+
     factoryName: null,
     lineName: '',
-    salesManagerName: '',
-    producerManagerName: '',
     itemCode: '',
     itemName: '',
+
     startTimeFrom: null,
     startTimeTo: null,
     endTimeFrom: null,
     endTimeTo: null,
     dueDateFrom: null,
     dueDateTo: null,
+
     minTotalQty: null,
     maxTotalQty: null,
     minPerformanceQty: null,
@@ -378,11 +479,10 @@ const resetFilters = () => {
   emit('reset', { ...localFilters });
 };
 
-// --- Watchers ---
+// --- Watchers (변경 없음) ---
 watch(
   () => localFilters.factoryName,
   newFactoryName => {
-    // 공장명에 해당하는 ID를 찾아 selectedFactoryId에 할당하여 라인 리스트 업데이트
     const selectedFactory = factoryOptions.value.find(factory => factory.value === newFactoryName);
     selectedFactoryId.value = selectedFactory ? selectedFactory.id : null;
 
