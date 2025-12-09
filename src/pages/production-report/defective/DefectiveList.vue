@@ -181,76 +181,106 @@
     </div>
 
     <div class="mt-4 overflow-x-auto">
-        <table class="w-full min-w-[920px] table-fixed">
-          <thead class="border-b-2 border-primary text-sm font-semibold text-gray-600">
-            <tr>
-              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden w-[160px]">전표번호</th>
-              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden w-[150px]">품목 코드</th>
-              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden w-[180px]">품목명</th>
-              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden">공장</th>
-              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden w-[140px]">라인</th>
-              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden">불량률</th>
-              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden">생산 담당자</th>
-              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden">영업 담당자</th>
-              <th class="px-4 py-3 text-center whitespace-nowrap overflow-hidden">비고</th>
-            </tr>
-          </thead>
+      <Table class="w-full min-w-[920px] table-fixed">
+        <TableHeader class="border-b-2 border-primary">
+          <TableRow>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[160px]">
+              전표번호
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[150px]">
+              품목 코드
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[180px]">
+              품목명
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              공장
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[140px]">
+              라인
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              불량률
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              생산 담당자
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              영업 담당자
+            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">
+              비고
+            </TableHead>
+          </TableRow>
+        </TableHeader>
 
-          <tbody v-if="!hasSearched">
-            <tr>
-              <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="9">
-                필터를 설정한 뒤 조회 버튼을 눌러주세요.
-              </td>
-            </tr>
-          </tbody>
+        <TableBody v-if="!hasSearched">
+          <TableRow>
+            <TableCell colspan="9" class="text-center py-10 text-sm text-gray-400">
+              필터를 설정한 뒤 조회 버튼을 눌러주세요.
+            </TableCell>
+          </TableRow>
+        </TableBody>
 
-          <tbody v-else-if="isLoading">
-            <tr>
-              <td class="px-4 py-10 text-center text-sm text-gray-500" colspan="9">
-                불량 데이터를 불러오는 중입니다...
-              </td>
-            </tr>
-          </tbody>
+        <TableBody v-else-if="isLoading">
+          <TableRow>
+            <TableCell colspan="9" class="text-center py-10 text-sm text-gray-500">
+              불량 데이터를 불러오는 중입니다...
+            </TableCell>
+          </TableRow>
+        </TableBody>
 
-          <tbody v-else-if="visibleRecords.length">
-            <tr
-              v-for="record in visibleRecords"
-              :key="detailKeyOf(record)"
-              class="text-center transition-all border-b border-dotted border-gray-300 hover:bg-gray-50 text-sm text-gray-700"
-            >
-              <td class="px-4 py-3 font-medium">
-                <button
-                  class="text-[#2765C4] underline-offset-2 hover:underline"
-                  @click="
-                    goToDefectiveDetail(record.defectiveDocNo || record.productionPerformanceDocNo)
-                  "
-                >
-                  {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
-                </button>
-              </td>
-              <td class="px-4 py-3 text-center">{{ record.itemCode }}</td>
-              <td class="px-4 py-3 text-center">{{ record.itemName }}</td>
-              <td class="px-4 py-3 text-center">{{ record.factoryName }}</td>
-              <td class="px-4 py-3 text-center">{{ record.lineName }}</td>
-              <td class="px-4 py-3 text-center font-semibold text-[#5B6D4C]">
-                {{ formatPercent(record.defectiveTotalRate) }}
-              </td>
-              <td class="px-4 py-3 text-center">{{ record.productionManagerName }}</td>
-              <td class="px-4 py-3 text-center">{{ record.salesManagerName }}</td>
-              <td class="px-4 py-3 whitespace-pre-wrap text-center text-gray-600">
-                {{ remarksMap[remarkKeyOf(record)] ?? '' }}
-              </td>
-            </tr>
-          </tbody>
+        <TableBody v-else-if="visibleRecords.length">
+          <TableRow
+            v-for="record in visibleRecords"
+            :key="detailKeyOf(record)"
+            class="text-center transition-all border-b border-dotted border-gray-300 hover:bg-gray-50"
+          >
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
+              <button
+                class="text-[#2765C4] underline-offset-2 hover:underline"
+                @click="
+                  goToDefectiveDetail(record.defectiveDocNo || record.productionPerformanceDocNo)
+                "
+              >
+                {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
+              </button>
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.itemCode }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.itemName }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.factoryName }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.lineName }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[#5B6D4C]">
+              {{ formatPercent(record.defectiveTotalRate) }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.productionManagerName }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
+              {{ record.salesManagerName }}
+            </TableCell>
+            <TableCell class="py-3 whitespace-pre-wrap whitespace-normal text-gray-600">
+              {{ remarksMap[remarkKeyOf(record)] ?? '' }}
+            </TableCell>
+          </TableRow>
+        </TableBody>
 
-          <tbody v-else>
-            <tr>
-              <td class="px-4 py-10 text-center text-sm text-gray-400" colspan="9">
-                조건에 맞는 불량 데이터가 없습니다.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <TableBody v-else>
+          <TableRow>
+            <TableCell colspan="9" class="text-center py-10 text-sm text-gray-400">
+              조건에 맞는 불량 데이터가 없습니다.
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
   </section>
 </template>
@@ -281,6 +311,14 @@ import {
 } from '@/components/ui/accordion';
 import FilterInput from '@/components/filter/FilterInput.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const isApplying = ref(false);
 const hasSearched = ref(false);
