@@ -73,7 +73,7 @@
             <Label class="text-xs">생산 담당자</Label>
             <CreateAutoCompleteSelect
               label="생산 담당자"
-              :value="localFilters.producerManagerName"
+              :value="localFilters.producerManagerNo"
               :setValue="setProducerManagerFilter"
               :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
               keyField="empNo"
@@ -139,7 +139,7 @@
             <Label class="text-xs">영업 담당자</Label>
             <CreateAutoCompleteSelect
               label="영업 담당자"
-              :value="localFilters.salesManagerName"
+              :value="localFilters.salesManagerNo"
               :setValue="setSalesManagerFilter"
               :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
               keyField="empNo"
@@ -366,7 +366,6 @@ const lineOptions = computed(() => {
 });
 
 // --- Functions ---
-// 품목 관련 함수 (변경 없음)
 function onItemSelected(item) {
   selectedItemId.value = item.id;
   localFilters.itemCode = item.itemCode;
@@ -387,19 +386,16 @@ const setItemCodeFilter = newCode => {
   }
 };
 
-// 💡 [추가] 생산 담당자 선택 로직
 function onProducerManagerSelected(manager) {
   localFilters.producerManagerName = manager.userName; // UI 표시용 이름 저장
   localFilters.producerManagerNo = manager.empNo; // DTO 전송용 사번 저장
 }
 
-// 💡 [추가] 생산 담당자 초기화 로직
 function onProducerManagerCleared() {
   localFilters.producerManagerName = '';
   localFilters.producerManagerNo = '';
 }
 
-// 💡 [추가] 생산 담당자 직접 입력 시 로직
 const setProducerManagerFilter = newName => {
   localFilters.producerManagerName = newName;
   localFilters.producerManagerNo = '';
@@ -422,7 +418,6 @@ const setSalesManagerFilter = newName => {
 };
 
 const applyFilters = () => {
-  // 💡 [유지] DTO 전송 시 UI 표시용 Name 필드는 제거하고 No 필드를 사용
   const filtersToSend = {
     ...localFilters,
     salesManagerName: undefined,
@@ -447,7 +442,6 @@ const resetFilters = () => {
     defectiveDocumentNo: '',
     lotNo: '',
 
-    // 💡 [유지] 담당자 Name/No 모두 초기화
     salesManagerName: '',
     salesManagerNo: '',
     producerManagerName: '',
