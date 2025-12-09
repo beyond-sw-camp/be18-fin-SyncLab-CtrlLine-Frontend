@@ -110,7 +110,6 @@ const parsePage = value => {
   return Number.isNaN(parsed) || parsed < 1 ? 1 : parsed;
 };
 
-// ✅ 필터 컴포넌트에서 추가/변경된 모든 필드 반영
 const initialFilters = {
   // 문서/전표/Lot
   documentDateFrom: route.query.documentDateFrom || null,
@@ -124,7 +123,9 @@ const initialFilters = {
   lineName: route.query.lineName || '',
   itemName: route.query.itemName || '',
   salesManagerName: route.query.salesManagerName || '',
+  salesManagerNo: route.query.salesManagerNo || '',
   productionManagerName: route.query.productionManagerName || '',
+  productionManagerNo: route.query.productionManagerNo || '',
 
   // 기간 필드
   dueDateFrom: route.query.dueDateFrom || null,
@@ -180,7 +181,6 @@ watch(page, () => {
   syncQuery();
 });
 
-// 3. URL 쿼리가 변경될 때 필터 상태 업데이트 (뒤로가기/URL 직접 입력 등)
 watch(
   () => route.query,
   newQuery => {
@@ -199,7 +199,9 @@ watch(
     filters.itemName = newQuery.itemName ?? '';
 
     filters.productionManagerName = newQuery.productionManagerName ?? '';
+    filters.productionManagerNo = newQuery.productionManagerNo ?? '';
     filters.salesManagerName = newQuery.salesManagerName ?? '';
+    filters.salesManagerNo = newQuery.salesManagerNo ?? '';
 
     filters.startTimeFrom = newQuery.startTimeFrom || null;
     filters.startTimeTo = newQuery.startTimeTo || null;

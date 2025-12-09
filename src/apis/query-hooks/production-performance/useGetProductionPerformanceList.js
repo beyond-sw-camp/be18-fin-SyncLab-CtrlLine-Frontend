@@ -25,7 +25,9 @@ export default function useGetProductionPerformanceList(initialFilters = {}) {
     itemName: initialFilters.itemName ?? '',
 
     salesManagerName: initialFilters.salesManagerNo ?? '',
+    salesManagerNo: initialFilters.salesManagerNo ?? '',
     productionManagerName: initialFilters.producerManagerNo ?? '',
+    productionManagerNo: initialFilters.productionManagerName ?? '',
 
     startTimeFrom: initialFilters.startTimeFrom ?? null,
     startTimeTo: initialFilters.startTimeTo ?? null,

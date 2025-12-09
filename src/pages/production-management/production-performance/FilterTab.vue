@@ -476,7 +476,7 @@ const resetFilters = () => {
   selectedFactoryId.value = null;
   selectedItemId.value = null;
 
-  emit('reset', { ...localFilters });
+  emit('search', { ...localFilters });
 };
 
 // --- Watchers (변경 없음) ---
