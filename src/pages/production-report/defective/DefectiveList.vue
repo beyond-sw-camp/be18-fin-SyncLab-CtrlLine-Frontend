@@ -7,7 +7,8 @@
 
       <div class="flex items-center">
         <Button
-          class="rounded-full bg-[#5B6D4C] px-6 py-2 text-white hover:bg-[#4C5C3F]"
+          size="sm"
+          class="cursor-pointer w-[70px]"
           :disabled="!hasSearched || isLoading || !visibleRecords.length"
           @click="exportCsv"
         >
@@ -16,149 +17,87 @@
       </div>
     </header>
 
-    <Dialog v-model:open="isFilterOpen">
-      <DialogTrigger as-child>
-        <button
-          class="flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600 transition hover:bg-gray-200"
-        >
-          Filter by
-          <ChevronDown class="size-4" />
-        </button>
-      </DialogTrigger>
-
-      <DialogContent
-        class="w-full max-w-[1040px] sm:max-w-[1040px] rounded-3xl border border-gray-300 p-8 shadow-xl"
-      >
-        <DialogHeader class="flex items-center justify-between p-0">
-          <DialogTitle class="text-lg font-semibold text-gray-800">필터 설정</DialogTitle>
-        </DialogHeader>
-
-        <div class="mt-4 space-y-5">
-          <div class="space-y-3">
-            <div class="filter-line">
-              <span class="filter-chip">시작 일자</span>
-              <input
-                v-model="filterForm.fromDate"
-                type="date"
-                class="filter-input flex-1 min-w-[220px]"
-                placeholder="연도. 월. 일."
-              />
-            </div>
-
-            <div class="filter-line">
-              <span class="filter-chip">종료 일자</span>
-              <input
-                v-model="filterForm.toDate"
-                type="date"
-                class="filter-input flex-1 min-w-[220px]"
-                placeholder="연도. 월. 일."
-              />
-            </div>
-
-            <div class="filter-line">
-              <span class="filter-chip">납기 일자</span>
-              <input
-                v-model="filterForm.dueDate"
-                type="date"
-                class="filter-input flex-1 min-w-[220px]"
-                placeholder="연도. 월. 일."
-              />
-            </div>
-          </div>
-
-          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <div class="filter-grid-item">
-              <span class="filter-chip">생산 공장</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.factoryCode"
-                  placeholder="공장 코드 검색"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div class="filter-grid-item">
-              <span class="filter-chip">생산 라인</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.lineCode"
-                  placeholder="라인 코드 검색"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div class="filter-grid-item">
-              <span class="filter-chip">품목 ID</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.itemId"
-                  placeholder="품목 ID 또는 코드"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div class="filter-grid-item">
-              <span class="filter-chip">생산 담당자</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.productionManagerNo"
-                  placeholder="사번 검색"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div class="filter-grid-item">
-              <span class="filter-chip">영업 담당자</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.salesManagerNo"
-                  placeholder="사번 검색"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-
-            <div class="filter-grid-item">
-              <span class="filter-chip">전표 번호</span>
-              <div class="relative flex-1">
-                <Search class="filter-icon" />
-                <input
-                  v-model="filterForm.productionPerformanceDocNo"
-                  placeholder="전표 번호"
-                  class="filter-input filter-input--icon w-full"
-                  type="text"
-                />
-              </div>
-            </div>
-          </div>
+    <Accordion type="single" collapsible class="mt-4">
+      <AccordionItem value="defectiveFilters">
+        <div class="flex w-fit items-center gap-2 rounded-full bg-gray-100 px-2 py-1 hover:bg-gray-200">
+          <AccordionTrigger class="p-0 hover:no-underline cursor-pointer text-sm font-normal text-gray-600">
+            Filter by
+          </AccordionTrigger>
         </div>
 
-        <DialogFooter class="mt-6 flex justify-end gap-2">
-          <Button variant="outline" class="rounded-full px-6" @click="resetFilters">초기화</Button>
-          <Button
-            class="rounded-full bg-[#5B6D4C] px-6 py-2 text-white hover:bg-[#4C5C3F]"
-            :disabled="isApplying"
-            @click="applyFilters"
-          >
-            조회
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <AccordionContent class="mt-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <FilterInput
+              label="시작 일자"
+              type="date"
+              placeholder="연도. 월. 일."
+              v-model="filterForm.fromDate"
+            />
+            <FilterInput
+              label="종료 일자"
+              type="date"
+              placeholder="연도. 월. 일."
+              v-model="filterForm.toDate"
+            />
+            <FilterInput
+              label="납기 일자"
+              type="date"
+              placeholder="연도. 월. 일."
+              v-model="filterForm.dueDate"
+            />
+            <FilterInput
+              label="생산 공장"
+              placeholder="공장 코드 검색"
+              v-model="filterForm.factoryCode"
+              search-icon
+            />
+            <FilterInput
+              label="생산 라인"
+              placeholder="라인 코드 검색"
+              v-model="filterForm.lineCode"
+              search-icon
+            />
+            <FilterInput
+              label="품목 ID"
+              placeholder="품목 ID 또는 코드"
+              v-model="filterForm.itemId"
+              search-icon
+            />
+            <FilterInput
+              label="생산 담당자"
+              placeholder="사번 검색"
+              v-model="filterForm.productionManagerNo"
+              search-icon
+            />
+            <FilterInput
+              label="영업 담당자"
+              placeholder="사번 검색"
+              v-model="filterForm.salesManagerNo"
+              search-icon
+            />
+            <FilterInput
+              label="전표 번호"
+              placeholder="전표 번호"
+              v-model="filterForm.productionPerformanceDocNo"
+              search-icon
+            />
+          </div>
+
+          <div class="flex justify-end mt-4 gap-2">
+            <Button variant="outline" class="rounded-full px-6" @click="resetFilters">
+              초기화
+            </Button>
+            <Button
+              class="rounded-full bg-[#5B6D4C] px-6 py-2 text-white hover:bg-[#4C5C3F]"
+              :disabled="isApplying"
+              @click="applyFilters"
+            >
+              조회
+            </Button>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
 
     <div v-if="chartsVisible" class="grid gap-4 lg:grid-cols-2">
       <Card class="h-[340px]">
@@ -339,7 +278,7 @@
 <script setup>
 import { keepPreviousData, useQuery } from '@tanstack/vue-query';
 import { VisDonut, VisSingleContainer, VisXYContainer, VisAxis, VisLine } from '@unovis/vue';
-import { ChevronDown, Search } from 'lucide-vue-next';
+import { Search } from 'lucide-vue-next';
 import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
@@ -356,16 +295,14 @@ import {
   componentToString,
 } from '@/components/ui/chart';
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import FilterInput from '@/components/filter/FilterInput.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
-const isFilterOpen = ref(false);
 const isApplying = ref(false);
 const hasSearched = ref(false);
 const router = useRouter();
@@ -555,7 +492,6 @@ const applyFilters = async () => {
 
     hasSearched.value = true;
     await refetch();
-    isFilterOpen.value = false;
   } catch (error) {
     console.error(error);
     toast.error('불량 데이터를 불러오지 못했습니다.');
@@ -835,43 +771,6 @@ const chartsVisible = computed(() => hasSearched.value && chartRecords.value.len
 </script>
 
 <style scoped>
-.filter-line {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.filter-chip {
-  flex-shrink: 0;
-  border-radius: 999px;
-  background-color: #5b6d4c;
-  padding: 0.5rem 0.9rem;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #ffffff;
-  min-width: 96px;
-}
-
-.filter-grid-item {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 1rem;
-  padding: 0.75rem;
-  background-color: #fbfbfb;
-}
-
-.filter-icon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  pointer-events: none;
-}
-
 .filter-input {
   border-radius: 0.75rem;
   border: 1px solid #e5e7eb;
