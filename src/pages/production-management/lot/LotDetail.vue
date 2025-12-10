@@ -40,79 +40,87 @@
       </div>
 
       <div class="flex justify-end">
-        <Button variant="outline" class="w-fit" @click="viewSerialNumbers">
-          {{ showSerials ? '시리얼 번호 닫기' : '시리얼 번호 조회' }}
+        <Button variant="outline" class="w-fit" @click="toggleSerialModal">
+          {{ isSerialModalOpen ? '시리얼 번호 닫기' : '시리얼 번호 조회' }}
         </Button>
       </div>
 
-      <section v-if="showSerials" class="border rounded-lg p-6">
-        <h4 class="text-lg font-semibold mb-4">시리얼 번호</h4>
-        <div v-if="isSerialLoading" class="text-sm text-muted-foreground">조회 중입니다...</div>
-        <div v-else-if="hasSerialError" class="text-sm text-red-500">
-          시리얼 번호를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.
-        </div>
-        <div v-else-if="serialNumbers.length === 0" class="text-sm text-muted-foreground">
-          등록된 시리얼 번호가 없습니다.
-        </div>
-        <div v-else class="flex flex-col gap-4">
-          <div class="flex flex-col gap-3 border rounded-lg p-4 bg-muted/30">
-            <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-              <span class="font-medium text-foreground">총 {{ totalSerialCount }}건</span>
-              <span v-if="filteredSerialCount !== totalSerialCount">
-                검색 결과 {{ filteredSerialCount }}건
-              </span>
+      <Dialog :open="isSerialModalOpen" @update:open="handleSerialModalToggle">
+        <DialogContent class="sm:max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col gap-4">
+          <DialogHeader>
+            <DialogTitle>시리얼 번호</DialogTitle>
+            <DialogDescription>
+              Lot {{ lotDetail?.lotNo || '-' }}의 시리얼 번호를 확인하세요.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div class="flex-1 flex flex-col gap-4 min-h-[200px]">
+            <div v-if="isSerialLoading" class="text-sm text-muted-foreground">조회 중입니다...</div>
+            <div v-else-if="hasSerialError" class="text-sm text-red-500">
+              시리얼 번호를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.
             </div>
-            <div class="flex flex-col md:flex-row gap-3">
-              <Input
-                v-model="serialSearchQuery"
-                placeholder="시리얼 번호 검색"
-                class="md:max-w-xs"
-              />
-              <div class="flex gap-2">
-                <Button variant="outline" size="sm" @click="serialSearchQuery = ''">
-                  검색 초기화
-                </Button>
-                <Button size="sm" @click="copyAllSerials">전체 복사</Button>
+            <div v-else-if="serialNumbers.length === 0" class="text-sm text-muted-foreground">
+              등록된 시리얼 번호가 없습니다.
+            </div>
+            <template v-else>
+              <div class="flex flex-col gap-3 border rounded-lg p-4 bg-muted/30">
+                <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  <span class="font-medium text-foreground">총 {{ totalSerialCount }}건</span>
+                  <span v-if="filteredSerialCount !== totalSerialCount">
+                    검색 결과 {{ filteredSerialCount }}건
+                  </span>
+                </div>
+                <div class="flex flex-col md:flex-row gap-3">
+                  <Input
+                    v-model="serialSearchQuery"
+                    placeholder="시리얼 번호 검색"
+                    class="md:max-w-xs"
+                  />
+                  <div class="flex gap-2">
+                    <Button variant="outline" size="sm" @click="serialSearchQuery = ''">
+                      검색 초기화
+                    </Button>
+                    <Button size="sm" @click="copyAllSerials">전체 복사</Button>
+                  </div>
+                </div>
               </div>
-            </div>
+              <div v-if="filteredSerials.length === 0" class="text-sm text-muted-foreground">
+                검색 조건에 해당하는 시리얼 번호가 없습니다.
+              </div>
+              <div v-else class="border rounded-lg overflow-auto">
+                <table class="w-full text-sm">
+                  <thead class="bg-muted/70 text-muted-foreground uppercase text-xs">
+                    <tr>
+                      <th class="w-16 px-3 py-2 text-center font-medium">No.</th>
+                      <th class="px-3 py-2 font-medium text-left">시리얼 번호</th>
+                      <th class="w-28 px-3 py-2 text-center font-medium">동작</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(serial, index) in filteredSerials"
+                      :key="`${serial}-${index}`"
+                      class="border-t odd:bg-white even:bg-muted/20 hover:bg-muted/40"
+                    >
+                      <td class="px-3 py-2 text-center font-medium text-muted-foreground">
+                        {{ index + 1 }}
+                      </td>
+                      <td class="px-3 py-2 font-mono text-base text-foreground break-all">
+                        {{ serial }}
+                      </td>
+                      <td class="px-3 py-2 text-center">
+                        <Button variant="ghost" size="sm" class="h-8" @click="copySerial(serial)">
+                          복사
+                        </Button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </template>
           </div>
-          <div v-if="filteredSerials.length === 0" class="text-sm text-muted-foreground">
-            검색 조건에 해당하는 시리얼 번호가 없습니다.
-          </div>
-          <div v-else class="border rounded-lg overflow-hidden">
-            <div class="max-h-96 overflow-auto">
-              <table class="w-full text-sm">
-                <thead class="sticky top-0 bg-muted/70 text-muted-foreground uppercase text-xs">
-                  <tr>
-                    <th class="w-16 px-3 py-2 text-center font-medium">No.</th>
-                    <th class="px-3 py-2 font-medium text-left">시리얼 번호</th>
-                    <th class="w-28 px-3 py-2 text-center font-medium">동작</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(serial, index) in filteredSerials"
-                    :key="`${serial}-${index}`"
-                    class="border-t odd:bg-white even:bg-muted/20 hover:bg-muted/40"
-                  >
-                    <td class="px-3 py-2 text-center font-medium text-muted-foreground">
-                      {{ index + 1 }}
-                    </td>
-                    <td class="px-3 py-2 font-mono text-base text-foreground break-all">
-                      {{ serial }}
-                    </td>
-                    <td class="px-3 py-2 text-center">
-                      <Button variant="ghost" size="sm" class="h-8" @click="copySerial(serial)">
-                        복사
-                      </Button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
+        </DialogContent>
+      </Dialog>
     </div>
 
     <div v-else class="border rounded-lg p-6 text-center text-sm text-muted-foreground">
@@ -129,6 +137,13 @@ import { toast } from 'vue-sonner';
 import { getLotSerials } from '@/apis/query-functions/lot';
 import useGetLotDetail from '@/apis/query-hooks/lot/useGetLotDetail';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -138,7 +153,7 @@ const router = useRouter();
 const lotId = computed(() => route.params.lotId);
 
 const { data: lotDetail, isPending } = useGetLotDetail(lotId);
-const showSerials = ref(false);
+const isSerialModalOpen = ref(false);
 const serialNumbers = ref([]);
 const isSerialLoading = ref(false);
 const hasSerialError = ref(false);
@@ -211,17 +226,28 @@ function calculateDefectiveRate(detail) {
   return (defectiveQty / lotQty) * 100;
 }
 
-const viewSerialNumbers = async () => {
+const toggleSerialModal = () => {
+  if (isSerialModalOpen.value) {
+    handleSerialModalToggle(false);
+    return;
+  }
+  openSerialModal();
+};
+
+const handleSerialModalToggle = value => {
+  isSerialModalOpen.value = value;
+  if (!value) {
+    serialSearchQuery.value = '';
+  }
+};
+
+const openSerialModal = async () => {
   if (!lotDetail.value?.serialFilePath) {
     toast.info('등록된 시리얼 번호가 없습니다.');
     return;
   }
 
-  if (showSerials.value) {
-    showSerials.value = false;
-    return;
-  }
-
+  handleSerialModalToggle(true);
   isSerialLoading.value = true;
   hasSerialError.value = false;
 
@@ -232,7 +258,6 @@ const viewSerialNumbers = async () => {
     }
     const response = await getLotSerials(currentLotId);
     serialNumbers.value = response?.serialList ?? [];
-    showSerials.value = true;
     serialSearchQuery.value = '';
   } catch (error) {
     hasSerialError.value = true;
