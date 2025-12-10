@@ -249,6 +249,11 @@ const setItemCodeFilter = newCode => {
 };
 
 const applyFilters = () => {
+  const startFrom = localFilters.startTimeFrom;
+  const startTo = localFilters.startTimeTo;
+  const endFrom = localFilters.endTimeFrom;
+  const endTo = localFilters.endTimeTo;
+
   emit('search', {
     factoryCode: localFilters.factoryCode,
     lineCode: localFilters.lineCode,
@@ -261,10 +266,14 @@ const applyFilters = () => {
     maxPerformanceQty: normalizeNumber(localFilters.maxPerformanceQty),
     minDefectiveRate: normalizeNumber(localFilters.minDefectiveRate),
     maxDefectiveRate: normalizeNumber(localFilters.maxDefectiveRate),
-    startTimeFrom: localFilters.startTimeFrom,
-    startTimeTo: localFilters.startTimeTo,
-    endTimeFrom: localFilters.endTimeFrom,
-    endTimeTo: localFilters.endTimeTo,
+    startTimeFrom: startFrom,
+    startTimeTo: startTo,
+    endTimeFrom: endFrom,
+    endTimeTo: endTo,
+    startDateTimeStart: startFrom,
+    startDateTimeEnd: startTo,
+    endDateTimeStart: endFrom,
+    endDateTimeEnd: endTo,
   });
 };
 
@@ -306,6 +315,10 @@ const resetFilters = () => {
     startTimeTo: null,
     endTimeFrom: null,
     endTimeTo: null,
+    startDateTimeStart: null,
+    startDateTimeEnd: null,
+    endDateTimeStart: null,
+    endDateTimeEnd: null,
   });
 };
 

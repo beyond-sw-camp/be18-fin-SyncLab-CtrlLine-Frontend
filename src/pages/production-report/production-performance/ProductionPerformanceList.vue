@@ -223,6 +223,10 @@ const defaultFilters = {
   startTimeTo: null,
   endTimeFrom: null,
   endTimeTo: null,
+  startDateTimeStart: null,
+  startDateTimeEnd: null,
+  endDateTimeStart: null,
+  endDateTimeEnd: null,
 };
 
 const parseNumericFilter = (value, fallback) => {
@@ -264,6 +268,10 @@ const buildFiltersFromQuery = query => ({
     defaultFilters.endTimeFrom,
   endTimeTo:
     query.endTimeTo ?? query.endDateTimeEnd ?? query.endDateTimeTo ?? defaultFilters.endTimeTo,
+  startDateTimeStart: query.startDateTimeStart ?? defaultFilters.startDateTimeStart,
+  startDateTimeEnd: query.startDateTimeEnd ?? defaultFilters.startDateTimeEnd,
+  endDateTimeStart: query.endDateTimeStart ?? defaultFilters.endDateTimeStart,
+  endDateTimeEnd: query.endDateTimeEnd ?? defaultFilters.endDateTimeEnd,
 });
 
 const hasFilterValues = filters =>
