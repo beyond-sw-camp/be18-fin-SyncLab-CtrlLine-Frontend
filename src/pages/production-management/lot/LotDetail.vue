@@ -79,21 +79,36 @@
           <div v-if="filteredSerials.length === 0" class="text-sm text-muted-foreground">
             검색 조건에 해당하는 시리얼 번호가 없습니다.
           </div>
-          <div v-else class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <div
-              v-for="(serial, index) in filteredSerials"
-              :key="`${serial}-${index}`"
-              class="border rounded-lg p-4 bg-white shadow-xs flex flex-col gap-3"
-            >
-              <div class="flex items-center justify-between text-xs text-muted-foreground">
-                <span>No. {{ index + 1 }}</span>
-                <Button variant="ghost" size="sm" class="h-7 px-2" @click="copySerial(serial)">
-                  복사
-                </Button>
-              </div>
-              <p class="font-mono text-base font-semibold break-all text-foreground">
-                {{ serial }}
-              </p>
+          <div v-else class="border rounded-lg overflow-hidden">
+            <div class="max-h-96 overflow-auto">
+              <table class="w-full text-sm">
+                <thead class="sticky top-0 bg-muted/70 text-muted-foreground uppercase text-xs">
+                  <tr>
+                    <th class="w-16 px-3 py-2 text-center font-medium">No.</th>
+                    <th class="px-3 py-2 font-medium text-left">시리얼 번호</th>
+                    <th class="w-28 px-3 py-2 text-center font-medium">동작</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(serial, index) in filteredSerials"
+                    :key="`${serial}-${index}`"
+                    class="border-t odd:bg-white even:bg-muted/20 hover:bg-muted/40"
+                  >
+                    <td class="px-3 py-2 text-center font-medium text-muted-foreground">
+                      {{ index + 1 }}
+                    </td>
+                    <td class="px-3 py-2 font-mono text-base text-foreground break-all">
+                      {{ serial }}
+                    </td>
+                    <td class="px-3 py-2 text-center">
+                      <Button variant="ghost" size="sm" class="h-8" @click="copySerial(serial)">
+                        복사
+                      </Button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
