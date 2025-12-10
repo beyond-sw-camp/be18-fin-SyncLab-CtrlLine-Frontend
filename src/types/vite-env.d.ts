@@ -10,8 +10,6 @@ interface ImportMetaEnv {
   readonly VITE_APP_TITLE: string;
   readonly VITE_APP_ENV: string;
   readonly VITE_SYNCFUSION_LICENSE;
-  readonly VITE_SERIAL_FILE_BASE_URL?: string;
-  readonly VITE_AWS_S3_REGION?: string;
 }
 
 interface ImportMeta {
