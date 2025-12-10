@@ -6,14 +6,21 @@
           Filter by
         </AccordionTrigger>
       </div>
-      <!--조인해서 가져오는 품목, 라인만 필터링이 안됨.. 왜 그러는 걸까요. AI: 백엔드 문제일 것 같아~!-->
+
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FilterSelect label="공장" v-model="localFilters.factoryName" :options="factoryOptions" />
+
+          <FilterSelect label="라인" v-model="localFilters.lineName" :options="lineOptions" />
+
           <FilterInput label="전표번호" v-model="localFilters.defectiveDocNo" />
-          <FilterInput label="품목코드" v-model="localFilters.itemCode" />
-          <FilterInput label="품목명" v-model="localFilters.itemName" />
-          <FilterInput label="라인명" v-model="localFilters.lineName" />
+
           <FilterInput label="실적전표" v-model="localFilters.productionPerformanceDocNo" />
+
+          <FilterInput label="품목코드" v-model="localFilters.itemCode" />
+
+          <FilterInput label="품목명" v-model="localFilters.itemName" />
+
           <div>
             <Label class="text-xs">생산기간</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
@@ -53,9 +60,12 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { computed, reactive, watch, ref } from 'vue';
 
+import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
+import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import FilterInput from '@/components/filter/FilterInput.vue';
+import FilterSelect from '@/components/filter/FilterSelect.vue';
 import {
   Accordion,
   AccordionItem,
@@ -69,18 +79,63 @@ const props = defineProps({
   filters: { type: Object, required: true },
 });
 
+const selectedFactoryId = ref(null);
 const emit = defineEmits(['search']);
 
-// 불량 필터 구조
+const { data: factoryList } = useGetFactoryList();
+const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId });
+
+const factoryOptions = computed(() => {
+  if (!factoryList.value || !factoryList.value.content)
+    return [{ value: null, label: '전체', id: null }];
+
+  return [
+    { value: null, label: '전체', id: null },
+    ...factoryList.value.content.map(factory => ({
+      value: factory.factoryName,
+      label: factory.factoryName,
+      id: factory.factoryId,
+    })),
+  ];
+});
+
+const lineOptions = computed(() => {
+  if (!lineList.value || !lineList.value.content) return [{ value: null, label: '전체', id: null }];
+
+  const options = lineList.value.content.map(line => ({
+    value: line.lineName,
+    label: line.lineName,
+    id: line.lineId,
+    code: line.lineCode,
+  }));
+
+  const uniqueOptions = options.filter(
+    (item, index, self) => index === self.findIndex(t => t.value === item.value),
+  );
+
+  return [{ value: null, label: '전체', id: null }, ...uniqueOptions];
+});
+
 const localFilters = reactive({
   defectiveDocNo: props.filters.defectiveDocNo ?? '',
+  factoryName: props.filters.factoryName ?? null,
   itemCode: props.filters.itemCode ?? '',
   itemName: props.filters.itemName ?? '',
-  lineName: props.filters.lineName ?? '',
+  lineName: props.filters.lineName ?? null,
   productionPerformanceDocNo: props.filters.productionPerformanceDocNo ?? '',
   fromDate: props.filters.fromDate ?? null,
   toDate: props.filters.toDate ?? null,
 });
+
+watch(
+  () => localFilters.factoryName,
+  newFactoryName => {
+    const selectedFactory = factoryOptions.value.find(factory => factory.value === newFactoryName);
+    selectedFactoryId.value = selectedFactory ? selectedFactory.id : null;
+
+    localFilters.lineName = null;
+  },
+);
 
 watch(
   () => props.filters,
@@ -94,17 +149,22 @@ const applyFilters = () => {
   emit('search', { ...localFilters });
 };
 
-// 초기화
 const resetFilters = () => {
   Object.assign(localFilters, {
     defectiveDocNo: '',
+    factoryName: null,
     itemCode: '',
     itemName: '',
-    lineName: '',
+    lineName: null,
     productionPerformanceDocNo: '',
     fromDate: null,
     toDate: null,
   });
+
+  selectedFactoryId.value = null;
+
   emit('search', { ...localFilters });
 };
 </script>
+
+<style scoped></style>
