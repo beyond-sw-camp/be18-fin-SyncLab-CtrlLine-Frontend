@@ -27,7 +27,6 @@
         <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
           {{ PPDetail.itemUnit }}
         </TableCell>
-
         <TableCell class="py-3 text-center">
           {{ PPDetail.totalQty }}
         </TableCell>

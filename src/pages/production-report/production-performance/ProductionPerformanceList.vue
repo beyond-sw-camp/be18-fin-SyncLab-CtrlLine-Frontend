@@ -20,19 +20,19 @@
               <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">품목코드</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산계획번호</TableHead
+                >생산 계획번호</TableHead
               >
               <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산담당자</TableHead
+                >생산 담당자</TableHead
               >
               <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >영업담당자</TableHead
+                >영업 담당자</TableHead
               >
               <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산시작시간</TableHead
+                >생산 시작 시간</TableHead
               >
               <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산종료시간</TableHead
+                >생산 종료 시간</TableHead
               >
               <TableHead class="text-center whitespace-nowrap overflow-hidden">실적수량</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">불량수량</TableHead>
@@ -65,10 +65,10 @@
                 {{ row.productionPlanDocumentNo ?? '-' }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-                {{ row.productionManagerName ?? '-' }}
+                {{ row.productionManagerEmpName ?? '-' }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-                {{ row.salesManagerName ?? '-' }}
+                {{ row.salesManagerEmpName ?? '-' }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
                 {{ formatDate(row.startTime) }}
@@ -77,13 +77,13 @@
                 {{ formatDate(row.endTime) }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-                {{ formatCount(row.performanceQty) }} EA.
+                {{ formatQuantity(row.performanceQty) }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-                {{ formatCount(row.defectiveQty) }}
+                {{ formatQuantity(row.defectiveQty) }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-                {{ formatRate(row.defectRate) }}
+                {{ formatRate(row.defectiveRate) }}
               </TableCell>
             </TableRow>
           </TableBody>
@@ -195,8 +195,14 @@ const performanceRows = computed(() => productionPerformanceAll.value ?? []);
 
 const exportEnabled = computed(() => hasSearched.value && performanceRows.value.length > 0);
 
-const formatCount = value => (value === undefined || value === null ? '-' : value);
+// const formatCount = value => (value === undefined || value === null ? '-' : value);
 const formatRate = value => (value === undefined || value === null ? '-' : `${value} %`);
+
+const formatQuantity = (quantity, unit) => {
+  if (quantity === null || quantity === undefined) return '-';
+  const formattedQty = Number(quantity).toLocaleString('ko-KR');
+  return `${formattedQty} ${unit || ''}`.trim();
+};
 
 const syncQuery = () => {
   const query = buildQueryObject({ ...filters });
@@ -225,7 +231,7 @@ const exportCsv = () => {
     '공장명',
     '라인명',
     '품목명',
-    '품코드',
+    '품목코드',
     '생산계획번호',
     '생산담당자',
     '영업담당자',
@@ -247,9 +253,9 @@ const exportCsv = () => {
     item.salesManagerName ?? '',
     formatDate(item.startTime),
     formatDate(item.endTime),
-    item.performanceQty ?? '',
-    item.defectiveQty ?? '',
-    item.defectRate ?? '',
+    formatQuantity(item.performanceQty ?? ''),
+    formatQuantity(item.defectiveQty ?? ''),
+    item.defectiveRate ?? '',
   ]);
 
   const csvContent = [
