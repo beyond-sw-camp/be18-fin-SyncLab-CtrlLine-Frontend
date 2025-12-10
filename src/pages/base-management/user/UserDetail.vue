@@ -186,24 +186,30 @@
               </FormItem>
             </FormField>
 
-            <FormField v-slot="{ componentField, errorMessage }" name="role">
-              <FormItem>
-                <FormLabel>권한</FormLabel>
-                <FormControl>
-                  <Select v-bind="componentField" :disabled="!isEditableInput">
-                    <SelectTrigger class="w-full">
-                      <SelectValue placeholder="권한을 선택하세요." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem v-for="(label, value) in ROLE_LABELS" :key="value" :value="value">
-                        {{ label }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-                </FormControl>
-              </FormItem>
-            </FormField>
+            <div v-if="canView(['ADMIN'])">
+              <FormField v-slot="{ componentField, errorMessage }" name="role">
+                <FormItem>
+                  <FormLabel>권한</FormLabel>
+                  <FormControl>
+                    <Select v-bind="componentField" :disabled="!isEditableInput">
+                      <SelectTrigger class="w-full">
+                        <SelectValue placeholder="권한을 선택하세요." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem
+                          v-for="(label, value) in ROLE_LABELS"
+                          :key="value"
+                          :value="value"
+                        >
+                          {{ label }}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                  </FormControl>
+                </FormItem>
+              </FormField>
+            </div>
 
             <FormField v-slot="{ componentField, errorMessage }" name="status">
               <FormItem>

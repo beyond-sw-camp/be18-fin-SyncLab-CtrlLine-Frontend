@@ -19,7 +19,9 @@
             :options="departmentOptions"
           />
 
-          <FilterInput label="전화번호" v-model="localFilters.userPhoneNumber" />
+          <div v-if="isAdmin">
+            <FilterInput label="전화번호" v-model="localFilters.userPhoneNumber" />
+          </div>
 
           <FilterSelect
             label="상태"
@@ -32,16 +34,18 @@
             ]"
           />
 
-          <FilterSelect
-            label="권한"
-            v-model="localFilters.userRole"
-            :options="[
-              { value: null, label: '전체' },
-              { value: 'USER', label: '유저' },
-              { value: 'MANAGER', label: '매니저' },
-              { value: 'ADMIN', label: '관리자' },
-            ]"
-          />
+          <div v-if="isAdmin">
+            <FilterSelect
+              label="권한"
+              v-model="localFilters.userRole"
+              :options="[
+                { value: null, label: '전체' },
+                { value: 'USER', label: '유저' },
+                { value: 'MANAGER', label: '매니저' },
+                { value: 'ADMIN', label: '관리자' },
+              ]"
+            />
+          </div>
         </div>
 
         <div class="flex justify-end mt-4 gap-2">
@@ -79,8 +83,10 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { DEPARTMENT_LABELS } from '@/constants/enumLabels';
+import { canView } from '@/utils/canView';
 
 const emit = defineEmits(['search']);
+const isAdmin = canView(['ADMIN']);
 
 const localFilters = reactive({
   userName: '',
