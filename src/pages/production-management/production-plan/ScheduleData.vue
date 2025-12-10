@@ -402,6 +402,11 @@ function handleEventOrderChange(draggedEvent) {
 function onSelectedScheduleAction(args) {
   if (isProgrammaticUpdate.value) return;
 
+  if (['dateNavigate', 'viewNavigate'].includes(args.requestType)) {
+    const inst = selectedScheduleRef.value?.ej2Instances;
+    if (inst) onSelectedNavigation(inst);
+  }
+
   if (args.requestType === 'eventChanged') {
     const updatedEvents = args.changedRecords ?? [];
 
