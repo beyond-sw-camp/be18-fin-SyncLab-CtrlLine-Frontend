@@ -296,6 +296,7 @@
         :draftEndTime="form.values.endTime"
         :draftItem="itemDetail"
         :draftQty="form.values.plannedQty"
+        :isEmergent="form.values.isEmergent"
         mode="create"
       />
     </form>

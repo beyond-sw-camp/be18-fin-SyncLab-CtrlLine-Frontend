@@ -17,9 +17,10 @@
       </Button>
       <Button
         v-if="canEdit"
-        type="submit"
+        type="button"
         form="productionPlanUpdateForm"
         class="bg-primary text-white hover:bg-primary-600 cursor-pointer w-[60px]"
+        @click="onSubmit"
         size="sm"
       >
         Save
@@ -308,7 +309,6 @@
             </FormField>
           </div>
         </div>
-
         <ItemTable :itemDetail="itemDetail" />
       </fieldset>
       <ScheduleData
@@ -327,6 +327,13 @@
       />
     </form>
   </div>
+  <ConfirmScheduleModal
+    v-if="showConfirmationModal"
+    :visible="showConfirmationModal"
+    :affected-plans-data="affectedPlansData"
+    @confirm="handleConfirmUpdate"
+    @cancel="handleCancelUpdate"
+  />
 </template>
 
 <script setup>
@@ -334,7 +341,8 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { useDebounceFn } from '@vueuse/core';
 import { useForm } from 'vee-validate';
 import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { toast } from 'vue-sonner';
 import { z } from 'zod';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
@@ -358,6 +366,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
+import ConfirmScheduleModal from '@/pages/production-management/production-plan/ConfirmScheduleModal.vue';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
 import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
@@ -486,6 +495,10 @@ const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId
 const { mutate: updateProductionPlan } = useUpdateProductionPlan(route.params.productionPlanId);
 const { mutate: updateEndTime } = useCreateProductionPlanEndTime();
 
+const router = useRouter();
+const showConfirmationModal = ref(false);
+const affectedPlansData = ref(null);
+
 function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
   selectedFactoryId.value = selected?.factoryId ?? null;
@@ -539,8 +552,23 @@ const onSubmit = form.handleSubmit(values => {
     dueDate: values.dueDate,
   };
 
-  updateProductionPlan(params);
+  updateProductionPlan(params, {
+    onSuccess: data => {
+      affectedPlansData.value = data;
+      showConfirmationModal.value = true;
+    },
+  });
 });
+
+const handleConfirmUpdate = () => {
+  showConfirmationModal.value = false; // 모달 닫기
+  toast.success('생산계획을 수정하고 일정을 확정했습니다.'); // 최종 성공 토스트
+  router.push('/production-management/production-plans'); // 최종 리다이렉트
+};
+
+const handleCancelUpdate = () => {
+  showConfirmationModal.value = false;
+};
 
 const debouncedUpdateEndTime = useDebounceFn(({ startTime, plannedQty, lineCode }) => {
   updateEndTime(

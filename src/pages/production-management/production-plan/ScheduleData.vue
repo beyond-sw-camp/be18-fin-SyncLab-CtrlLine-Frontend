@@ -3,7 +3,7 @@
     <div>
       <Badge variant="secondary" class="mb-4">선택 라인</Badge>
       <ejs-schedule
-        class="time-scale"
+        class="time-scale hide-scrollbar"
         :timeScale="optimizedTimeScaleOptions"
         :timezone="'Asia/Seoul'"
         v-if="props.lineCode && selectedLineResource.length > 0"
@@ -37,7 +37,6 @@
         :eventSettings="availableEventSettings"
         :showCurrentTimeIndicator="true"
         :popupOpen="onPopupOpen"
-        :dragStart="onDragStart"
         :group="groupOptions"
         :resources="availableLineResource"
         :created="onAvailableCreated"
@@ -58,7 +57,6 @@ import {
   Day,
   Week,
   TimelineMonth,
-  DragAndDrop,
 } from '@syncfusion/ej2-vue-schedule';
 import { computed, nextTick, provide, ref, watch } from 'vue';
 
@@ -70,12 +68,13 @@ import { useScheduleRangeManager } from '@/hooks/useScheduleRangeManager';
 import ScheduleTooltip from '@/pages/production-management/production-plan/ScheduleTooltip.vue';
 import { useUserStore } from '@/stores/useUserStore';
 
-provide('schedule', [TimelineViews, Day, Week, TimelineMonth, DragAndDrop]);
+provide('schedule', [TimelineViews, Day, Week, TimelineMonth]);
 
+// 타임라인 스케일 설정
 const optimizedTimeScaleOptions = {
   enable: true,
-  interval: 15, // 15분마다 시간 라벨 표시
-  slotCount: 15, // 15분 / 15 = 1분 단위 스냅
+  interval: 15,
+  slotCount: 15,
 };
 
 const props = defineProps({
@@ -83,16 +82,12 @@ const props = defineProps({
   factoryCode: String,
   lineCode: String,
   productionPlanDetailId: Number,
-  mode: {
-    type: String,
-    default: 'detail',
-  },
+  mode: { type: String, default: 'detail' },
   draftStartTime: String,
   draftEndTime: String,
   draftItem: Object,
   draftQty: Number,
-  updatedStartTime: String,
-  updatedEndTime: String,
+  isEmergent: Boolean,
   productionManagerNo: String,
 });
 
@@ -120,12 +115,7 @@ function onEventClick(args) {
 
   const y = rect.bottom - scheduleTop + scrollTop - gap * 2;
 
-  tooltip.value = {
-    show: true,
-    x,
-    y,
-    data: args.event,
-  };
+  tooltip.value = { show: true, x, y, data: args.event };
 }
 
 const draftEvent = computed(() => {
@@ -136,12 +126,11 @@ const draftEvent = computed(() => {
     !props.draftEndTime ||
     !props.draftItem ||
     !props.draftQty
-  ) {
+  )
     return null;
-  }
 
   return {
-    Id: 'draft', // 임시 ID
+    Id: 'draft',
     Subject: '신규 생산계획',
     StartTime: new Date(props.draftStartTime),
     EndTime: new Date(props.draftEndTime),
@@ -155,61 +144,66 @@ const draftEvent = computed(() => {
 function onEventRendered(args) {
   const ev = args.data;
 
-  // 신규 등록 시
+  // 신규 draft 이벤트
   if (ev.Id === 'draft') {
     args.element.style.setProperty('background-color', 'var(--primary)', 'important');
     args.element.style.setProperty('border-color', 'var(--primary)', 'important');
-
-    const subject = args.element.querySelector('.e-subject');
-    if (subject) {
-      subject.style.setProperty('color', 'white', 'important');
-      subject.style.opacity = '1';
-    }
-    return; // 아래 status 로직은 진행 X
+    args.element.style.setProperty('color', 'white', 'important');
+    return;
   }
 
-  // 상세 조회 중인 이벤트인 경우
+  // 상세조회 중인 이벤트 강조
   if (props.productionPlanDetailId && ev.Id === props.productionPlanDetailId) {
     args.element.style.setProperty('background-color', DETAIL_HIGHLIGHT.background, 'important');
     args.element.style.setProperty('border-color', DETAIL_HIGHLIGHT.border, 'important');
-
-    const subject = args.element.querySelector('.e-subject');
-    if (subject) {
-      subject.style.setProperty('color', DETAIL_HIGHLIGHT.text, 'important');
-      subject.style.opacity = '1';
-    }
-    return; // 상태 컬러 스킵
+    args.element.style.setProperty('color', DETAIL_HIGHLIGHT.text, 'important');
+    return;
   }
 
-  // 일반 이벤트는 상태 컬러 적용
-  const status = ev.Status;
-  const color = STATUS_COLORS[status];
-  if (!color) return;
-
-  args.element.style.setProperty('background-color', color.background, 'important');
-  args.element.style.setProperty('border-color', color.border, 'important');
-
-  const subject = args.element.querySelector('.e-subject');
-  if (subject) {
-    subject.style.setProperty('color', color.text, 'important');
-    subject.style.opacity = '1';
+  // 일반 상태 컬러 적용
+  const color = STATUS_COLORS[ev.Status];
+  if (color) {
+    args.element.style.setProperty('background-color', color.background, 'important');
+    args.element.style.setProperty('border-color', color.border, 'important');
+    args.element.style.setProperty('color', color.text, 'important');
   }
 }
 
-const emit = defineEmits(['updateStartEndTime']);
+function onSelectedDragStart(args) {
+  const event = args.data;
+
+  // 상세조회 중인 이벤트만 드래그 허용
+  if (event.Id !== props.productionPlanDetailId) {
+    args.cancel = true;
+    return;
+  }
+
+  const role = userStore.userRole;
+
+  if (role === 'ADMIN') {
+    if (event.Status !== 'PENDING' && event.Status !== 'CONFIRMED') {
+      args.cancel = true;
+    }
+  } else if (role === 'MANAGER') {
+    if (event.Status !== 'PENDING' || props.productionManagerNo !== userStore.empNo) {
+      args.cancel = true;
+    }
+  } else {
+    args.cancel = true;
+  }
+}
 
 const { data: lineListSchedule } = useGetLineList({
   factoryId: computed(() => props.factoryId),
 });
 
-const selectedLine = computed(() => {
-  return lineListSchedule.value?.content?.find(l => l.lineCode === props.lineCode);
-});
+const selectedLine = computed(() =>
+  lineListSchedule.value?.content?.find(l => l.lineCode === props.lineCode),
+);
 
 const availableLineResource = computed(() => [
   {
     field: 'LineCode',
-    title: '라인',
     name: 'Lines',
     idField: 'LineCode',
     textField: 'text',
@@ -226,7 +220,6 @@ const selectedLineResource = computed(() => {
   return [
     {
       field: 'LineCode',
-      title: '라인',
       name: 'Lines',
       idField: 'LineCode',
       textField: 'text',
@@ -252,38 +245,35 @@ const { data: selectedLineData, filters: selectedFilters } = useGetProductionPla
   lineCode: props.lineCode,
 });
 
+// 날짜 이동
 const { selectedDate: selectedDateSelected, onNavigation: onSelectedNavigation } =
   useScheduleRangeManager(selectedFilters);
 
 const { selectedDate: selectedDateAvailable, onNavigation: onAvailableNavigation } =
   useScheduleRangeManager(availableFilters);
 
-const makeEvent = ev => {
-  return {
-    Id: ev.id,
-    Subject: ev.documentNo,
-    StartTime: new Date(ev.startTime),
-    EndTime: new Date(ev.endTime),
-    LineCode: ev.lineCode,
-    ItemName: ev.itemName,
-    ItemQty: ev.plannedQty,
-    Status: ev.status,
-  };
-};
+// 이벤트 포맷
+const makeEvent = ev => ({
+  Id: ev.id,
+  Subject: ev.documentNo,
+  StartTime: new Date(ev.startTime),
+  EndTime: new Date(ev.endTime),
+  LineCode: ev.lineCode,
+  ItemName: ev.itemName,
+  ItemQty: ev.plannedQty,
+  Status: ev.status,
+});
 
+// 이벤트 목록
 const selectedEvents = computed(() => {
   const base = selectedLineData.value?.map(makeEvent) ?? [];
-  if (props.mode === 'create' && draftEvent.value && props.lineCode) {
-    base.push(draftEvent.value);
-  }
+  if (props.mode === 'create' && draftEvent.value) base.push(draftEvent.value);
   return base;
 });
 
 const availableEvents = computed(() => {
   const base = availableLineData.value?.map(makeEvent) ?? [];
-  if (props.mode === 'create' && draftEvent.value && props.lineCode) {
-    base.push(draftEvent.value);
-  }
+  if (props.mode === 'create' && draftEvent.value) base.push(draftEvent.value);
   return base;
 });
 
@@ -300,18 +290,6 @@ const availableEventSettings = computed(() => ({
 const selectedScheduleRef = ref(null);
 const availableScheduleRef = ref(null);
 
-watch(selectedEvents, () => {
-  nextTick(() => {
-    selectedScheduleRef.value?.ej2Instances?.refreshEvents();
-  });
-});
-
-watch(availableEvents, () => {
-  nextTick(() => {
-    availableScheduleRef.value?.ej2Instances?.refreshEvents();
-  });
-});
-
 function onSelectedCreated() {
   const inst = selectedScheduleRef.value?.ej2Instances;
   if (inst) onSelectedNavigation(inst);
@@ -322,128 +300,11 @@ function onAvailableCreated() {
   if (inst) onAvailableNavigation(inst);
 }
 
-const isProgrammaticUpdate = ref(false);
-const originalStartTime = ref(null);
-
-function applyEventToSchedules(ev) {
-  const selectedInst = selectedScheduleRef.value?.ej2Instances;
-  const availableInst = availableScheduleRef.value?.ej2Instances;
-
-  if (selectedInst) selectedInst.saveEvent(ev);
-  if (availableInst) availableInst.saveEvent(ev);
-}
-
-function handleEventOrderChange(draggedEvent) {
-  const lineCode = props.lineCode;
-  if (!lineCode) return;
-
-  // 현재 라인의 이벤트들 복사 (draft 제외)
-  let events = selectedEvents.value
-    .filter(e => e.LineCode === lineCode && e.Id !== 'draft')
-    .map(e => ({
-      ...e,
-      StartTime: new Date(e.StartTime),
-      EndTime: new Date(e.EndTime),
-    }));
-
-  if (!events.length) return;
-
-  // 드래그 전 원본 가장 이른 시작 시간
-  const originalEarliestMs = Math.min(...events.map(e => e.StartTime.getTime()));
-
-  // 드래그된 이벤트 찾기
-  const draggedIndex = events.findIndex(e => e.Id === draggedEvent.Id);
-  if (draggedIndex === -1) return;
-
-  const newStartMs = new Date(draggedEvent.StartTime).getTime();
-  const newEndMs = new Date(draggedEvent.EndTime).getTime();
-  const dragDuration = newEndMs - newStartMs;
-
-  // 어떤 이벤트도 기준 시간보다 앞으론 못 가게 조정
-  const effectiveStartMs = newStartMs < originalEarliestMs ? originalEarliestMs : newStartMs;
-  const effectiveEndMs = effectiveStartMs + dragDuration;
-
-  events[draggedIndex].StartTime = new Date(effectiveStartMs);
-  events[draggedIndex].EndTime = new Date(effectiveEndMs);
-
-  // 새 시작 시간을 기준으로 순서 재정렬
-  events.sort((a, b) => a.StartTime.getTime() - b.StartTime.getTime());
-
-  // 전체 타임라인은 항상 originalEarliestMs 에서 시작
-  let currentStart = new Date(originalEarliestMs);
-  let updatedCurrentEvent = null;
-
-  isProgrammaticUpdate.value = true;
-  try {
-    for (const ev of events) {
-      const durationMs = ev.EndTime.getTime() - ev.StartTime.getTime();
-
-      ev.StartTime = new Date(currentStart);
-      ev.EndTime = new Date(currentStart.getTime() + durationMs);
-      currentStart = new Date(ev.EndTime);
-
-      applyEventToSchedules(ev);
-
-      if (ev.Id === draggedEvent.Id) {
-        updatedCurrentEvent = ev;
-      }
-    }
-  } finally {
-    isProgrammaticUpdate.value = false;
-  }
-
-  // draggedEvent 에도 최종 시간 반영 (emit 용)
-  if (updatedCurrentEvent) {
-    draggedEvent.StartTime = updatedCurrentEvent.StartTime;
-    draggedEvent.EndTime = updatedCurrentEvent.EndTime;
-  }
-}
-
+// 날짜 이동 처리
 function onSelectedScheduleAction(args) {
-  if (isProgrammaticUpdate.value) return;
-
   if (['dateNavigate', 'viewNavigate'].includes(args.requestType)) {
     const inst = selectedScheduleRef.value?.ej2Instances;
     if (inst) onSelectedNavigation(inst);
-  }
-
-  if (args.requestType === 'eventChanged') {
-    const updatedEvents = args.changedRecords ?? [];
-
-    updatedEvents.forEach(draggedEvent => {
-      if (
-        draggedEvent &&
-        props.mode === 'detail' &&
-        draggedEvent.Id === props.productionPlanDetailId
-      ) {
-        handleEventOrderChange(draggedEvent);
-
-        // 여기서 ±1초 보정하는 emitEvent 로직도 그대로 사용
-        let deltaSec = 0;
-        if (originalStartTime.value) {
-          const prev = originalStartTime.value.getTime();
-          const now = new Date(draggedEvent.StartTime).getTime();
-          if (now > prev)
-            deltaSec = 1; // 오른쪽
-          else if (now < prev) deltaSec = -1; // 왼쪽
-        }
-        const deltaMs = deltaSec * 1000;
-
-        const emitEvent = {
-          ...draggedEvent,
-          StartTime: new Date(new Date(draggedEvent.StartTime).getTime() + deltaMs),
-          EndTime: new Date(new Date(draggedEvent.EndTime).getTime() + deltaMs),
-        };
-
-        originalStartTime.value = null;
-        emit('updateStartEndTime', emitEvent);
-      }
-    });
-
-    nextTick(() => {
-      selectedScheduleRef.value?.ej2Instances?.refreshEvents();
-      availableScheduleRef.value?.ej2Instances?.refreshEvents();
-    });
   }
 }
 
@@ -455,134 +316,27 @@ function onAvailableScheduleAction(args) {
 }
 
 function onPopupOpen(args) {
-  if (args.type === 'QuickInfo' || args.type === 'Editor') {
-    args.cancel = true;
-  }
+  if (args.type === 'QuickInfo' || args.type === 'Editor') args.cancel = true;
 }
-
-function onSelectedDragStart(args) {
-  const draggedEvent = args.data;
-  const userRole = userStore.userRole;
-  const eventStatus = draggedEvent.Status;
-
-  // 현재 상세 조회 중인 이벤트가 아니면 취소 (기존 로직 유지)
-  if (draggedEvent.Id !== props.productionPlanDetailId) {
-    args.cancel = true;
-    return;
-  }
-
-  let isAllowed = false;
-
-  // 관리자 권한
-  if (userRole === 'ADMIN') {
-    // ADMIN은 PENDING 또는 CONFIRMED 상태이면 가능
-    if (eventStatus === 'PENDING' || eventStatus === 'CONFIRMED') {
-      isAllowed = true;
-    }
-  }
-
-  // 매니저 권한
-  else if (userRole === 'MANAGER') {
-    // MANAGER는 PENDING 상태이면서,
-    // 이벤트의 productionNo가 현재 사용자의 productionNo와 일치할 때만 가능
-    if (eventStatus === 'PENDING' && props.productionManagerNo === userStore.empNo) {
-      isAllowed = true;
-    }
-  }
-
-  // 권한이 없으면 드래그 취소
-  if (!isAllowed) {
-    args.cancel = true;
-    return;
-  }
-
-  originalStartTime.value = new Date(draggedEvent.StartTime);
-}
-
-function onDragStart(args) {
-  args.cancel = true;
-}
-
-function reorderEventsAfterTimeChange(changedEventId, newStartTime, newEndTime) {
-  const lineCode = props.lineCode;
-  if (!lineCode) return;
-
-  // 현재 라인의 모든 이벤트 복사 (draft 제외)
-  let events = selectedEvents.value
-    .filter(e => e.LineCode === lineCode && e.Id !== 'draft')
-    .map(e => ({
-      ...e,
-      StartTime: new Date(e.StartTime),
-      EndTime: new Date(e.EndTime),
-    }));
-
-  if (!events.length) return;
-
-  // 변경된 이벤트 찾기
-  const changedIndex = events.findIndex(e => e.Id === changedEventId);
-  if (changedIndex === -1) return;
-
-  // 변경된 이벤트의 시간 업데이트
-  events[changedIndex].StartTime = new Date(newStartTime);
-  events[changedIndex].EndTime = new Date(newEndTime);
-
-  // 시작 시간 기준으로 정렬
-  events.sort((a, b) => a.StartTime.getTime() - b.StartTime.getTime());
-
-  // 가장 이른 시작 시간 찾기
-  const earliestMs = Math.min(...events.map(e => e.StartTime.getTime()));
-
-  // 전체 타임라인 재정렬
-  let currentStart = new Date(earliestMs);
-
-  isProgrammaticUpdate.value = true;
-  try {
-    for (const ev of events) {
-      const durationMs = ev.EndTime.getTime() - ev.StartTime.getTime();
-
-      ev.StartTime = new Date(currentStart);
-      ev.EndTime = new Date(currentStart.getTime() + durationMs);
-      currentStart = new Date(ev.EndTime);
-
-      applyEventToSchedules(ev);
-    }
-  } finally {
-    isProgrammaticUpdate.value = false;
-  }
-
-  // 스케줄 새로고침
-  nextTick(() => {
-    selectedScheduleRef.value?.ej2Instances?.refreshEvents();
-    availableScheduleRef.value?.ej2Instances?.refreshEvents();
-  });
-}
-
-watch(
-  () => [props.updatedStartTime, props.updatedEndTime, props.productionPlanDetailId],
-  ([newStartTime, newEndTime, planId]) => {
-    if (props.mode === 'detail' && planId && newStartTime && newEndTime) {
-      // 시간이 실제로 변경되었는지 확인
-      const currentEvent = selectedEvents.value.find(e => e.Id === planId);
-      if (currentEvent) {
-        const currentStart = new Date(currentEvent.StartTime).getTime();
-        const currentEnd = new Date(currentEvent.EndTime).getTime();
-        const newStart = new Date(newStartTime).getTime();
-        const newEnd = new Date(newEndTime).getTime();
-
-        // 시간이 변경된 경우에만 재정렬
-        if (currentStart !== newStart || currentEnd !== newEnd) {
-          reorderEventsAfterTimeChange(planId, newStartTime, newEndTime);
-        }
-      }
-    }
-  },
-  { deep: true },
-);
 </script>
 
 <style>
 .e-schedule {
   overflow: visible !important;
+}
+
+.e-schedule .e-content-wrap,
+.e-schedule {
+  /* 1. Internet Explorer, Edge 구 버전 */
+  -ms-overflow-style: none;
+
+  /* 2. Firefox */
+  scrollbar-width: none;
+
+  /* 3. WebKit (Chrome, Safari, Edge) */
+  &::-webkit-scrollbar {
+    display: none; /* 스크롤바 영역 자체를 숨김 */
+  }
 }
 
 /* 막대바 높이 지정 */
