@@ -59,7 +59,7 @@
 
         <FormField name="itemName" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>품목명(품목코드)</FormLabel>
+            <FormLabel>품목</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -113,7 +113,7 @@
 
         <FormField name="productionPlanDocumentNo" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>생산 실적 전표</FormLabel>
+            <FormLabel>생산계획 전표번호</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -122,7 +122,7 @@
 
         <FormField name="lotNo" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>LOT No.</FormLabel>
+            <FormLabel>LoT No.</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
