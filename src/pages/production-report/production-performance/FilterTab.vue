@@ -7,6 +7,7 @@
 
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FilterInput label="전표번호" v-model="localFilters.documentNo" />
           <FilterSelect label="공장" v-model="localFilters.factoryCode" :options="factoryOptions" />
           <FilterInput label="생산 계획번호" v-model="localFilters.productionPlanDocumentNo" />
 
@@ -84,14 +85,14 @@
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.startDateTimeStart"
+                v-model="localFilters.startTimeFrom"
                 class="flex-1 min-w-[180px]"
                 placeholder="From"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.startDateTimeEnd"
+                v-model="localFilters.startTimeTo"
                 class="flex-1 min-w-[180px]"
                 placeholder="To"
               />
@@ -103,14 +104,14 @@
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.endDateTimeStart"
+                v-model="localFilters.endTimeFrom"
                 class="flex-1 min-w-[180px]"
                 placeholder="From"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.endDateTimeEnd"
+                v-model="localFilters.endTimeTo"
                 class="flex-1 min-w-[180px]"
                 placeholder="To"
               />
@@ -167,18 +168,23 @@ const emit = defineEmits(['search', 'reset']);
 const localFilters = reactive({
   factoryCode: props.filters.factoryCode ?? null,
   lineCode: props.filters.lineCode ?? null,
+  documentNo: props.filters.documentNo ?? '',
   productionPlanDocumentNo: props.filters.productionPlanDocumentNo ?? '',
   itemCode: props.filters.itemCode ?? '',
-  productionManagerEmpName: props.filters.productionManagerEmpName ?? '',
-  salesManagerEmpName: props.filters.salesManagerEmpName ?? '',
+  productionManagerEmpName:
+    props.filters.productionManagerEmpName ?? props.filters.productionManagerName ?? '',
+  productionManagerName: props.filters.productionManagerName ?? '',
+  salesManagerEmpName:
+    props.filters.salesManagerEmpName ?? props.filters.salesManagerName ?? '',
+  salesManagerName: props.filters.salesManagerName ?? '',
   minPerformanceQty: props.filters.minPerformanceQty ?? null,
   maxPerformanceQty: props.filters.maxPerformanceQty ?? null,
   minDefectiveRate: props.filters.minDefectiveRate ?? null,
   maxDefectiveRate: props.filters.maxDefectiveRate ?? null,
-  startDateTimeStart: props.filters.startDateTimeStart ?? null,
-  startDateTimeEnd: props.filters.startDateTimeEnd ?? null,
-  endDateTimeStart: props.filters.endDateTimeStart ?? null,
-  endDateTimeEnd: props.filters.endDateTimeEnd ?? null,
+  startTimeFrom: props.filters.startTimeFrom ?? null,
+  startTimeTo: props.filters.startTimeTo ?? null,
+  endTimeFrom: props.filters.endTimeFrom ?? null,
+  endTimeTo: props.filters.endTimeTo ?? null,
 });
 
 const selectedFactoryId = ref(null);
@@ -247,21 +253,33 @@ const setItemCodeFilter = newCode => {
 };
 
 const applyFilters = () => {
+  const startFrom = localFilters.startTimeFrom;
+  const startTo = localFilters.startTimeTo;
+  const endFrom = localFilters.endTimeFrom;
+  const endTo = localFilters.endTimeTo;
+
   emit('search', {
     factoryCode: localFilters.factoryCode,
     lineCode: localFilters.lineCode,
+    documentNo: localFilters.documentNo,
     productionPlanDocumentNo: localFilters.productionPlanDocumentNo,
     itemCode: localFilters.itemCode,
     productionManagerEmpName: localFilters.productionManagerEmpName,
+    productionManagerName: localFilters.productionManagerEmpName,
     salesManagerEmpName: localFilters.salesManagerEmpName,
+    salesManagerName: localFilters.salesManagerEmpName,
     minPerformanceQty: normalizeNumber(localFilters.minPerformanceQty),
     maxPerformanceQty: normalizeNumber(localFilters.maxPerformanceQty),
     minDefectiveRate: normalizeNumber(localFilters.minDefectiveRate),
     maxDefectiveRate: normalizeNumber(localFilters.maxDefectiveRate),
-    startDateTimeStart: localFilters.startDateTimeStart,
-    startDateTimeEnd: localFilters.startDateTimeEnd,
-    endDateTimeStart: localFilters.endDateTimeStart,
-    endDateTimeEnd: localFilters.endDateTimeEnd,
+    startTimeFrom: startFrom,
+    startTimeTo: startTo,
+    endTimeFrom: endFrom,
+    endTimeTo: endTo,
+    startDateTimeStart: startFrom,
+    startDateTimeEnd: startTo,
+    endDateTimeStart: endFrom,
+    endDateTimeEnd: endTo,
   });
 };
 
@@ -269,18 +287,21 @@ const resetFilters = () => {
   Object.assign(localFilters, {
     factoryCode: null,
     lineCode: null,
+    documentNo: '',
     productionPlanDocumentNo: '',
     itemCode: '',
     productionManagerEmpName: '',
+    productionManagerName: '',
     salesManagerEmpName: '',
+    salesManagerName: '',
     minPerformanceQty: null,
     maxPerformanceQty: null,
     minDefectiveRate: null,
     maxDefectiveRate: null,
-    startDateTimeStart: null,
-    startDateTimeEnd: null,
-    endDateTimeStart: null,
-    endDateTimeEnd: null,
+    startTimeFrom: null,
+    startTimeTo: null,
+    endTimeFrom: null,
+    endTimeTo: null,
   });
 
   selectedFactoryId.value = null;
@@ -289,14 +310,21 @@ const resetFilters = () => {
   emit('reset', {
     factoryCode: null,
     lineCode: null,
+    documentNo: '',
     productionPlanDocumentNo: '',
     itemCode: '',
     productionManagerEmpName: '',
+    productionManagerName: '',
     salesManagerEmpName: '',
+    salesManagerName: '',
     minPerformanceQty: null,
     maxPerformanceQty: null,
     minDefectiveRate: null,
     maxDefectiveRate: null,
+    startTimeFrom: null,
+    startTimeTo: null,
+    endTimeFrom: null,
+    endTimeTo: null,
     startDateTimeStart: null,
     startDateTimeEnd: null,
     endDateTimeStart: null,
@@ -305,7 +333,17 @@ const resetFilters = () => {
 };
 
 const assignFilters = newFilters => {
-  Object.assign(localFilters, newFilters);
+  const managerName =
+    newFilters.productionManagerEmpName ?? newFilters.productionManagerName ?? '';
+  const salesName = newFilters.salesManagerEmpName ?? newFilters.salesManagerName ?? '';
+
+  Object.assign(localFilters, {
+    ...newFilters,
+    productionManagerEmpName: managerName,
+    productionManagerName: newFilters.productionManagerName ?? managerName ?? '',
+    salesManagerEmpName: salesName,
+    salesManagerName: newFilters.salesManagerName ?? salesName ?? '',
+  });
 };
 
 watch(
