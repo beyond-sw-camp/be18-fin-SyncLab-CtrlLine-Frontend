@@ -77,6 +77,28 @@
             readonly
           />
         </div>
+
+        <div class="flex flex-col">
+          <Label for="performanceDocNo" class="text-sm font-medium mb-1">생산실적 전표번호</Label>
+          <Input
+            id="performanceDocNo"
+            class="text-sm"
+            type="text"
+            :model-value="defectiveDetail.performanceDocNo"
+            readonly
+          />
+        </div>
+
+        <div class="flex flex-col">
+          <Label for="lotNo" class="text-sm font-medium mb-1">Lot No.</Label>
+          <Input
+            id="lotNo"
+            class="text-sm"
+            type="text"
+            :model-value="defectiveDetail.lotNo"
+            readonly
+          />
+        </div>
       </div>
 
       <div class="mt-6">
