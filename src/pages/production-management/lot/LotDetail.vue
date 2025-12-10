@@ -83,6 +83,7 @@
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
+import { ungzip } from 'pako';
 
 import useGetLotDetail from '@/apis/query-hooks/lot/useGetLotDetail';
 import { Button } from '@/components/ui/button';
@@ -174,6 +175,56 @@ function calculateDefectiveRate(detail) {
   return (defectiveQty / lotQty) * 100;
 }
 
+function resolveSerialFileUrl(filePath) {
+  if (!filePath) return '';
+  if (/^https?:\/\//i.test(filePath)) {
+    return filePath;
+  }
+
+  if (/^s3:\/\//i.test(filePath)) {
+    const pathWithoutScheme = filePath.replace(/^s3:\/\//i, '');
+    const [bucket, ...keyParts] = pathWithoutScheme.split('/');
+    if (!bucket) {
+      return '';
+    }
+
+    const key = keyParts.join('/');
+    const customBaseUrl = (import.meta.env.VITE_SERIAL_FILE_BASE_URL ?? '').replace(/\/+$/, '');
+
+    if (customBaseUrl) {
+      return `${customBaseUrl}/${key}`.replace(/([^:]\/)\/+/g, '$1');
+    }
+
+    const region = import.meta.env.VITE_AWS_S3_REGION;
+    const host = region ? `${bucket}.s3.${region}.amazonaws.com` : `${bucket}.s3.amazonaws.com`;
+    return `https://${host}/${key}`.replace(/([^:]\/)\/+/g, '$1');
+  }
+
+  return filePath;
+}
+
+function isGzipResponse(response, url) {
+  const encoding = response.headers.get('content-encoding')?.toLowerCase() ?? '';
+  const contentType = response.headers.get('content-type')?.toLowerCase() ?? '';
+  if (encoding.includes('gzip') || contentType.includes('gzip')) {
+    return true;
+  }
+
+  if (!url) return false;
+  return /\.gz($|\?)/i.test(url);
+}
+
+async function readSerialFile(response, serialFileUrl) {
+  if (!isGzipResponse(response, serialFileUrl)) {
+    return response.text();
+  }
+
+  const buffer = await response.arrayBuffer();
+  const decompressed = ungzip(new Uint8Array(buffer));
+  const decoder = new TextDecoder('utf-8');
+  return decoder.decode(decompressed);
+}
+
 const viewSerialNumbers = async () => {
   if (!lotDetail.value?.serialFilePath) {
     toast.info('등록된 시리얼 번호가 없습니다.');
@@ -189,11 +240,16 @@ const viewSerialNumbers = async () => {
   hasSerialError.value = false;
 
   try {
-    const response = await fetch(lotDetail.value.serialFilePath);
+    const serialFileUrl = resolveSerialFileUrl(lotDetail.value.serialFilePath);
+    if (!serialFileUrl) {
+      throw new Error('invalid serial url');
+    }
+
+    const response = await fetch(serialFileUrl);
     if (!response.ok) {
       throw new Error('failed to fetch');
     }
-    const text = await response.text();
+    const text = await readSerialFile(response, serialFileUrl);
     serialNumbers.value = text.split(/\r?\n/).filter(line => line.trim().length > 0);
     showSerials.value = true;
   } catch {
