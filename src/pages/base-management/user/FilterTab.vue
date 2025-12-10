@@ -34,18 +34,16 @@
             ]"
           />
 
-          <div v-if="isAdmin">
-            <FilterSelect
-              label="권한"
-              v-model="localFilters.userRole"
-              :options="[
-                { value: null, label: '전체' },
-                { value: 'USER', label: '유저' },
-                { value: 'MANAGER', label: '매니저' },
-                { value: 'ADMIN', label: '관리자' },
-              ]"
-            />
-          </div>
+          <FilterSelect
+            label="권한"
+            v-model="localFilters.userRole"
+            :options="[
+              { value: null, label: '전체' },
+              { value: 'USER', label: '유저' },
+              { value: 'MANAGER', label: '매니저' },
+              { value: 'ADMIN', label: '관리자' },
+            ]"
+          />
         </div>
 
         <div class="flex justify-end mt-4 gap-2">

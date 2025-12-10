@@ -32,55 +32,65 @@
                 :key="line.lineCode"
                 class="line-floor-plan"
                 :data-type="line.type"
-            >
-              <header class="line-floor-plan__header">
-                <div>
-                  <p class="line-floor-plan__title">{{ line.displayLabel }}</p>
-                  <p class="line-floor-plan__code">{{ line.lineCode }}</p>
-                </div>
-                <span class="line-floor-plan__badge">라인</span>
-              </header>
+              >
+                <header class="line-floor-plan__header">
+                  <div>
+                    <p class="line-floor-plan__title">{{ line.displayLabel }}</p>
+                    <p class="line-floor-plan__code">{{ line.lineCode }}</p>
+                  </div>
+                </header>
 
-              <div class="line-floor-plan__body">
-                <div class="pipeline">
-                  <div class="pipeline__rail"></div>
-                  <div
-                    v-for="(equipment, index) in EQUIPMENT_LAYOUT"
-                    :key="equipment.key"
-                    class="pipeline__node"
-                    :class="`pipeline__node--${equipment.position}`"
-                    :style="{ gridColumn: equipment.gridColumn, gridRow: equipment.gridRow }"
-                  >
-                    <Tooltip>
-                      <TooltipTrigger as-child>
-                        <button
-                          type="button"
-                          class="pipeline__machine"
-                          :data-active="(equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)"
-                          @click.stop="openEquipmentModal(equipment)"
+                <div class="line-floor-plan__body">
+                  <div class="pipeline">
+                    <div class="pipeline__rail"></div>
+                    <div
+                      v-for="(equipment, index) in EQUIPMENT_LAYOUT"
+                      :key="equipment.key"
+                      class="pipeline__node"
+                      :class="`pipeline__node--${equipment.position}`"
+                      :style="{ gridColumn: equipment.gridColumn, gridRow: equipment.gridRow }"
+                    >
+                      <Tooltip>
+                        <TooltipTrigger as-child>
+                          <button
+                            type="button"
+                            class="pipeline__machine"
+                            :data-active="
+                              (equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)
+                            "
+                            @click.stop="openEquipmentModal(equipment)"
+                          >
+                            <component
+                              :is="equipment.icon"
+                              class="equipment-icon"
+                              aria-hidden="true"
+                            />
+                            <span class="pipeline__stage-number">{{ index + 1 }}</span>
+                          </button>
+                        </TooltipTrigger>
+
+                        <TooltipContent
+                          class="rounded-xl border border-gray-200 bg-white/95 px-3 py-2 shadow-xl"
+                          side="top"
+                          :side-offset="8"
                         >
-                          <component :is="equipment.icon" class="equipment-icon" aria-hidden="true" />
-                          <span class="pipeline__stage-number">{{ index + 1 }}</span>
-                        </button>
-                      </TooltipTrigger>
-
-                      <TooltipContent
-                        class="rounded-xl border border-gray-200 bg-white/95 px-3 py-2 shadow-xl"
-                        side="top"
-                        :side-offset="8"
-                      >
-                        <p class="text-xs font-semibold text-gray-800">{{ equipment.label }}</p>
-                        <p class="text-[11px] text-gray-500">{{ tooltipDescription(equipment.label) }}</p>
-                      </TooltipContent>
-                    </Tooltip>
+                          <p class="text-xs font-semibold text-gray-800">{{ equipment.label }}</p>
+                          <p class="text-[11px] text-gray-500">
+                            {{ tooltipDescription(equipment.label) }}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
+              </article>
             </div>
           </TooltipProvider>
 
-          <Dialog :open="isEquipmentModalOpen" @update:open="val => (!val ? closeEquipmentModal() : null)">
+          <Dialog
+            :open="isEquipmentModalOpen"
+            @update:open="val => (!val ? closeEquipmentModal() : null)"
+          >
             <DialogContent class="max-w-xl rounded-3xl border border-gray-200 p-6 shadow-2xl">
               <DialogHeader>
                 <DialogTitle class="text-2xl font-semibold text-gray-900">
@@ -102,16 +112,22 @@
               </div>
             </DialogContent>
           </Dialog>
-
         </div>
       </div>
     </div>
-
   </section>
 </template>
 
 <script setup>
-import { BatteryCharging, Boxes, Droplet, Puzzle, ShieldCheck, Sparkles, Zap } from 'lucide-vue-next';
+import {
+  BatteryCharging,
+  Boxes,
+  Droplet,
+  Puzzle,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+} from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -320,7 +336,6 @@ const openEquipmentModal = equipment => {
 const closeEquipmentModal = () => {
   isEquipmentModalOpen.value = false;
 };
-
 </script>
 
 <style scoped>
@@ -328,7 +343,8 @@ const closeEquipmentModal = () => {
   position: relative;
   padding: 2.5rem 1.5rem 1.5rem;
   border-radius: 1.75rem;
-  background: radial-gradient(circle at top left, rgba(91, 109, 76, 0.09), transparent 45%),
+  background:
+    radial-gradient(circle at top left, rgba(91, 109, 76, 0.09), transparent 45%),
     radial-gradient(circle at bottom right, rgba(91, 109, 76, 0.12), transparent 40%),
     linear-gradient(180deg, #fdfefe 0%, #f5f7f2 100%);
   overflow: hidden;
@@ -442,7 +458,9 @@ const closeEquipmentModal = () => {
   justify-content: center;
   box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .pipeline__machine:focus-visible {
@@ -539,10 +557,5 @@ const closeEquipmentModal = () => {
   background: rgba(167, 243, 208, 0.6);
   color: #065f46;
 }
-
 </style>
-.process-card__header p {
-  margin: 0.2rem 0 0;
-  color: #64748b;
-  font-size: 0.9rem;
-}
+.process-card__header p { margin: 0.2rem 0 0; color: #64748b; font-size: 0.9rem; }

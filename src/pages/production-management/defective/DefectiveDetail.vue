@@ -1,23 +1,30 @@
 <template>
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">불량 상세 조회</h3>
+
+    <div class="flex gap-2">
+      <Badge v-if="defectiveDetail" variant="secondary">
+        {{ defectiveDetail.defectiveDocNo }}
+      </Badge>
+    </div>
   </div>
 
   <div v-if="defectiveDetail" class="flex flex-col gap-8 md:flex-row">
     <div class="flex-1 flex flex-col gap-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
         <div class="flex flex-col">
-          <Label class="text-sm font-medium mb-1" for="factoryName">공장명</Label>
+          <Label class="text-sm font-medium mb-1" for="factoryName">공장</Label>
           <Input
             id="factoryName"
             type="text"
             :model-value="defectiveDetail.factoryName"
             class="text-sm"
+            readonly
           />
         </div>
 
         <div class="flex flex-col">
-          <Label class="text-sm font-medium mb-1" for="lineName">라인명</Label>
+          <Label class="text-sm font-medium mb-1" for="lineName">라인</Label>
           <Input
             id="lineName"
             type="text"
@@ -28,24 +35,24 @@
         </div>
 
         <div class="flex flex-col">
-          <Label for="itemName" class="text-sm font-medium mb-1">품목명</Label>
+          <Label for="itemName" class="text-sm font-medium mb-1">품목코드</Label>
           <Input
             id="itemName"
             type="text"
-            :model-value="`${defectiveDetail.itemName} (${defectiveDetail.itemCode})`"
+            :model-value="`${defectiveDetail.itemCode}`"
             readonly
             class="text-sm"
           />
         </div>
 
         <div class="flex flex-col">
-          <Label for="defectiveDocNo" class="text-sm font-medium mb-1">불량 전표번호</Label>
+          <Label for="itemName" class="text-sm font-medium mb-1">품목명</Label>
           <Input
-            id="defectiveDocNo"
-            class="text-sm"
+            id="itemName"
             type="text"
-            :model-value="defectiveDetail.defectiveDocNo"
+            :model-value="`${defectiveDetail.itemName}`"
             readonly
+            class="text-sm"
           />
         </div>
 
@@ -70,6 +77,28 @@
             readonly
           />
         </div>
+
+        <div class="flex flex-col">
+          <Label for="performanceDocNo" class="text-sm font-medium mb-1">생산실적 전표번호</Label>
+          <Input
+            id="performanceDocNo"
+            class="text-sm"
+            type="text"
+            :model-value="defectiveDetail.performanceDocNo"
+            readonly
+          />
+        </div>
+
+        <div class="flex flex-col">
+          <Label for="lotNo" class="text-sm font-medium mb-1">Lot No.</Label>
+          <Input
+            id="lotNo"
+            class="text-sm"
+            type="text"
+            :model-value="defectiveDetail.lotNo"
+            readonly
+          />
+        </div>
       </div>
 
       <div class="mt-6">
@@ -84,6 +113,7 @@
 import { useRoute } from 'vue-router';
 
 import useGetDefective from '@/apis/query-hooks/defective/useGetDefective';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import DefectiveTable from '@/pages/production-management/defective/DefectiveTable.vue';

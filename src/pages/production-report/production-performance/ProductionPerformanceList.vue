@@ -1,12 +1,7 @@
 <template>
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산실적 현황</h3>
-    <Button
-      size="sm"
-      class="cursor-pointer w-[70px]"
-      @click="exportCsv"
-      :disabled="!exportEnabled"
-    >
+    <Button size="sm" class="cursor-pointer w-[70px]" @click="exportCsv" :disabled="!exportEnabled">
       Export
     </Button>
   </div>
@@ -23,12 +18,22 @@
               <TableHead class="text-center whitespace-nowrap overflow-hidden">공장명</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">라인명</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>
-              <TableHead class="text-center whitespace-nowrap overflow-hidden">품코드</TableHead>
-              <TableHead class="text-center whitespace-nowrap overflow-hidden">생산계획번호</TableHead>
-              <TableHead class="text-center whitespace-nowrap overflow-hidden">생산담당자</TableHead>
-              <TableHead class="text-center whitespace-nowrap overflow-hidden">영업담당자</TableHead>
-              <TableHead class="text-center whitespace-nowrap overflow-hidden">생산시작시간</TableHead>
-              <TableHead class="text-center whitespace-nowrap overflow-hidden">생산종료시간</TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden">품목코드</TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden"
+                >생산계획번호</TableHead
+              >
+              <TableHead class="text-center whitespace-nowrap overflow-hidden"
+                >생산담당자</TableHead
+              >
+              <TableHead class="text-center whitespace-nowrap overflow-hidden"
+                >영업담당자</TableHead
+              >
+              <TableHead class="text-center whitespace-nowrap overflow-hidden"
+                >생산시작시간</TableHead
+              >
+              <TableHead class="text-center whitespace-nowrap overflow-hidden"
+                >생산종료시간</TableHead
+              >
               <TableHead class="text-center whitespace-nowrap overflow-hidden">실적수량</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">불량수량</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">불량률</TableHead>
@@ -41,7 +46,9 @@
               :key="index"
               class="text-center transition-all border-b border-dotted border-gray-300"
             >
-              <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">{{ row.documentNo }}</TableCell>
+              <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">{{
+                row.documentNo
+              }}</TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
                 {{ row.factoryName ?? '-' }}
               </TableCell>
@@ -152,8 +159,7 @@ const buildFiltersFromQuery = query => ({
   productionPlanDocumentNo:
     query.productionPlanDocumentNo ?? defaultFilters.productionPlanDocumentNo,
   itemCode: query.itemCode ?? defaultFilters.itemCode,
-  productionManagerName:
-    query.productionManagerName ?? defaultFilters.productionManagerName,
+  productionManagerName: query.productionManagerName ?? defaultFilters.productionManagerName,
   salesManagerName: query.salesManagerName ?? defaultFilters.salesManagerName,
   minPerformanceQty: parseNumericFilter(query.minPerformanceQty, defaultFilters.minPerformanceQty),
   maxPerformanceQty: parseNumericFilter(query.maxPerformanceQty, defaultFilters.maxPerformanceQty),
@@ -187,13 +193,10 @@ watch(
 
 const performanceRows = computed(() => productionPerformanceAll.value ?? []);
 
-const exportEnabled = computed(
-  () => hasSearched.value && performanceRows.value.length > 0,
-);
+const exportEnabled = computed(() => hasSearched.value && performanceRows.value.length > 0);
 
 const formatCount = value => (value === undefined || value === null ? '-' : value);
-const formatRate = value =>
-  value === undefined || value === null ? '-' : `${value} %`;
+const formatRate = value => (value === undefined || value === null ? '-' : `${value} %`);
 
 const syncQuery = () => {
   const query = buildQueryObject({ ...filters });

@@ -113,7 +113,7 @@
 
         <FormField name="productionPlanDocumentNo" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>생산 실적 전표</FormLabel>
+            <FormLabel>생산계획 전표번호</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -122,7 +122,7 @@
 
         <FormField name="lotNo" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>LOT No.</FormLabel>
+            <FormLabel>LoT No.</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -209,14 +209,15 @@ watch(
       remark: val.remark,
     });
 
+    const unit = val.itemUnit || 'EA';
     PPDetail.value = {
       itemCode: val.itemCode,
       itemName: val.itemName,
       itemSpecification: val.itemSpecification,
       itemUnit: val.itemUnit,
-      totalQty: formatQuantity(val.totalQty),
-      performanceQty: formatQuantity(val.performanceQty),
-      defectiveQty: formatQuantity(val.defectiveQty),
+      totalQty: formatQuantity(val.totalQty, unit),
+      performanceQty: formatQuantity(val.performanceQty, unit),
+      defectiveQty: formatQuantity(val.defectiveQty, unit),
       defectiveRate: val.defectiveRate,
     };
   },

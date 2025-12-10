@@ -16,13 +16,11 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden">사원명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">Email</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">부서명</TableHead>
-            <TableHead v-if="isAdmin" class="text-center whitespace-nowrap overflow-hidden">
-              연락처
-            </TableHead>
+            <TableHead v-if="isAdmin" class="text-center whitespace-nowrap overflow-hidden"
+              >연락처</TableHead
+            >
             <TableHead class="text-center whitespace-nowrap overflow-hidden">상태</TableHead>
-            <TableHead v-if="isAdmin" class="text-center whitespace-nowrap overflow-hidden">
-              권한
-            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 권한 </TableHead>
           </TableRow>
         </TableHeader>
 
@@ -42,7 +40,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ user.userDepartment }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis" v-if="isAdmin">
+            <TableCell v-if="isAdmin" class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ user.userPhoneNumber }}
             </TableCell>
             <TableCell>
@@ -56,7 +54,7 @@
                 {{ EMPLOYMENT_STATUS_LABELS[user.userStatus] }}
               </span>
             </TableCell>
-            <TableCell v-if="isAdmin">{{ ROLE_LABELS[user.userRole] }}</TableCell>
+            <TableCell>{{ ROLE_LABELS[user.userRole] }}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
@@ -84,7 +82,7 @@
 <script setup>
 import { ChevronRightIcon, InfoIcon } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -108,43 +106,31 @@ import {
 } from '@/components/ui/table';
 import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 import FilterTab from '@/pages/base-management/user/FilterTab.vue';
-import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 import { canView } from '@/utils/canView';
 
-const route = useRoute();
 const router = useRouter();
 const deniedModal = ref(false);
-const authStore = useAuthStore();
 
 const isAdmin = canView(['ADMIN']);
+const { data: userList, refetch, page, filters } = useGetUserList();
+
+const onSearch = newFilters => {
+  Object.assign(filters, newFilters);
+  page.value = 1; // 첫 페이지 부터 조회
+  refetch();
+};
 
 const goToDetail = userId => {
   router.push(`/base-management/users/${userId}`);
 };
 
-const initialFilters = {
-  userEmail: route.query.userEmail || '',
-  userDepartment: route.query.userDepartment || null,
-  userPhoneNumber: route.query.userPhoneNumber || '',
-  userStatus: route.query.userStatus || null,
-  userRole: route.query.userRole || null,
-};
-
-const { data: userList, page, filters } = useGetUserList(initialFilters);
-
-const onSearch = newFilters => {
-  Object.assign(filters, newFilters);
-  syncQuery();
-  page.value = 1;
-};
-
 const syncQuery = () => {
-  if (!authStore.isLoggedIn) return;
   const query = buildQueryObject({
     ...filters,
     page: page.value,
   });
+
   router.replace({ query });
 };
 
@@ -154,24 +140,6 @@ watch(
     syncQuery();
   },
   { deep: true },
-);
-
-watch(page, () => {
-  syncQuery();
-});
-
-watch(
-  () => route.query,
-  newQuery => {
-    page.value = Number(newQuery.page ?? 1);
-
-    filters.userEmail = newQuery.userEmail ?? '';
-    filters.userDepartment = newQuery.userDepartment ?? '';
-    filters.userPhoneNumber = newQuery.userPhoneNumber ?? null;
-    filters.userStatus = newQuery.userStatus ?? null;
-    filters.userRole = newQuery.userRole ?? null;
-  },
-  { immediate: true },
 );
 </script>
 
