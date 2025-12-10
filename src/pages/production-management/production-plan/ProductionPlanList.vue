@@ -145,6 +145,7 @@ import StatusUpdateDialog from '@/pages/production-management/production-plan/St
 import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 import { canView } from '@/utils/canView';
+import { formatNumber } from '@/utils/formatNumber';
 
 const route = useRoute();
 const router = useRouter();

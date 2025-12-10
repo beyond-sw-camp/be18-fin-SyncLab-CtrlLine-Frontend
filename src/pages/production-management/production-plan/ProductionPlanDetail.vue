@@ -28,13 +28,13 @@
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row">
-    <fieldset :disabled="isFormDisabled">
-      <form
-        v-if="productionPlanDetail"
-        id="productionPlanUpdateForm"
-        @submit="onSubmit"
-        class="flex-1 flex flex-col gap-2"
-      >
+    <form
+      v-if="productionPlanDetail"
+      id="productionPlanUpdateForm"
+      @submit="onSubmit"
+      class="flex-1 flex flex-col gap-2"
+    >
+      <fieldset :class="['w-full', canEdit ? '' : 'pointer-events-none']">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div class="order-1 md:order-0">
             <FormField v-slot="{ componentField, errorMessage }" name="factoryCode">
@@ -42,7 +42,7 @@
                 <FormLabel>공장</FormLabel>
                 <FormControl>
                   <Select v-bind="componentField" @update:modelValue="onFactorySelected">
-                    <SelectTrigger :class="['w-full', canEdit ? '' : 'pointer-events-none']">
+                    <SelectTrigger class="w-full">
                       <SelectValue placeholder="공장을 선택해주세요." />
                     </SelectTrigger>
 
@@ -220,7 +220,7 @@
                     :key="`factory-${selectedFactoryId}-item-${selectedItemId}`"
                     @update:modelValue="onLineSelected"
                   >
-                    <SelectTrigger :class="['w-full', canEdit ? '' : 'pointer-events-none']">
+                    <SelectTrigger class="w-full">
                       <SelectValue placeholder="라인을 선택해주세요." />
                     </SelectTrigger>
 
@@ -271,7 +271,7 @@
                 <FormLabel>상태</FormLabel>
                 <FormControl class="w-full">
                   <Select v-bind="componentField">
-                    <SelectTrigger :class="['w-full', canEdit ? '' : 'pointer-events-none']">
+                    <SelectTrigger class="w-full">
                       <SelectValue placeholder="상태를 선택하세요." />
                     </SelectTrigger>
                     <SelectContent>
@@ -308,23 +308,24 @@
             </FormField>
           </div>
         </div>
+
         <ItemTable :itemDetail="itemDetail" />
-        <ScheduleData
-          v-if="
-            productionPlanDetail && selectedFactoryId && selectedItemId && lineList?.content?.length
-          "
-          :productionPlanDetailId="productionPlanDetail.id"
-          :factoryId="selectedFactoryId"
-          :factoryCode="productionPlanDetail.factoryCode"
-          :lineCode="productionPlanDetail.lineCode"
-          mode="detail"
-          @updateStartEndTime="onStartTimeEndTimeChanged"
-          :updatedStartTime="form.values.startTime"
-          :updatedEndTime="form.values.endTime"
-          :productionManagerNo="form.values.productionManagerNo"
-        />
-      </form>
-    </fieldset>
+      </fieldset>
+      <ScheduleData
+        v-if="
+          productionPlanDetail && selectedFactoryId && selectedItemId && lineList?.content?.length
+        "
+        :productionPlanDetailId="productionPlanDetail.id"
+        :factoryId="selectedFactoryId"
+        :factoryCode="productionPlanDetail.factoryCode"
+        :lineCode="productionPlanDetail.lineCode"
+        mode="detail"
+        @updateStartEndTime="onStartTimeEndTimeChanged"
+        :updatedStartTime="form.values.startTime"
+        :updatedEndTime="form.values.endTime"
+        :productionManagerNo="form.values.productionManagerNo"
+      />
+    </form>
   </div>
 </template>
 
@@ -413,37 +414,31 @@ const userStore = useUserStore();
 
 const isAdmin = computed(() => userStore.userRole === 'ADMIN');
 
-const isFormDisabled = computed(() => {
-  const status = productionPlanDetail.value?.status;
-
-  if (!status) return true; // 상태값이 없으면 기본적으로 비활성화(안전 조치)
-
-  // RUNNING, COMPLETED, RETURNED 상태일 때는 입력값 전체를 비활성화 (disabled) 처리
-  if (['RUNNING', 'COMPLETED', 'RETURNED'].includes(status)) {
-    return true;
-  }
-
-  // 그 외의 상태 (PENDING, CONFIRMED 등)에서는 활성화
-  return false;
-});
-
 const canEdit = computed(() => {
   const role = userStore.userRole;
   const status = productionPlanDetail.value?.status;
+  const userEmpNo = userStore.empNo; // 현재 로그인된 사용자의 사번
+  const pmNo = productionPlanDetail.value?.productionManagerNo; // 생산계획의 생산 담당자 사번
 
   if (!status || !role) return false;
 
-  // RUNNING, COMPLETED 은 누구든 수정 불가
+  // RUNNING, COMPLETED, RETURNED 상태일 때는 누구든 수정 불가 (가장 먼저 검사)
   if (['RUNNING', 'COMPLETED', 'RETURNED'].includes(status)) return false;
 
-  // ADMIN: PENDING, CONFIRMED 에서만 수정 가능
+  // ADMIN: 수정 불가 상태를 제외하고 모두 가능 (PENDING, CONFIRMED)
   if (role === 'ADMIN') {
     return ['PENDING', 'CONFIRMED'].includes(status);
   }
 
-  // MANAGER, USER: PENDING 에서만 수정 가능
-  if (role === 'MANAGER' || role === 'USER') {
-    return status === 'PENDING';
+  // MANAGER: 소유자 일치 여부와 상태를 검사
+  if (role === 'MANAGER') {
+    // 생산 담당자가 현재 사용자와 일치하고 (소유권), 상태가 PENDING 또는 CONFIRMED일 때만 허용
+    return userEmpNo === pmNo && ['PENDING'].includes(status);
+  }
+
+  // USER: 수정 불가
+  if (role === 'USER') {
+    return false;
   }
 
   // 혹시 모를 기타 롤은 모두 불가
@@ -468,7 +463,7 @@ const canDelete = computed(() => {
 
   // MANAGER: 자기 자신 것만 삭제 가능 (PENDING, CONFIRMED 만)
   if (role === 'MANAGER') {
-    return userEmpNo === pmNo && ['PENDING', 'CONFIRMED'].includes(status);
+    return userEmpNo === pmNo && ['PENDING'].includes(status);
   }
 
   // USER: 삭제 불가
