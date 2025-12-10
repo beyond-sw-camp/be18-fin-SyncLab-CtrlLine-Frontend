@@ -31,13 +31,7 @@
           <FilterSelect
             label="담당부서"
             v-model="localFilters.userDepartment"
-            :options="[
-              { value: null, label: '전체' },
-              { value: '영업 1팀', label: '영업 1팀' },
-              { value: '영업 2팀', label: '영업 2팀' },
-              { value: '생산 1팀', label: '생산 1팀' },
-              { value: '생산 2팀', label: '생산 2팀' },
-            ]"
+            :options="departmentOptions"
           />
         </div>
 
@@ -64,7 +58,7 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { computed, reactive, watch } from 'vue';
 
 import FilterInput from '@/components/filter/FilterInput.vue';
 import FilterSelect from '@/components/filter/FilterSelect.vue';
@@ -75,6 +69,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { DEPARTMENT_LABELS } from '@/constants/enumLabels';
 
 const props = defineProps({
   filters: { type: Object, required: true },
@@ -90,6 +85,17 @@ const localFilters = reactive({
   userDepartment: props.filters.userDepartment ?? null,
 });
 
+const departmentOptions = computed(() => {
+  const options = Object.entries(DEPARTMENT_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
+
+  options.unshift({ value: null, label: '전체' });
+
+  return options;
+});
+
 watch(
   () => props.filters,
   newVal => {
@@ -97,7 +103,6 @@ watch(
   },
   { deep: true },
 );
-
 
 const applyFilters = () => {
   emit('search', { ...localFilters });
