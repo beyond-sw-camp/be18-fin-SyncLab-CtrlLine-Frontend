@@ -98,7 +98,7 @@
               {{ productionPlan.salesManagerName }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ formatNumberWithCommas(productionPlan.plannedQty) }}
+              {{ formatNumber(productionPlan.plannedQty) }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ productionPlan.dueDate }}
@@ -145,7 +145,6 @@ import StatusUpdateDialog from '@/pages/production-management/production-plan/St
 import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 import { canView } from '@/utils/canView';
-import formatNumberWithCommas from '@/utils/formatNumberWithCommas';
 
 const route = useRoute();
 const router = useRouter();

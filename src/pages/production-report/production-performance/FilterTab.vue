@@ -7,20 +7,13 @@
 
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FilterSelect
-            label="공장명"
-            v-model="localFilters.factoryCode"
-            :options="factoryOptions"
-          />
-          <FilterInput
-            label="생산계획번호"
-            v-model="localFilters.productionPlanDocumentNo"
-          />
+          <FilterSelect label="공장" v-model="localFilters.factoryCode" :options="factoryOptions" />
+          <FilterInput label="생산 계획번호" v-model="localFilters.productionPlanDocumentNo" />
 
           <div>
-            <Label class="text-xs">품목코드</Label>
+            <Label class="text-xs">품목</Label>
             <CreateAutoCompleteSelect
-              label="품목코드"
+              label="품목"
               :value="localFilters.itemCode"
               :setValue="setItemCodeFilter"
               :fetchList="() => useGetItemList({ isActive: true })"
@@ -44,15 +37,9 @@
             />
           </div>
 
-          <FilterInput
-            label="생산담당자"
-            v-model="localFilters.productionManagerName"
-          />
-          <FilterInput
-            label="영업담당자"
-            v-model="localFilters.salesManagerName"
-          />
-          <FilterSelect label="라인명" v-model="localFilters.lineCode" :options="lineOptions" />
+          <FilterInput label="생산 담당자" v-model="localFilters.productionManagerEmpName" />
+          <FilterInput label="영업 담당자" v-model="localFilters.salesManagerEmpName" />
+          <FilterSelect label="라인" v-model="localFilters.lineCode" :options="lineOptions" />
 
           <div>
             <Label class="text-xs">실적수량</Label>
@@ -74,18 +61,18 @@
           </div>
 
           <div>
-            <Label class="text-xs">불량률</Label>
+            <Label class="text-xs">불량률 (%)</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="number"
-                v-model="localFilters.minDefectRate"
+                v-model="localFilters.minDefectiveRate"
                 placeholder="최소"
                 class="flex-1 min-w-[180px]"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="number"
-                v-model="localFilters.maxDefectRate"
+                v-model="localFilters.maxDefectiveRate"
                 placeholder="최대"
                 class="flex-1 min-w-[180px]"
               />
@@ -93,18 +80,18 @@
           </div>
 
           <div>
-            <Label class="text-xs">생산 시작시간</Label>
+            <Label class="text-xs">생산 시작 시간</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.startTimeFrom"
+                v-model="localFilters.startDateTimeStart"
                 class="flex-1 min-w-[180px]"
                 placeholder="From"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.startTimeTo"
+                v-model="localFilters.startDateTimeEnd"
                 class="flex-1 min-w-[180px]"
                 placeholder="To"
               />
@@ -112,18 +99,18 @@
           </div>
 
           <div>
-            <Label class="text-xs">생산 종료시간</Label>
+            <Label class="text-xs">생산 종료 시간</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.endTimeFrom"
+                v-model="localFilters.endDateTimeStart"
                 class="flex-1 min-w-[180px]"
                 placeholder="From"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.endTimeTo"
+                v-model="localFilters.endDateTimeEnd"
                 class="flex-1 min-w-[180px]"
                 placeholder="To"
               />
@@ -182,16 +169,16 @@ const localFilters = reactive({
   lineCode: props.filters.lineCode ?? null,
   productionPlanDocumentNo: props.filters.productionPlanDocumentNo ?? '',
   itemCode: props.filters.itemCode ?? '',
-  productionManagerName: props.filters.productionManagerName ?? '',
-  salesManagerName: props.filters.salesManagerName ?? '',
+  productionManagerEmpName: props.filters.productionManagerEmpName ?? '',
+  salesManagerEmpName: props.filters.salesManagerEmpName ?? '',
   minPerformanceQty: props.filters.minPerformanceQty ?? null,
   maxPerformanceQty: props.filters.maxPerformanceQty ?? null,
-  minDefectRate: props.filters.minDefectRate ?? null,
-  maxDefectRate: props.filters.maxDefectRate ?? null,
-  startTimeFrom: props.filters.startTimeFrom ?? null,
-  startTimeTo: props.filters.startTimeTo ?? null,
-  endTimeFrom: props.filters.endTimeFrom ?? null,
-  endTimeTo: props.filters.endTimeTo ?? null,
+  minDefectiveRate: props.filters.minDefectiveRate ?? null,
+  maxDefectiveRate: props.filters.maxDefectiveRate ?? null,
+  startDateTimeStart: props.filters.startDateTimeStart ?? null,
+  startDateTimeEnd: props.filters.startDateTimeEnd ?? null,
+  endDateTimeStart: props.filters.endDateTimeStart ?? null,
+  endDateTimeEnd: props.filters.endDateTimeEnd ?? null,
 });
 
 const selectedFactoryId = ref(null);
@@ -265,16 +252,16 @@ const applyFilters = () => {
     lineCode: localFilters.lineCode,
     productionPlanDocumentNo: localFilters.productionPlanDocumentNo,
     itemCode: localFilters.itemCode,
-    productionManagerName: localFilters.productionManagerName,
-    salesManagerName: localFilters.salesManagerName,
+    productionManagerEmpName: localFilters.productionManagerEmpName,
+    salesManagerEmpName: localFilters.salesManagerEmpName,
     minPerformanceQty: normalizeNumber(localFilters.minPerformanceQty),
     maxPerformanceQty: normalizeNumber(localFilters.maxPerformanceQty),
-    minDefectRate: normalizeNumber(localFilters.minDefectRate),
-    maxDefectRate: normalizeNumber(localFilters.maxDefectRate),
-    startTimeFrom: localFilters.startTimeFrom,
-    startTimeTo: localFilters.startTimeTo,
-    endTimeFrom: localFilters.endTimeFrom,
-    endTimeTo: localFilters.endTimeTo,
+    minDefectiveRate: normalizeNumber(localFilters.minDefectiveRate),
+    maxDefectiveRate: normalizeNumber(localFilters.maxDefectiveRate),
+    startDateTimeStart: localFilters.startDateTimeStart,
+    startDateTimeEnd: localFilters.startDateTimeEnd,
+    endDateTimeStart: localFilters.endDateTimeStart,
+    endDateTimeEnd: localFilters.endDateTimeEnd,
   });
 };
 
@@ -284,16 +271,16 @@ const resetFilters = () => {
     lineCode: null,
     productionPlanDocumentNo: '',
     itemCode: '',
-    productionManagerName: '',
-    salesManagerName: '',
+    productionManagerEmpName: '',
+    salesManagerEmpName: '',
     minPerformanceQty: null,
     maxPerformanceQty: null,
-    minDefectRate: null,
-    maxDefectRate: null,
-    startTimeFrom: null,
-    startTimeTo: null,
-    endTimeFrom: null,
-    endTimeTo: null,
+    minDefectiveRate: null,
+    maxDefectiveRate: null,
+    startDateTimeStart: null,
+    startDateTimeEnd: null,
+    endDateTimeStart: null,
+    endDateTimeEnd: null,
   });
 
   selectedFactoryId.value = null;
@@ -304,16 +291,16 @@ const resetFilters = () => {
     lineCode: null,
     productionPlanDocumentNo: '',
     itemCode: '',
-    productionManagerName: '',
-    salesManagerName: '',
+    productionManagerEmpName: '',
+    salesManagerEmpName: '',
     minPerformanceQty: null,
     maxPerformanceQty: null,
-    minDefectRate: null,
-    maxDefectRate: null,
-    startTimeFrom: null,
-    startTimeTo: null,
-    endTimeFrom: null,
-    endTimeTo: null,
+    minDefectiveRate: null,
+    maxDefectiveRate: null,
+    startDateTimeStart: null,
+    startDateTimeEnd: null,
+    endDateTimeStart: null,
+    endDateTimeEnd: null,
   });
 };
 

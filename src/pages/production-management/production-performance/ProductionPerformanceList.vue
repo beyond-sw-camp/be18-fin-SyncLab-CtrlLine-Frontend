@@ -59,7 +59,7 @@
             </TableCell>
 
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ formatQuantityWithUnit(performance.performanceQty, performance.itemUnit) }}
+              {{ formatNumber(performance.performanceQty, performance.itemUnit) }}
             </TableCell>
 
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
@@ -99,6 +99,7 @@ import {
 import FilterTab from '@/pages/production-management/production-performance/FilterTab.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
+import { formatNumber } from '@/utils/formatNumber';
 
 const goDetail = id => {
   router.push(`/production-management/production-performances/${id}`);
@@ -151,12 +152,6 @@ const initialFilters = {
   maxPerformanceQty: parseNumberQuery(route.query.maxPerformanceQty),
   minDefectRate: parseNumberQuery(route.query.minDefectRate),
   maxDefectRate: parseNumberQuery(route.query.maxDefectRate),
-};
-
-const formatQuantityWithUnit = (quantity, unit) => {
-  if (quantity === null || quantity === undefined || quantity === '') return '';
-  const formattedQty = Number(quantity).toLocaleString('ko-KR');
-  return `${formattedQty} ${unit || ''}`.trim();
 };
 
 const {

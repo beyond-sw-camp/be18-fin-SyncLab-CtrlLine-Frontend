@@ -32,20 +32,16 @@
 
           <FilterInput label="Lot No." v-model="localFilters.lotNo" />
 
-          <FilterSelect
-            label="공장명"
-            v-model="localFilters.factoryName"
-            :options="factoryOptions"
-          />
+          <FilterSelect label="공장" v-model="localFilters.factoryName" :options="factoryOptions" />
 
-          <FilterSelect label="라인명" v-model="localFilters.lineName" :options="lineOptions" />
+          <FilterSelect label="라인" v-model="localFilters.lineName" :options="lineOptions" />
 
           <FilterInput label="불량 전표번호" v-model="localFilters.defectiveDocumentNo" />
 
           <div>
-            <Label class="text-xs">품목명</Label>
+            <Label class="text-xs">품목</Label>
             <CreateAutoCompleteSelect
-              label="품목명"
+              label="품목"
               :value="localFilters.itemCode"
               :setValue="setItemCodeFilter"
               :fetchList="() => useGetItemList({ isActive: true })"
@@ -98,7 +94,7 @@
           </div>
 
           <div>
-            <Label class="text-xs">생산 시작시각</Label>
+            <Label class="text-xs">생산 시작 시각</Label>
             <div class="flex items-center gap-1 mt-1">
               <FilterInput
                 type="datetime-local"
@@ -164,7 +160,7 @@
           </div>
 
           <div>
-            <Label class="text-xs">생산 종료시각</Label>
+            <Label class="text-xs">생산 종료 시각</Label>
             <div class="flex items-center gap-1 mt-1">
               <FilterInput
                 type="datetime-local"
@@ -183,7 +179,7 @@
           </div>
 
           <div>
-            <Label class="text-xs">투입수량</Label>
+            <Label class="text-xs">투입 수량</Label>
             <div class="flex items-center gap-1 mt-1">
               <FilterInput
                 type="number"
@@ -202,7 +198,7 @@
           </div>
 
           <div>
-            <Label class="text-xs">실적수량</Label>
+            <Label class="text-xs">실적 수량</Label>
             <div class="flex items-center gap-1 mt-1">
               <FilterInput
                 type="number"
