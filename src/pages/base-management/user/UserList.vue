@@ -79,7 +79,7 @@
 
 <script setup>
 import { ChevronRightIcon, InfoIcon } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
@@ -104,6 +104,7 @@ import {
 } from '@/components/ui/table';
 import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 import FilterTab from '@/pages/base-management/user/FilterTab.vue';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 import { canView } from '@/utils/canView';
 
 const router = useRouter();
@@ -121,6 +122,23 @@ const onSearch = newFilters => {
 const goToDetail = userId => {
   router.push(`/base-management/users/${userId}`);
 };
+
+const syncQuery = () => {
+  const query = buildQueryObject({
+    ...filters,
+    page: page.value,
+  });
+
+  router.replace({ query });
+};
+
+watch(
+  () => ({ ...filters }),
+  () => {
+    syncQuery();
+  },
+  { deep: true },
+);
 </script>
 
 <style scoped></style>
