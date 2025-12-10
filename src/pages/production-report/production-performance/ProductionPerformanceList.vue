@@ -20,10 +20,10 @@
               <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">품목코드</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산계획번호</TableHead
+                >생산 계획번호</TableHead
               >
               <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산담당자</TableHead
+                >생산 담당자</TableHead
               >
               <TableHead class="text-center whitespace-nowrap overflow-hidden"
                 >영업담당자</TableHead
@@ -65,10 +65,10 @@
                 {{ row.productionPlanDocumentNo ?? '-' }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-                {{ row.productionManagerName ?? '-' }}
+                {{ row.productionManagerEmpName ?? '-' }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-                {{ row.salesManagerName ?? '-' }}
+                {{ row.salesManagerEmpName ?? '-' }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
                 {{ formatDate(row.startTime) }}
