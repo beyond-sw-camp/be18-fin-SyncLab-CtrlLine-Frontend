@@ -4,7 +4,7 @@
       <div class="relative w-full">
         <Input
           type="text"
-          :placeholder="`${label}을 입력하세요`"
+          :placeholder="`${withObjectParticle(label)} 입력하세요`"
           v-model="textInput"
           @input="onInput"
           @compositionstart="isComposing = true"
@@ -21,7 +21,7 @@
           class="absolute right-2 top-1/2 -translate-y-1/2"
           :disabled="disabled"
         >
-          <SearchIcon  :class="cn('w-4 h-4', props.iconClass)"/>
+          <SearchIcon :class="cn('w-4 h-4', props.iconClass)" />
         </Button>
         <ul
           v-if="autoItems.length > 0 && !isItemSelected"
@@ -70,6 +70,7 @@ import SelectModal from '@/components/auto-complete/SelectModal.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import withObjectParticle from '@/utils/withObjectParticle';
 
 const props = defineProps({
   label: { type: String, required: true },

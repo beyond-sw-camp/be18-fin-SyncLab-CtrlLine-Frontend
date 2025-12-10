@@ -11,6 +11,9 @@ export default function useDeleteProductionPlanList() {
     onSuccess: () => {
       toast.success('생산게획을 일괄 삭제했습니다.');
       queryClient.invalidateQueries({ queryKey: ['productionPlanList'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanScheduleList'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanAll'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanBoundary'] });
     },
     onError: error => {
       toast.error(error.response.data.message);

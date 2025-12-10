@@ -9,7 +9,7 @@ export default function useGetDefectiveList(initialFilters = {}) {
   const authStore = useAuthStore();
   const page = ref(1);
   const pageSize = ref(10);
-  const fixedSort = [{ sortBy: 'defectiveDocNo', direction: 'desc' }];
+  const fixedSort = [{ sortBy: 'createdAt', direction: 'desc' }];
 
   const filters = reactive({
     defectiveDocNo: initialFilters.defectiveDocNo ?? '',

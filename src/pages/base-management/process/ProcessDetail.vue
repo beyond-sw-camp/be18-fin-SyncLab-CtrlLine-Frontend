@@ -184,6 +184,7 @@ watch(
       processName: processDetail.value.processName,
       userDepartment: processDetail.value.userDepartment,
       empNo: processDetail.value.empNo,
+      userName: processDetail.value.userName,
       isActive: processDetail.value.isActive ? 'true' : 'false',
     });
   },

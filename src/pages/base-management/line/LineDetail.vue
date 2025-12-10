@@ -10,101 +10,103 @@
       @submit="onSubmit"
       class="flex-1 flex flex-col gap-10"
     >
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField v-slot="{ componentField, errorMessage }" name="lineCode">
-          <FormItem>
-            <FormLabel>라인코드</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="line-code" disabled />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+      <fieldset :disabled="!isAdmin">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField v-slot="{ componentField, errorMessage }" name="lineCode">
+            <FormItem>
+              <FormLabel>라인코드</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" autocomplete="line-code" disabled />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="lineName">
-          <FormItem>
-            <FormLabel>라인명</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="line-name" disabled />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+          <FormField v-slot="{ componentField, errorMessage }" name="lineName">
+            <FormItem>
+              <FormLabel>라인명</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" autocomplete="line-name" disabled />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-        <FormField v-slot="{ value, componentField, setValue, errorMessage }" name="empNo">
-          <FormItem>
-            <FormLabel>담당자</FormLabel>
-            <FormControl>
-              <UpdateAutoCompleteSelect
-                :key="`empNo-${lineDetail.empNo}`"
-                label="담당자"
-                :value="value"
-                :componentField="componentField"
-                :setValue="setValue"
-                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
-                key-field="empNo"
-                nameField="userName"
-                :fields="[
-                  'empNo',
-                  'userName',
-                  'userEmail',
-                  'userDepartment',
-                  'userPhoneNumber',
-                  'userStatus',
-                  'userRole',
-                ]"
-                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
-                :initialText="lineDetail.userName"
-                :emitFullItem="true"
-                @selectedFullItem="onUserSelected"
-                @clear="onUserCleared"
-              />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+          <FormField v-slot="{ value, componentField, setValue, errorMessage }" name="empNo">
+            <FormItem>
+              <FormLabel>담당자</FormLabel>
+              <FormControl>
+                <UpdateAutoCompleteSelect
+                  :key="`empNo-${lineDetail.empNo}`"
+                  label="담당자"
+                  :value="value"
+                  :componentField="componentField"
+                  :setValue="setValue"
+                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                  key-field="empNo"
+                  nameField="userName"
+                  :fields="[
+                    'empNo',
+                    'userName',
+                    'userEmail',
+                    'userDepartment',
+                    'userPhoneNumber',
+                    'userStatus',
+                    'userRole',
+                  ]"
+                  :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                  :initialText="lineDetail.userName"
+                  :emitFullItem="true"
+                  @selectedFullItem="onUserSelected"
+                  @clear="onUserCleared"
+                />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="userDepartment">
-          <FormItem>
-            <FormLabel>담당부서</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="userDepartment" disabled />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+          <FormField v-slot="{ componentField, errorMessage }" name="userDepartment">
+            <FormItem>
+              <FormLabel>담당부서</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" autocomplete="userDepartment" disabled />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="isActive">
-          <FormItem>
-            <FormLabel>라인 사용여부</FormLabel>
-            <FormControl :disabled="!isAdmin">
-              <RadioGroup v-bind="componentField" class="flex">
-                <div class="flex items-center space-x-2">
-                  <RadioGroupItem value="true" id="r1" />
-                  <Label for="r1" class="font-normal">라인 사용</Label>
-                </div>
+          <FormField v-slot="{ componentField, errorMessage }" name="isActive">
+            <FormItem>
+              <FormLabel>라인 사용여부</FormLabel>
+              <FormControl :disabled="!isAdmin">
+                <RadioGroup v-bind="componentField" class="flex">
+                  <div class="flex items-center space-x-2">
+                    <RadioGroupItem value="true" id="r1" />
+                    <Label for="r1" class="font-normal">라인 사용</Label>
+                  </div>
 
-                <div class="flex items-center space-x-2">
-                  <RadioGroupItem value="false" id="r2" />
-                  <Label for="r2" class="font-normal">라인 미사용</Label>
-                </div>
-              </RadioGroup>
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+                  <div class="flex items-center space-x-2">
+                    <RadioGroupItem value="false" id="r2" />
+                    <Label for="r2" class="font-normal">라인 미사용</Label>
+                  </div>
+                </RadioGroup>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
+      </fieldset>
+      <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
+        <Button
+          type="submit"
+          size="sm"
+          form="lineUpdateForm"
+          class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
+        >
+          Save
+        </Button>
       </div>
     </form>
-  </div>
-  <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
-    <Button
-      type="submit"
-      size="sm"
-      form="lineUpdateForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
-    >
-      Save
-    </Button>
   </div>
 </template>
 

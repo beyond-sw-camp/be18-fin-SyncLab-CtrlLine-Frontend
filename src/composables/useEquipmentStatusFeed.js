@@ -95,12 +95,7 @@ export default function useEquipmentStatusFeed(factoryIdRef, factoryCodeRef = nu
     const rawItems = flattenPayload(payload);
     return rawItems
       .map(item => {
-        const code = pickValue(item, [
-          'equipmentCode',
-          'equipment_code',
-          'equipment.code',
-          'code',
-        ]);
+        const code = pickValue(item, ['equipmentCode', 'equipment_code', 'equipment.code', 'code']);
         const id = pickValue(item, ['equipmentId', 'equipment_id', 'id', 'equipment.equipmentId']);
         const levelCandidates = [
           pickValue(item, ['runtimeStatusLevel', 'runtime_status_level']),

@@ -42,13 +42,13 @@
               {{ defective.lineName }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ defective.defectiveTotalQty }}
+              {{ formatNullable(defective.defectiveTotalQty) }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ defective.defectiveTotalRate }}
+              {{ formatNullable(defective.defectiveTotalRate) }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ defective.productionPerformanceDocNo }}
+              {{ formatNullable(defective.productionPerformanceDocNo) }}
             </TableCell>
           </TableRow>
         </TableBody>
@@ -87,6 +87,11 @@ const initialFilters = {
 };
 
 const { data: defectiveList, page, filters } = useGetDefectiveList(initialFilters);
+
+const formatNullable = value => {
+  if (value === null || value === undefined || value === '') return '-';
+  return value;
+};
 
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);

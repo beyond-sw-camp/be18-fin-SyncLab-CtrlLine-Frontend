@@ -8,7 +8,7 @@ export default function useGetLotList(initialFilters = {}, initialPage = 1) {
   const authStore = useAuthStore();
   const page = ref(initialPage);
   const pageSize = ref(10);
-  const fixedSort = ['lotNo,desc'];
+  const fixedSort = ['createdAt, desc'];
 
   const filters = reactive({
     lotNo: initialFilters.lotNo ?? '',

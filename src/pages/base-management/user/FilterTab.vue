@@ -18,10 +18,13 @@
             v-model="localFilters.userDepartment"
             :options="[
               { value: null, label: '전체' },
-              { value: '영업 1팀', label: '영업 1팀' },
-              { value: '영업 2팀', label: '영업 2팀' },
-              { value: '생산 1팀', label: '생산 1팀' },
-              { value: '생산 2팀', label: '생산 2팀' },
+              { value: '영업1팀', label: '영업1팀' },
+              { value: '영업2팀', label: '영업2팀' },
+              { value: '생산1팀', label: '생산1팀' },
+              { value: '생산2팀', label: '생산2팀' },
+              { value: '개발1팀', label: '개발1팀' },
+              { value: '품질관리팀', label: '품질관리팀' },
+              { value: '인사총무팀', label: '인사총무팀' },
             ]"
           />
 

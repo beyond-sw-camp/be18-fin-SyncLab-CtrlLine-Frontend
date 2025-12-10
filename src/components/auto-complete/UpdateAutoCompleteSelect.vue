@@ -4,7 +4,7 @@
       <div class="relative w-full">
         <Input
           type="text"
-          :placeholder="`${label}을 입력하세요`"
+          :placeholder="`${withObjectParticle(label)} 입력하세요`"
           v-model="textInput"
           @input="onInput"
           @compositionstart="isComposing = true"
@@ -66,6 +66,7 @@ import { toast } from 'vue-sonner';
 import SelectModal from '@/components/auto-complete/SelectModal.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import withObjectParticle from '@/utils/withObjectParticle';
 
 const props = defineProps({
   label: { type: String, required: true },

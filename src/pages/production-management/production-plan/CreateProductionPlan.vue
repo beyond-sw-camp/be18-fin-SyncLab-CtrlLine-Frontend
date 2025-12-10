@@ -1,14 +1,33 @@
 <template>
   <div class="flex justify-between items-center mb-6">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 등록</h3>
-    <Button
-      type="submit"
-      form="productionPlanCreateForm"
-      class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
-      size="sm"
-    >
-      Save
-    </Button>
+    <div class="flex gap-3">
+      <div class="flex gap-2 items-center" v-if="isAdmin">
+        <label class="flex gap-1 items-center text-sm font-medium">
+          우선작업
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+              <TooltipContent side="top">
+                <p>우선작업은 관리자에 의해 우선 실행되는 주문입니다.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </label>
+        <FormField name="isEmergent" v-slot="{ value, setValue }">
+          <Switch :modelValue="value" @update:modelValue="setValue" />
+        </FormField>
+      </div>
+
+      <Button
+        type="submit"
+        form="productionPlanCreateForm"
+        class="bg-primary text-white hover:bg-primary-600 cursor-pointer"
+        size="sm"
+      >
+        Save
+      </Button>
+    </div>
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row">
@@ -59,35 +78,31 @@
         </div>
 
         <div class="order-7 md:order-0">
-          <FormField name="productionManagerNo" v-slot="{ componentField, errorMessage }">
-            <FormItem>
-              <FormLabel>
-                생산담당자
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p>라인 담당자가 생산담당자로 자동 지정됩니다.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </FormLabel>
-              <FormControl class="w-full truncate min-w-0">
-                <div class="flex gap-2 items-center">
-                  <Input
-                    type="text"
-                    placeholder="생산담당자는 자동 지정됩니다."
-                    readonly
-                    :value="lineDetail?.userName || ''"
-                    class="text-sm"
-                  />
-                  <Input
-                    type="text"
-                    v-bind="componentField"
-                    class="max-w-20 bg-gray-100 text-sm"
-                    readonly
-                  />
-                </div>
+          <FormField name="productionManagerNo" v-slot="{ value, setValue, errorMessage }">
+            <FormItem class="w-full">
+              <FormLabel>생산담당자</FormLabel>
+              <FormControl class="w-full min-w-0">
+                <CreateAutoCompleteSelect
+                  :key="`autocomplete-${'productionManagerNo'}`"
+                  label="생산담당자"
+                  :value="value"
+                  :setValue="setValue"
+                  :fetchList="
+                    () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })
+                  "
+                  keyField="empNo"
+                  nameField="userName"
+                  :fields="[
+                    'empNo',
+                    'userName',
+                    'userEmail',
+                    'userDepartment',
+                    'userPhoneNumber',
+                    'userStatus',
+                    'userRole',
+                  ]"
+                  :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -140,7 +155,7 @@
             <FormItem class="w-full">
               <FormLabel>생산시작시간</FormLabel>
               <FormControl>
-                <Input type="datetime-local" :value="componentField" readonly class="text-sm" />
+                <Input type="datetime-local" v-bind="componentField" disabled class="text-sm" />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -157,7 +172,9 @@
                   label="영업담당자"
                   :value="value"
                   :setValue="setValue"
-                  :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                  :fetchList="
+                    () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })
+                  "
                   keyField="empNo"
                   nameField="userName"
                   :fields="[
@@ -226,7 +243,7 @@
             <FormItem>
               <FormLabel>생산종료시간</FormLabel>
               <FormControl class="w-full">
-                <Input type="datetime-local" :value="componentField" disabled class="text-sm" />
+                <Input type="datetime-local" v-bind="componentField" disabled class="text-sm" />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
@@ -275,6 +292,10 @@
         :factoryId="selectedFactoryId"
         :factoryCode="factoryDetail?.factoryCode"
         :lineCode="lineDetail?.lineCode"
+        :draftStartTime="form.values.startTime"
+        :draftEndTime="form.values.endTime"
+        :draftItem="itemDetail"
+        :draftQty="form.values.plannedQty"
         mode="create"
       />
     </form>
@@ -283,15 +304,18 @@
 
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
+import { useDebounceFn } from '@vueuse/core';
 import { InfoIcon } from 'lucide-vue-next';
 import { useForm } from 'vee-validate';
-import { ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { z } from 'zod';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useCreateProductionPlan from '@/apis/query-hooks/production-plan/useCreateProductionPlan';
+import useCreateProductionPlanEndTime from '@/apis/query-hooks/production-plan/useCreateProductionPlanEndTime';
+import useGetProductionPlanBoundary from '@/apis/query-hooks/production-plan/useGetProductionPlanBoundary';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import { Button } from '@/components/ui/button';
@@ -304,11 +328,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
 import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
+import { canView } from '@/utils/canView';
+import formatDate from '@/utils/formatDate';
 
 const formSchema = toTypedSchema(
   z.object({
@@ -323,20 +350,25 @@ const formSchema = toTypedSchema(
     salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }),
     lineCode: z.string({ required_error: '라인명은 필수입니다.' }).min(1, '라인명은 필수입니다.'),
     status: z.string({ required_error: '상태는 필수입니다.' }),
+    startTime: z.string().optional(),
+    endTime: z.string().optional(),
     plannedQty: z.coerce
       .number({ required_error: '생산계획수량은 필수입니다.' })
       .positive('생산계획수량은 1 이상이어야 합니다.'),
+    isEmergent: z.boolean().optional(),
     remark: z.string().optional(),
   }),
 );
 
 const userStore = useUserStore();
+const isAdmin = canView(['ADMIN']);
 
 const form = useForm({
   validationSchema: formSchema,
   initialValues: {
     status: userStore.userRole === 'ADMIN' ? 'CONFIRMED' : 'PENDING',
     plannedQty: 0,
+    isEmergent: false,
   },
 });
 
@@ -348,7 +380,13 @@ const lineDetail = ref({});
 
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
+const { data: boundaryData } = useGetProductionPlanBoundary({
+  factoryCode: computed(() => factoryDetail.value?.factoryCode),
+  lineCode: computed(() => lineDetail.value?.lineCode),
+});
+
 const { mutate: createProductionPlan } = useCreateProductionPlan();
+const { mutate: updateEndTime } = useCreateProductionPlanEndTime();
 
 function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
@@ -358,7 +396,6 @@ function onFactorySelected(factoryCode) {
   selectedItemId.value = null;
   form.setFieldValue('itemCode', '', false);
   form.setFieldValue('lineCode', '', false);
-  form.setFieldValue('productionManagerNo', '', false);
   itemDetail.value = {};
   lineDetail.value = {};
 }
@@ -372,7 +409,6 @@ function onItemSelected(item) {
 function onItemCleared() {
   selectedItemId.value = null;
   form.setFieldValue('lineCode', '', false);
-  form.setFieldValue('productionManagerNo', '', false);
   itemDetail.value = {};
   lineDetail.value = {};
 }
@@ -382,10 +418,8 @@ function onLineSelected(lineCode) {
 
   if (selected) {
     lineDetail.value = selected;
-    form.setFieldValue('productionManagerNo', selected.empNo, false);
   } else {
     lineDetail.value = {};
-    form.setFieldValue('productionManagerNo', '', false);
   }
 }
 
@@ -400,10 +434,61 @@ const onSubmit = form.handleSubmit(values => {
     status: values.status,
     remark: values.remark,
     plannedQty: values.plannedQty,
+    isEmergent: values.isEmergent ? 'true' : 'false',
   };
 
   // @ts-ignore
   createProductionPlan(params);
+});
+
+watch(
+  [
+    () => boundaryData.value?.latestEndTime,
+    () => boundaryData.value?.earliestStartTime,
+    () => form.values.isEmergent,
+  ],
+  ([latestEndTime, earliestStartTime, isEmergent]) => {
+    let timeToUse = isEmergent ? earliestStartTime : latestEndTime;
+
+    if (!timeToUse) return;
+    let startDate = new Date(timeToUse);
+    const now = new Date();
+
+    // 시작 시간이 현재 시간보다 과거거나 같으면 30분 추가
+    if (startDate <= now) {
+      startDate.setMinutes(startDate.getMinutes() + 30);
+      timeToUse = startDate.toISOString();
+    }
+
+    form.setFieldValue('startTime', formatDate(timeToUse, 'datetime-local'));
+  },
+);
+
+const debouncedUpdateEndTime = useDebounceFn(({ startTime, plannedQty, lineCode }) => {
+  updateEndTime(
+    // @ts-ignore
+    { startTime, plannedQty, lineCode },
+    {
+      onSuccess: data => {
+        if (!data) return;
+        form.setFieldValue('endTime', data.endTime, false);
+      },
+    },
+  );
+}, 400);
+
+watch([() => form.values.startTime, () => form.values.plannedQty], ([startTime, plannedQty]) => {
+  const formattedStartTime = formatDate(startTime, 'local-datetime');
+
+  if (!startTime || !plannedQty || !lineDetail.value?.lineCode || !formattedStartTime) return;
+
+  console.log(formattedStartTime);
+
+  debouncedUpdateEndTime({
+    startTime: formattedStartTime,
+    plannedQty,
+    lineCode: lineDetail.value.lineCode,
+  });
 });
 </script>
 

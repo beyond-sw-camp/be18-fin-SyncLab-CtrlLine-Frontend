@@ -8,7 +8,7 @@ export default function useGetProductionPlanList(currentStatus, initialFilters =
   const authStore = useAuthStore();
   const page = ref(1);
   const pageSize = ref(10);
-  const fixedSort = ['documentNo,desc'];
+  const fixedSort = ['createdAt,desc'];
 
   const filters = reactive({
     factoryName: initialFilters.factoryName ?? '',

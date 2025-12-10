@@ -13,6 +13,8 @@ export default function useCreateProductionPlan() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['productionPlanList'] });
       queryClient.invalidateQueries({ queryKey: ['productionPlanScheduleList'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanAll'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanBoundary'] });
       toast.success('생산계획 등록에 성공했습니다.');
       router.push('/production-management/production-plans');
     },

@@ -2,8 +2,8 @@
   <div class="flex justify-between items-center">
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 목록</h3>
     <div class="flex gap-2">
-      <DeleteConfirmDialog :rows="selectedRows" @deleted="onReset" />
-      <StatusUpdateDialog :rows="selectedRows" @updated="onReset" />
+      <DeleteConfirmDialog :rows="selectedRows" @deleted="onReset" v-if="isAdmin" />
+      <StatusUpdateDialog :rows="selectedRows" @updated="onReset" v-if="isAdmin" />
       <RouterLink to="/production-management/production-plans/new">
         <Button size="sm" class="cursor-pointer w-[70px]">
           New <ChevronRightIcon class="ml-1" />
@@ -141,12 +141,15 @@ import { STATUS_CLASSES } from '@/constants/productionPlanStatus';
 import DeleteConfirmDialog from '@/pages/production-management/production-plan/DeleteConfirmDialog.vue';
 import FilterTab from '@/pages/production-management/production-plan/FilterTab.vue';
 import StatusUpdateDialog from '@/pages/production-management/production-plan/StatusUpdateDialog.vue';
+import { useUserStore } from '@/stores/useUserStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
 
 const currentStatus = ref(route.query.status || 'TOTAL');
+const userStore = useUserStore();
+const isAdmin = computed(() => userStore.userRole === 'ADMIN');
 
 const initialFilters = {
   factoryName: route.query.factoryName || '',

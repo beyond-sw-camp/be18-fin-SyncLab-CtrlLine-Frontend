@@ -6,6 +6,12 @@ export async function createProductionPlan(params) {
   return data.data;
 }
 
+// 종료 시간 반환
+export async function createProductionPlanEndTime(params) {
+  const { data } = await apiClient.post(`/production-plans/endtime`, params);
+  return data.data;
+}
+
 export async function getProductionPlanList(params) {
   const queryObj = buildQueryObject(params);
   const search = new URLSearchParams(queryObj);
@@ -29,6 +35,15 @@ export async function getProductionPlan(productionPlanId) {
   return data.data;
 }
 
+// 생산계획라인별 맨 앞의 시작시간과 맨 뒤의 종료시간을 반환함
+export async function getProductionPlanBoundary(params) {
+  const queryObj = buildQueryObject(params);
+  const search = new URLSearchParams(queryObj);
+
+  const { data } = await apiClient.get(`/production-plans/boundary?${search.toString()}`);
+  return data.data;
+}
+
 export async function updateProductionPlan(productionPlanId, params) {
   const { data } = await apiClient.patch(`/production-plans/${productionPlanId}`, params);
   return data.data;
@@ -40,7 +55,6 @@ export async function updateProductionPlanStatusList(params) {
 }
 
 export async function deleteProductionPlan(productionPlanId) {
-  console.log(productionPlanId);
   const { data } = await apiClient.delete(`/production-plans/${productionPlanId}`);
   return data.data;
 }

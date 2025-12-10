@@ -81,7 +81,7 @@ const canEdit = computed(() => {
   const uniqueStatuses = new Set(statuses);
 
   // 상태가 하나라도 RUNNING, COMPLETED면 불가
-  if ([...uniqueStatuses].some(s => ['RUNNING', 'COMPLETED'].includes(s))) {
+  if ([...uniqueStatuses].some(s => ['RUNNING', 'COMPLETED', 'RETURNED'].includes(s))) {
     return false;
   }
 
@@ -95,10 +95,6 @@ const canEdit = computed(() => {
   // 권한별 조건
   if (role === 'ADMIN') {
     return ['PENDING', 'CONFIRMED'].includes(status);
-  }
-
-  if (role === 'MANAGER' || role === 'USER') {
-    return status === 'PENDING';
   }
 
   return false;

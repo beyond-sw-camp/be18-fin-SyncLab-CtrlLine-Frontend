@@ -11,6 +11,9 @@ export default function useUpdateProductionPlanStatusList() {
     onSuccess: () => {
       toast.success('생산게획 상태를 일괄 변경했습니다.');
       queryClient.invalidateQueries({ queryKey: ['productionPlanList'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanScheduleList'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanAll'] });
+      queryClient.invalidateQueries({ queryKey: ['productionPlanBoundary'] });
     },
     onError: error => {
       toast.error(error.response.data.message);
