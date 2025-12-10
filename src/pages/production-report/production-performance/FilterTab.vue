@@ -171,8 +171,12 @@ const localFilters = reactive({
   documentNo: props.filters.documentNo ?? '',
   productionPlanDocumentNo: props.filters.productionPlanDocumentNo ?? '',
   itemCode: props.filters.itemCode ?? '',
-  productionManagerEmpName: props.filters.productionManagerEmpName ?? '',
-  salesManagerEmpName: props.filters.salesManagerEmpName ?? '',
+  productionManagerEmpName:
+    props.filters.productionManagerEmpName ?? props.filters.productionManagerName ?? '',
+  productionManagerName: props.filters.productionManagerName ?? '',
+  salesManagerEmpName:
+    props.filters.salesManagerEmpName ?? props.filters.salesManagerName ?? '',
+  salesManagerName: props.filters.salesManagerName ?? '',
   minPerformanceQty: props.filters.minPerformanceQty ?? null,
   maxPerformanceQty: props.filters.maxPerformanceQty ?? null,
   minDefectiveRate: props.filters.minDefectiveRate ?? null,
@@ -261,7 +265,9 @@ const applyFilters = () => {
     productionPlanDocumentNo: localFilters.productionPlanDocumentNo,
     itemCode: localFilters.itemCode,
     productionManagerEmpName: localFilters.productionManagerEmpName,
+    productionManagerName: localFilters.productionManagerEmpName,
     salesManagerEmpName: localFilters.salesManagerEmpName,
+    salesManagerName: localFilters.salesManagerEmpName,
     minPerformanceQty: normalizeNumber(localFilters.minPerformanceQty),
     maxPerformanceQty: normalizeNumber(localFilters.maxPerformanceQty),
     minDefectiveRate: normalizeNumber(localFilters.minDefectiveRate),
@@ -285,7 +291,9 @@ const resetFilters = () => {
     productionPlanDocumentNo: '',
     itemCode: '',
     productionManagerEmpName: '',
+    productionManagerName: '',
     salesManagerEmpName: '',
+    salesManagerName: '',
     minPerformanceQty: null,
     maxPerformanceQty: null,
     minDefectiveRate: null,
@@ -306,7 +314,9 @@ const resetFilters = () => {
     productionPlanDocumentNo: '',
     itemCode: '',
     productionManagerEmpName: '',
+    productionManagerName: '',
     salesManagerEmpName: '',
+    salesManagerName: '',
     minPerformanceQty: null,
     maxPerformanceQty: null,
     minDefectiveRate: null,
@@ -323,7 +333,17 @@ const resetFilters = () => {
 };
 
 const assignFilters = newFilters => {
-  Object.assign(localFilters, newFilters);
+  const managerName =
+    newFilters.productionManagerEmpName ?? newFilters.productionManagerName ?? '';
+  const salesName = newFilters.salesManagerEmpName ?? newFilters.salesManagerName ?? '';
+
+  Object.assign(localFilters, {
+    ...newFilters,
+    productionManagerEmpName: managerName,
+    productionManagerName: newFilters.productionManagerName ?? managerName ?? '',
+    salesManagerEmpName: salesName,
+    salesManagerName: newFilters.salesManagerName ?? salesName ?? '',
+  });
 };
 
 watch(

@@ -214,7 +214,9 @@ const defaultFilters = {
   productionPlanDocumentNo: '',
   itemCode: '',
   productionManagerEmpName: '',
+  productionManagerName: '',
   salesManagerEmpName: '',
+  salesManagerName: '',
   minPerformanceQty: null,
   maxPerformanceQty: null,
   minDefectRate: null,
@@ -248,8 +250,14 @@ const buildFiltersFromQuery = query => ({
     query.productionManagerEmpName ??
     query.productionManagerName ??
     defaultFilters.productionManagerEmpName,
+  productionManagerName:
+    query.productionManagerName ??
+    query.productionManagerEmpName ??
+    defaultFilters.productionManagerName,
   salesManagerEmpName:
     query.salesManagerEmpName ?? query.salesManagerName ?? defaultFilters.salesManagerEmpName,
+  salesManagerName:
+    query.salesManagerName ?? query.salesManagerEmpName ?? defaultFilters.salesManagerName,
   minPerformanceQty: parseNumericFilter(query.minPerformanceQty, defaultFilters.minPerformanceQty),
   maxPerformanceQty: parseNumericFilter(query.maxPerformanceQty, defaultFilters.maxPerformanceQty),
   minDefectRate: parseNumericFilter(query.minDefectRate, defaultFilters.minDefectRate),
@@ -298,11 +306,36 @@ watch(
 
 const rawPerformanceRows = computed(() => productionPerformanceAll.value ?? []);
 
+const matchesKeyword = (source, keyword, exact = false) => {
+  const base = String(source ?? '').trim().toLowerCase();
+  const target = String(keyword ?? '').trim().toLowerCase();
+  if (!target) return true;
+  return exact ? base === target : base.includes(target);
+};
+
 const performanceRows = computed(() => {
-  const rows = rawPerformanceRows.value;
-  const keyword = (filters.documentNo ?? '').trim();
-  if (!keyword) return rows;
-  return rows.filter(row => String(row.documentNo ?? '').trim() === keyword);
+  let rows = rawPerformanceRows.value;
+  const docKeyword = (filters.documentNo ?? '').trim();
+  if (docKeyword) {
+    rows = rows.filter(row => matchesKeyword(row.documentNo, docKeyword, true));
+  }
+
+  const managerKeyword =
+    filters.productionManagerEmpName ?? filters.productionManagerName ?? '';
+  if (managerKeyword) {
+    rows = rows.filter(row =>
+      matchesKeyword(row.productionManagerEmpName ?? row.productionManagerName, managerKeyword),
+    );
+  }
+
+  const salesKeyword = filters.salesManagerEmpName ?? filters.salesManagerName ?? '';
+  if (salesKeyword) {
+    rows = rows.filter(row =>
+      matchesKeyword(row.salesManagerEmpName ?? row.salesManagerName, salesKeyword),
+    );
+  }
+
+  return rows;
 });
 
 const chartRecords = computed(() => (hasSearched.value ? performanceRows.value : []));
