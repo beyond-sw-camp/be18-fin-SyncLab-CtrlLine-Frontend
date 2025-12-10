@@ -122,7 +122,7 @@
 
         <FormField name="lotNo" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>LoT No.</FormLabel>
+            <FormLabel>Lot No.</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
@@ -197,7 +197,7 @@ watch(
     form.setValues({
       factoryName: `${val.factoryName} (${val.factoryCode})`,
       lineName: `${val.lineName} (${val.lineCode})`,
-      itemName: val.itemName,
+      itemName: `${val.itemName} (${val.itemCode})`,
       dueDate: val.dueDate,
       salesManagerName: `${val.salesManagerName} (${val.salesManagerNo})`,
       productionManagerName: `${val.productionManagerName} (${val.productionManagerNo})`,
@@ -209,15 +209,14 @@ watch(
       remark: val.remark,
     });
 
-    const unit = val.itemUnit || 'EA';
     PPDetail.value = {
       itemCode: val.itemCode,
       itemName: val.itemName,
       itemSpecification: val.itemSpecification,
       itemUnit: val.itemUnit,
-      totalQty: formatQuantity(val.totalQty, unit),
-      performanceQty: formatQuantity(val.performanceQty, unit),
-      defectiveQty: formatQuantity(val.defectiveQty, unit),
+      totalQty: formatQuantity(val.totalQty),
+      performanceQty: formatQuantity(val.performanceQty),
+      defectiveQty: formatQuantity(val.defectiveQty),
       defectiveRate: val.defectiveRate,
     };
   },

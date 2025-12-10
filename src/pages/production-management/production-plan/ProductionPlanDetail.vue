@@ -39,7 +39,7 @@
           <div class="order-1 md:order-0">
             <FormField v-slot="{ componentField, errorMessage }" name="factoryCode">
               <FormItem>
-                <FormLabel>공장명</FormLabel>
+                <FormLabel>공장</FormLabel>
                 <FormControl>
                   <Select v-bind="componentField" @update:modelValue="onFactorySelected">
                     <SelectTrigger class="w-full truncate min-w-0">
@@ -86,11 +86,11 @@
               v-slot="{ value, componentField, setValue, errorMessage }"
             >
               <FormItem class="w-full">
-                <FormLabel>생산담당자</FormLabel>
+                <FormLabel>생산 담당자</FormLabel>
                 <FormControl class="w-full min-w-0">
                   <UpdateAutoCompleteSelect
                     :key="`productionManagerNo-${productionPlanDetail?.productionManagerNo}`"
-                    label="생산담당자"
+                    label="생산 담당자"
                     :value="value"
                     :componentField="componentField"
                     :setValue="setValue"
@@ -120,12 +120,12 @@
           <div class="order-2 md:order-0">
             <FormField name="itemCode" v-slot="{ value, componentField, setValue, errorMessage }">
               <FormItem>
-                <FormLabel>품목명</FormLabel>
+                <FormLabel>품목</FormLabel>
                 <FormControl class="w-full min-w-0">
                   <div v-if="selectedFactoryId">
                     <UpdateAutoCompleteSelect
                       :key="`itemCode-${productionPlanDetail?.itemCode}`"
-                      label="품목명"
+                      label="품목"
                       :value="value"
                       :componentField="componentField"
                       :setValue="setValue"
@@ -163,7 +163,7 @@
           <div class="order-5 md:order-0">
             <FormField v-slot="{ componentField, errorMessage }" name="startTime">
               <FormItem class="w-full">
-                <FormLabel>생산시작시간</FormLabel>
+                <FormLabel>생산 시작 시각</FormLabel>
                 <FormControl>
                   <Input type="datetime-local" v-bind="componentField" class="text-sm" readonly />
                   <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -178,11 +178,11 @@
               v-slot="{ value, componentField, setValue, errorMessage }"
             >
               <FormItem class="w-full">
-                <FormLabel>영업담당자</FormLabel>
+                <FormLabel>영업 담당자</FormLabel>
                 <FormControl class="w-full min-w-0">
                   <UpdateAutoCompleteSelect
                     :key="`salesManagerNo-${productionPlanDetail?.salesManagerNo}`"
-                    label="영업담당자"
+                    label="영업 담당자"
                     :value="value"
                     :componentField="componentField"
                     :setValue="setValue"
@@ -212,7 +212,7 @@
           <div class="order-3 md:order-0">
             <FormField v-slot="{ componentField, errorMessage }" name="lineCode">
               <FormItem>
-                <FormLabel>라인명</FormLabel>
+                <FormLabel>라인</FormLabel>
                 <FormControl>
                   <Select
                     v-if="selectedFactoryId && selectedItemId"
@@ -256,7 +256,7 @@
           <div class="order-6 md:order-0">
             <FormField v-slot="{ componentField, errorMessage }" name="endTime">
               <FormItem>
-                <FormLabel>생산종료시간</FormLabel>
+                <FormLabel>생산 종료 시각</FormLabel>
                 <FormControl class="w-full">
                   <Input type="datetime-local" v-bind="componentField" disabled class="text-sm" />
                   <p class="text-red-500 text-xs">{{ errorMessage }}</p>

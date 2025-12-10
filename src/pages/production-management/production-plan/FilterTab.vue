@@ -9,14 +9,10 @@
 
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FilterSelect
-            label="공장명"
-            v-model="localFilters.factoryName"
-            :options="factoryOptions"
-          />
-          <FilterInput label="품목명" v-model="localFilters.itemName" />
-          <FilterInput label="생산담당자" v-model="localFilters.productionManagerName" />
-          <FilterInput label="영업담당자" v-model="localFilters.salesManagerName" />
+          <FilterSelect label="공장" v-model="localFilters.factoryName" :options="factoryOptions" />
+          <FilterInput label="품목" v-model="localFilters.itemName" />
+          <FilterInput label="생산 담당자" v-model="localFilters.productionManagerName" />
+          <FilterInput label="영업 담당자" v-model="localFilters.salesManagerName" />
           <FilterInput label="납기일자" type="date" v-model="localFilters.dueDate" />
           <div>
             <Label class="text-xs">생산기간</Label>
