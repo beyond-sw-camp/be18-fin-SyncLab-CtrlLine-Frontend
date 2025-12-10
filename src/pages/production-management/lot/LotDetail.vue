@@ -80,10 +80,10 @@
 </template>
 
 <script setup>
+import { ungzip } from 'pako';
 import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
-import { ungzip } from 'pako';
 
 import useGetLotDetail from '@/apis/query-hooks/lot/useGetLotDetail';
 import { Button } from '@/components/ui/button';
