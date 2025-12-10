@@ -75,11 +75,33 @@
           </FormItem>
         </FormField>
 
-        <FormField name="salesManagerName" v-slot="{ componentField }">
-          <FormItem>
+        <FormField name="salesManagerNo" v-slot="{ value, componentField, setValue, errorMessage }">
+          <FormItem class="w-full">
             <FormLabel>영업 담당자</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+            <FormControl class="w-full min-w-0">
+              <UpdateAutoCompleteSelect
+                :key="`salesManagerNo-${productionPerformanceDetail?.salesManagerNo}`"
+                label="영업 담당자"
+                :value="value"
+                :componentField="componentField"
+                :setValue="setValue"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })"
+                keyField="empNo"
+                nameField="userName"
+                :fields="[
+                  'empNo',
+                  'userName',
+                  'userEmail',
+                  'userDepartment',
+                  'userPhoneNumber',
+                  'userStatus',
+                  'userRole',
+                ]"
+                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                :initialText="productionPerformanceDetail.salesManagerName"
+                :disabled="!canEdit"
+              />
+              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
         </FormField>
@@ -154,6 +176,8 @@ import { useRoute } from 'vue-router';
 
 import useGetProductionPerformance from '@/apis/query-hooks/production-performance/useGetProductionPerformance';
 import useupdateProductionPerformance from '@/apis/query-hooks/production-performance/useUpdateProductionPerformance';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
+import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompleteSelect.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
@@ -166,7 +190,11 @@ const { data: productionPerformanceDetail } = useGetProductionPerformance(route.
 const { mutate: updateProductionPerformance } = useupdateProductionPerformance(route.params.id);
 
 const userStore = useUserStore();
-const form = useForm();
+const form = useForm({
+  initialValues: {
+    salesManagerNo: productionPerformanceDetail.value?.salesManagerNo,
+  },
+});
 const PPDetail = ref({});
 
 const canEdit = computed(() => {
@@ -193,12 +221,14 @@ watch(
   productionPerformanceDetail,
   val => {
     if (!val) return;
+
     form.setValues({
       factoryName: `${val.factoryName} (${val.factoryCode})`,
       lineName: `${val.lineName} (${val.lineCode})`,
       itemName: `${val.itemName} (${val.itemCode})`,
       dueDate: val.dueDate,
-      salesManagerName: `${val.salesManagerName} (${val.salesManagerNo})`,
+      salesManagerName: val.salesManagerName,
+      salesManagerNo: val.salesManagerNo,
       productionManagerName: `${val.productionManagerName} (${val.productionManagerNo})`,
       startTime: val.startTime,
       endTime: val.endTime,
