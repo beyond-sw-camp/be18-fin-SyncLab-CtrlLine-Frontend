@@ -14,7 +14,11 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10" @click.stop>
+            <TableHead
+              v-if="isAdmin"
+              class="text-center whitespace-nowrap overflow-hidden w-10"
+              @click.stop
+            >
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
@@ -38,6 +42,7 @@
             @click="goToDetail(item.id)"
           >
             <TableCell
+              v-if="isAdmin"
               class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
               @click.stop
             >
@@ -110,11 +115,13 @@ import FilterTab from '@/pages/base-management/item/FilterTab.vue';
 import StatusUpdateDialog from '@/pages/base-management/item/StatusUpdateDialog.vue';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
+import { canView } from '@/utils/canView';
 
 const route = useRoute();
 const router = useRouter();
 const selectedRows = ref([]);
 const authStore = useAuthStore();
+const isAdmin = canView(['ADMIN']);
 
 const initialFilters = {
   itemCode: route.query.itemCode || '',
