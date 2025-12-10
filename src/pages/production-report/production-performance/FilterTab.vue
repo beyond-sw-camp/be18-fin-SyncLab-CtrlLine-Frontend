@@ -7,6 +7,7 @@
 
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FilterInput label="전표번호" v-model="localFilters.documentNo" />
           <FilterSelect label="공장" v-model="localFilters.factoryCode" :options="factoryOptions" />
           <FilterInput label="생산 계획번호" v-model="localFilters.productionPlanDocumentNo" />
 
@@ -167,6 +168,7 @@ const emit = defineEmits(['search', 'reset']);
 const localFilters = reactive({
   factoryCode: props.filters.factoryCode ?? null,
   lineCode: props.filters.lineCode ?? null,
+  documentNo: props.filters.documentNo ?? '',
   productionPlanDocumentNo: props.filters.productionPlanDocumentNo ?? '',
   itemCode: props.filters.itemCode ?? '',
   productionManagerEmpName: props.filters.productionManagerEmpName ?? '',
@@ -250,6 +252,7 @@ const applyFilters = () => {
   emit('search', {
     factoryCode: localFilters.factoryCode,
     lineCode: localFilters.lineCode,
+    documentNo: localFilters.documentNo,
     productionPlanDocumentNo: localFilters.productionPlanDocumentNo,
     itemCode: localFilters.itemCode,
     productionManagerEmpName: localFilters.productionManagerEmpName,
@@ -269,6 +272,7 @@ const resetFilters = () => {
   Object.assign(localFilters, {
     factoryCode: null,
     lineCode: null,
+    documentNo: '',
     productionPlanDocumentNo: '',
     itemCode: '',
     productionManagerEmpName: '',
@@ -289,6 +293,7 @@ const resetFilters = () => {
   emit('reset', {
     factoryCode: null,
     lineCode: null,
+    documentNo: '',
     productionPlanDocumentNo: '',
     itemCode: '',
     productionManagerEmpName: '',

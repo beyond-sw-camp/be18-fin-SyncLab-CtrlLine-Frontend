@@ -210,6 +210,7 @@ const router = useRouter();
 const defaultFilters = {
   factoryCode: null,
   lineCode: null,
+  documentNo: '',
   productionPlanDocumentNo: '',
   itemCode: '',
   productionManagerEmpName: '',
@@ -235,6 +236,7 @@ const parseNumericFilter = (value, fallback) => {
 const buildFiltersFromQuery = query => ({
   factoryCode: query.factoryCode ?? defaultFilters.factoryCode,
   lineCode: query.lineCode ?? defaultFilters.lineCode,
+  documentNo: query.documentNo ?? defaultFilters.documentNo,
   productionPlanDocumentNo:
     query.productionPlanDocumentNo ?? defaultFilters.productionPlanDocumentNo,
   itemCode: query.itemCode ?? defaultFilters.itemCode,
@@ -286,7 +288,14 @@ watch(
   { immediate: true },
 );
 
-const performanceRows = computed(() => productionPerformanceAll.value ?? []);
+const rawPerformanceRows = computed(() => productionPerformanceAll.value ?? []);
+
+const performanceRows = computed(() => {
+  const rows = rawPerformanceRows.value;
+  const keyword = (filters.documentNo ?? '').trim();
+  if (!keyword) return rows;
+  return rows.filter(row => String(row.documentNo ?? '').trim() === keyword);
+});
 
 const chartRecords = computed(() => (hasSearched.value ? performanceRows.value : []));
 
