@@ -59,7 +59,7 @@
 
         <FormField name="itemName" v-slot="{ componentField }">
           <FormItem>
-            <FormLabel>품목</FormLabel>
+            <FormLabel>품목명(품목코드)</FormLabel>
             <FormControl>
               <Input type="text" v-bind="componentField" readonly class="text-sm" />
             </FormControl>
