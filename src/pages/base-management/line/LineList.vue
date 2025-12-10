@@ -102,11 +102,13 @@ import {
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/line/FilterTab.vue';
 import StatusUpdateDialog from '@/pages/base-management/line/StatusUpdateDialog.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
 const selectedRows = ref([]);
+const authStore = useAuthStore();
 
 const initialFilters = {
   lineName: route.query.lineName || '',
@@ -157,6 +159,7 @@ const onSearch = newFilters => {
 };
 
 const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
   const query = buildQueryObject({
     ...filters,
     page: page.value,

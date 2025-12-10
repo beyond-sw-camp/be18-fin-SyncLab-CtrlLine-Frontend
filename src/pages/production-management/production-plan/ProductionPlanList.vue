@@ -142,6 +142,7 @@ import { STATUS_CLASSES } from '@/constants/productionPlanStatus';
 import DeleteConfirmDialog from '@/pages/production-management/production-plan/DeleteConfirmDialog.vue';
 import FilterTab from '@/pages/production-management/production-plan/FilterTab.vue';
 import StatusUpdateDialog from '@/pages/production-management/production-plan/StatusUpdateDialog.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 import { canView } from '@/utils/canView';
 import formatNumberWithCommas from '@/utils/formatNumberWithCommas';
@@ -151,6 +152,7 @@ const router = useRouter();
 
 const currentStatus = ref(route.query.status || 'TOTAL');
 const isAdmin = canView(['ADMIN']);
+const authStore = useAuthStore();
 
 const initialFilters = {
   factoryName: route.query.factoryName || '',
@@ -213,6 +215,8 @@ const toggleRow = (checked, row) => {
 };
 
 const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
+
   const query = buildQueryObject({
     status: currentStatus.value,
     ...filters,

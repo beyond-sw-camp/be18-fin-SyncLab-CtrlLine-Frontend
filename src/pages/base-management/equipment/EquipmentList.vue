@@ -107,10 +107,12 @@ import {
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
 import StatusUpdateDialog from '@/pages/base-management/equipment/StatusUpdateDialog.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 const selectedRows = ref([]);
 
 const initialFilters = {
@@ -166,6 +168,8 @@ const goToDetail = equipmentCode => {
 };
 
 const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
+
   const query = buildQueryObject({
     ...filters,
     page: page.value,

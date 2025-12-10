@@ -103,11 +103,13 @@ import {
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/process/FilterTab.vue';
 import StatusUpdateDialog from '@/pages/base-management/process/StatusUpdateDialog.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
 const selectedRows = ref([]);
+const authStore = useAuthStore();
 
 const initialFilters = {
   processName: route.query.processName || '',
@@ -159,6 +161,7 @@ const goToDetail = processCode => {
 };
 
 const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
   const query = buildQueryObject({
     ...filters,
     page: page.value,

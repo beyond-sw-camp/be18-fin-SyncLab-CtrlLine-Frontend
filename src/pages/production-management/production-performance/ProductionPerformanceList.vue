@@ -97,6 +97,7 @@ import {
 } from '@/components/ui/table';
 // 필터 컴포넌트 이름이 FilterTab.vue로 가정하고 유지합니다.
 import FilterTab from '@/pages/production-management/production-performance/FilterTab.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const goDetail = id => {
@@ -105,6 +106,7 @@ const goDetail = id => {
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 
 const parseNumberQuery = value => {
   if (value === undefined || value === null || value === '') return null;
@@ -174,6 +176,7 @@ const onSearch = newFilters => {
 };
 
 const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
   const query = buildQueryObject({
     ...filters,
     page: page.value,
