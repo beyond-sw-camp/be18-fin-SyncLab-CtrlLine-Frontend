@@ -93,6 +93,7 @@ const props = defineProps({
   draftQty: Number,
   updatedStartTime: String,
   updatedEndTime: String,
+  productionManagerNo: String,
 });
 
 const userStore = useUserStore();
@@ -455,12 +456,42 @@ function onPopupOpen(args) {
 }
 
 function onSelectedDragStart(args) {
-  if (args.data.Id !== props.productionPlanDetailId) {
+  const draggedEvent = args.data;
+  const userRole = userStore.userRole;
+  const eventStatus = draggedEvent.Status;
+
+  // 현재 상세 조회 중인 이벤트가 아니면 취소 (기존 로직 유지)
+  if (draggedEvent.Id !== props.productionPlanDetailId) {
     args.cancel = true;
     return;
   }
 
-  originalStartTime.value = new Date(args.data.StartTime);
+  let isAllowed = false;
+
+  // 관리자 권한
+  if (userRole === 'ADMIN') {
+    // ADMIN은 PENDING 또는 CONFIRMED 상태이면 가능
+    if (eventStatus === 'PENDING' || eventStatus === 'CONFIRMED') {
+      isAllowed = true;
+    }
+  }
+
+  // 매니저 권한
+  else if (userRole === 'MANAGER') {
+    // MANAGER는 PENDING 상태이면서,
+    // 이벤트의 productionNo가 현재 사용자의 productionNo와 일치할 때만 가능
+    if (eventStatus === 'PENDING' && props.productionManagerNo === userStore.empNo) {
+      isAllowed = true;
+    }
+  }
+
+  // 권한이 없으면 드래그 취소
+  if (!isAllowed) {
+    args.cancel = true;
+    return;
+  }
+
+  originalStartTime.value = new Date(draggedEvent.StartTime);
 }
 
 function onDragStart(args) {

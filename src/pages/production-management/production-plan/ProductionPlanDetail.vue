@@ -321,6 +321,7 @@
           @updateStartEndTime="onStartTimeEndTimeChanged"
           :updatedStartTime="form.values.startTime"
           :updatedEndTime="form.values.endTime"
+          :productionManagerNo="form.values.productionManagerNo"
         />
       </form>
     </fieldset>
