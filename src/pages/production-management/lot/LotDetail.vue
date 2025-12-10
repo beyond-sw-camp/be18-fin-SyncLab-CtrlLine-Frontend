@@ -2,9 +2,6 @@
   <div class="flex flex-col gap-6">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
       <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">Lot No. 상세</h3>
-      <div class="flex gap-2">
-        <Button variant="outline" size="sm" @click="goBack">뒤로가기</Button>
-      </div>
     </div>
 
     <div v-if="isPending" class="border rounded-lg p-6 text-center text-sm text-muted-foreground">
