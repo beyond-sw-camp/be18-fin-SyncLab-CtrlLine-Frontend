@@ -237,12 +237,7 @@
             class="text-center transition-all border-b border-dotted border-gray-300 hover:bg-gray-50"
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
-              <button
-                class="text-[#2765C4] underline-offset-2 hover:underline"
-                @click="
-                  goToDefectiveDetail(record.defectiveDocNo || record.productionPerformanceDocNo)
-                "
-              >
+              <button class="text-[#2765C4] underline-offset-2 hover:underline" @click="goToDefectiveDetail(record)">
                 {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
               </button>
             </TableCell>
@@ -588,12 +583,24 @@ const exportCsv = () => {
   URL.revokeObjectURL(url);
 };
 
-const goToDefectiveDetail = docNo => {
+const goToDefectiveDetail = record => {
+  if (!record) {
+    toast.error('불량 정보를 찾을 수 없습니다.');
+    return;
+  }
+
+  const docNo = record.productionPerformanceDocNo || record.defectiveDocNo;
+  const planId = record.planDefectiveId;
+
   if (!docNo) {
     toast.error('전표번호가 없습니다.');
     return;
   }
-  router.push(`/production-management/defectives/${docNo}`);
+  if (!planId) {
+    toast.error('불량 상세 ID를 찾을 수 없습니다.');
+    return;
+  }
+  router.push({ name: 'DefectiveDetail', params: { planDefectiveId: planId } });
 };
 
 const CHART_COLORS = ['#5B6D4C', '#7F9C7A', '#AFC49A', '#D7E0C7', '#F1F3EA', '#94A57B'];
