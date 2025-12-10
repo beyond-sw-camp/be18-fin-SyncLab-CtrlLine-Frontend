@@ -164,11 +164,13 @@ function onUserCleared() {
 }
 
 const onSubmit = form.handleSubmit(values => {
+  console.log('Form Values:', values);
   const params = {
     userName: values.userName,
     empNo: values.empNo,
     isActive: values.isActive === 'true',
   };
+  console.log('Request Params:', params);
 
   // @ts-ignore
   updateProcess(params);
@@ -184,6 +186,7 @@ watch(
       processName: processDetail.value.processName,
       userDepartment: processDetail.value.userDepartment,
       empNo: processDetail.value.empNo,
+      userName: processDetail.value.userName,
       isActive: processDetail.value.isActive ? 'true' : 'false',
     });
   },
