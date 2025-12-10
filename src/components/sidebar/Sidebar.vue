@@ -4,7 +4,7 @@
       메뉴
     </div>
 
-    <nav class="flex-1 overflow-y-auto py-2 text-sm">
+    <nav class="flex-1 overflow-y-auto py-2 text-sm hide-scrollbar">
       <RouterLink
         to="/dashboard"
         active-class="bg-primary-600 text-white font-semibold"
@@ -32,3 +32,4 @@ import { RouterLink } from 'vue-router';
 import SidebarGroup from '@/components/sidebar/SidebarGroup.vue';
 import { baseManagement, productionManagement, productionReport } from '@/constants/category';
 </script>
+<style></style>

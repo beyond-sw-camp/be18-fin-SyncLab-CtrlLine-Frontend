@@ -15,6 +15,22 @@ input[type='number'] {
   -moz-appearance: textfield;
 }
 
+/* 스크롤바 제거 */
+/* Chrome, Safari */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+/* IE, Edge */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+}
+
 :root {
   --radius: 0.65rem;
   --background: oklch(1 0 0);
