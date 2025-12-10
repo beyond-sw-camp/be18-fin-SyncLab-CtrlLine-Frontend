@@ -78,7 +78,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { toast } from 'vue-sonner';
 
 import useGetLotDetail from '@/apis/query-hooks/lot/useGetLotDetail';
@@ -94,8 +94,6 @@ import {
 } from '@/components/ui/table';
 
 const route = useRoute();
-const router = useRouter();
-
 const lotId = computed(() => route.params.lotId);
 
 const { data: lotDetail, isPending } = useGetLotDetail(lotId);
@@ -103,10 +101,6 @@ const showSerials = ref(false);
 const serialNumbers = ref([]);
 const isSerialLoading = ref(false);
 const hasSerialError = ref(false);
-
-const goBack = () => {
-  router.back();
-};
 
 function formatNumber(value) {
   if (value === null || value === undefined) return '-';
