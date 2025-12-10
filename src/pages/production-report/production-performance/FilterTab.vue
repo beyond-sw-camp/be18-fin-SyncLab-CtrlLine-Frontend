@@ -84,14 +84,14 @@
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.startDateTimeStart"
+                v-model="localFilters.startTimeFrom"
                 class="flex-1 min-w-[180px]"
                 placeholder="From"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.startDateTimeEnd"
+                v-model="localFilters.startTimeTo"
                 class="flex-1 min-w-[180px]"
                 placeholder="To"
               />
@@ -103,14 +103,14 @@
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.endDateTimeStart"
+                v-model="localFilters.endTimeFrom"
                 class="flex-1 min-w-[180px]"
                 placeholder="From"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.endDateTimeEnd"
+                v-model="localFilters.endTimeTo"
                 class="flex-1 min-w-[180px]"
                 placeholder="To"
               />
@@ -175,10 +175,10 @@ const localFilters = reactive({
   maxPerformanceQty: props.filters.maxPerformanceQty ?? null,
   minDefectiveRate: props.filters.minDefectiveRate ?? null,
   maxDefectiveRate: props.filters.maxDefectiveRate ?? null,
-  startDateTimeStart: props.filters.startDateTimeStart ?? null,
-  startDateTimeEnd: props.filters.startDateTimeEnd ?? null,
-  endDateTimeStart: props.filters.endDateTimeStart ?? null,
-  endDateTimeEnd: props.filters.endDateTimeEnd ?? null,
+  startTimeFrom: props.filters.startTimeFrom ?? null,
+  startTimeTo: props.filters.startTimeTo ?? null,
+  endTimeFrom: props.filters.endTimeFrom ?? null,
+  endTimeTo: props.filters.endTimeTo ?? null,
 });
 
 const selectedFactoryId = ref(null);
@@ -258,10 +258,10 @@ const applyFilters = () => {
     maxPerformanceQty: normalizeNumber(localFilters.maxPerformanceQty),
     minDefectiveRate: normalizeNumber(localFilters.minDefectiveRate),
     maxDefectiveRate: normalizeNumber(localFilters.maxDefectiveRate),
-    startDateTimeStart: localFilters.startDateTimeStart,
-    startDateTimeEnd: localFilters.startDateTimeEnd,
-    endDateTimeStart: localFilters.endDateTimeStart,
-    endDateTimeEnd: localFilters.endDateTimeEnd,
+    startTimeFrom: localFilters.startTimeFrom,
+    startTimeTo: localFilters.startTimeTo,
+    endTimeFrom: localFilters.endTimeFrom,
+    endTimeTo: localFilters.endTimeTo,
   });
 };
 
@@ -277,10 +277,10 @@ const resetFilters = () => {
     maxPerformanceQty: null,
     minDefectiveRate: null,
     maxDefectiveRate: null,
-    startDateTimeStart: null,
-    startDateTimeEnd: null,
-    endDateTimeStart: null,
-    endDateTimeEnd: null,
+    startTimeFrom: null,
+    startTimeTo: null,
+    endTimeFrom: null,
+    endTimeTo: null,
   });
 
   selectedFactoryId.value = null;
@@ -297,10 +297,10 @@ const resetFilters = () => {
     maxPerformanceQty: null,
     minDefectiveRate: null,
     maxDefectiveRate: null,
-    startDateTimeStart: null,
-    startDateTimeEnd: null,
-    endDateTimeStart: null,
-    endDateTimeEnd: null,
+    startTimeFrom: null,
+    startTimeTo: null,
+    endTimeFrom: null,
+    endTimeTo: null,
   });
 };
 
