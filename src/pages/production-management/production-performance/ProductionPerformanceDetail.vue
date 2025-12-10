@@ -48,11 +48,36 @@
           </FormField>
         </div>
 
-        <FormField name="productionManagerName" v-slot="{ componentField }">
-          <FormItem>
+        <FormField
+          name="productionManagerNo"
+          v-slot="{ value, componentField, setValue, errorMessage }"
+        >
+          <FormItem class="w-full">
             <FormLabel>생산 담당자</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+            <FormControl class="w-full min-w-0">
+              <UpdateAutoCompleteSelect
+                :key="`productionManagerNo-${productionPerformanceDetail?.productionManagerNo}`"
+                label="생산 담당자"
+                :value="value"
+                :componentField="componentField"
+                :setValue="setValue"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })"
+                keyField="empNo"
+                nameField="userName"
+                :fields="[
+                  'empNo',
+                  'userName',
+                  'userEmail',
+                  'userDepartment',
+                  'userPhoneNumber',
+                  'userStatus',
+                  'userRole',
+                ]"
+                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                :initialText="productionPerformanceDetail.productionManagerName"
+                :disabled="!canEdit"
+              />
+              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
             </FormControl>
           </FormItem>
         </FormField>
@@ -193,6 +218,7 @@ const userStore = useUserStore();
 const form = useForm({
   initialValues: {
     salesManagerNo: productionPerformanceDetail.value?.salesManagerNo,
+    productionManagerNo: productionPerformanceDetail.value?.productionManagerNo,
   },
 });
 const PPDetail = ref({});
@@ -223,13 +249,17 @@ watch(
     if (!val) return;
 
     form.setValues({
-      factoryName: `${val.factoryName} (${val.factoryCode})`,
-      lineName: `${val.lineName} (${val.lineCode})`,
-      itemName: `${val.itemName} (${val.itemCode})`,
+      factoryName: val.factoryName,
+      factoryCode: val.factoryCode,
+      lineName: val.lineName,
+      lineCode: val.lineCode,
+      itemName: val.itemName,
+      itemCode: val.itemCode,
       dueDate: val.dueDate,
       salesManagerName: val.salesManagerName,
       salesManagerNo: val.salesManagerNo,
-      productionManagerName: `${val.productionManagerName} (${val.productionManagerNo})`,
+      productionManagerName: val.productionManagerName,
+      productionManagerNo: val.productionManagerNo,
       startTime: val.startTime,
       endTime: val.endTime,
       lotNo: val.lotNo,
