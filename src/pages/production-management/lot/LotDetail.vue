@@ -54,21 +54,48 @@
         <div v-else-if="serialNumbers.length === 0" class="text-sm text-muted-foreground">
           등록된 시리얼 번호가 없습니다.
         </div>
-        <div v-else class="max-h-72 overflow-auto border rounded">
-          <Table class="w-full">
-            <TableHeader>
-              <TableRow>
-                <TableHead class="w-20 text-center">No.</TableHead>
-                <TableHead>시리얼 번호</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="(serial, index) in serialNumbers" :key="`${serial}-${index}`">
-                <TableCell class="text-center font-medium">{{ index + 1 }}</TableCell>
-                <TableCell class="font-mono text-sm">{{ serial }}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+        <div v-else class="flex flex-col gap-4">
+          <div class="flex flex-col gap-3 border rounded-lg p-4 bg-muted/30">
+            <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+              <span class="font-medium text-foreground">총 {{ totalSerialCount }}건</span>
+              <span v-if="filteredSerialCount !== totalSerialCount">
+                검색 결과 {{ filteredSerialCount }}건
+              </span>
+            </div>
+            <div class="flex flex-col md:flex-row gap-3">
+              <Input
+                v-model="serialSearchQuery"
+                placeholder="시리얼 번호 검색"
+                class="md:max-w-xs"
+              />
+              <div class="flex gap-2">
+                <Button variant="outline" size="sm" @click="serialSearchQuery = ''">
+                  검색 초기화
+                </Button>
+                <Button size="sm" @click="copyAllSerials">전체 복사</Button>
+              </div>
+            </div>
+          </div>
+          <div v-if="filteredSerials.length === 0" class="text-sm text-muted-foreground">
+            검색 조건에 해당하는 시리얼 번호가 없습니다.
+          </div>
+          <div v-else class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div
+              v-for="(serial, index) in filteredSerials"
+              :key="`${serial}-${index}`"
+              class="border rounded-lg p-4 bg-white shadow-xs flex flex-col gap-3"
+            >
+              <div class="flex items-center justify-between text-xs text-muted-foreground">
+                <span>No. {{ index + 1 }}</span>
+                <Button variant="ghost" size="sm" class="h-7 px-2" @click="copySerial(serial)">
+                  복사
+                </Button>
+              </div>
+              <p class="font-mono text-base font-semibold break-all text-foreground">
+                {{ serial }}
+              </p>
+            </div>
+          </div>
         </div>
       </section>
     </div>
@@ -87,15 +114,8 @@ import { toast } from 'vue-sonner';
 import { getLotSerials } from '@/apis/query-functions/lot';
 import useGetLotDetail from '@/apis/query-hooks/lot/useGetLotDetail';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 
 const route = useRoute();
 const router = useRouter();
@@ -107,6 +127,7 @@ const showSerials = ref(false);
 const serialNumbers = ref([]);
 const isSerialLoading = ref(false);
 const hasSerialError = ref(false);
+const serialSearchQuery = ref('');
 
 const goBack = () => {
   router.back();
@@ -197,12 +218,49 @@ const viewSerialNumbers = async () => {
     const response = await getLotSerials(currentLotId);
     serialNumbers.value = response?.serialList ?? [];
     showSerials.value = true;
+    serialSearchQuery.value = '';
   } catch (error) {
     hasSerialError.value = true;
     console.error('Failed to load serial numbers', error);
     toast.error('시리얼 번호를 불러오지 못했습니다.');
   } finally {
     isSerialLoading.value = false;
+  }
+};
+
+const filteredSerials = computed(() => {
+  const keyword = serialSearchQuery.value.trim().toLowerCase();
+  if (!keyword) {
+    return serialNumbers.value;
+  }
+  return serialNumbers.value.filter(serial => serial.toLowerCase().includes(keyword));
+});
+
+const totalSerialCount = computed(() => serialNumbers.value.length);
+const filteredSerialCount = computed(() => filteredSerials.value.length);
+
+const copySerial = async serial => {
+  try {
+    await navigator.clipboard.writeText(serial);
+    toast.success('시리얼 번호를 복사했습니다.');
+  } catch (error) {
+    console.error('Failed to copy serial', error);
+    toast.error('복사에 실패했습니다.');
+  }
+};
+
+const copyAllSerials = async () => {
+  if (!filteredSerials.value.length) {
+    toast.info('복사할 시리얼 번호가 없습니다.');
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(filteredSerials.value.join('\n'));
+    toast.success('시리얼 번호 전체를 복사했습니다.');
+  } catch (error) {
+    console.error('Failed to copy serials', error);
+    toast.error('복사에 실패했습니다.');
   }
 };
 </script>
