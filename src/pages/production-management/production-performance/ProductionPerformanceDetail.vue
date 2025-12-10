@@ -82,11 +82,31 @@
           </FormItem>
         </FormField>
 
-        <FormField name="itemName" v-slot="{ componentField }">
+        <FormField name="itemCode" v-slot="{ componentField }">
           <FormItem>
             <FormLabel>품목</FormLabel>
             <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
+              <UpdateAutoCompleteSelect
+                :key="`itemCode-${productionPerformanceDetail?.itemCode}`"
+                label="품목"
+                :componentField="componentField"
+                :setValue="setValue"
+                :fetchList="() => useGetItemList({ isActive: true })"
+                keyField="itemCode"
+                nameField="itemName"
+                :fields="[
+                  'itemCode',
+                  'itemName',
+                  'itemSpecification',
+                  'itemUnit',
+                  'itemStatus',
+                  'isActive',
+                ]"
+                :tableHeaders="['품목코드', '품목명', '규격', '단위', '품목구분', '사용여부']"
+                :emitFullItem="true"
+                :initialText="productionPerformanceDetail.itemName"
+                :disabled="!canEdit"
+              />
             </FormControl>
           </FormItem>
         </FormField>
@@ -195,10 +215,12 @@
 </template>
 
 <script setup>
+import { setValue } from '@syncfusion/ej2-base';
 import { useForm } from 'vee-validate';
 import { ref, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
+import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetProductionPerformance from '@/apis/query-hooks/production-performance/useGetProductionPerformance';
 import useupdateProductionPerformance from '@/apis/query-hooks/production-performance/useUpdateProductionPerformance';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
