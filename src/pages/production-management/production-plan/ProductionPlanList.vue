@@ -97,7 +97,7 @@
               {{ productionPlan.salesManagerName }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ productionPlan.plannedQty }}
+              {{ formatQuantity(productionPlan.plannedQty) }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ productionPlan.dueDate }}
@@ -159,6 +159,12 @@ const initialFilters = {
   dueDate: route.query.dueDate || null,
   startTime: route.query.startTime || null,
   endTime: route.query.endTime || null,
+};
+
+const formatQuantity = (quantity, unit) => {
+  if (quantity === null || quantity === undefined) return '-';
+  const formattedQty = Number(quantity).toLocaleString('ko-KR');
+  return `${formattedQty} ${unit || ''}`.trim();
 };
 
 const {

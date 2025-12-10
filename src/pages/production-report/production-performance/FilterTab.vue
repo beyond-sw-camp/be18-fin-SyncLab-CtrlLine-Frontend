@@ -65,14 +65,14 @@
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="number"
-                v-model="localFilters.minDefectRate"
+                v-model="localFilters.minDefectiveRate"
                 placeholder="최소"
                 class="flex-1 min-w-[180px]"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="number"
-                v-model="localFilters.maxDefectRate"
+                v-model="localFilters.maxDefectiveRate"
                 placeholder="최대"
                 class="flex-1 min-w-[180px]"
               />
@@ -84,14 +84,14 @@
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.startTimeFrom"
+                v-model="localFilters.startDateTimeStart"
                 class="flex-1 min-w-[180px]"
                 placeholder="From"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.startTimeTo"
+                v-model="localFilters.startDateTimeEnd"
                 class="flex-1 min-w-[180px]"
                 placeholder="To"
               />
@@ -103,14 +103,14 @@
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.endTimeFrom"
+                v-model="localFilters.endDateTimeStart"
                 class="flex-1 min-w-[180px]"
                 placeholder="From"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.endTimeTo"
+                v-model="localFilters.endDateTimeEnd"
                 class="flex-1 min-w-[180px]"
                 placeholder="To"
               />
@@ -173,12 +173,12 @@ const localFilters = reactive({
   salesManagerEmpName: props.filters.salesManagerEmpName ?? '',
   minPerformanceQty: props.filters.minPerformanceQty ?? null,
   maxPerformanceQty: props.filters.maxPerformanceQty ?? null,
-  minDefectRate: props.filters.minDefectRate ?? null,
-  maxDefectRate: props.filters.maxDefectRate ?? null,
-  startTimeFrom: props.filters.startTimeFrom ?? null,
-  startTimeTo: props.filters.startTimeTo ?? null,
-  endTimeFrom: props.filters.endTimeFrom ?? null,
-  endTimeTo: props.filters.endTimeTo ?? null,
+  minDefectiveRate: props.filters.minDefectiveRate ?? null,
+  maxDefectiveRate: props.filters.maxDefectiveRate ?? null,
+  startDateTimeStart: props.filters.startDateTimeStart ?? null,
+  startDateTimeEnd: props.filters.startDateTimeEnd ?? null,
+  endDateTimeStart: props.filters.endDateTimeStart ?? null,
+  endDateTimeEnd: props.filters.endDateTimeEnd ?? null,
 });
 
 const selectedFactoryId = ref(null);
@@ -256,12 +256,12 @@ const applyFilters = () => {
     salesManagerEmpName: localFilters.salesManagerEmpName,
     minPerformanceQty: normalizeNumber(localFilters.minPerformanceQty),
     maxPerformanceQty: normalizeNumber(localFilters.maxPerformanceQty),
-    minDefectRate: normalizeNumber(localFilters.minDefectRate),
-    maxDefectRate: normalizeNumber(localFilters.maxDefectRate),
-    startTimeFrom: localFilters.startTimeFrom,
-    startTimeTo: localFilters.startTimeTo,
-    endTimeFrom: localFilters.endTimeFrom,
-    endTimeTo: localFilters.endTimeTo,
+    minDefectiveRate: normalizeNumber(localFilters.minDefectiveRate),
+    maxDefectiveRate: normalizeNumber(localFilters.maxDefectiveRate),
+    startDateTimeStart: localFilters.startDateTimeStart,
+    startDateTimeEnd: localFilters.startDateTimeEnd,
+    endDateTimeStart: localFilters.endDateTimeStart,
+    endDateTimeEnd: localFilters.endDateTimeEnd,
   });
 };
 
@@ -275,12 +275,12 @@ const resetFilters = () => {
     salesManagerEmpName: '',
     minPerformanceQty: null,
     maxPerformanceQty: null,
-    minDefectRate: null,
-    maxDefectRate: null,
-    startTimeFrom: null,
-    startTimeTo: null,
-    endTimeFrom: null,
-    endTimeTo: null,
+    minDefectiveRate: null,
+    maxDefectiveRate: null,
+    startDateTimeStart: null,
+    startDateTimeEnd: null,
+    endDateTimeStart: null,
+    endDateTimeEnd: null,
   });
 
   selectedFactoryId.value = null;
@@ -295,12 +295,12 @@ const resetFilters = () => {
     salesManagerEmpName: '',
     minPerformanceQty: null,
     maxPerformanceQty: null,
-    minDefectRate: null,
-    maxDefectRate: null,
-    startTimeFrom: null,
-    startTimeTo: null,
-    endTimeFrom: null,
-    endTimeTo: null,
+    minDefectiveRate: null,
+    maxDefectiveRate: null,
+    startDateTimeStart: null,
+    startDateTimeEnd: null,
+    endDateTimeStart: null,
+    endDateTimeEnd: null,
   });
 };
 

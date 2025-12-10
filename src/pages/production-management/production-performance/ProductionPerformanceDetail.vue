@@ -185,7 +185,6 @@ const onSubmit = form.handleSubmit(values => {
 
 const formatQuantity = (quantity, unit) => {
   if (quantity === null || quantity === undefined) return '';
-  // 숫자를 세 자리마다 쉼표를 넣어 문자열로 포맷팅
   const formattedQty = Number(quantity).toLocaleString('ko-KR');
   return `${formattedQty} ${unit || ''}`.trim();
 };
