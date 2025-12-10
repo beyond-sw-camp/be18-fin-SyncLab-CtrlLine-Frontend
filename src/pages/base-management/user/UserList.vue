@@ -79,8 +79,8 @@
 
 <script setup>
 import { ChevronRightIcon, InfoIcon } from 'lucide-vue-next';
-import { ref } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { ref, watch } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -104,23 +104,71 @@ import {
 } from '@/components/ui/table';
 import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 import FilterTab from '@/pages/base-management/user/FilterTab.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { buildQueryObject } from '@/utils/buildQueryObject';
 import { canView } from '@/utils/canView';
 
+const route = useRoute();
 const router = useRouter();
 const deniedModal = ref(false);
+const authStore = useAuthStore();
 
 const isAdmin = canView(['ADMIN']);
-const { data: userList, refetch, page, filters } = useGetUserList();
-
-const onSearch = newFilters => {
-  Object.assign(filters, newFilters);
-  page.value = 1; // 첫 페이지 부터 조회
-  refetch();
-};
 
 const goToDetail = userId => {
   router.push(`/base-management/users/${userId}`);
 };
+
+const initialFilters = {
+  userEmail: route.query.userEmail || '',
+  userDepartment: route.query.userDepartment || null,
+  userPhoneNumber: route.query.userPhoneNumber || '',
+  userStatus: route.query.userStatus || null,
+  userRole: route.query.userRole || null,
+};
+
+const { data: userList, page, filters } = useGetUserList(initialFilters);
+
+const onSearch = newFilters => {
+  Object.assign(filters, newFilters);
+  syncQuery();
+  page.value = 1;
+};
+
+const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
+  const query = buildQueryObject({
+    ...filters,
+    page: page.value,
+  });
+  router.replace({ query });
+};
+
+watch(
+  () => ({ ...filters }),
+  () => {
+    syncQuery();
+  },
+  { deep: true },
+);
+
+watch(page, () => {
+  syncQuery();
+});
+
+watch(
+  () => route.query,
+  newQuery => {
+    page.value = Number(newQuery.page ?? 1);
+
+    filters.userEmail = newQuery.userEmail ?? '';
+    filters.userDepartment = newQuery.userDepartment ?? '';
+    filters.userPhoneNumber = newQuery.userPhoneNumber ?? null;
+    filters.userStatus = newQuery.userStatus ?? null;
+    filters.userRole = newQuery.userRole ?? null;
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped></style>
