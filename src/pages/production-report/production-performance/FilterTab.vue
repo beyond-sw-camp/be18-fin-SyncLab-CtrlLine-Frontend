@@ -8,8 +8,12 @@
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FilterInput label="전표번호" v-model="localFilters.documentNo" />
-          <FilterSelect label="공장" v-model="localFilters.factoryCode" :options="factoryOptions" />
+
           <FilterInput label="생산 계획번호" v-model="localFilters.productionPlanDocumentNo" />
+
+          <FilterSelect label="공장" v-model="localFilters.factoryCode" :options="factoryOptions" />
+
+          <FilterSelect label="라인" v-model="localFilters.lineCode" :options="lineOptions" />
 
           <div>
             <Label class="text-xs">품목</Label>
@@ -38,10 +42,6 @@
             />
           </div>
 
-          <FilterInput label="생산 담당자" v-model="localFilters.productionManagerEmpName" />
-          <FilterInput label="영업 담당자" v-model="localFilters.salesManagerEmpName" />
-          <FilterSelect label="라인" v-model="localFilters.lineCode" :options="lineOptions" />
-
           <div>
             <Label class="text-xs">실적수량</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
@@ -59,6 +59,62 @@
                 class="flex-1 min-w-[180px]"
               />
             </div>
+          </div>
+
+          <div>
+            <Label class="text-xs">생산 담당자</Label>
+            <CreateAutoCompleteSelect
+              label="생산 담당자"
+              :value="localFilters.productionManagerEmpNo"
+              :setValue="setProducerManagerFilter"
+              :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+              keyField="empNo"
+              nameField="userName"
+              :fields="[
+                'empNo',
+                'userName',
+                'userEmail',
+                'userDepartment',
+                'userPhoneNumber',
+                'userStatus',
+                'userRole',
+              ]"
+              :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+              :emitFullItem="true"
+              @selectedFullItem="onProducerManagerSelected"
+              @clear="onProducerManagerCleared"
+              class="h-7 placeholder:text-xs text-xs"
+              inputClass="h-7 text-xs placeholder:text-xs"
+              iconClass="!w-3 !h-3"
+            />
+          </div>
+
+          <div>
+            <Label class="text-xs">영업 담당자</Label>
+            <CreateAutoCompleteSelect
+              label="영업 담당자"
+              :value="localFilters.salesManagerEmpNo"
+              :setValue="setSalesManagerFilter"
+              :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+              keyField="empNo"
+              nameField="userName"
+              :fields="[
+                'empNo',
+                'userName',
+                'userEmail',
+                'userDepartment',
+                'userPhoneNumber',
+                'userStatus',
+                'userRole',
+              ]"
+              :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+              :emitFullItem="true"
+              @selectedFullItem="onSalesManagerSelected"
+              @clear="onSalesManagerCleared"
+              class="h-7 placeholder:text-xs text-xs"
+              inputClass="h-7 text-xs placeholder:text-xs"
+              iconClass="!w-3 !h-3"
+            />
           </div>
 
           <div>
@@ -85,14 +141,14 @@
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.startTimeFrom"
+                v-model="localFilters.startDateTimeStart"
                 class="flex-1 min-w-[180px]"
                 placeholder="From"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.startTimeTo"
+                v-model="localFilters.startDateTimeEnd"
                 class="flex-1 min-w-[180px]"
                 placeholder="To"
               />
@@ -104,14 +160,14 @@
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.endTimeFrom"
+                v-model="localFilters.endDateTimeStart"
                 class="flex-1 min-w-[180px]"
                 placeholder="From"
               />
               <span class="block text-gray-400 w-full lg:w-fit">~</span>
               <FilterInput
                 type="datetime-local"
-                v-model="localFilters.endTimeTo"
+                v-model="localFilters.endDateTimeEnd"
                 class="flex-1 min-w-[180px]"
                 placeholder="To"
               />
@@ -147,6 +203,7 @@ import { computed, reactive, ref, watch } from 'vue';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import FilterInput from '@/components/filter/FilterInput.vue';
 import FilterSelect from '@/components/filter/FilterSelect.vue';
@@ -165,26 +222,58 @@ const props = defineProps({
 
 const emit = defineEmits(['search', 'reset']);
 
+function onProducerManagerSelected(manager) {
+  localFilters.productionManagerName = manager.userName; // UI 표시용 이름 저장
+  localFilters.productionManagerEmpNo = manager.empNo; // DTO 전송용 사번 저장
+}
+
+function onProducerManagerCleared() {
+  localFilters.productionManagerName = '';
+  localFilters.productionManagerEmpNo = '';
+}
+
+const setProducerManagerFilter = newName => {
+  localFilters.productionManagerName = newName;
+  localFilters.productionManagerEmpNo = '';
+};
+
+// 영업 담당자 관련 함수 (변경 없음)
+function onSalesManagerSelected(manager) {
+  localFilters.salesManagerName = manager.userName;
+  localFilters.salesManagerEmpNo = manager.empNo;
+}
+
+function onSalesManagerCleared() {
+  localFilters.salesManagerName = '';
+  localFilters.salesManagerEmpNo = '';
+}
+
+const setSalesManagerFilter = newName => {
+  localFilters.salesManagerName = newName;
+  localFilters.salesManagerEmpNo = '';
+};
+
 const localFilters = reactive({
   factoryCode: props.filters.factoryCode ?? null,
   lineCode: props.filters.lineCode ?? null,
   documentNo: props.filters.documentNo ?? '',
   productionPlanDocumentNo: props.filters.productionPlanDocumentNo ?? '',
   itemCode: props.filters.itemCode ?? '',
-  productionManagerEmpName:
-    props.filters.productionManagerEmpName ?? props.filters.productionManagerName ?? '',
+
+  productionManagerEmpNo: props.filters.productionManagerEmpNo ?? '',
   productionManagerName: props.filters.productionManagerName ?? '',
-  salesManagerEmpName:
-    props.filters.salesManagerEmpName ?? props.filters.salesManagerName ?? '',
+  salesManagerEmpNo: props.filters.salesManagerEmpNo ?? '',
   salesManagerName: props.filters.salesManagerName ?? '',
+
   minPerformanceQty: props.filters.minPerformanceQty ?? null,
   maxPerformanceQty: props.filters.maxPerformanceQty ?? null,
   minDefectiveRate: props.filters.minDefectiveRate ?? null,
   maxDefectiveRate: props.filters.maxDefectiveRate ?? null,
-  startTimeFrom: props.filters.startTimeFrom ?? null,
-  startTimeTo: props.filters.startTimeTo ?? null,
-  endTimeFrom: props.filters.endTimeFrom ?? null,
-  endTimeTo: props.filters.endTimeTo ?? null,
+
+  startDateTimeStart: props.filters.startDateTimeStart ?? null,
+  startDateTimeEnd: props.filters.startDateTimeEnd ?? null,
+  endDateTimeStart: props.filters.endDateTimeStart ?? null,
+  endDateTimeEnd: props.filters.endDateTimeEnd ?? null,
 });
 
 const selectedFactoryId = ref(null);
@@ -253,10 +342,10 @@ const setItemCodeFilter = newCode => {
 };
 
 const applyFilters = () => {
-  const startFrom = localFilters.startTimeFrom;
-  const startTo = localFilters.startTimeTo;
-  const endFrom = localFilters.endTimeFrom;
-  const endTo = localFilters.endTimeTo;
+  const startFrom = localFilters.startDateTimeStart;
+  const startTo = localFilters.startDateTimeEnd;
+  const endFrom = localFilters.endDateTimeStart;
+  const endTo = localFilters.endDateTimeEnd;
 
   emit('search', {
     factoryCode: localFilters.factoryCode,
@@ -264,18 +353,17 @@ const applyFilters = () => {
     documentNo: localFilters.documentNo,
     productionPlanDocumentNo: localFilters.productionPlanDocumentNo,
     itemCode: localFilters.itemCode,
-    productionManagerEmpName: localFilters.productionManagerEmpName,
-    productionManagerName: localFilters.productionManagerEmpName,
-    salesManagerEmpName: localFilters.salesManagerEmpName,
-    salesManagerName: localFilters.salesManagerEmpName,
+
+    productionManagerEmpNo: localFilters.productionManagerEmpNo,
+    productionManagerName: localFilters.productionManagerName,
+    salesManagerEmpNo: localFilters.salesManagerEmpNo,
+    salesManagerName: localFilters.salesManagerName,
+
     minPerformanceQty: normalizeNumber(localFilters.minPerformanceQty),
     maxPerformanceQty: normalizeNumber(localFilters.maxPerformanceQty),
     minDefectiveRate: normalizeNumber(localFilters.minDefectiveRate),
     maxDefectiveRate: normalizeNumber(localFilters.maxDefectiveRate),
-    startTimeFrom: startFrom,
-    startTimeTo: startTo,
-    endTimeFrom: endFrom,
-    endTimeTo: endTo,
+
     startDateTimeStart: startFrom,
     startDateTimeEnd: startTo,
     endDateTimeStart: endFrom,
@@ -290,18 +378,21 @@ const resetFilters = () => {
     documentNo: '',
     productionPlanDocumentNo: '',
     itemCode: '',
-    productionManagerEmpName: '',
+
+    productionManagerEmpNo: '',
     productionManagerName: '',
-    salesManagerEmpName: '',
+    salesManagerEmpNo: '',
     salesManagerName: '',
+
     minPerformanceQty: null,
     maxPerformanceQty: null,
     minDefectiveRate: null,
     maxDefectiveRate: null,
-    startTimeFrom: null,
-    startTimeTo: null,
-    endTimeFrom: null,
-    endTimeTo: null,
+
+    startDateTimeStart: null,
+    startDateTimeEnd: null,
+    endDateTimeStart: null,
+    endDateTimeEnd: null,
   });
 
   selectedFactoryId.value = null;
@@ -313,18 +404,15 @@ const resetFilters = () => {
     documentNo: '',
     productionPlanDocumentNo: '',
     itemCode: '',
-    productionManagerEmpName: '',
+    productionManagerEmpNo: '',
     productionManagerName: '',
-    salesManagerEmpName: '',
+    salesManagerEmpNo: '',
     salesManagerName: '',
     minPerformanceQty: null,
     maxPerformanceQty: null,
     minDefectiveRate: null,
     maxDefectiveRate: null,
-    startTimeFrom: null,
-    startTimeTo: null,
-    endTimeFrom: null,
-    endTimeTo: null,
+
     startDateTimeStart: null,
     startDateTimeEnd: null,
     endDateTimeStart: null,
@@ -333,15 +421,14 @@ const resetFilters = () => {
 };
 
 const assignFilters = newFilters => {
-  const managerName =
-    newFilters.productionManagerEmpName ?? newFilters.productionManagerName ?? '';
-  const salesName = newFilters.salesManagerEmpName ?? newFilters.salesManagerName ?? '';
+  const managerName = newFilters.productionManagerEmpNo ?? newFilters.productionManagerName ?? '';
+  const salesName = newFilters.salesManagerEmpNo ?? newFilters.salesManagerName ?? '';
 
   Object.assign(localFilters, {
     ...newFilters,
-    productionManagerEmpName: managerName,
+    productionManagerEmpNo: managerName,
     productionManagerName: newFilters.productionManagerName ?? managerName ?? '',
-    salesManagerEmpName: salesName,
+    salesManagerEmpNo: salesName,
     salesManagerName: newFilters.salesManagerName ?? salesName ?? '',
   });
 };

@@ -181,27 +181,48 @@
         <FormField name="productionPlanDocumentNo" v-slot="{ componentField }">
           <FormItem>
             <FormLabel>생산계획 전표번호</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
-            </FormControl>
+            <div
+              class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
+            >
+              <button
+                class="text-[#1e6c20] underline-offset-2 hover:underline text-sm p-0 text-left"
+                @click="openPlanDocNoNewTab(productionPerformanceDetail.productionPlanId)"
+              >
+                {{ componentField.modelValue }}
+              </button>
+            </div>
           </FormItem>
         </FormField>
 
         <FormField name="lotNo" v-slot="{ componentField }">
           <FormItem>
             <FormLabel>Lot No.</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
-            </FormControl>
+            <div
+              class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
+            >
+              <button
+                class="text-[#1e6c20] underline-offset-2 hover:underline text-sm p-0 text-left"
+                @click="openLotNoNewTab(productionPerformanceDetail.lotId)"
+              >
+                {{ componentField.modelValue }}
+              </button>
+            </div>
           </FormItem>
         </FormField>
 
         <FormField name="defectiveDocumentNo" v-slot="{ componentField }">
           <FormItem>
             <FormLabel>불량 전표번호</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" readonly class="text-sm" />
-            </FormControl>
+            <div
+              class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
+            >
+              <button
+                class="text-[#1e6c20] underline-offset-2 hover:underline text-sm p-0 text-left"
+                @click="openDefNewTab(productionPerformanceDetail.defectiveId)"
+              >
+                {{ componentField.modelValue }}
+              </button>
+            </div>
           </FormItem>
         </FormField>
       </div>
@@ -250,6 +271,39 @@ const canEdit = computed(() => {
   const role = userStore.userRole;
   return role === 'ADMIN';
 });
+
+const openDefNewTab = planDefectiveId => {
+  if (!planDefectiveId) {
+    return;
+  }
+
+  const path = `/production-management/defectives/${planDefectiveId}`;
+  const fullUrl = window.location.origin + path;
+
+  window.open(fullUrl, '_blank');
+};
+
+const openLotNoNewTab = lotId => {
+  if (!lotId) {
+    return;
+  }
+
+  const path = `/production-management/lots/${lotId}`;
+  const fullUrl = window.location.origin + path;
+
+  window.open(fullUrl, '_blank');
+};
+
+const openPlanDocNoNewTab = productionPlanId => {
+  if (!productionPlanId) {
+    return;
+  }
+
+  const path = `/production-management/production-plans/${productionPlanId}`;
+  const fullUrl = window.location.origin + path;
+
+  window.open(fullUrl, '_blank');
+};
 
 const onSubmit = form.handleSubmit(values => {
   const params = {

@@ -13,7 +13,10 @@
       <CardContent class="flex h-full flex-col justify-center">
         <div v-if="defectiveTrendData.length" class="h-[260px] w-full">
           <ChartContainer :config="defectiveChartConfig" cursor>
-            <VisXYContainer :data="defectiveTrendData" :margin="{ left: 40, right: 16, bottom: 32 }">
+            <VisXYContainer
+              :data="defectiveTrendData"
+              :margin="{ left: 40, right: 16, bottom: 32 }"
+            >
               <VisLine
                 :x="d => d.index"
                 :y="d => d.value"
@@ -47,7 +50,10 @@
       <CardContent class="flex h-full flex-col justify-center">
         <div v-if="performanceTrendData.length" class="h-[260px] w-full">
           <ChartContainer :config="performanceChartConfig" cursor>
-            <VisXYContainer :data="performanceTrendData" :margin="{ left: 40, right: 16, bottom: 32 }">
+            <VisXYContainer
+              :data="performanceTrendData"
+              :margin="{ left: 40, right: 16, bottom: 32 }"
+            >
               <VisLine
                 :x="d => d.index"
                 :y="d => d.value"
@@ -99,10 +105,10 @@
                 >영업 담당자</TableHead
               >
               <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산 시작 시간</TableHead
+                >생산 시작 시각</TableHead
               >
               <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산 종료 시간</TableHead
+                >생산 종료 시각</TableHead
               >
               <TableHead class="text-center whitespace-nowrap overflow-hidden">실적수량</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">불량수량</TableHead>
@@ -269,7 +275,10 @@ const buildFiltersFromQuery = query => ({
     query.startDateTimeFrom ??
     defaultFilters.startTimeFrom,
   startTimeTo:
-    query.startTimeTo ?? query.startDateTimeEnd ?? query.startDateTimeTo ?? defaultFilters.startTimeTo,
+    query.startTimeTo ??
+    query.startDateTimeEnd ??
+    query.startDateTimeTo ??
+    defaultFilters.startTimeTo,
   endTimeFrom:
     query.endTimeFrom ??
     query.endDateTimeStart ??
@@ -308,8 +317,12 @@ watch(
 const rawPerformanceRows = computed(() => productionPerformanceAll.value ?? []);
 
 const matchesKeyword = (source, keyword, exact = false) => {
-  const base = String(source ?? '').trim().toLowerCase();
-  const target = String(keyword ?? '').trim().toLowerCase();
+  const base = String(source ?? '')
+    .trim()
+    .toLowerCase();
+  const target = String(keyword ?? '')
+    .trim()
+    .toLowerCase();
   if (!target) return true;
   return exact ? base === target : base.includes(target);
 };
@@ -321,8 +334,7 @@ const performanceRows = computed(() => {
     rows = rows.filter(row => matchesKeyword(row.documentNo, docKeyword, true));
   }
 
-  const managerKeyword =
-    filters.productionManagerEmpName ?? filters.productionManagerName ?? '';
+  const managerKeyword = filters.productionManagerEmpName ?? filters.productionManagerName ?? '';
   if (managerKeyword) {
     rows = rows.filter(row =>
       matchesKeyword(row.productionManagerEmpName ?? row.productionManagerName, managerKeyword),
@@ -456,9 +468,7 @@ const trendBuckets = computed(() => {
   if (!rangeEnd && rangeStart) rangeEnd = rangeStart;
 
   const spanDays =
-    rangeStart && rangeEnd
-      ? Math.max(1, Math.round((rangeEnd - rangeStart) / MS_PER_DAY) + 1)
-      : 1;
+    rangeStart && rangeEnd ? Math.max(1, Math.round((rangeEnd - rangeStart) / MS_PER_DAY) + 1) : 1;
 
   const mode = spanDays <= 7 ? 'day' : spanDays <= 42 ? 'week' : 'month';
 
@@ -518,14 +528,10 @@ const defectiveTooltipTemplate = componentToString(defectiveChartConfig, ChartTo
   hideLabel: true,
   valueFormatter: value => `${Number(value ?? 0).toLocaleString()} EA`,
 });
-const performanceTooltipTemplate = componentToString(
-  performanceChartConfig,
-  ChartTooltipContent,
-  {
-    hideLabel: true,
-    valueFormatter: value => `${Number(value ?? 0).toLocaleString()} EA`,
-  },
-);
+const performanceTooltipTemplate = componentToString(performanceChartConfig, ChartTooltipContent, {
+  hideLabel: true,
+  valueFormatter: value => `${Number(value ?? 0).toLocaleString()} EA`,
+});
 
 const chartsVisible = computed(() => hasSearched.value && chartRecords.value.length > 0);
 

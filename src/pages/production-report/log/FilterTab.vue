@@ -10,7 +10,7 @@
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label class="text-xs">일자</Label>
+            <Label class="text-xs">생성일자</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <div class="flex-1 min-w-[180px]">
                 <FilterInput type="date" v-model="localFilters.formDate" placeholder="시작일" />
