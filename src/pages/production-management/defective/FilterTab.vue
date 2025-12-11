@@ -13,7 +13,7 @@
 
           <FilterSelect label="라인" v-model="localFilters.lineName" :options="lineOptions" />
 
-          <FilterInput label="전표번호" v-model="localFilters.defectiveDocNo" />
+          <FilterInput label="불량 전표번호" v-model="localFilters.defectiveDocNo" />
 
           <FilterInput label="실적전표" v-model="localFilters.productionPerformanceDocNo" />
 
@@ -104,7 +104,7 @@ const lineOptions = computed(() => {
 
   const options = lineList.value.content.map(line => ({
     value: line.lineName,
-    label: line.lineName,
+    label: `${line.lineName} (${line.lineCode})`,
     id: line.lineId,
     code: line.lineCode,
   }));

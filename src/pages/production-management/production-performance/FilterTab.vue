@@ -469,7 +469,6 @@ const resetFilters = () => {
   emit('search', { ...localFilters });
 };
 
-// --- Watchers (변경 없음) ---
 watch(
   () => localFilters.factoryName,
   newFactoryName => {
