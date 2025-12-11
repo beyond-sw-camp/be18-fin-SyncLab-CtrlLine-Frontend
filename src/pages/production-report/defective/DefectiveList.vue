@@ -28,6 +28,12 @@
         <AccordionContent class="p-4 border-t-2 border-b-2 my-3">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <FilterInput
+              label="전표 번호"
+              placeholder="전표 번호"
+              v-model="filterForm.productionPerformanceDocNo"
+              search-icon
+            />
+            <FilterInput
               label="시작 일자"
               type="date"
               placeholder="연도. 월. 일."
@@ -57,7 +63,7 @@
               v-model="filterForm.lineCode"
               search-icon
             />
-            <div>
+            <div class="flex flex-col gap-1">
               <Label class="text-xs">품목</Label>
               <CreateAutoCompleteSelect
                 label="품목"
@@ -83,7 +89,7 @@
                 iconClass="!w-3 !h-3"
               />
             </div>
-            <div>
+            <div class="flex flex-col gap-1">
               <Label class="text-xs">생산 담당자</Label>
               <CreateAutoCompleteSelect
                 label="생산 담당자"
@@ -110,7 +116,7 @@
                 iconClass="!w-3 !h-3"
               />
             </div>
-            <div>
+            <div class="flex flex-col gap-1">
               <Label class="text-xs">영업 담당자</Label>
               <CreateAutoCompleteSelect
                 label="영업 담당자"
@@ -137,12 +143,24 @@
                 iconClass="!w-3 !h-3"
               />
             </div>
-            <FilterInput
-              label="전표 번호"
-              placeholder="전표 번호"
-              v-model="filterForm.productionPerformanceDocNo"
-              search-icon
-            />
+            <div>
+              <Label class="text-xs">불량률 (%)</Label>
+              <div class="flex flex-wrap gap-1 mt-1 items-center">
+                <FilterInput
+                  type="number"
+                  placeholder="최소"
+                  v-model="filterForm.minDefectiveRate"
+                  class="flex-1 min-w-[160px]"
+                />
+                <span class="block text-gray-400 w-full lg:w-fit text-center">~</span>
+                <FilterInput
+                  type="number"
+                  placeholder="최대"
+                  v-model="filterForm.maxDefectiveRate"
+                  class="flex-1 min-w-[160px]"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="flex justify-end mt-4 gap-2">
@@ -398,6 +416,8 @@ const filterForm = reactive({
   salesManagerNo: '',
   salesManagerName: '',
   productionPerformanceDocNo: '',
+  minDefectiveRate: '',
+  maxDefectiveRate: '',
 });
 
 const activeFilters = reactive({
@@ -410,11 +430,13 @@ const activeFilters = reactive({
   productionManagerNo: '',
   salesManagerNo: '',
   productionPerformanceDocNo: '',
+  minDefectiveRate: '',
+  maxDefectiveRate: '',
 });
 
 const onItemSelected = item => {
   filterForm.itemId = item?.id ?? '';
-  filterForm.itemCode = item?.itemCode ?? '';
+  filterForm.itemCode = item?.itemCode ? String(item.itemCode) : '';
 };
 
 const onItemCleared = () => {
@@ -423,7 +445,7 @@ const onItemCleared = () => {
 };
 
 const setItemCodeFilter = newCode => {
-  filterForm.itemCode = newCode;
+  filterForm.itemCode = newCode ? String(newCode) : '';
   if (!newCode) {
     filterForm.itemId = '';
   }
@@ -431,7 +453,7 @@ const setItemCodeFilter = newCode => {
 
 const onProductionManagerSelected = manager => {
   filterForm.productionManagerName = manager?.userName ?? '';
-  filterForm.productionManagerNo = manager?.empNo ?? '';
+  filterForm.productionManagerNo = manager?.empNo ? String(manager.empNo) : '';
 };
 
 const onProductionManagerCleared = () => {
@@ -440,7 +462,7 @@ const onProductionManagerCleared = () => {
 };
 
 const setProductionManagerFilter = newValue => {
-  filterForm.productionManagerNo = newValue;
+  filterForm.productionManagerNo = newValue ? String(newValue) : '';
   if (!newValue) {
     filterForm.productionManagerName = '';
   }
@@ -448,7 +470,7 @@ const setProductionManagerFilter = newValue => {
 
 const onSalesManagerSelected = manager => {
   filterForm.salesManagerName = manager?.userName ?? '';
-  filterForm.salesManagerNo = manager?.empNo ?? '';
+  filterForm.salesManagerNo = manager?.empNo ? String(manager.empNo) : '';
 };
 
 const onSalesManagerCleared = () => {
@@ -457,7 +479,7 @@ const onSalesManagerCleared = () => {
 };
 
 const setSalesManagerFilter = newValue => {
-  filterForm.salesManagerNo = newValue;
+  filterForm.salesManagerNo = newValue ? String(newValue) : '';
   if (!newValue) {
     filterForm.salesManagerName = '';
   }
@@ -474,6 +496,8 @@ const queryParams = computed(() =>
     productionManagerNo: activeFilters.productionManagerNo,
     salesManagerNo: activeFilters.salesManagerNo,
     productionPerformanceDocNo: activeFilters.productionPerformanceDocNo,
+    minDefectiveRate: activeFilters.minDefectiveRate,
+    maxDefectiveRate: activeFilters.maxDefectiveRate,
   }),
 );
 
@@ -565,7 +589,7 @@ watch(
 );
 
 const sanitizeNumber = value => {
-  if (!value) return '';
+  if (value === null || value === undefined || value === '') return '';
   const num = Number(value);
   return Number.isNaN(num) ? '' : num;
 };
@@ -584,6 +608,8 @@ const resetFilters = () => {
     salesManagerNo: '',
     salesManagerName: '',
     productionPerformanceDocNo: '',
+    minDefectiveRate: '',
+    maxDefectiveRate: '',
   });
 };
 
@@ -603,6 +629,8 @@ const applyFilters = async () => {
       productionManagerNo: filterForm.productionManagerNo.trim(),
       salesManagerNo: filterForm.salesManagerNo.trim(),
       productionPerformanceDocNo: filterForm.productionPerformanceDocNo.trim(),
+      minDefectiveRate: sanitizeNumber(filterForm.minDefectiveRate),
+      maxDefectiveRate: sanitizeNumber(filterForm.maxDefectiveRate),
     });
 
     hasSearched.value = true;
