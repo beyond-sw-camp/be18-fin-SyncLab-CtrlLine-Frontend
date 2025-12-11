@@ -466,9 +466,8 @@ watch(
     let startDate = new Date(timeToUse);
     const now = new Date();
 
-    // 시작 시간이 현재 시간보다 과거거나 같으면 30분 추가
     if (startDate <= now) {
-      startDate.setMinutes(startDate.getMinutes() + 30);
+      startDate.setMinutes(startDate.getMinutes() + (isAdmin ? 10 : 30));
       timeToUse = startDate.toISOString();
     }
 

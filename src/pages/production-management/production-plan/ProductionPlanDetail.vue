@@ -662,7 +662,7 @@ watch(
       status: val.status,
       plannedQty: val.plannedQty,
       startTime: val.startTime,
-      endTime: val.endTime,
+      endTime: val.actualEndTime ?? val.endTime,
       remark: val.remark,
     });
 

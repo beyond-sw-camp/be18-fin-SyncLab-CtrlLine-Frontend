@@ -15,6 +15,7 @@
         :showCurrentTimeIndicator="true"
         :popupOpen="onPopupOpen"
         :dragStart="onSelectedDragStart"
+        :dragStop="onDragStop"
         :group="groupOptions"
         :resources="selectedLineResource"
         :created="onSelectedCreated"
@@ -58,7 +59,7 @@ import {
   TimelineMonth,
   DragAndDrop,
 } from '@syncfusion/ej2-vue-schedule';
-import { computed, provide, ref } from 'vue';
+import { computed, provide, ref, watch } from 'vue';
 
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetProductionPlanScheduleList from '@/apis/query-hooks/production-plan/useGetProductionPlanScheduleList';
@@ -109,8 +110,8 @@ function onEventClick(args) {
   const gap = 10;
 
   const wrap = document.querySelector('.e-schedule .e-content-wrap');
-  const scrollTop = wrap.scrollTop;
-  const scheduleTop = wrap.getBoundingClientRect().top;
+  const scrollTop = wrap?.scrollTop ?? 0;
+  const scheduleTop = wrap?.getBoundingClientRect().top ?? 0;
 
   let x = rect.right - width;
   while (x > 700) x = x / 1.5;
@@ -120,6 +121,7 @@ function onEventClick(args) {
   tooltip.value = { show: true, x, y, data: args.event };
 }
 
+// ---- draft 이벤트 (라인 변경/생성 시) ----
 const draftEvent = computed(() => {
   if (
     !props.lineCode ||
@@ -286,30 +288,52 @@ const makeEvent = ev => ({
   Id: ev.id,
   Subject: ev.documentNo,
   StartTime: new Date(ev.startTime),
-  EndTime: new Date(ev.endTime),
+  EndTime: new Date(ev.actualEndTime ?? ev.endTime),
   LineCode: ev.lineCode,
   ItemName: ev.itemName,
   ItemQty: ev.plannedQty,
   Status: ev.status,
 });
 
-const selectedEvents = computed(() => {
-  const baseEvents = selectedLineData.value?.map(makeEvent) ?? [];
-  const draft = draftEvent.value;
+// ---------- 여기부터가 중요한 부분 ----------
 
-  if (draft) {
-    if (props.mode === 'create') {
-      return [...baseEvents, draft];
+// 스케줄에서 실제로 사용하는 상태(수정 가능)
+const selectedEvents = ref([]); // [{Id, StartTime, EndTime, ...}]
+const baseStartTime = ref(null); // 라인 전체의 "맨 처음 시작 시각" 유지용
+
+// 서버 데이터 + draft가 바뀔 때마다 selectedEvents 초기화
+watch(
+  [selectedLineData, draftEvent],
+  ([data, draft]) => {
+    const base = data?.map(makeEvent) ?? [];
+
+    let result = base;
+    if (draft) {
+      if (props.mode === 'create') {
+        result = [...base, draft];
+      } else if (props.mode === 'detail') {
+        result = [...base.filter(ev => ev.Id !== props.productionPlanDetail.id), draft];
+      }
     }
 
-    if (props.mode === 'detail') {
-      const filteredEvents = baseEvents.filter(ev => ev.Id !== props.productionPlanDetail.id);
-      return [...filteredEvents, draft];
-    }
-  }
+    // 시작시간 기준 정렬
+    result.sort((a, b) => a.StartTime - b.StartTime);
 
-  return baseEvents;
-});
+    selectedEvents.value = result;
+
+    // 라인의 "최초 시작 시간"은 최초 한 번만 기억
+    if (!baseStartTime.value && result.length > 0) {
+      baseStartTime.value = new Date(result[0].StartTime);
+    }
+  },
+  { immediate: true },
+);
+
+// ejs-schedule 에 바인딩할 설정
+const selectedEventSettings = computed(() => ({
+  dataSource: [...selectedEvents.value],
+  resources: ['Lines'],
+}));
 
 const availableEvents = computed(() => {
   const base = availableLineData.value?.map(makeEvent) ?? [];
@@ -317,18 +341,60 @@ const availableEvents = computed(() => {
   return base;
 });
 
-const selectedEventSettings = computed(() => ({
-  dataSource: [...selectedEvents.value],
-  resources: ['Lines'],
-}));
-
 const availableEventSettings = computed(() => ({
   dataSource: [...availableEvents.value],
   resources: ['Lines'],
 }));
 
+// 순서 기준 보조 함수
+function compactEventsGlobal(events) {
+  if (!events.length) return events;
+
+  // 1) 현재 StartTime 기준으로 정렬 (드래그 후 위치 반영)
+  const sorted = [...events].sort((a, b) => a.StartTime - b.StartTime);
+
+  // 2) 전체 라인의 기준 시작 시간
+  let current = baseStartTime.value ? new Date(baseStartTime.value) : new Date(sorted[0].StartTime);
+
+  const duration = ev => ev.EndTime - ev.StartTime;
+
+  for (const ev of sorted) {
+    const len = duration(ev);
+    ev.StartTime = new Date(current);
+    ev.EndTime = new Date(current.getTime() + len);
+    current = ev.EndTime;
+  }
+
+  return sorted;
+}
+
 const selectedScheduleRef = ref(null);
 const availableScheduleRef = ref(null);
+
+function onDragStop(args) {
+  const moved = args.data;
+  if (!moved) return;
+
+  const events = selectedEvents.value;
+  const idx = events.findIndex(ev => ev.Id === moved.Id);
+  if (idx === -1) return;
+
+  const originalDuration = events[idx].EndTime - events[idx].StartTime;
+
+  // drop 위치 반영
+  events[idx].StartTime = new Date(moved.StartTime);
+  events[idx].EndTime = new Date(moved.StartTime.getTime() + originalDuration);
+
+  const compacted = compactEventsGlobal(events);
+
+  selectedEvents.value = [...compacted];
+
+  const inst = selectedScheduleRef.value?.ej2Instances;
+  if (inst) {
+    inst.deleteEvent(inst.getEvents());
+    inst.addEvent([...compacted]);
+  }
+}
 
 function onSelectedCreated() {
   const inst = selectedScheduleRef.value?.ej2Instances;
@@ -342,7 +408,6 @@ function onAvailableCreated() {
 
 const emit = defineEmits(['updateStartEndTime']);
 
-// 날짜 이동 처리
 function onSelectedScheduleAction(args) {
   if (['dateNavigate', 'viewNavigate'].includes(args.requestType)) {
     const inst = selectedScheduleRef.value?.ej2Instances;
@@ -353,7 +418,6 @@ function onSelectedScheduleAction(args) {
     const updated = args.changedRecords?.[0];
     if (!updated) return;
 
-    // 부모로 start/endTime emit
     emit('updateStartEndTime', {
       StartTime: updated.StartTime,
       EndTime: updated.EndTime,
@@ -380,16 +444,12 @@ function onPopupOpen(args) {
 
 .e-schedule .e-content-wrap,
 .e-schedule {
-  /* 1. Internet Explorer, Edge 구 버전 */
   -ms-overflow-style: none;
-
-  /* 2. Firefox */
   scrollbar-width: none;
-
-  /* 3. WebKit (Chrome, Safari, Edge) */
-  &::-webkit-scrollbar {
-    display: none; /* 스크롤바 영역 자체를 숨김 */
-  }
+}
+.e-schedule .e-content-wrap::-webkit-scrollbar,
+.e-schedule::-webkit-scrollbar {
+  display: none;
 }
 
 /* 막대바 높이 지정 */
