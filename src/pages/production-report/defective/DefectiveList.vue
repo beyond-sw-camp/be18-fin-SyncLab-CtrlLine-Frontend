@@ -358,12 +358,12 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
+import { getDefectiveAll, getDefectiveDetail } from '@/apis/query-functions/defective';
+import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
-import { getDefectiveAll, getDefectiveDetail } from '@/apis/query-functions/defective';
-import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
 import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import FilterInput from '@/components/filter/FilterInput.vue';
 import FilterSelect from '@/components/filter/FilterSelect.vue';
@@ -382,6 +382,7 @@ import {
   ChartTooltipContent,
   componentToString,
 } from '@/components/ui/chart';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -390,7 +391,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Label } from '@/components/ui/label';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const isApplying = ref(false);
