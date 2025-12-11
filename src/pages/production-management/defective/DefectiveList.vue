@@ -73,10 +73,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import FilterTab from '@/pages/production-management/defective/FilterTab.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 
 const initialFilters = {
   defectiveDocNo: route.query.defectiveDocNo || '',
@@ -104,6 +106,7 @@ const goToDetail = planDefectiveId => {
 };
 
 const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
   const query = buildQueryObject({
     ...filters,
     page: page.value,

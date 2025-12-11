@@ -231,6 +231,7 @@ import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/for
 import { Input } from '@/components/ui/input';
 import PPTable from '@/pages/production-management/production-performance/PPTable.vue';
 import { useUserStore } from '@/stores/useUserStore';
+import { formatNumber } from '@/utils/formatNumber';
 
 const route = useRoute();
 const { data: productionPerformanceDetail } = useGetProductionPerformance(route.params.id);
@@ -258,12 +259,6 @@ const onSubmit = form.handleSubmit(values => {
   // @ts-ignore
   updateProductionPerformance(params);
 });
-
-const formatQuantity = (quantity, unit) => {
-  if (quantity === null || quantity === undefined) return '';
-  const formattedQty = Number(quantity).toLocaleString('ko-KR');
-  return `${formattedQty} ${unit || ''}`.trim();
-};
 
 watch(
   productionPerformanceDetail,
@@ -295,9 +290,9 @@ watch(
       itemName: val.itemName,
       itemSpecification: val.itemSpecification,
       itemUnit: val.itemUnit,
-      totalQty: formatQuantity(val.totalQty),
-      performanceQty: formatQuantity(val.performanceQty),
-      defectiveQty: formatQuantity(val.defectiveQty),
+      totalQty: formatNumber(val.totalQty),
+      performanceQty: formatNumber(val.performanceQty),
+      defectiveQty: formatNumber(val.defectiveQty),
       defectiveRate: val.defectiveRate,
     };
   },

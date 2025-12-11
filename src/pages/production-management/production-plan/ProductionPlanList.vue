@@ -30,7 +30,7 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10">
+            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10" v-if="isAdmin">
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
@@ -64,6 +64,7 @@
             @click="goToDetail(productionPlan.id)"
           >
             <TableCell
+              v-if="isAdmin"
               class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
               @click.stop
             >
@@ -97,7 +98,7 @@
               {{ productionPlan.salesManagerName }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
-              {{ formatQuantity(productionPlan.plannedQty) }}
+              {{ formatNumber(productionPlan.plannedQty) }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ productionPlan.dueDate }}
@@ -141,15 +142,17 @@ import { STATUS_CLASSES } from '@/constants/productionPlanStatus';
 import DeleteConfirmDialog from '@/pages/production-management/production-plan/DeleteConfirmDialog.vue';
 import FilterTab from '@/pages/production-management/production-plan/FilterTab.vue';
 import StatusUpdateDialog from '@/pages/production-management/production-plan/StatusUpdateDialog.vue';
-import { useUserStore } from '@/stores/useUserStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
+import { canView } from '@/utils/canView';
+import { formatNumber } from '@/utils/formatNumber';
 
 const route = useRoute();
 const router = useRouter();
 
 const currentStatus = ref(route.query.status || 'TOTAL');
-const userStore = useUserStore();
-const isAdmin = computed(() => userStore.userRole === 'ADMIN');
+const isAdmin = canView(['ADMIN']);
+const authStore = useAuthStore();
 
 const initialFilters = {
   factoryName: route.query.factoryName || '',
@@ -159,12 +162,6 @@ const initialFilters = {
   dueDate: route.query.dueDate || null,
   startTime: route.query.startTime || null,
   endTime: route.query.endTime || null,
-};
-
-const formatQuantity = (quantity, unit) => {
-  if (quantity === null || quantity === undefined) return '-';
-  const formattedQty = Number(quantity).toLocaleString('ko-KR');
-  return `${formattedQty} ${unit || ''}`.trim();
 };
 
 const {
@@ -218,6 +215,8 @@ const toggleRow = (checked, row) => {
 };
 
 const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
+
   const query = buildQueryObject({
     status: currentStatus.value,
     ...filters,

@@ -75,10 +75,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import LotFilterTab from '@/pages/production-management/lot/LotFilterTab.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 
 const initialFilters = {
   lotNo: route.query.lotNo || '',
@@ -106,6 +108,7 @@ const goToDetail = lotId => {
 };
 
 const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
   const query = buildQueryObject({
     ...filters,
     page: page.value,

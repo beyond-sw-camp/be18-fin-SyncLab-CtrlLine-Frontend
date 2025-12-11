@@ -173,12 +173,14 @@ export const productionReport = [
     icon: 'ClipboardMinus',
     label: '생산계획 현황',
     to: '/production-report/production-plans/all',
+    admin: false,
   },
   {
     icon: 'FileChartLine',
     label: '생산실적 현황',
     to: '/production-report/production-performances/all',
+    admin: false,
   },
-  { icon: 'BugPlay', label: '불량 현황', to: '/production-report/defectives/all' },
-  { icon: 'FileClock', label: '로그 현황', to: '/production-report/logs/all' },
+  { icon: 'BugPlay', label: '불량 현황', to: '/production-report/defectives/all', admin: false },
+  { icon: 'FileClock', label: '로그 현황', to: '/production-report/logs/all', admin: true },
 ];

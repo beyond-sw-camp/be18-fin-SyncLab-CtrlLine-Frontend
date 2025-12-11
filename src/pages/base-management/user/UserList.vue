@@ -16,9 +16,11 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden">사원명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">Email</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">부서명</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">연락처</TableHead>
+            <TableHead v-if="isAdmin" class="text-center whitespace-nowrap overflow-hidden"
+              >연락처</TableHead
+            >
             <TableHead class="text-center whitespace-nowrap overflow-hidden">상태</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">권한</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 권한 </TableHead>
           </TableRow>
         </TableHeader>
 
@@ -38,7 +40,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ user.userDepartment }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableCell v-if="isAdmin" class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ user.userPhoneNumber }}
             </TableCell>
             <TableCell>

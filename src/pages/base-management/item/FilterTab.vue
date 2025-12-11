@@ -14,8 +14,6 @@
           <FilterInput label="품목코드" v-model="localFilters.itemCode" />
           <!-- 규격 -->
           <FilterInput label="규격" v-model="localFilters.itemSpecification" />
-          <!-- 단위 -->
-          <FilterInput label="단위" v-model="localFilters.itemUnit" />
           <!-- 품목구분 -->
           <FilterSelect
             label="품목구분"
@@ -85,7 +83,6 @@ const localFilters = reactive({
   itemCode: props.filters.itemCode ?? '',
   itemName: props.filters.itemName ?? '',
   itemSpecification: props.filters.itemSpecification ?? null,
-  itemUnit: props.filters.itemUnit ?? '',
   itemStatus: props.filters.itemStatus ?? null,
   isActive: props.filters.isActive ?? null,
 });
@@ -108,7 +105,6 @@ const resetFilters = () => {
     itemCode: '',
     itemName: '',
     itemSpecification: '',
-    itemUnit: null,
     itemStatus: null,
     isActive: null,
   });

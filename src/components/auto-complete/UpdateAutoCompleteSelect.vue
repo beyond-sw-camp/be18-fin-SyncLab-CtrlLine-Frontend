@@ -11,7 +11,6 @@
           @compositionend="onCompositionEnd"
           @keydown.enter.prevent="onEnter"
           class="pr-8 text-sm"
-          :disabled="disabled"
         />
         <Button
           variant="ghost"
@@ -19,7 +18,6 @@
           size="xs"
           @click="openModal"
           class="absolute right-2 top-1/2 -translate-y-1/2"
-          :disabled="disabled"
         >
           <SearchIcon class="w-4 h-4" />
         </Button>
@@ -39,7 +37,7 @@
         </ul>
       </div>
 
-      <Input type="text" v-bind="componentField" readonly class="w-28 bg-gray-100 text-sm" />
+      <Input type="text" v-bind="componentField" class="w-28 bg-gray-100 text-sm" />
     </div>
 
     <SelectModal

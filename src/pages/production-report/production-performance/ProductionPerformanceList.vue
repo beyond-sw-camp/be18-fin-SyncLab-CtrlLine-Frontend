@@ -147,10 +147,10 @@
                 {{ formatDate(row.endTime) }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-                {{ formatQuantity(row.performanceQty) }}
+                {{ formatNumber(row.performanceQty) }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
-                {{ formatQuantity(row.defectiveQty) }}
+                {{ formatNumber(row.defectiveQty) }}
               </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
                 {{ formatRate(row.defectiveRate) }}
@@ -203,6 +203,7 @@ import {
 import FilterTab from '@/pages/production-report/production-performance/FilterTab.vue';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 import formatDate from '@/utils/formatDate';
+import { formatNumber } from '@/utils/formatNumber';
 
 const route = useRoute();
 const router = useRouter();
@@ -533,12 +534,6 @@ const exportEnabled = computed(() => hasSearched.value && performanceRows.value.
 // const formatCount = value => (value === undefined || value === null ? '-' : value);
 const formatRate = value => (value === undefined || value === null ? '-' : `${value} %`);
 
-const formatQuantity = (quantity, unit) => {
-  if (quantity === null || quantity === undefined) return '-';
-  const formattedQty = Number(quantity).toLocaleString('ko-KR');
-  return `${formattedQty} ${unit || ''}`.trim();
-};
-
 const syncQuery = () => {
   const query = buildQueryObject({ ...filters });
   router.replace({ query });
@@ -588,8 +583,8 @@ const exportCsv = () => {
     item.salesManagerName ?? '',
     formatDate(item.startTime),
     formatDate(item.endTime),
-    formatQuantity(item.performanceQty ?? ''),
-    formatQuantity(item.defectiveQty ?? ''),
+    formatNumber(item.performanceQty ?? ''),
+    formatNumber(item.defectiveQty ?? ''),
     item.defectiveRate ?? '',
   ]);
 
