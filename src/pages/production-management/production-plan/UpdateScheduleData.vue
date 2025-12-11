@@ -5,7 +5,7 @@
       <ejs-schedule
         class="time-scale hide-scrollbar"
         :timeScale="optimizedTimeScaleOptions"
-        v-if="props.lineCode && selectedLineResource.length > 0"
+        v-if="lineCode && selectedLineResource.length > 0"
         ref="selectedScheduleRef"
         :selectedDate="selectedDateSelected"
         width="100%"
@@ -15,6 +15,7 @@
         :showCurrentTimeIndicator="true"
         :popupOpen="onPopupOpen"
         :dragStart="onSelectedDragStart"
+        :dragStop="onSelectedDragStop"
         :group="groupOptions"
         :resources="selectedLineResource"
         :created="onSelectedCreated"
@@ -36,7 +37,7 @@
         :eventSettings="availableEventSettings"
         :showCurrentTimeIndicator="true"
         :popupOpen="onPopupOpen"
-        :dragStop="onDragStop"
+        :dragStop="onAvailableDragStop"
         :group="groupOptions"
         :resources="availableLineResource"
         :created="onAvailableCreated"
@@ -59,7 +60,8 @@ import {
   TimelineMonth,
   DragAndDrop,
 } from '@syncfusion/ej2-vue-schedule';
-import { computed, provide, ref } from 'vue';
+import { computed, provide, ref, watch } from 'vue';
+import { toast } from 'vue-sonner';
 
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetProductionPlanScheduleList from '@/apis/query-hooks/production-plan/useGetProductionPlanScheduleList';
@@ -70,13 +72,6 @@ import ScheduleTooltip from '@/pages/production-management/production-plan/Sched
 import { useUserStore } from '@/stores/useUserStore';
 
 provide('schedule', [TimelineViews, Day, Week, TimelineMonth, DragAndDrop]);
-
-// 타임라인 스케일 설정
-const optimizedTimeScaleOptions = {
-  enable: true,
-  interval: 15,
-  slotCount: 15,
-};
 
 const props = defineProps({
   productionPlanDetail: Object,
@@ -90,6 +85,7 @@ const props = defineProps({
 });
 
 const userStore = useUserStore();
+const lineCode = computed(() => props.lineCode);
 
 const tooltip = ref({
   show: false,
@@ -98,6 +94,12 @@ const tooltip = ref({
   data: null,
 });
 
+const optimizedTimeScaleOptions = {
+  enable: true,
+  interval: 15,
+  slotCount: 15,
+};
+
 function onEventClick(args) {
   const el = args.element;
   const rect = el.getBoundingClientRect();
@@ -105,8 +107,8 @@ function onEventClick(args) {
   const gap = 10;
 
   const wrap = document.querySelector('.e-schedule .e-content-wrap');
-  const scrollTop = wrap.scrollTop;
-  const scheduleTop = wrap.getBoundingClientRect().top;
+  const scrollTop = wrap ? wrap.scrollTop : 0;
+  const scheduleTop = wrap ? wrap.getBoundingClientRect().top : 0;
 
   let x = rect.right - width;
   while (x > 700) x = x / 1.5;
@@ -123,88 +125,48 @@ const draftEvent = computed(() => {
     !props.draftEndTime ||
     !props.draftItem ||
     !props.draftQty
-  )
+  ) {
     return null;
+  }
 
   const isLineChanged = props.lineCode !== props.productionPlanDetail.lineCode;
+  if (!isLineChanged) return null;
 
-  if (isLineChanged) {
-    return {
-      Id: 'draft-modified',
-      Subject: props.productionPlanDetail.planDocumentNo,
-      StartTime: new Date(props.draftStartTime),
-      EndTime: new Date(props.draftEndTime),
-      LineCode: props.lineCode,
-      ItemName: props.draftItem.itemName,
-      ItemQty: props.draftQty,
-      Status: props.productionPlanDetail.status,
-    };
-  }
-  return null;
+  return {
+    Id: 'draft-modified',
+    Subject: props.productionPlanDetail.planDocumentNo,
+    StartTime: new Date(props.draftStartTime),
+    EndTime: new Date(props.draftEndTime),
+    LineCode: props.lineCode,
+    ItemName: props.draftItem.itemName,
+    ItemQty: props.draftQty,
+    Status: props.productionPlanDetail.status,
+  };
 });
 
 function onEventRendered(args) {
   const ev = args.data;
 
-  // 새롭게 수정
   if (ev.Id === 'draft-modified') {
-    console.log('신규');
     args.element.style.setProperty('background-color', 'var(--primary)', 'important');
     args.element.style.setProperty('border-color', 'var(--primary)', 'important');
     args.element.style.setProperty('color', 'white', 'important');
     return;
   }
 
-  // 상세조회 중인 이벤트 강조
   if (props.productionPlanDetail.id && ev.Id === props.productionPlanDetail.id) {
-    console.log('내 데이터임');
     args.element.style.setProperty('background-color', DETAIL_HIGHLIGHT.background, 'important');
     args.element.style.setProperty('border-color', DETAIL_HIGHLIGHT.border, 'important');
     args.element.style.setProperty('color', DETAIL_HIGHLIGHT.text, 'important');
     return;
   }
 
-  // 일반 상태 컬러 적용
   const color = STATUS_COLORS[ev.Status];
   if (color) {
     args.element.style.setProperty('background-color', color.background, 'important');
     args.element.style.setProperty('border-color', color.border, 'important');
     args.element.style.setProperty('color', color.text, 'important');
   }
-}
-
-function onSelectedDragStart(args) {
-  const ev = args.data;
-  const role = userStore.userRole;
-
-  // 상세 조회 중인 이벤트만 드래그 허용
-  if (ev.Id !== props.productionPlanDetail.id) {
-    args.cancel = true;
-    return;
-  }
-
-  // ADMIN 규칙
-  if (role === 'ADMIN') {
-    const allowed = ev.Status === 'PENDING' || ev.Status === 'CONFIRMED';
-    if (!allowed) {
-      args.cancel = true;
-    }
-    return;
-  }
-
-  // MANAGER 규칙
-  if (role === 'MANAGER') {
-    const isOwner = props.productionPlanDetail.productionManagerNo === userStore.empNo;
-    const allowed = ev.Status === 'PENDING' && isOwner;
-
-    if (!allowed) {
-      args.cancel = true;
-    }
-    return;
-  }
-
-  // 나머지 롤은 무조건 불가
-  args.cancel = true;
 }
 
 const { data: lineListSchedule } = useGetLineList({
@@ -262,46 +224,50 @@ const { data: selectedLineData, filters: selectedFilters } = useGetProductionPla
 // 날짜 이동
 const { selectedDate: selectedDateSelected, onNavigation: onSelectedNavigation } =
   useScheduleRangeManager(selectedFilters);
-
 const { selectedDate: selectedDateAvailable, onNavigation: onAvailableNavigation } =
   useScheduleRangeManager(availableFilters);
 
-// 이벤트 포맷
-const makeEvent = ev => {
+function makeEvent(ev) {
   return {
     Id: ev.id,
     Subject: ev.documentNo,
     StartTime: new Date(ev.startTime),
     EndTime: new Date(ev.endTime),
+    Status: ev.status,
     LineCode: ev.lineCode,
     ItemName: ev.itemName,
     ItemQty: ev.plannedQty,
-    Status: ev.status,
   };
-};
+}
 
-const selectedEvents = computed(() => {
-  const baseEvents = selectedLineData.value?.map(makeEvent) ?? [];
-  const draft = draftEvent.value;
+// 선택 재정렬
+const selectedEvents = ref([]);
 
-  if (draft) {
-    return [...baseEvents, draft];
-  }
+// 서버 데이터 + draft 변동 시 초기화
+watch(
+  [selectedLineData, draftEvent],
+  ([data, draft]) => {
+    const base = data?.map(makeEvent) ?? [];
+    let result = base;
 
-  return baseEvents;
-});
+    if (draft) {
+      // 상세조회 중인 이벤트는 빼고 draft로 교체
+      result = [...base.filter(ev => ev.Id !== props.productionPlanDetail.id), draft];
+    }
 
+    result.sort((a, b) => a.StartTime - b.StartTime);
+    selectedEvents.value = result;
+  },
+  { immediate: true },
+);
+
+// 선택 가능한 라인은 읽기 전용
 const availableEvents = computed(() => {
-  const baseEvents = availableLineData.value?.map(makeEvent) ?? [];
-  const draft = draftEvent.value;
-
-  if (draft) {
-    return [...baseEvents, draft];
-  }
-
-  return baseEvents;
+  const base = availableLineData.value?.map(makeEvent) ?? [];
+  return base;
 });
 
+// eventSettings
 const selectedEventSettings = computed(() => ({
   dataSource: [...selectedEvents.value],
   resources: ['Lines'],
@@ -312,8 +278,217 @@ const availableEventSettings = computed(() => ({
   resources: ['Lines'],
 }));
 
+const beforeDragEvents = ref([]); // drag 시작 직전의 selectedEvents 스냅샷
+const beforeDragMoved = ref(null); // 어떤 이벤트를 움직였는지 저장
+
+function onSelectedDragStart(args) {
+  const ev = args.data;
+
+  // 드래그 시작 시 전체 스냅샷 저장
+  beforeDragEvents.value = selectedEvents.value.map(e => ({
+    ...e,
+    StartTime: new Date(e.StartTime),
+    EndTime: new Date(e.EndTime),
+  }));
+
+  // 현재 드래그 중인 이벤트의 "원래" 시작 시각 저장
+  beforeDragMoved.value = {
+    id: ev.Id,
+    start: new Date(ev.StartTime),
+  };
+}
+
+function compactFuture(originalOrder, orderedFuture, now, role) {
+  if (!orderedFuture.length) return [];
+
+  const durationMap = new Map(
+    originalOrder.map(ev => [ev.Id, ev.EndTime.getTime() - ev.StartTime.getTime()]),
+  );
+
+  // 시작 기준은 "드래그 전 future 중 가장 이른 시작시간" 또는 now 중 더 큰 값
+  let baseStart = originalOrder[0].StartTime;
+  if (baseStart < now) baseStart = new Date(now);
+
+  let cursor = new Date(baseStart);
+  const result = [];
+
+  for (const ev of orderedFuture) {
+    if (role === 'MANAGER' && ev.Status === 'CONFIRMED') {
+      // MANAGER: CONFIRMED 는 시간 고정
+      const orig = originalOrder.find(o => o.Id === ev.Id) || ev;
+      const fixed = {
+        ...ev,
+        StartTime: new Date(orig.StartTime),
+        EndTime: new Date(orig.EndTime),
+      };
+      result.push(fixed);
+
+      if (fixed.EndTime > cursor) {
+        cursor = new Date(fixed.EndTime);
+      }
+      continue;
+    }
+
+    const len = durationMap.get(ev.Id) ?? ev.EndTime.getTime() - ev.StartTime.getTime();
+    const start = new Date(cursor);
+    const end = new Date(cursor.getTime() + len);
+
+    result.push({
+      ...ev,
+      StartTime: start,
+      EndTime: end,
+    });
+
+    cursor = end;
+  }
+
+  return result;
+}
+
+function onSelectedDragStop(args) {
+  const moved = args.data;
+  if (!moved) return;
+
+  const role = userStore.userRole;
+  const now = new Date();
+
+  // 과거로 드롭되면 취소 (UI 롤백)
+  if (new Date(moved.StartTime) < now) {
+    args.cancel = true;
+    return;
+  }
+
+  const baseEvents = beforeDragEvents.value.length ? beforeDragEvents.value : selectedEvents.value;
+
+  const original = baseEvents.map(ev => ({
+    ...ev,
+    StartTime: new Date(ev.StartTime),
+    EndTime: new Date(ev.EndTime),
+  }));
+
+  const originalMoved = baseEvents.find(ev => ev.Id === moved.Id);
+  const movedStart = new Date(moved.StartTime);
+  let dropTime = new Date(movedStart);
+
+  if (originalMoved) {
+    const originalStart = new Date(originalMoved.StartTime);
+
+    if (movedStart > originalStart) {
+      // 뒤로 이동
+      dropTime = new Date(dropTime.getTime() + 1000);
+    } else if (movedStart < originalStart) {
+      // 앞으로 이동
+      dropTime = new Date(dropTime.getTime() - 1000);
+    }
+  }
+
+  // past / future 분리
+  const past = original.filter(ev => ev.StartTime < now);
+  let future = original.filter(ev => ev.StartTime >= now);
+  if (!future.length) return;
+
+  future.sort((a, b) => a.StartTime - b.StartTime);
+
+  const movedIdx = future.findIndex(ev => ev.Id === moved.Id);
+  if (movedIdx === -1) {
+    selectedEvents.value = original;
+    beforeDragEvents.value = [];
+    beforeDragMoved.value = null;
+    return;
+  }
+  const [movedOriginal] = future.splice(movedIdx, 1);
+
+  // dropTime 기준으로 새 위치 결정
+  let insertIndex = future.findIndex(ev => dropTime < ev.StartTime);
+  if (insertIndex === -1) insertIndex = future.length;
+
+  const orderedFuture = [
+    ...future.slice(0, insertIndex),
+    movedOriginal,
+    ...future.slice(insertIndex),
+  ];
+
+  // compaction
+  const compactedFuture = compactFuture(
+    future.concat(movedOriginal).sort((a, b) => a.StartTime - b.StartTime),
+    orderedFuture,
+    now,
+    role,
+  );
+
+  let merged = [...past, ...compactedFuture].sort((a, b) => a.StartTime - b.StartTime);
+
+  if (role === 'MANAGER') {
+    const idx = merged.findIndex(ev => ev.Id === moved.Id);
+    if (idx !== -1) {
+      const current = merged[idx];
+      const prev = merged[idx - 1];
+      const next = merged[idx + 1];
+
+      const overlapsPrevConfirmed =
+        prev && prev.Status === 'CONFIRMED' && current.StartTime < prev.EndTime; // 앞 CONFIRMED 과 겹침
+
+      const overlapsNextConfirmed =
+        next && next.Status === 'CONFIRMED' && current.EndTime > next.StartTime; // 뒤 CONFIRMED 과 겹침
+
+      if (overlapsPrevConfirmed || overlapsNextConfirmed) {
+        // 롤백
+        selectedEvents.value = baseEvents.map(ev => ({
+          ...ev,
+          StartTime: new Date(ev.StartTime),
+          EndTime: new Date(ev.EndTime),
+        }));
+        beforeDragEvents.value = [];
+        beforeDragMoved.value = null;
+        args.cancel = true;
+
+        toast.info('담당자는 CONFIRMED 상태의 일정을 수정할 수 없습니다. ');
+        return;
+      }
+    }
+  }
+
+  const finalMoved = merged.find(ev => ev.Id === moved.Id);
+  const beforeInfo = beforeDragMoved.value;
+
+  if (finalMoved && beforeInfo && beforeInfo.id === moved.Id) {
+    const originalStart = beforeInfo.start;
+    const finalStart = new Date(finalMoved.StartTime);
+    const delta = 1000; // 1초
+
+    if (finalStart > originalStart) {
+      // 뒤로 이동 → +1초
+      finalMoved.StartTime = new Date(finalStart.getTime() + delta);
+      finalMoved.EndTime = new Date(finalMoved.EndTime.getTime() + delta);
+    } else if (finalStart < originalStart) {
+      // 앞으로 이동 → -1초
+      finalMoved.StartTime = new Date(finalStart.getTime() - delta);
+      finalMoved.EndTime = new Date(finalMoved.EndTime.getTime() - delta);
+    }
+
+    merged = merged.map(ev => (ev.Id === finalMoved.Id ? { ...finalMoved } : ev));
+  }
+
+  selectedEvents.value = merged;
+  beforeDragEvents.value = [];
+  beforeDragMoved.value = null;
+
+  const movedAfterAdjust = merged.find(ev => ev.Id === moved.Id);
+  if (movedAfterAdjust) {
+    emit('updateStartEndTime', {
+      StartTime: movedAfterAdjust.StartTime,
+      EndTime: movedAfterAdjust.EndTime,
+    });
+  }
+}
+
 const selectedScheduleRef = ref(null);
 const availableScheduleRef = ref(null);
+
+// 하단 스케줄에서 드래그는 아직 사용 안 함 → 전부 취소
+function onAvailableDragStop(args) {
+  args.cancel = true;
+}
 
 function onSelectedCreated() {
   const inst = selectedScheduleRef.value?.ej2Instances;
@@ -327,22 +502,10 @@ function onAvailableCreated() {
 
 const emit = defineEmits(['updateStartEndTime']);
 
-// 날짜 이동 처리
 function onSelectedScheduleAction(args) {
   if (['dateNavigate', 'viewNavigate'].includes(args.requestType)) {
     const inst = selectedScheduleRef.value?.ej2Instances;
     if (inst) onSelectedNavigation(inst);
-  }
-
-  if (args.requestType === 'eventChanged') {
-    const updated = args.changedRecords?.[0];
-    if (!updated) return;
-
-    // 부모로 start/endTime emit
-    emit('updateStartEndTime', {
-      StartTime: updated.StartTime,
-      EndTime: updated.EndTime,
-    });
   }
 }
 
@@ -356,10 +519,6 @@ function onAvailableScheduleAction(args) {
 function onPopupOpen(args) {
   if (args.type === 'QuickInfo' || args.type === 'Editor') args.cancel = true;
 }
-
-function onDragStop(args) {
-  args.cancel = true;
-}
 </script>
 
 <style>
@@ -367,10 +526,10 @@ function onDragStop(args) {
   overflow: visible !important;
 }
 
-/* 스크롤바 지정 */
+/* 스크롤바 얇게 */
 .e-schedule .e-content-wrap::-webkit-scrollbar,
 .e-schedule::-webkit-scrollbar {
-  width: 2px; /* 원하는 너비로 설정하여 얇게 만듭니다. */
+  width: 2px;
   height: 2px;
 }
 
@@ -385,7 +544,7 @@ function onDragStop(args) {
   background: transparent;
 }
 
-/* 막대바 높이 지정 */
+/* 막대바 높이 */
 .e-schedule .e-timeline-view .e-content-wrap tr,
 .e-schedule .e-timeline-view .e-resource-column-wrap tr {
   height: 30px !important;
