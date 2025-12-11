@@ -57,24 +57,86 @@
               v-model="filterForm.lineCode"
               search-icon
             />
-            <FilterInput
-              label="품목 ID"
-              placeholder="품목 ID 또는 코드"
-              v-model="filterForm.itemId"
-              search-icon
-            />
-            <FilterInput
-              label="생산 담당자"
-              placeholder="사번 검색"
-              v-model="filterForm.productionManagerNo"
-              search-icon
-            />
-            <FilterInput
-              label="영업 담당자"
-              placeholder="사번 검색"
-              v-model="filterForm.salesManagerNo"
-              search-icon
-            />
+            <div>
+              <Label class="text-xs">품목</Label>
+              <CreateAutoCompleteSelect
+                label="품목"
+                :value="filterForm.itemCode"
+                :setValue="setItemCodeFilter"
+                :fetchList="() => useGetItemList({ isActive: true })"
+                keyField="itemCode"
+                nameField="itemName"
+                :fields="[
+                  'itemCode',
+                  'itemName',
+                  'itemSpecification',
+                  'itemUnit',
+                  'itemStatus',
+                  'isActive',
+                ]"
+                :tableHeaders="['품목코드', '품목명', '규격', '단위', '품목구분', '사용여부']"
+                :emitFullItem="true"
+                @selectedFullItem="onItemSelected"
+                @clear="onItemCleared"
+                class="h-7 placeholder:text-xs text-xs"
+                inputClass="h-7 text-xs placeholder:text-xs"
+                iconClass="!w-3 !h-3"
+              />
+            </div>
+            <div>
+              <Label class="text-xs">생산 담당자</Label>
+              <CreateAutoCompleteSelect
+                label="생산 담당자"
+                :value="filterForm.productionManagerNo"
+                :setValue="setProductionManagerFilter"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                keyField="empNo"
+                nameField="userName"
+                :fields="[
+                  'empNo',
+                  'userName',
+                  'userEmail',
+                  'userDepartment',
+                  'userPhoneNumber',
+                  'userStatus',
+                  'userRole',
+                ]"
+                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                :emitFullItem="true"
+                @selectedFullItem="onProductionManagerSelected"
+                @clear="onProductionManagerCleared"
+                class="h-7 placeholder:text-xs text-xs"
+                inputClass="h-7 text-xs placeholder:text-xs"
+                iconClass="!w-3 !h-3"
+              />
+            </div>
+            <div>
+              <Label class="text-xs">영업 담당자</Label>
+              <CreateAutoCompleteSelect
+                label="영업 담당자"
+                :value="filterForm.salesManagerNo"
+                :setValue="setSalesManagerFilter"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                keyField="empNo"
+                nameField="userName"
+                :fields="[
+                  'empNo',
+                  'userName',
+                  'userEmail',
+                  'userDepartment',
+                  'userPhoneNumber',
+                  'userStatus',
+                  'userRole',
+                ]"
+                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                :emitFullItem="true"
+                @selectedFullItem="onSalesManagerSelected"
+                @clear="onSalesManagerCleared"
+                class="h-7 placeholder:text-xs text-xs"
+                inputClass="h-7 text-xs placeholder:text-xs"
+                iconClass="!w-3 !h-3"
+              />
+            </div>
             <FilterInput
               label="전표 번호"
               placeholder="전표 번호"
@@ -287,8 +349,11 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
+import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import { getDefectiveAll, getDefectiveDetail } from '@/apis/query-functions/defective';
 import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
+import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import FilterInput from '@/components/filter/FilterInput.vue';
 import {
   Accordion,
@@ -313,6 +378,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Label } from '@/components/ui/label';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 
 const isApplying = ref(false);
@@ -326,8 +392,11 @@ const filterForm = reactive({
   factoryCode: '',
   lineCode: '',
   itemId: '',
+  itemCode: '',
   productionManagerNo: '',
+  productionManagerName: '',
   salesManagerNo: '',
+  salesManagerName: '',
   productionPerformanceDocNo: '',
 });
 
@@ -342,6 +411,57 @@ const activeFilters = reactive({
   salesManagerNo: '',
   productionPerformanceDocNo: '',
 });
+
+const onItemSelected = item => {
+  filterForm.itemId = item?.id ?? '';
+  filterForm.itemCode = item?.itemCode ?? '';
+};
+
+const onItemCleared = () => {
+  filterForm.itemId = '';
+  filterForm.itemCode = '';
+};
+
+const setItemCodeFilter = newCode => {
+  filterForm.itemCode = newCode;
+  if (!newCode) {
+    filterForm.itemId = '';
+  }
+};
+
+const onProductionManagerSelected = manager => {
+  filterForm.productionManagerName = manager?.userName ?? '';
+  filterForm.productionManagerNo = manager?.empNo ?? '';
+};
+
+const onProductionManagerCleared = () => {
+  filterForm.productionManagerName = '';
+  filterForm.productionManagerNo = '';
+};
+
+const setProductionManagerFilter = newValue => {
+  filterForm.productionManagerNo = newValue;
+  if (!newValue) {
+    filterForm.productionManagerName = '';
+  }
+};
+
+const onSalesManagerSelected = manager => {
+  filterForm.salesManagerName = manager?.userName ?? '';
+  filterForm.salesManagerNo = manager?.empNo ?? '';
+};
+
+const onSalesManagerCleared = () => {
+  filterForm.salesManagerName = '';
+  filterForm.salesManagerNo = '';
+};
+
+const setSalesManagerFilter = newValue => {
+  filterForm.salesManagerNo = newValue;
+  if (!newValue) {
+    filterForm.salesManagerName = '';
+  }
+};
 
 const queryParams = computed(() =>
   buildQueryObject({
@@ -458,8 +578,11 @@ const resetFilters = () => {
     factoryCode: '',
     lineCode: '',
     itemId: '',
+    itemCode: '',
     productionManagerNo: '',
+    productionManagerName: '',
     salesManagerNo: '',
+    salesManagerName: '',
     productionPerformanceDocNo: '',
   });
 };
