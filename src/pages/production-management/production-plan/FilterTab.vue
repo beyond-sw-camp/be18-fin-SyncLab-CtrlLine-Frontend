@@ -10,12 +10,111 @@
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FilterSelect label="공장" v-model="localFilters.factoryName" :options="factoryOptions" />
-          <FilterInput label="품목" v-model="localFilters.itemName" />
-          <FilterInput label="생산 담당자" v-model="localFilters.productionManagerName" />
-          <FilterInput label="영업 담당자" v-model="localFilters.salesManagerName" />
-          <FilterInput label="납기일자" type="date" v-model="localFilters.dueDate" />
+
           <div>
-            <Label class="text-xs">생산기간</Label>
+            <Label class="text-xs">품목</Label>
+            <CreateAutoCompleteSelect
+              label="품목"
+              :value="localFilters.itemCode"
+              :setValue="setItemCodeFilter"
+              :fetchList="() => useGetItemList({ isActive: true })"
+              keyField="itemCode"
+              nameField="itemName"
+              :fields="[
+                'itemCode',
+                'itemName',
+                'itemSpecification',
+                'itemUnit',
+                'itemStatus',
+                'isActive',
+              ]"
+              :tableHeaders="['품목코드', '품목명', '규격', '단위', '품목구분', '사용여부']"
+              :emitFullItem="true"
+              @selectedFullItem="onItemSelected"
+              @clear="onItemCleared"
+              class="h-7 placeholder:text-xs text-xs"
+              inputClass="h-7 text-xs placeholder:text-xs"
+              iconClass="!w-3 !h-3"
+            />
+          </div>
+
+          <div>
+            <Label class="text-xs">생산 담당자</Label>
+            <CreateAutoCompleteSelect
+              label="생산 담당자"
+              :value="localFilters.productionManagerNo"
+              :setValue="setProducerManagerFilter"
+              :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+              keyField="empNo"
+              nameField="userName"
+              :fields="[
+                'empNo',
+                'userName',
+                'userEmail',
+                'userDepartment',
+                'userPhoneNumber',
+                'userStatus',
+                'userRole',
+              ]"
+              :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+              :emitFullItem="true"
+              @selectedFullItem="onProducerManagerSelected"
+              @clear="onProducerManagerCleared"
+              class="h-7 placeholder:text-xs text-xs"
+              inputClass="h-7 text-xs placeholder:text-xs"
+              iconClass="!w-3 !h-3"
+            />
+          </div>
+
+          <div>
+            <Label class="text-xs">영업 담당자</Label>
+            <CreateAutoCompleteSelect
+              label="영업 담당자"
+              :value="localFilters.salesManagerNo"
+              :setValue="setSalesManagerFilter"
+              :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+              keyField="empNo"
+              nameField="userName"
+              :fields="[
+                'empNo',
+                'userName',
+                'userEmail',
+                'userDepartment',
+                'userPhoneNumber',
+                'userStatus',
+                'userRole',
+              ]"
+              :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+              :emitFullItem="true"
+              @selectedFullItem="onSalesManagerSelected"
+              @clear="onSalesManagerCleared"
+              class="h-7 placeholder:text-xs text-xs"
+              inputClass="h-7 text-xs placeholder:text-xs"
+              iconClass="!w-3 !h-3"
+            />
+          </div>
+
+          <div>
+            <Label class="text-xs">납기일자</Label>
+            <div class="flex items-center gap-1 mt-1">
+              <FilterInput
+                type="date"
+                v-model="localFilters.dueDateFrom"
+                placeholder="시작일"
+                class="w-1/2"
+              />
+              <span class="block text-gray-400">~</span>
+              <FilterInput
+                type="date"
+                v-model="localFilters.dueDateTo"
+                placeholder="종료일"
+                class="w-1/2"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label class="text-xs">생산 시작시각 ~ 생산 종료시각</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <div class="flex-1 min-w-[180px]">
                 <FilterInput
@@ -61,9 +160,12 @@
 </template>
 
 <script setup>
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, watch, ref } from 'vue';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
+import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
+import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import FilterInput from '@/components/filter/FilterInput.vue';
 import FilterSelect from '@/components/filter/FilterSelect.vue';
 import {
@@ -80,13 +182,18 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['search']);
+const selectedItemId = ref(null);
 
 const localFilters = reactive({
   factoryName: props.filters.factoryName ?? null,
   itemName: props.filters.itemName ?? '',
+  itemCode: props.filters.itemCode ?? '',
   productionManagerName: props.filters.productionManagerName ?? '',
+  productionManagerNo: props.filters.productionManagerNo ?? '',
   salesManagerName: props.filters.salesManagerName ?? '',
-  dueDate: props.filters.dueDate ?? null,
+  salesManagerNo: props.filters.salesManagerNo ?? '',
+  dueDateFrom: props.filters.dueDateFrom ?? null,
+  dueDateTo: props.filters.dueDateTo ?? null,
   startTime: props.filters.startTime ?? null,
   endTime: props.filters.endTime ?? null,
 });
@@ -99,8 +206,24 @@ watch(
   { deep: true },
 );
 
-const applyFilters = () => {
-  emit('search', { ...localFilters });
+function onItemSelected(item) {
+  selectedItemId.value = item.id;
+  localFilters.itemCode = item.itemCode;
+  localFilters.itemName = item.itemName;
+}
+
+function onItemCleared() {
+  selectedItemId.value = null;
+  localFilters.itemCode = '';
+  localFilters.itemName = '';
+}
+
+const setItemCodeFilter = newCode => {
+  localFilters.itemCode = newCode;
+  localFilters.itemName = '';
+  if (!newCode) {
+    selectedItemId.value = null;
+  }
 };
 
 const { data: factoryList } = useGetFactoryList();
@@ -117,14 +240,65 @@ const factoryOptions = computed(() => {
   ];
 });
 
+function onProducerManagerSelected(manager) {
+  localFilters.productionManagerName = manager.userName;
+  localFilters.productionManagerNo = manager.empNo;
+}
+
+function onProducerManagerCleared() {
+  localFilters.productionManagerName = '';
+  localFilters.productionManagerNo = '';
+}
+
+const setProducerManagerFilter = newName => {
+  localFilters.productionManagerName = newName;
+  localFilters.productionManagerNo = '';
+};
+
+// 영업 담당자 관련 함수
+function onSalesManagerSelected(manager) {
+  localFilters.salesManagerName = manager.userName;
+  localFilters.salesManagerNo = manager.empNo;
+}
+
+function onSalesManagerCleared() {
+  localFilters.salesManagerName = '';
+  localFilters.salesManagerNo = '';
+}
+
+const setSalesManagerFilter = newName => {
+  localFilters.salesManagerName = newName;
+  localFilters.salesManagerNo = '';
+};
+
+const applyFilters = () => {
+  const filtersToSend = {
+    ...localFilters,
+    salesManagerName: undefined,
+    productionManagerName: undefined,
+  };
+
+  const finalFilters = Object.fromEntries(
+    Object.entries(filtersToSend).filter(
+      ([value]) => value !== undefined && value !== null && value !== '',
+    ),
+  );
+
+  emit('search', finalFilters);
+};
+
 const resetFilters = () => {
   // 초기화하고 바로 조회
   Object.assign(localFilters, {
     factoryName: null,
     salesManagerName: '',
+    salesManagerNo: '',
     productionManagerName: '',
+    productionManagerNo: '',
     itemName: '',
-    dueDate: null,
+    itemCode: '',
+    dueDateFrom: null,
+    dueDateTi: null,
     startTime: null,
     endTime: null,
   });
