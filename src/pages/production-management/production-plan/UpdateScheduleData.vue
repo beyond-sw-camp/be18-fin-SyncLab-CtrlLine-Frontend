@@ -35,7 +35,6 @@
         :views="['TimelineDay', 'TimelineWeek', 'TimelineMonth']"
         :current-view="'TimelineDay'"
         :eventSettings="availableEventSettings"
-        :showCurrentTimeIndicator="true"
         :popupOpen="onPopupOpen"
         :dragStop="onAvailableDragStop"
         :group="groupOptions"
@@ -263,8 +262,21 @@ watch(
 
 // 선택 가능한 라인은 읽기 전용
 const availableEvents = computed(() => {
-  const base = availableLineData.value?.map(makeEvent) ?? [];
-  return base;
+  const serverEvents = availableLineData.value?.map(makeEvent) ?? [];
+
+  // 선택된 라인의 변경된 결과
+  const changedEvents = selectedEvents.value;
+
+  // 서버 이벤트 중 선택라인의 원래 이벤트 제거
+  const filteredServer = serverEvents.filter(ev => !changedEvents.some(c => c.Id === ev.Id));
+
+  // 서버 + 변경된 selectedEvents 병합
+  const merged = [...filteredServer, ...changedEvents];
+
+  // 시간 순 정렬
+  merged.sort((a, b) => a.StartTime - b.StartTime);
+
+  return merged;
 });
 
 // eventSettings
