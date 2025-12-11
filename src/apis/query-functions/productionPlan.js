@@ -67,6 +67,20 @@ export async function deleteProductionPlanList(params) {
   return data.data;
 }
 
+// ============ 생산계획 최적화 ============
+
+export async function createProductionPlanOptimizePreview(lineCode) {
+  const { data } = await apiClient.post(`/production-plans/${lineCode}/optimize/preview`);
+  return data.data;
+}
+
+export async function createProductionPlanOptimize(lineCode, params) {
+  const { data } = await apiClient.post(`/production-plans/${lineCode}/optimize/commit`, {
+    previewKey: params,
+  });
+  return data.data;
+}
+
 // ============ 생산계획 현황 ============
 
 export async function getProductionPlanAll(params) {

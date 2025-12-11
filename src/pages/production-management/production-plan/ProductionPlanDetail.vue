@@ -311,6 +311,11 @@
         </div>
         <ItemTable :itemDetail="itemDetail" />
       </fieldset>
+      <OptimizeSchedule
+        v-if="isAdmin"
+        :lineCode="form.values.lineCode"
+        :productionPlanId="productionPlanDetail.id"
+      />
       <ScheduleData
         v-if="
           productionPlanDetail && selectedFactoryId && selectedItemId && lineList?.content?.length
@@ -368,6 +373,7 @@ import {
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ConfirmScheduleModal from '@/pages/production-management/production-plan/ConfirmScheduleModal.vue';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
+import OptimizeSchedule from '@/pages/production-management/production-plan/OptimizeSchedule.vue';
 import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
 import formatDate from '@/utils/formatDate';

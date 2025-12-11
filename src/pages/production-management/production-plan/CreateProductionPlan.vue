@@ -3,7 +3,7 @@
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 등록</h3>
     <div class="flex gap-3">
       <div class="flex gap-2 items-center" v-if="isAdmin">
-        <label class="flex gap-1 items-center text-sm font-medium">
+        <Label class="flex gap-1 items-center text-sm font-medium">
           우선작업
           <TooltipProvider>
             <Tooltip>
@@ -13,7 +13,7 @@
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        </label>
+        </Label>
         <FormField name="isEmergent" v-slot="{ value, setValue }">
           <Switch :modelValue="value" @update:modelValue="setValue" />
         </FormField>
@@ -322,6 +322,7 @@ import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompl
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
