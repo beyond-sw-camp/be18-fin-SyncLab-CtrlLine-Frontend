@@ -63,6 +63,4 @@ const props = defineProps({
     default: () => [],
   },
 });
-
-console.log(props.defectives);
 </script>

@@ -327,18 +327,17 @@
         :productionPlanId="productionPlanDetail.id"
       />
       <ScheduleData
-        v-if="
-          productionPlanDetail && selectedFactoryId && selectedItemId && lineList?.content?.length
-        "
-        :productionPlanDetailId="productionPlanDetail.id"
-        :factoryId="selectedFactoryId"
-        :factoryCode="productionPlanDetail.factoryCode"
-        :lineCode="productionPlanDetail.lineCode"
         mode="detail"
+        :key="form.values.lineCode"
+        :productionPlanDetail="productionPlanDetail"
+        :factoryId="selectedFactoryId"
+        :factoryCode="form.values.factoryCode"
+        :lineCode="form.values.lineCode"
         @updateStartEndTime="onStartTimeEndTimeChanged"
-        :updatedStartTime="form.values.startTime"
-        :updatedEndTime="form.values.endTime"
-        :productionManagerNo="form.values.productionManagerNo"
+        :draftStartTime="form.values.startTime"
+        :draftEndTime="form.values.endTime"
+        :draftItem="itemDetail"
+        :draftQty="form.values.plannedQty"
       />
     </form>
   </div>
@@ -366,6 +365,7 @@ import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useCreateProductionPlanEndTime from '@/apis/query-hooks/production-plan/useCreateProductionPlanEndTime';
 import useDeleteProductionPlan from '@/apis/query-hooks/production-plan/useDeleteProductionPlan';
 import useGetProductionPlan from '@/apis/query-hooks/production-plan/useGetProductionPlan';
+import useGetProductionPlanBoundary from '@/apis/query-hooks/production-plan/useGetProductionPlanBoundary';
 import useUpdateProductionPlan from '@/apis/query-hooks/production-plan/useUpdateProductionPlan';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompleteSelect.vue';
@@ -433,6 +433,7 @@ const form = useForm({
 
 const selectedFactoryId = ref(null);
 const selectedItemId = ref(null);
+const factoryDetail = ref({});
 const itemDetail = ref({});
 const lineDetail = ref({});
 const userStore = useUserStore();
@@ -510,6 +511,10 @@ const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 const { mutate: updateProductionPlan } = useUpdateProductionPlan(route.params.productionPlanId);
 const { mutate: updateEndTime } = useCreateProductionPlanEndTime();
+const { data: boundaryData } = useGetProductionPlanBoundary({
+  factoryCode: computed(() => factoryDetail.value?.factoryCode),
+  lineCode: computed(() => lineDetail.value?.lineCode),
+});
 
 const router = useRouter();
 const showConfirmationModal = ref(false);
@@ -518,6 +523,7 @@ const affectedPlansData = ref(null);
 function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
   selectedFactoryId.value = selected?.factoryId ?? null;
+  factoryDetail.value = selected ?? null;
 
   selectedItemId.value = null;
   form.setFieldValue('itemCode', '', false);
@@ -553,6 +559,36 @@ function onStartTimeEndTimeChanged(ev) {
   const start = formatDate(ev.StartTime, 'local-datetime');
   form.setFieldValue('startTime', start);
 }
+
+let initialized = false;
+
+watch(
+  [() => boundaryData.value?.latestEndTime, () => lineDetail.value?.lineCode],
+  ([latestEndTime, lineCode]) => {
+    if (!lineCode) return;
+
+    if (!initialized) {
+      initialized = true;
+      return;
+    }
+
+    if (!latestEndTime) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() + 30);
+      form.setFieldValue('startTime', formatDate(now.toISOString(), 'datetime-local'));
+      return;
+    }
+
+    let startDate = new Date(latestEndTime);
+    const now = new Date();
+
+    if (startDate <= now) {
+      startDate.setMinutes(startDate.getMinutes() + 30);
+    }
+
+    form.setFieldValue('startTime', formatDate(startDate.toISOString(), 'datetime-local'));
+  },
+);
 
 const onSubmit = form.handleSubmit(values => {
   const params = {

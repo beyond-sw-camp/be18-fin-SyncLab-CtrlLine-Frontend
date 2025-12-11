@@ -5,7 +5,6 @@
       <ejs-schedule
         class="time-scale hide-scrollbar"
         :timeScale="optimizedTimeScaleOptions"
-        :timezone="'Asia/Seoul'"
         v-if="props.lineCode && selectedLineResource.length > 0"
         ref="selectedScheduleRef"
         :selectedDate="selectedDateSelected"
@@ -58,7 +57,7 @@ import {
   Week,
   TimelineMonth,
 } from '@syncfusion/ej2-vue-schedule';
-import { computed, nextTick, provide, ref, watch } from 'vue';
+import { computed, provide, ref } from 'vue';
 
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetProductionPlanScheduleList from '@/apis/query-hooks/production-plan/useGetProductionPlanScheduleList';
@@ -81,7 +80,7 @@ const props = defineProps({
   factoryId: Number,
   factoryCode: String,
   lineCode: String,
-  productionPlanDetailId: Number,
+  productionPlanDetail: Object,
   mode: { type: String, default: 'detail' },
   draftStartTime: String,
   draftEndTime: String,
@@ -89,6 +88,8 @@ const props = defineProps({
   draftQty: Number,
   isEmergent: Boolean,
   productionManagerNo: String,
+  updatedStartTime: String,
+  updatedEndTime: String,
 });
 
 const userStore = useUserStore();
@@ -120,7 +121,6 @@ function onEventClick(args) {
 
 const draftEvent = computed(() => {
   if (
-    props.mode !== 'create' ||
     !props.lineCode ||
     !props.draftStartTime ||
     !props.draftEndTime ||
@@ -129,23 +129,41 @@ const draftEvent = computed(() => {
   )
     return null;
 
-  return {
-    Id: 'draft',
-    Subject: '신규 생산계획',
-    StartTime: new Date(props.draftStartTime),
-    EndTime: new Date(props.draftEndTime),
-    LineCode: props.lineCode,
-    ItemName: props.draftItem.itemName,
-    ItemQty: props.draftQty,
-    Status: userStore.userRole === 'ADMIN' ? 'CONFIRMED' : 'PENDING',
-  };
+  if (props.mode === 'create') {
+    return {
+      Id: 'draft',
+      Subject: '신규 생산계획',
+      StartTime: new Date(props.draftStartTime),
+      EndTime: new Date(props.draftEndTime),
+      LineCode: props.lineCode,
+      ItemName: props.draftItem.itemName,
+      ItemQty: props.draftQty,
+      Status: userStore.userRole === 'ADMIN' ? 'CONFIRMED' : 'PENDING',
+    };
+  }
+
+  const isLineChanged = props.lineCode !== props.productionPlanDetail.lineCode;
+
+  if (props.mode === 'detail' && isLineChanged) {
+    return {
+      Id: 'draft-modified',
+      Subject: props.productionPlanDetail.planDocumentNo,
+      StartTime: new Date(props.draftStartTime),
+      EndTime: new Date(props.draftEndTime),
+      LineCode: props.lineCode,
+      ItemName: props.draftItem.itemName,
+      ItemQty: props.draftQty,
+      Status: props.productionPlanDetail.status,
+    };
+  }
+  return null;
 });
 
 function onEventRendered(args) {
   const ev = args.data;
 
   // 신규 draft 이벤트
-  if (ev.Id === 'draft') {
+  if (ev.Id === 'draft' || ev.Id === 'draft-modified') {
     args.element.style.setProperty('background-color', 'var(--primary)', 'important');
     args.element.style.setProperty('border-color', 'var(--primary)', 'important');
     args.element.style.setProperty('color', 'white', 'important');
@@ -153,7 +171,7 @@ function onEventRendered(args) {
   }
 
   // 상세조회 중인 이벤트 강조
-  if (props.productionPlanDetailId && ev.Id === props.productionPlanDetailId) {
+  if (props.productionPlanDetail.id && ev.Id === props.productionPlanDetail.id) {
     args.element.style.setProperty('background-color', DETAIL_HIGHLIGHT.background, 'important');
     args.element.style.setProperty('border-color', DETAIL_HIGHLIGHT.border, 'important');
     args.element.style.setProperty('color', DETAIL_HIGHLIGHT.text, 'important');
@@ -173,7 +191,7 @@ function onSelectedDragStart(args) {
   const event = args.data;
 
   // 상세조회 중인 이벤트만 드래그 허용
-  if (event.Id !== props.productionPlanDetailId) {
+  if (event.Id !== props.productionPlanDetail.id) {
     args.cancel = true;
     return;
   }
@@ -264,11 +282,22 @@ const makeEvent = ev => ({
   Status: ev.status,
 });
 
-// 이벤트 목록
 const selectedEvents = computed(() => {
-  const base = selectedLineData.value?.map(makeEvent) ?? [];
-  if (props.mode === 'create' && draftEvent.value) base.push(draftEvent.value);
-  return base;
+  const baseEvents = selectedLineData.value?.map(makeEvent) ?? [];
+  const draft = draftEvent.value;
+
+  if (draft) {
+    if (props.mode === 'create') {
+      return [...baseEvents, draft];
+    }
+
+    if (props.mode === 'detail') {
+      const filteredEvents = baseEvents.filter(ev => ev.Id !== props.productionPlanDetail.id);
+      return [...filteredEvents, draft];
+    }
+  }
+
+  return baseEvents;
 });
 
 const availableEvents = computed(() => {

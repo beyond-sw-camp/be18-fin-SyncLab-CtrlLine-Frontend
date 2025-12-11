@@ -494,8 +494,6 @@ watch([() => form.values.startTime, () => form.values.plannedQty], ([startTime, 
 
   if (!startTime || !plannedQty || !lineDetail.value?.lineCode || !formattedStartTime) return;
 
-  console.log(formattedStartTime);
-
   debouncedUpdateEndTime({
     startTime: formattedStartTime,
     plannedQty,
