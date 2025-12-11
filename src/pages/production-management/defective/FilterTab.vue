@@ -11,7 +11,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FilterSelect label="공장" v-model="localFilters.factoryName" :options="factoryOptions" />
 
-          <FilterSelect label="라인" v-model="localFilters.lineName" :options="lineOptions" />
+          <FilterSelect label="라인" v-model="localFilters.lineCode" :options="lineOptions" />
 
           <FilterInput label="불량 전표번호" v-model="localFilters.defectiveDocNo" />
 
@@ -100,20 +100,26 @@ const factoryOptions = computed(() => {
 });
 
 const lineOptions = computed(() => {
-  if (!lineList.value || !lineList.value.content) return [{ value: null, label: '전체', id: null }];
+  if (!lineList.value || !lineList.value.content) {
+    return [{ value: null, label: '전체' }];
+  }
 
-  const options = lineList.value.content.map(line => ({
-    value: line.lineName,
+  const entries = lineList.value.content;
+  const relevantLines = entries;
+
+  const uniqueLines = new Map();
+  for (const line of relevantLines) {
+    if (!uniqueLines.has(line.lineCode)) {
+      uniqueLines.set(line.lineCode, line);
+    }
+  }
+
+  const options = Array.from(uniqueLines.values()).map(line => ({
+    value: line.lineCode,
     label: `${line.lineName} (${line.lineCode})`,
-    id: line.lineId,
-    code: line.lineCode,
   }));
 
-  const uniqueOptions = options.filter(
-    (item, index, self) => index === self.findIndex(t => t.value === item.value),
-  );
-
-  return [{ value: null, label: '전체', id: null }, ...uniqueOptions];
+  return [{ value: null, label: '전체' }, ...options];
 });
 
 const localFilters = reactive({
@@ -122,6 +128,7 @@ const localFilters = reactive({
   itemCode: props.filters.itemCode ?? '',
   itemName: props.filters.itemName ?? '',
   lineName: props.filters.lineName ?? null,
+  lineCode: props.filters.lineCode ?? null,
   productionPerformanceDocNo: props.filters.productionPerformanceDocNo ?? '',
   fromDate: props.filters.fromDate ?? null,
   toDate: props.filters.toDate ?? null,
@@ -156,6 +163,7 @@ const resetFilters = () => {
     itemCode: '',
     itemName: '',
     lineName: null,
+    lineCode: null,
     productionPerformanceDocNo: '',
     fromDate: null,
     toDate: null,
