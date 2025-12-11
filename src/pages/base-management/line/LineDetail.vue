@@ -96,6 +96,13 @@
           </FormField>
         </div>
       </fieldset>
+      <!--담당자 MANAGER 권한 이상 부터 가능하다~ -->
+      <div class="mt-8 pt-6 border-t">
+        <Button v-if="isAdmin" size="sm" class="bg-[#6B8865] hover:bg-[#485945]">
+          생산 가능 품목 등록
+        </Button>
+      </div>
+
       <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
         <Button
           type="submit"
@@ -113,7 +120,7 @@
 <script setup>
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
-import { watch } from 'vue';
+import { watch, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { z } from 'zod';
 
