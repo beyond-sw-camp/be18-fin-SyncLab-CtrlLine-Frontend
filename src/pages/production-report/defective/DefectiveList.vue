@@ -25,7 +25,7 @@
           </AccordionTrigger>
         </div>
 
-        <AccordionContent class="mt-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <AccordionContent class="p-4 border-t-2 border-b-2 my-3">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <FilterInput
               label="시작 일자"
