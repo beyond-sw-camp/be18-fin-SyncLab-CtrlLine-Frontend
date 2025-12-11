@@ -14,16 +14,7 @@
           <FilterSelect
             label="담당부서"
             v-model="localFilters.userDepartment"
-            :options="[
-              { value: null, label: '전체' },
-              { value: '영업1팀', label: '영업1팀' },
-              { value: '영업2팀', label: '영업2팀' },
-              { value: '생산1팀', label: '생산1팀' },
-              { value: '생산2팀', label: '생산2팀' },
-              { value: '개발1팀', label: '개발1팀' },
-              { value: '품질관리팀', label: '품질관리팀' },
-              { value: '인사총무팀', label: '인사총무팀' },
-            ]"
+            :options="departmentOptions"
           />
         </div>
 
@@ -62,6 +53,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { DEPARTMENT_LABELS } from '@/constants/enumLabels';
 
 const { data: lineList } = useGetLineList();
 
@@ -97,6 +89,17 @@ const localFilters = reactive({
   lineName: props.filters.lineName ?? '',
   userName: props.filters.userName ?? '',
   userDepartment: props.filters.userDepartment ?? null,
+});
+
+const departmentOptions = computed(() => {
+  const options = Object.entries(DEPARTMENT_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
+
+  options.unshift({ value: null, label: '전체' });
+
+  return options;
 });
 
 watch(

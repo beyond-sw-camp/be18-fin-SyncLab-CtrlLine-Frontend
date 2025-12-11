@@ -3,8 +3,8 @@
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 상세 조회</h3>
     <div class="flex gap-2">
       <Badge v-if="productionPlanDetail" variant="secondary">
-        {{ productionPlanDetail.planDocumentNo }}</Badge
-      >
+        {{ productionPlanDetail.planDocumentNo }}
+      </Badge>
 
       <Button
         v-if="canDelete"
@@ -17,9 +17,10 @@
       </Button>
       <Button
         v-if="canEdit"
-        type="submit"
+        type="button"
         form="productionPlanUpdateForm"
         class="bg-primary text-white hover:bg-primary-600 cursor-pointer w-[60px]"
+        @click="onSubmit"
         size="sm"
       >
         Save
@@ -28,13 +29,13 @@
   </div>
 
   <div class="flex flex-col gap-8 md:flex-row">
-    <fieldset :disabled="isFormDisabled">
-      <form
-        v-if="productionPlanDetail"
-        id="productionPlanUpdateForm"
-        @submit="onSubmit"
-        class="flex-1 flex flex-col gap-2"
-      >
+    <form
+      v-if="productionPlanDetail"
+      id="productionPlanUpdateForm"
+      @submit="onSubmit"
+      class="flex-1 flex flex-col gap-2"
+    >
+      <fieldset :class="['w-full', canEdit ? '' : 'pointer-events-none']">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
           <div class="order-1 md:order-0">
             <FormField v-slot="{ componentField, errorMessage }" name="factoryCode">
@@ -42,7 +43,7 @@
                 <FormLabel>공장</FormLabel>
                 <FormControl>
                   <Select v-bind="componentField" @update:modelValue="onFactorySelected">
-                    <SelectTrigger class="w-full truncate min-w-0">
+                    <SelectTrigger class="w-full">
                       <SelectValue placeholder="공장을 선택해주세요." />
                     </SelectTrigger>
 
@@ -95,7 +96,12 @@
                     :componentField="componentField"
                     :setValue="setValue"
                     :fetchList="
-                      () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })
+                      () =>
+                        useGetUserList({
+                          userStatus: 'ACTIVE',
+                          userDepartment: '생산',
+                          userRole: ['ADMIN', 'MANAGER'],
+                        })
                     "
                     keyField="empNo"
                     nameField="userName"
@@ -187,7 +193,12 @@
                     :componentField="componentField"
                     :setValue="setValue"
                     :fetchList="
-                      () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })
+                      () =>
+                        useGetUserList({
+                          userStatus: 'ACTIVE',
+                          userDepartment: '영업',
+                          userRole: ['ADMIN', 'MANAGER'],
+                        })
                     "
                     keyField="empNo"
                     nameField="userName"
@@ -220,7 +231,7 @@
                     :key="`factory-${selectedFactoryId}-item-${selectedItemId}`"
                     @update:modelValue="onLineSelected"
                   >
-                    <SelectTrigger class="w-full truncate min-w-0">
+                    <SelectTrigger class="w-full">
                       <SelectValue placeholder="라인을 선택해주세요." />
                     </SelectTrigger>
 
@@ -271,7 +282,7 @@
                 <FormLabel>상태</FormLabel>
                 <FormControl class="w-full">
                   <Select v-bind="componentField">
-                    <SelectTrigger :class="['w-full', canEdit ? '' : 'pointer-events-none']">
+                    <SelectTrigger class="w-full">
                       <SelectValue placeholder="상태를 선택하세요." />
                     </SelectTrigger>
                     <SelectContent>
@@ -309,22 +320,34 @@
           </div>
         </div>
         <ItemTable :itemDetail="itemDetail" />
-        <ScheduleData
-          v-if="
-            productionPlanDetail && selectedFactoryId && selectedItemId && lineList?.content?.length
-          "
-          :productionPlanDetailId="productionPlanDetail.id"
-          :factoryId="selectedFactoryId"
-          :factoryCode="productionPlanDetail.factoryCode"
-          :lineCode="productionPlanDetail.lineCode"
-          mode="detail"
-          @updateStartEndTime="onStartTimeEndTimeChanged"
-          :updatedStartTime="form.values.startTime"
-          :updatedEndTime="form.values.endTime"
-        />
-      </form>
-    </fieldset>
+      </fieldset>
+      <OptimizeSchedule
+        v-if="isAdmin"
+        :lineCode="form.values.lineCode"
+        :productionPlanId="productionPlanDetail.id"
+      />
+      <ScheduleData
+        mode="detail"
+        :key="form.values.lineCode"
+        :productionPlanDetail="productionPlanDetail"
+        :factoryId="selectedFactoryId"
+        :factoryCode="form.values.factoryCode"
+        :lineCode="form.values.lineCode"
+        @updateStartEndTime="onStartTimeEndTimeChanged"
+        :draftStartTime="form.values.startTime"
+        :draftEndTime="form.values.endTime"
+        :draftItem="itemDetail"
+        :draftQty="form.values.plannedQty"
+      />
+    </form>
   </div>
+  <ConfirmScheduleModal
+    v-if="showConfirmationModal"
+    :visible="showConfirmationModal"
+    :affected-plans-data="affectedPlansData"
+    @confirm="handleConfirmUpdate"
+    @cancel="handleCancelUpdate"
+  />
 </template>
 
 <script setup>
@@ -332,7 +355,8 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { useDebounceFn } from '@vueuse/core';
 import { useForm } from 'vee-validate';
 import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { toast } from 'vue-sonner';
 import { z } from 'zod';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
@@ -341,6 +365,7 @@ import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useCreateProductionPlanEndTime from '@/apis/query-hooks/production-plan/useCreateProductionPlanEndTime';
 import useDeleteProductionPlan from '@/apis/query-hooks/production-plan/useDeleteProductionPlan';
 import useGetProductionPlan from '@/apis/query-hooks/production-plan/useGetProductionPlan';
+import useGetProductionPlanBoundary from '@/apis/query-hooks/production-plan/useGetProductionPlanBoundary';
 import useUpdateProductionPlan from '@/apis/query-hooks/production-plan/useUpdateProductionPlan';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompleteSelect.vue';
@@ -356,7 +381,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
+import ConfirmScheduleModal from '@/pages/production-management/production-plan/ConfirmScheduleModal.vue';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
+import OptimizeSchedule from '@/pages/production-management/production-plan/OptimizeSchedule.vue';
 import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
 import formatDate from '@/utils/formatDate';
@@ -406,43 +433,38 @@ const form = useForm({
 
 const selectedFactoryId = ref(null);
 const selectedItemId = ref(null);
+const factoryDetail = ref({});
 const itemDetail = ref({});
 const lineDetail = ref({});
 const userStore = useUserStore();
 
 const isAdmin = computed(() => userStore.userRole === 'ADMIN');
 
-const isFormDisabled = computed(() => {
-  const status = productionPlanDetail.value?.status;
-
-  if (!status) return true; // 상태값이 없으면 기본적으로 비활성화(안전 조치)
-
-  // RUNNING, COMPLETED, RETURNED 상태일 때는 입력값 전체를 비활성화 (disabled) 처리
-  if (['RUNNING', 'COMPLETED', 'RETURNED'].includes(status)) {
-    return true;
-  }
-
-  // 그 외의 상태 (PENDING, CONFIRMED 등)에서는 활성화
-  return false;
-});
-
 const canEdit = computed(() => {
   const role = userStore.userRole;
   const status = productionPlanDetail.value?.status;
+  const userEmpNo = userStore.empNo; // 현재 로그인된 사용자의 사번
+  const pmNo = productionPlanDetail.value?.productionManagerNo; // 생산계획의 생산 담당자 사번
 
   if (!status || !role) return false;
 
-  // RUNNING, COMPLETED 은 누구든 수정 불가
-  if (['RUNNING', 'COMPLETED'].includes(status)) return false;
+  // RUNNING, COMPLETED, RETURNED 상태일 때는 누구든 수정 불가 (가장 먼저 검사)
+  if (['RUNNING', 'COMPLETED', 'RETURNED'].includes(status)) return false;
 
-  // ADMIN: PENDING, CONFIRMED 에서만 수정 가능
+  // ADMIN: 수정 불가 상태를 제외하고 모두 가능 (PENDING, CONFIRMED)
   if (role === 'ADMIN') {
     return ['PENDING', 'CONFIRMED'].includes(status);
   }
 
-  // MANAGER, USER: PENDING 에서만 수정 가능
-  if (role === 'MANAGER' || role === 'USER') {
-    return status === 'PENDING';
+  // MANAGER: 소유자 일치 여부와 상태를 검사
+  if (role === 'MANAGER') {
+    // 생산 담당자가 현재 사용자와 일치하고 (소유권), 상태가 PENDING 또는 CONFIRMED일 때만 허용
+    return userEmpNo === pmNo && ['PENDING'].includes(status);
+  }
+
+  // USER: 수정 불가
+  if (role === 'USER') {
+    return false;
   }
 
   // 혹시 모를 기타 롤은 모두 불가
@@ -467,7 +489,7 @@ const canDelete = computed(() => {
 
   // MANAGER: 자기 자신 것만 삭제 가능 (PENDING, CONFIRMED 만)
   if (role === 'MANAGER') {
-    return userEmpNo === pmNo && ['PENDING', 'CONFIRMED'].includes(status);
+    return userEmpNo === pmNo && ['PENDING'].includes(status);
   }
 
   // USER: 삭제 불가
@@ -489,10 +511,19 @@ const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 const { mutate: updateProductionPlan } = useUpdateProductionPlan(route.params.productionPlanId);
 const { mutate: updateEndTime } = useCreateProductionPlanEndTime();
+const { data: boundaryData } = useGetProductionPlanBoundary({
+  factoryCode: computed(() => factoryDetail.value?.factoryCode),
+  lineCode: computed(() => lineDetail.value?.lineCode),
+});
+
+const router = useRouter();
+const showConfirmationModal = ref(false);
+const affectedPlansData = ref(null);
 
 function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
   selectedFactoryId.value = selected?.factoryId ?? null;
+  factoryDetail.value = selected ?? null;
 
   selectedItemId.value = null;
   form.setFieldValue('itemCode', '', false);
@@ -529,6 +560,36 @@ function onStartTimeEndTimeChanged(ev) {
   form.setFieldValue('startTime', start);
 }
 
+let initialized = false;
+
+watch(
+  [() => boundaryData.value?.latestEndTime, () => lineDetail.value?.lineCode],
+  ([latestEndTime, lineCode]) => {
+    if (!lineCode) return;
+
+    if (!initialized) {
+      initialized = true;
+      return;
+    }
+
+    if (!latestEndTime) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() + 30);
+      form.setFieldValue('startTime', formatDate(now.toISOString(), 'datetime-local'));
+      return;
+    }
+
+    let startDate = new Date(latestEndTime);
+    const now = new Date();
+
+    if (startDate <= now) {
+      startDate.setMinutes(startDate.getMinutes() + 30);
+    }
+
+    form.setFieldValue('startTime', formatDate(startDate.toISOString(), 'datetime-local'));
+  },
+);
+
 const onSubmit = form.handleSubmit(values => {
   const params = {
     status: values.status,
@@ -543,8 +604,23 @@ const onSubmit = form.handleSubmit(values => {
     dueDate: values.dueDate,
   };
 
-  updateProductionPlan(params);
+  updateProductionPlan(params, {
+    onSuccess: data => {
+      affectedPlansData.value = data;
+      showConfirmationModal.value = true;
+    },
+  });
 });
+
+const handleConfirmUpdate = () => {
+  showConfirmationModal.value = false; // 모달 닫기
+  toast.success('생산계획을 수정하고 일정을 확정했습니다.'); // 최종 성공 토스트
+  router.push('/production-management/production-plans'); // 최종 리다이렉트
+};
+
+const handleCancelUpdate = () => {
+  showConfirmationModal.value = false;
+};
 
 const debouncedUpdateEndTime = useDebounceFn(({ startTime, plannedQty, lineCode }) => {
   updateEndTime(

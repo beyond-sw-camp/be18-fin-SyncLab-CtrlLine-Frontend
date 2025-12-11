@@ -13,7 +13,11 @@
       <Table class="w-full table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden w-10" @click.stop>
+            <TableHead
+              class="text-center whitespace-nowrap overflow-hidden w-10"
+              @click.stop
+              v-if="isAdmin"
+            >
               <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
@@ -37,6 +41,7 @@
             @click="goToDetail(equipment.equipmentCode)"
           >
             <TableCell
+              v-if="isAdmin"
               class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
               @click.stop
             >
@@ -107,11 +112,15 @@ import {
 } from '@/components/ui/table';
 import FilterTab from '@/pages/base-management/equipment/FilterTab.vue';
 import StatusUpdateDialog from '@/pages/base-management/equipment/StatusUpdateDialog.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
+import { canView } from '@/utils/canView';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 const selectedRows = ref([]);
+const isAdmin = canView(['ADMIN']);
 
 const initialFilters = {
   equipmentName: route.query.equipmentName || '',
@@ -166,6 +175,8 @@ const goToDetail = equipmentCode => {
 };
 
 const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
+
   const query = buildQueryObject({
     ...filters,
     page: page.value,
