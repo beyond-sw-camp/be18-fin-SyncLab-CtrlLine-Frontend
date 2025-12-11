@@ -56,6 +56,7 @@ import {
   Day,
   Week,
   TimelineMonth,
+  DragAndDrop,
 } from '@syncfusion/ej2-vue-schedule';
 import { computed, provide, ref } from 'vue';
 
@@ -67,7 +68,7 @@ import { useScheduleRangeManager } from '@/hooks/useScheduleRangeManager';
 import ScheduleTooltip from '@/pages/production-management/production-plan/ScheduleTooltip.vue';
 import { useUserStore } from '@/stores/useUserStore';
 
-provide('schedule', [TimelineViews, Day, Week, TimelineMonth]);
+provide('schedule', [TimelineViews, Day, Week, TimelineMonth, DragAndDrop]);
 
 // 타임라인 스케일 설정
 const optimizedTimeScaleOptions = {
@@ -188,27 +189,37 @@ function onEventRendered(args) {
 }
 
 function onSelectedDragStart(args) {
-  const event = args.data;
+  const ev = args.data;
+  const role = userStore.userRole;
 
-  // 상세조회 중인 이벤트만 드래그 허용
-  if (event.Id !== props.productionPlanDetail.id) {
+  // 상세 조회 중인 이벤트만 드래그 허용
+  if (ev.Id !== props.productionPlanDetail.id) {
     args.cancel = true;
     return;
   }
 
-  const role = userStore.userRole;
-
+  // ADMIN 규칙
   if (role === 'ADMIN') {
-    if (event.Status !== 'PENDING' && event.Status !== 'CONFIRMED') {
+    const allowed = ev.Status === 'PENDING' || ev.Status === 'CONFIRMED';
+    if (!allowed) {
       args.cancel = true;
     }
-  } else if (role === 'MANAGER') {
-    if (event.Status !== 'PENDING' || props.productionManagerNo !== userStore.empNo) {
-      args.cancel = true;
-    }
-  } else {
-    args.cancel = true;
+    return;
   }
+
+  // MANAGER 규칙
+  if (role === 'MANAGER') {
+    const isOwner = props.productionPlanDetail.productionManagerNo === userStore.empNo;
+    const allowed = ev.Status === 'PENDING' && isOwner;
+
+    if (!allowed) {
+      args.cancel = true;
+    }
+    return;
+  }
+
+  // 나머지 롤은 무조건 불가
+  args.cancel = true;
 }
 
 const { data: lineListSchedule } = useGetLineList({
@@ -329,11 +340,24 @@ function onAvailableCreated() {
   if (inst) onAvailableNavigation(inst);
 }
 
+const emit = defineEmits(['updateStartEndTime']);
+
 // 날짜 이동 처리
 function onSelectedScheduleAction(args) {
   if (['dateNavigate', 'viewNavigate'].includes(args.requestType)) {
     const inst = selectedScheduleRef.value?.ej2Instances;
     if (inst) onSelectedNavigation(inst);
+  }
+
+  if (args.requestType === 'eventChanged') {
+    const updated = args.changedRecords?.[0];
+    if (!updated) return;
+
+    // 부모로 start/endTime emit
+    emit('updateStartEndTime', {
+      StartTime: updated.StartTime,
+      EndTime: updated.EndTime,
+    });
   }
 }
 
