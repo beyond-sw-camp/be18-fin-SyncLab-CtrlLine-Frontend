@@ -320,13 +320,15 @@
           </div>
         </div>
         <ItemTable :itemDetail="itemDetail" />
+
+        <OptimizeSchedule
+          v-if="isAdmin"
+          :lineCode="form.values.lineCode"
+          :productionPlanId="productionPlanDetail.id"
+        />
       </fieldset>
-      <OptimizeSchedule
-        v-if="isAdmin"
-        :lineCode="form.values.lineCode"
-        :productionPlanId="productionPlanDetail.id"
-      />
       <ScheduleData
+        v-if="productionPlanDetail"
         mode="detail"
         :key="form.values.lineCode"
         :productionPlanDetail="productionPlanDetail"
