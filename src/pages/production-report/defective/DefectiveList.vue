@@ -164,11 +164,17 @@
           </div>
 
           <div class="flex justify-end mt-4 gap-2">
-            <Button variant="outline" class="rounded-full px-6" @click="resetFilters">
+            <Button
+              variant="outline"
+              size="xs"
+              class="text-sm font-normal px-6"
+              @click="resetFilters"
+            >
               초기화
             </Button>
             <Button
-              class="rounded-full bg-[#5B6D4C] px-6 py-2 text-white hover:bg-[#4C5C3F]"
+              size="xs"
+              class="bg-primary text-white text-sm font-normal px-6"
               :disabled="isApplying"
               @click="applyFilters"
             >
