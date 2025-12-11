@@ -126,10 +126,13 @@
                     <SelectValue placeholder="부서를 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="영업 1팀">영업 1팀</SelectItem>
-                    <SelectItem value="영업 2팀">영업 2팀</SelectItem>
-                    <SelectItem value="생산 1팀">생산 1팀</SelectItem>
-                    <SelectItem value="생산 2팀">생산 2팀</SelectItem>
+                    <SelectItem
+                      v-for="(label, value) in DEPARTMENT_LABELS"
+                      :key="value"
+                      :value="value"
+                    >
+                      {{ label }}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -161,12 +164,13 @@
                     <SelectValue placeholder="직급을 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ASSISTANT">주임</SelectItem>
-                    <SelectItem value="ASSISTANT_MANAGER">대리</SelectItem>
-                    <SelectItem value="MANAGER">과장</SelectItem>
-                    <SelectItem value="GENERAL_MANAGER">부장</SelectItem>
-                    <SelectItem value="DIRECTOR">이사</SelectItem>
-                    <SelectItem value="CEO">대표</SelectItem>
+                    <SelectItem
+                      v-for="(label, value) in POSITION_LABELS"
+                      :key="value"
+                      :value="value"
+                    >
+                      {{ label }}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -183,9 +187,9 @@
                     <SelectValue placeholder="권한을 선택하세요." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="USER">유저</SelectItem>
-                    <SelectItem value="MANAGER">담당자</SelectItem>
-                    <SelectItem value="ADMIN">관리자</SelectItem>
+                    <SelectItem v-for="(label, value) in ROLE_LABELS" :key="value" :value="value">
+                      {{ label }}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -197,14 +201,18 @@
             <FormItem>
               <FormLabel>상태</FormLabel>
               <FormControl>
-                <Select v-bind="componentField" disabled>
+                <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
                     <SelectValue placeholder="재직 상태를 선택하세요" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ACTIVE">재직</SelectItem>
-                    <SelectItem value="LEAVE">휴직</SelectItem>
-                    <SelectItem value="RESIGNED">퇴사</SelectItem>
+                    <SelectItem
+                      v-for="(label, value) in EMPLOYMENT_STATUS_LABELS"
+                      :key="value"
+                      :value="value"
+                    >
+                      {{ label }}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -268,6 +276,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DEPARTMENT_LABELS,
+  EMPLOYMENT_STATUS_LABELS,
+  POSITION_LABELS,
+  ROLE_LABELS,
+} from '@/constants/enumLabels';
 
 const formSchema = toTypedSchema(
   z

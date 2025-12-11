@@ -15,10 +15,10 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 라인명 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목명 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              영업담당자
+              영업 담당자
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              생산담당자
+              생산 담당자
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 실적수량 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
