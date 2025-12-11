@@ -3,8 +3,8 @@
     <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight">생산계획 상세 조회</h3>
     <div class="flex gap-2">
       <Badge v-if="productionPlanDetail" variant="secondary">
-        {{ productionPlanDetail.planDocumentNo }}</Badge
-      >
+        {{ productionPlanDetail.planDocumentNo }}
+      </Badge>
 
       <Button
         v-if="canDelete"
@@ -96,7 +96,12 @@
                     :componentField="componentField"
                     :setValue="setValue"
                     :fetchList="
-                      () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })
+                      () =>
+                        useGetUserList({
+                          userStatus: 'ACTIVE',
+                          userDepartment: '생산',
+                          userRole: ['ADMIN', 'MANAGER'],
+                        })
                     "
                     keyField="empNo"
                     nameField="userName"
@@ -188,7 +193,12 @@
                     :componentField="componentField"
                     :setValue="setValue"
                     :fetchList="
-                      () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })
+                      () =>
+                        useGetUserList({
+                          userStatus: 'ACTIVE',
+                          userDepartment: '영업',
+                          userRole: ['ADMIN', 'MANAGER'],
+                        })
                     "
                     keyField="empNo"
                     nameField="userName"

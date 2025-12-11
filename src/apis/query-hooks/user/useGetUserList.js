@@ -22,7 +22,7 @@ export default function useGetUserList(initialFilters = {}) {
     const cleaned = {};
 
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== null && value !== '') {
+      if (value !== null && value !== '' && !(Array.isArray(value) && value.length === 0)) {
         cleaned[key] = value;
       }
     });

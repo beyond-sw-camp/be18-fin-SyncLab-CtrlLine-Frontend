@@ -88,7 +88,12 @@
                   :value="value"
                   :setValue="setValue"
                   :fetchList="
-                    () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })
+                    () =>
+                      useGetUserList({
+                        userStatus: 'ACTIVE',
+                        userDepartment: '생산',
+                        userRole: ['ADMIN', 'MANAGER'],
+                      })
                   "
                   keyField="empNo"
                   nameField="userName"
@@ -173,7 +178,12 @@
                   :value="value"
                   :setValue="setValue"
                   :fetchList="
-                    () => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })
+                    () =>
+                      useGetUserList({
+                        userStatus: 'ACTIVE',
+                        userDepartment: '영업',
+                        userRole: ['ADMIN', 'MANAGER'],
+                      })
                   "
                   keyField="empNo"
                   nameField="userName"
