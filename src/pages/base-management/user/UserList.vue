@@ -16,9 +16,9 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden">사원명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">Email</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">부서명</TableHead>
-            <TableHead v-if="isAdmin" class="text-center whitespace-nowrap overflow-hidden"
-              >연락처</TableHead
-            >
+            <TableHead v-if="isAdmin" class="text-center whitespace-nowrap overflow-hidden">
+              연락처
+            </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">상태</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 권한 </TableHead>
           </TableRow>
@@ -82,7 +82,7 @@
 <script setup>
 import { ChevronRightIcon, InfoIcon } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
@@ -106,14 +106,25 @@ import {
 } from '@/components/ui/table';
 import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 import FilterTab from '@/pages/base-management/user/FilterTab.vue';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { buildQueryObject } from '@/utils/buildQueryObject';
 import { canView } from '@/utils/canView';
 
+const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 const deniedModal = ref(false);
-
 const isAdmin = canView(['ADMIN']);
-const { data: userList, refetch, page, filters } = useGetUserList();
+
+const initialFilters = {
+  userEmail: route.query.userEmail || '',
+  userDepartment: route.query.userDepartment || '',
+  userPhoneNumber: route.query.userPhoneNumber || null,
+  userStatus: route.query.userStatus || null,
+  userRole: route.query.userRole || null,
+};
+
+const { data: userList, refetch, page, filters } = useGetUserList(initialFilters);
 
 const onSearch = newFilters => {
   Object.assign(filters, newFilters);
@@ -126,6 +137,8 @@ const goToDetail = userId => {
 };
 
 const syncQuery = () => {
+  if (!authStore.isLoggedIn) return;
+
   const query = buildQueryObject({
     ...filters,
     page: page.value,
@@ -140,6 +153,24 @@ watch(
     syncQuery();
   },
   { deep: true },
+);
+
+watch(page, () => {
+  syncQuery();
+});
+
+watch(
+  () => route.query,
+  newQuery => {
+    page.value = Number(newQuery.page ?? 1);
+
+    filters.userEmail = newQuery.userEmail ?? '';
+    filters.userPhoneNumber = newQuery.userPhoneNumber ?? '';
+    filters.userDepartment = newQuery.userDepartment ?? null;
+    filters.userStatus = newQuery.userStatus ?? null;
+    filters.userRole = newQuery.userRole ?? null;
+  },
+  { immediate: true },
 );
 </script>
 
