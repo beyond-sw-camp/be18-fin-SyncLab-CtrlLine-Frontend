@@ -283,7 +283,7 @@ const makeEvent = ev => {
 const selectedEvents = computed(() => {
   const baseEvents = selectedLineData.value?.map(makeEvent) ?? [];
   const draft = draftEvent.value;
-  
+
   if (draft) {
     return [...baseEvents, draft];
   }
@@ -367,6 +367,24 @@ function onDragStop(args) {
   overflow: visible !important;
 }
 
+/* 스크롤바 지정 */
+.e-schedule .e-content-wrap::-webkit-scrollbar,
+.e-schedule::-webkit-scrollbar {
+  width: 2px; /* 원하는 너비로 설정하여 얇게 만듭니다. */
+  height: 2px;
+}
+
+.e-schedule .e-content-wrap::-webkit-scrollbar-thumb,
+.e-schedule::-webkit-scrollbar-thumb {
+  background: gray;
+  border-radius: 3px;
+}
+
+.e-schedule .e-content-wrap::-webkit-scrollbar-track,
+.e-schedule::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 /* 막대바 높이 지정 */
 .e-schedule .e-timeline-view .e-content-wrap tr,
 .e-schedule .e-timeline-view .e-resource-column-wrap tr {
@@ -394,7 +412,12 @@ function onDragStop(args) {
   width: 2px !important;
 }
 
-.time-scale.e-schedule .e-header-row .e-time-slots {
-  display: none !important;
+.time-scale.e-schedule .e-header-row .e-time-slots span {
+  display: block;
+  white-space: normal;
+  word-wrap: break-word;
+  font-size: 8px;
+  width: 20px;
+  height: 30px;
 }
 </style>
