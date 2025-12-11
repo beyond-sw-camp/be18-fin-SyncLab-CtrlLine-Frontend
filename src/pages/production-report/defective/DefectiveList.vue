@@ -401,8 +401,8 @@ const filterForm = reactive({
   fromDate: '',
   toDate: '',
   dueDate: '',
-  factoryCode: '',
-  lineCode: '',
+  factoryCode: null,
+  lineCode: null,
   itemId: '',
   itemCode: '',
   productionManagerNo: '',
@@ -422,25 +422,33 @@ const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId
 
 const factoryOptions = computed(() => {
   const entries = factoryList.value?.content ?? [];
-  const options = entries.map(factory => ({
-    value: factory.factoryCode,
-    label: `${factory.factoryName} (${factory.factoryCode})`,
-    id: factory.factoryId,
-  }));
-  return [{ value: '', label: '전체', id: null }, ...options];
+  if (!entries.length) {
+    return [{ value: null, label: '전체', id: null }];
+  }
+
+  return [
+    { value: null, label: '전체', id: null },
+    ...entries.map(factory => ({
+      value: factory.factoryCode,
+      label: factory.factoryName,
+      id: factory.factoryId,
+    })),
+  ];
 });
 
 const lineOptions = computed(() => {
   const entries = lineList.value?.content ?? [];
-  if (!entries.length) return [{ value: '', label: '전체' }];
+  if (!entries.length) return [{ value: null, label: '전체' }];
+
   const unique = new Map();
   entries.forEach(line => {
-    if (line.lineCode && !unique.has(line.lineCode)) {
+    if (!unique.has(line.lineCode)) {
       unique.set(line.lineCode, line);
     }
   });
+
   return [
-    { value: '', label: '전체' },
+    { value: null, label: '전체' },
     ...Array.from(unique.values()).map(line => ({
       value: line.lineCode,
       label: `${line.lineName} (${line.lineCode})`,
@@ -526,7 +534,7 @@ watch(
   (newCode, oldCode) => {
     updateSelectedFactoryId(newCode);
     if (oldCode !== undefined && newCode !== oldCode) {
-      filterForm.lineCode = '';
+      filterForm.lineCode = null;
     }
   },
   { immediate: true },
@@ -649,13 +657,18 @@ const sanitizeNumber = value => {
   return Number.isNaN(num) ? '' : num;
 };
 
+const sanitizeString = value => {
+  if (typeof value !== 'string') return '';
+  return value.trim();
+};
+
 const resetFilters = () => {
   Object.assign(filterForm, {
     fromDate: '',
     toDate: '',
     dueDate: '',
-    factoryCode: '',
-    lineCode: '',
+    factoryCode: null,
+    lineCode: null,
     itemId: '',
     itemCode: '',
     productionManagerNo: '',
@@ -680,8 +693,8 @@ const applyFilters = async () => {
       fromDate: filterForm.fromDate || '',
       toDate: filterForm.toDate || '',
       dueDate: filterForm.dueDate || '',
-      factoryCode: filterForm.factoryCode.trim(),
-      lineCode: filterForm.lineCode.trim(),
+      factoryCode: sanitizeString(filterForm.factoryCode ?? ''),
+      lineCode: sanitizeString(filterForm.lineCode ?? ''),
       itemId: sanitizeNumber(filterForm.itemId),
       productionManagerNo: filterForm.productionManagerNo.trim(),
       salesManagerNo: filterForm.salesManagerNo.trim(),
