@@ -46,18 +46,8 @@
               placeholder="연도. 월. 일."
               v-model="filterForm.dueDate"
             />
-            <FilterInput
-              label="생산 공장"
-              placeholder="공장 코드 검색"
-              v-model="filterForm.factoryCode"
-              search-icon
-            />
-            <FilterInput
-              label="생산 라인"
-              placeholder="라인 코드 검색"
-              v-model="filterForm.lineCode"
-              search-icon
-            />
+            <FilterSelect label="공장" v-model="filterForm.factoryCode" :options="factoryOptions" />
+            <FilterSelect label="라인" v-model="filterForm.lineCode" :options="lineOptions" />
             <div class="flex flex-col gap-1">
               <Label class="text-xs">품목</Label>
               <CreateAutoCompleteSelect
@@ -368,12 +358,15 @@ import { computed, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { toast } from 'vue-sonner';
 
+import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
+import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import { getDefectiveAll, getDefectiveDetail } from '@/apis/query-functions/defective';
 import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
 import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import FilterInput from '@/components/filter/FilterInput.vue';
+import FilterSelect from '@/components/filter/FilterSelect.vue';
 import {
   Accordion,
   AccordionContent,
@@ -421,6 +414,40 @@ const filterForm = reactive({
   maxDefectiveRate: '',
 });
 
+const selectedFactoryId = ref(null);
+const selectedItemId = ref(null);
+
+const { data: factoryList } = useGetFactoryList();
+const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
+
+const factoryOptions = computed(() => {
+  const entries = factoryList.value?.content ?? [];
+  const options = entries.map(factory => ({
+    value: factory.factoryCode,
+    label: `${factory.factoryName} (${factory.factoryCode})`,
+    id: factory.factoryId,
+  }));
+  return [{ value: '', label: '전체', id: null }, ...options];
+});
+
+const lineOptions = computed(() => {
+  const entries = lineList.value?.content ?? [];
+  if (!entries.length) return [{ value: '', label: '전체' }];
+  const unique = new Map();
+  entries.forEach(line => {
+    if (line.lineCode && !unique.has(line.lineCode)) {
+      unique.set(line.lineCode, line);
+    }
+  });
+  return [
+    { value: '', label: '전체' },
+    ...Array.from(unique.values()).map(line => ({
+      value: line.lineCode,
+      label: `${line.lineName} (${line.lineCode})`,
+    })),
+  ];
+});
+
 const activeFilters = reactive({
   fromDate: '',
   toDate: '',
@@ -438,17 +465,20 @@ const activeFilters = reactive({
 const onItemSelected = item => {
   filterForm.itemId = item?.id ?? '';
   filterForm.itemCode = item?.itemCode ? String(item.itemCode) : '';
+  selectedItemId.value = item?.id ?? null;
 };
 
 const onItemCleared = () => {
   filterForm.itemId = '';
   filterForm.itemCode = '';
+  selectedItemId.value = null;
 };
 
 const setItemCodeFilter = newCode => {
   filterForm.itemCode = newCode ? String(newCode) : '';
   if (!newCode) {
     filterForm.itemId = '';
+    selectedItemId.value = null;
   }
 };
 
@@ -485,6 +515,30 @@ const setSalesManagerFilter = newValue => {
     filterForm.salesManagerName = '';
   }
 };
+
+const updateSelectedFactoryId = code => {
+  const match = factoryList.value?.content?.find(factory => factory.factoryCode === code);
+  selectedFactoryId.value = match?.factoryId ?? null;
+};
+
+watch(
+  () => filterForm.factoryCode,
+  (newCode, oldCode) => {
+    updateSelectedFactoryId(newCode);
+    if (oldCode !== undefined && newCode !== oldCode) {
+      filterForm.lineCode = '';
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  factoryList,
+  () => {
+    updateSelectedFactoryId(filterForm.factoryCode);
+  },
+  { deep: true },
+);
 
 const queryParams = computed(() =>
   buildQueryObject({
@@ -612,6 +666,8 @@ const resetFilters = () => {
     minDefectiveRate: '',
     maxDefectiveRate: '',
   });
+  selectedFactoryId.value = null;
+  selectedItemId.value = null;
 };
 
 const applyFilters = async () => {
