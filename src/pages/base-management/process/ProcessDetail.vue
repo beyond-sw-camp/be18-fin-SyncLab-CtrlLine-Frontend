@@ -37,6 +37,7 @@
               <FormLabel>담당자</FormLabel>
               <FormControl>
                 <UpdateAutoCompleteSelect
+                  class="cursor-pointer"
                   :key="`empNo-${processDetail.empNo}`"
                   label="담당자"
                   :value="value"
@@ -81,13 +82,13 @@
               <FormControl>
                 <RadioGroup v-bind="componentField" class="flex">
                   <div class="flex items-center space-x-2">
-                    <RadioGroupItem value="true" id="r1" />
-                    <Label for="r1" class="font-normal">공정 사용</Label>
+                    <RadioGroupItem value="true" id="r1" class="cursor-pointer" />
+                    <Label for="r1" class="font-normal cursor-pointer">공정 사용</Label>
                   </div>
 
                   <div class="flex items-center space-x-2">
-                    <RadioGroupItem value="false" id="r2" />
-                    <Label for="r2" class="font-normal">공정 미사용</Label>
+                    <RadioGroupItem value="false" id="r2" class="cursor-pointer" />
+                    <Label for="r2" class="font-normal cursor-pointer">공정 미사용</Label>
                   </div>
                 </RadioGroup>
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>

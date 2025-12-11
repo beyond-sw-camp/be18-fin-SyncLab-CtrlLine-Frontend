@@ -44,7 +44,7 @@
           </div>
 
           <div>
-            <Label class="text-xs">생성일</Label>
+            <Label class="text-xs">생성일자</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <div class="flex-1 min-w-[150px]">
                 <FilterInput
@@ -61,7 +61,7 @@
           </div>
 
           <div>
-            <Label class="text-xs">수정일</Label>
+            <Label class="text-xs">수정일자</Label>
             <div class="flex flex-wrap gap-1 mt-1 items-center">
               <div class="flex-1 min-w-[150px]">
                 <FilterInput
