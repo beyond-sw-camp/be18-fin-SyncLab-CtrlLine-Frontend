@@ -27,12 +27,7 @@
 
         <AccordionContent class="p-4 border-t-2 border-b-2 my-3">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <FilterInput
-              label="전표 번호"
-              placeholder="전표 번호"
-              v-model="filterForm.productionPerformanceDocNo"
-              search-icon
-            />
+            <FilterInput label="전표 번호" v-model="filterForm.productionPerformanceDocNo" />
             <FilterInput
               label="시작 일자"
               type="date"
