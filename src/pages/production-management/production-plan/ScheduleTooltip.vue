@@ -6,7 +6,10 @@
     :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
     @mousedown.stop
   >
-    <div class="text-lg font-semibold text-gray-900">
+    <div
+      class="text-lg font-semibold text-blue-600 underline cursor-pointer"
+      @click="openDetailPage"
+    >
       {{ tooltip.data.Subject }}
     </div>
 
@@ -70,6 +73,13 @@ function handleGlobalClick(e) {
   if (!tooltipEl.contains(e.target)) {
     emit('close');
   }
+}
+
+function openDetailPage() {
+  const id = props.tooltip.data.Id;
+  if (!id) return;
+
+  window.open(`/production-management/production-plans/${id}`, '_blank');
 }
 
 onMounted(() => {
