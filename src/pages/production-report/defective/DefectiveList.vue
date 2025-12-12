@@ -80,7 +80,7 @@
                 label="생산 담당자"
                 :value="filterForm.productionManagerNo"
                 :setValue="setProductionManagerFilter"
-                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })"
                 keyField="empNo"
                 nameField="userName"
                 :fields="[
@@ -107,7 +107,7 @@
                 label="영업 담당자"
                 :value="filterForm.salesManagerNo"
                 :setValue="setSalesManagerFilter"
-                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })"
                 keyField="empNo"
                 nameField="userName"
                 :fields="[
@@ -283,7 +283,7 @@
 
         <TableBody v-if="!hasSearched">
           <TableRow>
-            <TableCell colspan="9" class="text-center py-10 text-sm text-gray-400">
+            <TableCell colspan="9" class="text-center py-10 text-sm text-gray-500">
               필터를 설정한 뒤 조회 버튼을 눌러주세요.
             </TableCell>
           </TableRow>

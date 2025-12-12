@@ -2,7 +2,7 @@
   <div class="relative">
     <div>
       <Badge variant="secondary" class="mb-4">선택 라인</Badge>
-      <p class="text-gray-500 text-xs pl-1 pb-1">드래그하여 일정을 수정할 수 있습니다.</p>
+      <p class="text-gray-500 text-xs pl-1 pb-2">드래그하여 일정을 수정할 수 있습니다.</p>
       <div class="pl-1 pb-2 flex flex-wrap gap-2 text-[11px]">
         <div
           class="flex justify-center px-1 py-0.5 rounded-full border text-gray-700 text-[9px]"
@@ -68,7 +68,7 @@
 
     <div>
       <Badge variant="secondary" class="mb-4 mt-6">선택 가능한 라인</Badge>
-      <p class="text-gray-500 text-xs pl-1 pb-1">
+      <p class="text-gray-500 text-xs pl-1 pb-2">
         조회 전용 일정입니다. 드래그하여 이동할 수 없습니다.
       </p>
       <ejs-schedule
@@ -187,67 +187,28 @@ const draftEvent = computed(() => {
   };
 });
 
-// function onEventRendered(args) {
-//   const ev = args.data;
-
-//   if (ev.Id === 'draft-modified') {
-//     args.element.style.setProperty('background-color', 'var(--primary)', 'important');
-//     args.element.style.setProperty('border-color', 'var(--primary)', 'important');
-//     args.element.style.setProperty('color', 'white', 'important');
-//     return;
-//   }
-
-//   if (props.productionPlanDetail.id && ev.Id === props.productionPlanDetail.id) {
-//     args.element.style.setProperty('background-color', DETAIL_HIGHLIGHT.background, 'important');
-//     args.element.style.setProperty('border-color', DETAIL_HIGHLIGHT.border, 'important');
-//     args.element.style.setProperty('color', DETAIL_HIGHLIGHT.text, 'important');
-//     return;
-//   }
-
-//   const color = STATUS_COLORS[ev.Status];
-//   if (color) {
-//     args.element.style.setProperty('background-color', color.background, 'important');
-//     args.element.style.setProperty('border-color', color.border, 'important');
-//     args.element.style.setProperty('color', color.text, 'important');
-//   }
-// }
-
 function onEventRendered(args) {
   const ev = args.data;
-  const el = args.element;
-
-  // 공통적으로 먼저 초기화
-  el.classList.remove('event-current', 'event-draft', 'event-draggable', 'event-locked');
 
   if (ev.Id === 'draft-modified') {
-    el.style.setProperty('background-color', 'var(--primary)', 'important');
-    el.style.setProperty('border-color', 'var(--primary)', 'important');
-    el.style.setProperty('color', 'white', 'important');
-    el.classList.add('event-draft', 'event-draggable');
+    args.element.style.setProperty('background-color', 'var(--primary)', 'important');
+    args.element.style.setProperty('border-color', 'var(--primary)', 'important');
+    args.element.style.setProperty('color', 'white', 'important');
     return;
   }
 
-  // 👉 이번 상세 조회와 관련된 일정
   if (props.productionPlanDetail.id && ev.Id === props.productionPlanDetail.id) {
-    el.style.setProperty('background-color', DETAIL_HIGHLIGHT.background, 'important');
-    el.style.setProperty('border-color', DETAIL_HIGHLIGHT.border, 'important');
-    el.style.setProperty('color', DETAIL_HIGHLIGHT.text, 'important');
-    el.classList.add('event-current', 'event-draggable');
+    args.element.style.setProperty('background-color', DETAIL_HIGHLIGHT.background, 'important');
+    args.element.style.setProperty('border-color', DETAIL_HIGHLIGHT.border, 'important');
+    args.element.style.setProperty('color', DETAIL_HIGHLIGHT.text, 'important');
     return;
   }
 
   const color = STATUS_COLORS[ev.Status];
   if (color) {
-    el.style.setProperty('background-color', color.background, 'important');
-    el.style.setProperty('border-color', color.border, 'important');
-    el.style.setProperty('color', color.text, 'important');
-  }
-
-  // 상태에 따라 편집 가능/불가 구분 (예: CONFIRMED는 잠금)
-  if (ev.Status === 'CONFIRMED') {
-    el.classList.add('event-locked');
-  } else {
-    el.classList.add('event-draggable');
+    args.element.style.setProperty('background-color', color.background, 'important');
+    args.element.style.setProperty('border-color', color.border, 'important');
+    args.element.style.setProperty('color', color.text, 'important');
   }
 }
 
@@ -314,7 +275,7 @@ function makeEvent(ev) {
     Id: ev.id,
     Subject: ev.documentNo,
     StartTime: new Date(ev.startTime),
-    EndTime: new Date(ev.endTime),
+    EndTime: new Date(ev.actualEndTime ?? ev.endTime),
     Status: ev.status,
     LineCode: ev.lineCode,
     ItemName: ev.itemName,
@@ -375,6 +336,7 @@ const availableEventSettings = computed(() => ({
 
 const beforeDragEvents = ref([]); // drag 시작 직전의 selectedEvents 스냅샷
 const beforeDragMoved = ref(null); // 어떤 이벤트를 움직였는지 저장
+const DRAG_ORDER_EPSILON_MS = 1000; // 드래그 순서 보정용 (1초)
 
 function onSelectedDragStart(args) {
   const ev = args.data;
@@ -470,10 +432,10 @@ function onSelectedDragStop(args) {
 
     if (movedStart > originalStart) {
       // 뒤로 이동
-      dropTime = new Date(dropTime.getTime() + 1000);
+      dropTime = new Date(dropTime.getTime() + DRAG_ORDER_EPSILON_MS);
     } else if (movedStart < originalStart) {
       // 앞으로 이동
-      dropTime = new Date(dropTime.getTime() - 1000);
+      dropTime = new Date(dropTime.getTime() - DRAG_ORDER_EPSILON_MS);
     }
   }
 
@@ -549,16 +511,15 @@ function onSelectedDragStop(args) {
   if (finalMoved && beforeInfo && beforeInfo.id === moved.Id) {
     const originalStart = beforeInfo.start;
     const finalStart = new Date(finalMoved.StartTime);
-    const delta = 1000; // 1초
 
     if (finalStart > originalStart) {
-      // 뒤로 이동 → +1초
-      finalMoved.StartTime = new Date(finalStart.getTime() + delta);
-      finalMoved.EndTime = new Date(finalMoved.EndTime.getTime() + delta);
+      // 뒤로 이동
+      finalMoved.StartTime = new Date(finalStart.getTime() + DRAG_ORDER_EPSILON_MS);
+      finalMoved.EndTime = new Date(finalMoved.EndTime.getTime() + DRAG_ORDER_EPSILON_MS);
     } else if (finalStart < originalStart) {
-      // 앞으로 이동 → -1초
-      finalMoved.StartTime = new Date(finalStart.getTime() - delta);
-      finalMoved.EndTime = new Date(finalMoved.EndTime.getTime() - delta);
+      // 앞으로 이동
+      finalMoved.StartTime = new Date(finalStart.getTime() - DRAG_ORDER_EPSILON_MS);
+      finalMoved.EndTime = new Date(finalMoved.EndTime.getTime() - DRAG_ORDER_EPSILON_MS);
     }
 
     merged = merged.map(ev => (ev.Id === finalMoved.Id ? { ...finalMoved } : ev));
@@ -673,41 +634,5 @@ function onPopupOpen(args) {
   font-size: 8px;
   width: 20px;
   height: 30px;
-}
-
-/* 현재 상세 일정 */
-.event-current {
-  position: relative;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.7);
-}
-.event-current::before {
-  content: '현재 상세';
-  position: absolute;
-  top: -12px;
-  left: 4px;
-  font-size: 9px;
-  padding: 1px 4px;
-  border-radius: 999px;
-  background: rgba(37, 99, 235, 0.9);
-  color: white;
-}
-
-/* 변경 예정 드래프트 */
-.event-draft::before {
-  content: '변경 예정';
-}
-
-/* 드래그 가능 */
-.event-draggable {
-  cursor: grab !important;
-}
-.event-draggable:active {
-  cursor: grabbing !important;
-}
-
-/* 잠긴 일정 (예: CONFIRMED) */
-.event-locked {
-  cursor: not-allowed !important;
-  opacity: 0.7;
 }
 </style>
