@@ -255,7 +255,9 @@
       <Table class="w-full min-w-[920px] table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[160px]">
+            <TableHead
+              class="sticky left-0 z-10 min-w-28 bg-white shadow-md text-center whitespace-nowrap overflow-hidden"
+            >
               전표번호
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-[150px]">
