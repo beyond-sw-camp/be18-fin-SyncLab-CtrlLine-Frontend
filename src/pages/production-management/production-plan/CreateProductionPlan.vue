@@ -298,16 +298,15 @@
         </div>
       </div>
       <ItemTable :itemDetail="itemDetail" />
-      <ScheduleData
+      <CreateScheduleData
         :factoryId="selectedFactoryId"
-        :factoryCode="factoryDetail?.factoryCode"
-        :lineCode="lineDetail?.lineCode"
+        :factoryCode="form.values.factoryCode"
+        :lineCode="form.values.lineCode"
         :draftStartTime="form.values.startTime"
         :draftEndTime="form.values.endTime"
         :draftItem="itemDetail"
         :draftQty="form.values.plannedQty"
         :isEmergent="form.values.isEmergent"
-        mode="create"
       />
     </form>
   </div>
@@ -343,8 +342,8 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
+import CreateScheduleData from '@/pages/production-management/production-plan/CreateScheduleData.vue';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
-import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
 import { canView } from '@/utils/canView';
 import formatDate from '@/utils/formatDate';

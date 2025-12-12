@@ -50,78 +50,77 @@
         extension: userDetail.userExtension,
       }"
     >
-      <div v-if="canView(['ADMIN'])">
-        <h4 class="text-base font-semibold mb-4 border-b pb-2">기본 정보</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField v-slot="{ componentField, errorMessage }" name="phoneNumber">
-            <FormItem>
-              <FormLabel>연락처</FormLabel>
-              <FormControl>
-                <Input
-                  type="tel"
-                  placeholder="010-1234-5678"
-                  pattern="[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}"
-                  v-bind="componentField"
-                  autocomplete="tel"
-                />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+      <fieldset :disabled="!isEditable">
+        <div v-if="canView(['ADMIN'])">
+          <h4 class="text-base font-semibold mb-4 border-b pb-2">기본 정보</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField v-slot="{ componentField, errorMessage }" name="phoneNumber">
+              <FormItem>
+                <FormLabel>연락처</FormLabel>
+                <FormControl>
+                  <Input
+                    type="tel"
+                    placeholder="010-1234-5678"
+                    pattern="[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}"
+                    v-bind="componentField"
+                    autocomplete="tel"
+                  />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="address">
-            <FormItem>
-              <FormLabel>주소</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  placeholder="주소를 입력해주세요."
-                  v-bind="componentField"
-                  autocomplete="street-address"
-                />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField, errorMessage }" name="address">
+              <FormItem>
+                <FormLabel>주소</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="주소를 입력해주세요."
+                    v-bind="componentField"
+                    autocomplete="street-address"
+                  />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
         </div>
-      </div>
 
-      <div v-if="canView(['ADMIN'])">
-        <h4 class="text-base font-semibold mb-4 border-b pb-2">보안 설정</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField v-slot="{ componentField, errorMessage }" name="password">
-            <FormItem>
-              <FormLabel>비밀번호</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="비밀번호를 입력해주세요."
-                  v-bind="componentField"
-                  autocomplete="new-password"
-                />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+        <div v-if="canView(['ADMIN'])">
+          <h4 class="text-base font-semibold mb-4 border-b pb-2">보안 설정</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField v-slot="{ componentField, errorMessage }" name="password">
+              <FormItem>
+                <FormLabel>비밀번호</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="비밀번호를 입력해주세요."
+                    v-bind="componentField"
+                    autocomplete="new-password"
+                  />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="passwordConfirm">
-            <FormItem>
-              <FormLabel>비밀번호 확인</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="비밀번호를 다시 입력해주세요."
-                  v-bind="componentField"
-                  autocomplete="new-password"
-                />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField, errorMessage }" name="passwordConfirm">
+              <FormItem>
+                <FormLabel>비밀번호 확인</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="비밀번호를 다시 입력해주세요."
+                    v-bind="componentField"
+                    autocomplete="new-password"
+                  />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
         </div>
-      </div>
-
-      <fieldset :disabled="!isEditableInput">
         <div>
           <h4 class="text-base font-semibold mb-4 border-b pb-2">소속 정보</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -129,7 +128,7 @@
               <FormItem>
                 <FormLabel>부서</FormLabel>
                 <FormControl>
-                  <Select v-bind="componentField" :disabled="!isEditableInput">
+                  <Select v-bind="componentField" :disabled="!isEditable">
                     <SelectTrigger class="w-full">
                       <SelectValue placeholder="부서를 선택하세요." />
                     </SelectTrigger>
@@ -167,7 +166,7 @@
               <FormItem>
                 <FormLabel>직급</FormLabel>
                 <FormControl>
-                  <Select v-bind="componentField" :disabled="!isEditableInput">
+                  <Select v-bind="componentField" :disabled="!isEditable">
                     <SelectTrigger class="w-full">
                       <SelectValue placeholder="직급을 선택하세요." />
                     </SelectTrigger>
@@ -191,7 +190,7 @@
                 <FormItem>
                   <FormLabel>권한</FormLabel>
                   <FormControl>
-                    <Select v-bind="componentField" :disabled="!isEditableInput">
+                    <Select v-bind="componentField" :disabled="!isEditable">
                       <SelectTrigger class="w-full">
                         <SelectValue placeholder="권한을 선택하세요." />
                       </SelectTrigger>
@@ -215,7 +214,7 @@
               <FormItem>
                 <FormLabel>상태</FormLabel>
                 <FormControl>
-                  <Select v-bind="componentField" :disabled="!isEditableInput">
+                  <Select v-bind="componentField" :disabled="!isEditable">
                     <SelectTrigger class="w-full">
                       <SelectValue placeholder="재직 상태를 선택하세요" />
                     </SelectTrigger>
@@ -235,37 +234,37 @@
             </FormField>
           </div>
         </div>
-      </fieldset>
 
-      <div v-if="canView(['ADMIN'])">
-        <h4 class="text-base font-semibold mb-4 border-b pb-2">입사 정보</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField v-slot="{ componentField, errorMessage }" name="hiredDate">
-            <FormItem>
-              <FormLabel>입사일</FormLabel>
-              <FormControl>
-                <Input type="date" v-bind="componentField" disabled />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+        <div v-if="canView(['ADMIN'])">
+          <h4 class="text-base font-semibold mb-4 border-b pb-2">입사 정보</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField v-slot="{ componentField, errorMessage }" name="hiredDate">
+              <FormItem>
+                <FormLabel>입사일</FormLabel>
+                <FormControl>
+                  <Input type="date" v-bind="componentField" disabled />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="terminationDate">
-            <FormItem>
-              <FormLabel>퇴사일</FormLabel>
-              <FormControl>
-                <Input type="date" v-bind="componentField" />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+            <FormField v-slot="{ componentField, errorMessage }" name="terminationDate">
+              <FormItem>
+                <FormLabel>퇴사일</FormLabel>
+                <FormControl>
+                  <Input type="date" v-bind="componentField" />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
         </div>
-      </div>
+      </fieldset>
     </Form>
   </div>
   <div class="flex justify-end pt-6 pb-5">
     <Button
-      v-if="canView(['ADMIN'])"
+      v-if="isEditable"
       type="submit"
       size="sm"
       form="userUpdateForm"
@@ -346,7 +345,10 @@ const route = useRoute();
 
 const { data: userDetail } = useGetUser(route.params.userId);
 const { mutate: updateUser } = useUpdateUser(route.params.userId);
-const isEditableInput = canView(['ADMIN']);
+const isResigned = computed(() => userDetail.value.userStatus === 'RESIGNED');
+const isEditable = computed(() => {
+  return canView(['ADMIN']) && !isResigned.value;
+});
 
 const userInfo = computed(() => [
   { label: '사번', value: userDetail.value.empNo },

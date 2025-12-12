@@ -121,7 +121,7 @@ const previewEvents = computed(() => {
     StartTime: new Date(p.optimizedStartTime),
     EndTime: new Date(p.optimizedEndTime),
     Line: previewData.value.lineCode,
-    Status: p.status,
+    Status: p.planStatus,
     ItemName: p.itemName,
     ItemQty: p.plannedQty,
   }));
