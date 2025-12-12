@@ -139,7 +139,10 @@
                   <li
                     v-for="step in modalProcesses"
                     :key="step.name"
-                    :class="{ 'equipment-process-list__item--highlight': step.code === highlightedProcessCode }"
+                    :class="{
+                      'equipment-process-list__item--highlight':
+                        step.code === highlightedProcessCode,
+                    }"
                   >
                     <p class="font-medium text-gray-900">
                       {{ step.name }}
@@ -159,7 +162,6 @@
         </div>
       </div>
     </div>
-
   </section>
 </template>
 
@@ -603,10 +605,10 @@ const handleSearch = () => {
   }
 
   const line =
-    result.lineRef ?? lineStructuresDetailed.value.find(target => target.lineCode === result.lineCode);
+    result.lineRef ??
+    lineStructuresDetailed.value.find(target => target.lineCode === result.lineCode);
   const equipment =
-    result.equipmentRef ??
-    line?.equipments?.find(eq => eq.equipmentCode === result.equipmentCode);
+    result.equipmentRef ?? line?.equipments?.find(eq => eq.equipmentCode === result.equipmentCode);
 
   if (line && equipment) {
     openEquipmentModal(line, equipment, {
@@ -653,7 +655,7 @@ watch(searchQuery, value => {
 }
 
 .line-floor-plan--highlight {
-  border-color: rgba(45, 115, 90, 0.6);
+  border: 3px solid rgba(45, 115, 90, 0.8);
   box-shadow: 0 25px 45px rgba(45, 115, 90, 0.25);
 }
 
