@@ -18,17 +18,17 @@
               class="text-center whitespace-nowrap overflow-hidden w-10"
               @click.stop
             >
-              <Checkbox
+              <!-- <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
                 class="size-4 border-[1.5px]"
-              />
+              /> -->
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">라인코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">라인명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">담당부서</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">담당자</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead>
+            <!-- <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead> -->
           </TableRow>
         </TableHeader>
 
@@ -44,13 +44,13 @@
               class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
               @click.stop
             >
-              <Checkbox
+              <!-- <Checkbox
                 class="size-4 border-[1.5px]"
                 :modelValue="selectedRows.some(r => r.id === line.lineId)"
                 @update:modelValue="
                   checked => toggleRow(checked, { id: line.lineId, isActive: line.isActive })
                 "
-              />
+              /> -->
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ line.lineCode }}
@@ -64,7 +64,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ line.userName }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden">
+            <!-- <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
                 class="w-[50px] mx-auto"
                 :class="
@@ -75,7 +75,7 @@
               >
                 {{ line.isActive ? '사용' : '미사용' }}
               </Badge>
-            </TableCell>
+            </TableCell> -->
           </TableRow>
           <TableRow v-if="lineList.content.length === 0">
             <TableCell colspan="6" class="text-center py-10 text-gray-500">
@@ -90,13 +90,13 @@
 </template>
 
 <script setup>
-import { watch, ref, computed } from 'vue';
+import { watch, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+// import { Badge } from '@/components/ui/badge';
+// import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -129,31 +129,31 @@ const onReset = () => {
   selectedRows.value = [];
 };
 
-const allRows = computed(
-  () =>
-    lineList.value?.content?.map(line => ({
-      id: line.lineId,
-      isActive: line.isActive,
-    })) ?? [],
-);
+// const allRows = computed(
+//   () =>
+//     lineList.value?.content?.map(line => ({
+//       id: line.lineId,
+//       isActive: line.isActive,
+//     })) ?? [],
+// );
 
-const isAllChecked = computed(
-  () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
-);
+// const isAllChecked = computed(
+//   () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
+// );
 
-const toggleAll = checked => {
-  selectedRows.value = checked ? [...allRows.value] : [];
-};
+// const toggleAll = checked => {
+//   selectedRows.value = checked ? [...allRows.value] : [];
+// };
 
-const toggleRow = (checked, row) => {
-  if (checked) {
-    if (!selectedRows.value.find(r => r.id === row.id)) {
-      selectedRows.value.push(row);
-    }
-  } else {
-    selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
-  }
-};
+// const toggleRow = (checked, row) => {
+//   if (checked) {
+//     if (!selectedRows.value.find(r => r.id === row.id)) {
+//       selectedRows.value.push(row);
+//     }
+//   } else {
+//     selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
+//   }
+// };
 
 const goToDetail = lineCode => {
   router.push(`/base-management/lines/${lineCode}`);
