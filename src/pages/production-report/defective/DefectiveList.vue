@@ -1,5 +1,5 @@
 <template>
-    <section class="space-y-6">
+  <section class="space-y-6">
     <header class="flex items-center justify-between pb-4">
       <div>
         <h3 class="text-2xl font-semibold text-gray-900">불량 현황</h3>
@@ -80,7 +80,7 @@
                 label="생산 담당자"
                 :value="filterForm.productionManagerNo"
                 :setValue="setProductionManagerFilter"
-                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '생산' })"
                 keyField="empNo"
                 nameField="userName"
                 :fields="[
@@ -107,7 +107,7 @@
                 label="영업 담당자"
                 :value="filterForm.salesManagerNo"
                 :setValue="setSalesManagerFilter"
-                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE', userDepartment: '영업' })"
                 keyField="empNo"
                 nameField="userName"
                 :fields="[
@@ -264,24 +264,18 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-[180px]">
               품목명
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              공장
-            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-[140px]">
               라인
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              불량률
-            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 불량률 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
               생산 담당자
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
               영업 담당자
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              비고
-            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 비고 </TableHead>
           </TableRow>
         </TableHeader>
 
@@ -308,7 +302,10 @@
             class="text-center transition-all border-b border-dotted border-gray-300 hover:bg-gray-50"
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
-              <button class="text-[#2765C4] underline-offset-2 hover:underline" @click="goToDefectiveDetail(record)">
+              <button
+                class="text-[#2765C4] underline-offset-2 hover:underline"
+                @click="goToDefectiveDetail(record)"
+              >
                 {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
               </button>
             </TableCell>
@@ -324,7 +321,9 @@
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ record.lineName }}
             </TableCell>
-            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[#5B6D4C]">
+            <TableCell
+              class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[#5B6D4C]"
+            >
               {{ formatPercent(record.defectiveTotalRate) }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
@@ -1010,5 +1009,4 @@ const chartsVisible = computed(() => hasSearched.value && chartRecords.value.len
   background-color: #ffffff;
   outline: none;
 }
-
 </style>
