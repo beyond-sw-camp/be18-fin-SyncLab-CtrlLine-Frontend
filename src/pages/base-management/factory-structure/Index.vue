@@ -101,6 +101,14 @@
                 </DialogDescription>
               </DialogHeader>
 
+              <div
+                class="mt-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-600"
+                v-if="activeEquipmentCode"
+              >
+                설비코드:
+                <span class="font-mono font-semibold text-gray-800">{{ activeEquipmentCode }}</span>
+              </div>
+
               <div class="mt-4 space-y-3" v-if="modalProcesses.length">
                 <p class="text-sm font-semibold text-gray-700">주요 공정</p>
                 <ul class="equipment-process-list">
@@ -380,7 +388,20 @@ const modalProcesses = computed(() => {
   }));
 });
 
+const activeEquipmentCode = computed(() => {
+  if (!activeEquipment.value || !activeLine.value) return null;
+  return buildEquipmentCode(activeLine.value, activeEquipment.value);
+});
+
 const buildProcessCode = (line, equipment, process) => {
+  const equipmentCode = buildEquipmentCode(line, equipment);
+  if (!equipmentCode) return null;
+
+  const prCode = process.prCode ?? 'PR000';
+  return `${equipmentCode}-${prCode}`;
+};
+
+const buildEquipmentCode = (line, equipment) => {
   const factoryCode = line.factoryCode ?? selectedFactoryCode.value ?? 'F0001';
   const factoryNumber = extractNumber(factoryCode);
   const lineType = line.type ?? '';
@@ -398,9 +419,7 @@ const buildProcessCode = (line, equipment, process) => {
     1;
 
   const equipmentCode = `${prefix}${sequence.toString().padStart(3, '0')}`;
-  const prCode = process.prCode ?? 'PR000';
-
-  return `F${factoryNumber}-${lineType}${lineNumber}-${equipmentCode}-${prCode}`;
+  return `F${factoryNumber}-${lineType}${lineNumber}-${equipmentCode}`;
 };
 
 const extractNumber = value => {
