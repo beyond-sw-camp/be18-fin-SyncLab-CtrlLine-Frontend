@@ -17,66 +17,76 @@
         isActive: factoryDetail.isActive ? 'true' : 'false',
       }"
     >
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField v-slot="{ componentField, errorMessage }" name="factoryCode">
-          <FormItem>
-            <FormLabel>공장코드</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="factory-code" disabled />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div class="order-1 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="factoryCode">
+            <FormItem>
+              <FormLabel>공장코드</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" autocomplete="factory-code" disabled />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="factoryName">
-          <FormItem>
-            <FormLabel>공장명</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="factory-name" disabled />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+        <div class="order-1 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="factoryName">
+            <FormItem>
+              <FormLabel>공장명</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" autocomplete="factory-name" disabled />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="department">
-          <FormItem>
-            <FormLabel>담당부서</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="department" disabled />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+        <div class="order-1 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="department">
+            <FormItem>
+              <FormLabel>담당부서</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" autocomplete="department" disabled />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="name">
-          <FormItem>
-            <FormLabel>담당자</FormLabel>
-            <FormControl>
-              <Input type="text" v-bind="componentField" autocomplete="name" disabled />
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+        <div class="order-1 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="name">
+            <FormItem>
+              <FormLabel>담당자</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" autocomplete="name" disabled />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
 
-        <FormField v-slot="{ componentField, errorMessage }" name="isActive">
-          <FormItem>
-            <FormLabel>공장 사용여부</FormLabel>
-            <FormControl :disabled="!isAdmin">
-              <RadioGroup v-bind="componentField" class="flex">
-                <div class="flex items-center space-x-2">
-                  <RadioGroupItem value="true" id="r1" />
-                  <Label for="r1" class="font-normal">공장 사용</Label>
-                </div>
+        <div class="order-1 md:order-0">
+          <FormField v-slot="{ componentField, errorMessage }" name="isActive">
+            <FormItem>
+              <FormLabel>공장 사용여부</FormLabel>
+              <FormControl :disabled="!isAdmin">
+                <RadioGroup v-bind="componentField" class="flex">
+                  <div class="flex items-center space-x-2">
+                    <RadioGroupItem value="true" id="r1" class="cursor-pointer" />
+                    <Label for="r1" class="font-normal cursor-pointer">공장 사용</Label>
+                  </div>
 
-                <div class="flex items-center space-x-2">
-                  <RadioGroupItem value="false" id="r2" />
-                  <Label for="r2" class="font-normal">공장 미사용</Label>
-                </div>
-              </RadioGroup>
-              <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-            </FormControl>
-          </FormItem>
-        </FormField>
+                  <div class="flex items-center space-x-2">
+                    <RadioGroupItem value="false" id="r2" class="cursor-pointer" />
+                    <Label for="r2" class="font-normal cursor-pointer">공장 미사용</Label>
+                  </div>
+                </RadioGroup>
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+        </div>
       </div>
     </Form>
   </div>

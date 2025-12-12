@@ -15,7 +15,7 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">라인명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">불량수량</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">불량률</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">불량률 (%)</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">실적전표</TableHead>
           </TableRow>
         </TableHeader>

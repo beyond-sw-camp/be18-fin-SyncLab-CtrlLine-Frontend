@@ -22,166 +22,187 @@
       <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">기본 정보</h4>
         <fieldset :disabled="!isAdmin">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField name="equipmentCode" v-slot="{ componentField, errorMessage }">
-              <FormItem>
-                <FormLabel>설비코드</FormLabel>
-                <FormControl>
-                  <Input type="text" v-bind="componentField" disabled />
-                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-                </FormControl>
-              </FormItem>
-            </FormField>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div class="order-1 md:order-0">
+              <FormField name="equipmentCode" v-slot="{ componentField, errorMessage }">
+                <FormItem>
+                  <FormLabel>설비코드</FormLabel>
+                  <FormControl>
+                    <Input type="text" v-bind="componentField" disabled />
+                    <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                  </FormControl>
+                </FormItem>
+              </FormField>
+            </div>
 
-            <FormField name="equipmentName" v-slot="{ componentField, errorMessage }">
-              <FormItem>
-                <FormLabel>설비명</FormLabel>
-                <FormControl>
-                  <Input type="text" v-bind="componentField" disabled />
-                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-                </FormControl>
-              </FormItem>
-            </FormField>
+            <div class="order-1 md:order-0">
+              <FormField name="equipmentName" v-slot="{ componentField, errorMessage }">
+                <FormItem>
+                  <FormLabel>설비명</FormLabel>
+                  <FormControl>
+                    <Input type="text" v-bind="componentField" disabled />
+                    <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                  </FormControl>
+                </FormItem>
+              </FormField>
+            </div>
 
-            <FormField name="equipmentType" v-slot="{ componentField, errorMessage }">
-              <FormItem>
-                <FormLabel>설비유형</FormLabel>
-                <FormControl>
-                  <Input type="text" v-bind="componentField" disabled />
-                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-                </FormControl>
-              </FormItem>
-            </FormField>
+            <div class="order-1 md:order-0">
+              <FormField name="equipmentType" v-slot="{ componentField, errorMessage }">
+                <FormItem>
+                  <FormLabel>설비유형</FormLabel>
+                  <FormControl>
+                    <Input type="text" v-bind="componentField" disabled />
+                    <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                  </FormControl>
+                </FormItem>
+              </FormField>
+            </div>
 
-            <FormField name="empNo" v-slot="{ value, componentField, setValue, errorMessage }">
-              <FormItem>
-                <FormLabel>담당자</FormLabel>
-                <FormControl>
-                  <UpdateAutoCompleteSelect
-                    :key="`empNo-${equipmentDetail?.empNo}`"
-                    label="담당자"
-                    :value="value"
-                    :componentField="componentField"
-                    :setValue="setValue"
-                    :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
-                    keyField="empNo"
-                    nameField="userName"
-                    :fields="[
-                      'empNo',
-                      'userName',
-                      'userEmail',
-                      'userDepartment',
-                      'userPhoneNumber',
-                      'userStatus',
-                      'userRole',
-                    ]"
-                    :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
-                    :initialText="equipmentDetail.userName"
-                    :emitFullItem="true"
-                    @selectedFullItem="onUserSelected"
-                    @clear="onUserCleared"
-                  />
-                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-                </FormControl>
-              </FormItem>
-            </FormField>
+            <div class="order-1 md:order-0">
+              <FormField name="empNo" v-slot="{ value, componentField, setValue, errorMessage }">
+                <FormItem>
+                  <FormLabel>담당자</FormLabel>
+                  <FormControl>
+                    <UpdateAutoCompleteSelect
+                      :key="`empNo-${equipmentDetail?.empNo}`"
+                      label="담당자"
+                      :value="value"
+                      :componentField="componentField"
+                      :setValue="setValue"
+                      :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                      keyField="empNo"
+                      nameField="userName"
+                      :fields="[
+                        'empNo',
+                        'userName',
+                        'userEmail',
+                        'userDepartment',
+                        'userPhoneNumber',
+                        'userStatus',
+                        'userRole',
+                      ]"
+                      :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                      :initialText="equipmentDetail.userName"
+                      :emitFullItem="true"
+                      @selectedFullItem="onUserSelected"
+                      @clear="onUserCleared"
+                    />
+                    <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                  </FormControl>
+                </FormItem>
+              </FormField>
+            </div>
+            <div class="order-1 md:order-0">
+              <FormField v-slot="{ componentField, errorMessage }" name="userDepartment">
+                <FormItem>
+                  <FormLabel>담당부서</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      v-bind="componentField"
+                      autocomplete="userDepartment"
+                      readonly
+                    />
+                    <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                  </FormControl>
+                </FormItem>
+              </FormField>
+            </div>
 
-            <FormField v-slot="{ componentField, errorMessage }" name="userDepartment">
-              <FormItem>
-                <FormLabel>담당부서</FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    v-bind="componentField"
-                    autocomplete="userDepartment"
-                    readonly
-                  />
-                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-                </FormControl>
-              </FormItem>
-            </FormField>
+            <!-- <div class="order-1 md:order-0">
+              <FormField v-slot="{ componentField, errorMessage }" name="isActive">
+                <FormItem>
+                  <FormLabel>설비 사용여부</FormLabel>
+                  <FormControl>
+                    <RadioGroup v-bind="componentField" class="flex">
+                      <div class="flex items-center space-x-2">
+                        <RadioGroupItem value="true" id="r1" class="cursor-pointer" />
+                        <Label for="r1" class="font-normal cursor-pointer">설비 사용</Label>
+                      </div>
 
-            <FormField v-slot="{ componentField, errorMessage }" name="isActive">
-              <FormItem>
-                <FormLabel>설비 사용여부</FormLabel>
-                <FormControl>
-                  <RadioGroup v-bind="componentField" class="flex">
-                    <div class="flex items-center space-x-2">
-                      <RadioGroupItem value="true" id="r1" />
-                      <Label for="r1" class="font-normal">설비 사용</Label>
-                    </div>
-
-                    <div class="flex items-center space-x-2">
-                      <RadioGroupItem value="false" id="r2" />
-                      <Label for="r2" class="font-normal">설비 미사용</Label>
-                    </div>
-                  </RadioGroup>
-                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-                </FormControl>
-              </FormItem>
-            </FormField>
+                      <div class="flex items-center space-x-2">
+                        <RadioGroupItem value="false" id="r2" class="cursor-pointer" />
+                        <Label for="r2" class="font-normal cursor-pointer">설비 미사용</Label>
+                      </div>
+                    </RadioGroup>
+                    <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                  </FormControl>
+                </FormItem>
+              </FormField>
+            </div> -->
           </div>
         </fieldset>
       </div>
       <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">주요 지표</h4>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField name="equipmentPpm" v-slot="{ componentField, errorMessage }">
-            <FormItem>
-              <FormLabel>PPM</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="componentField" disabled />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div class="order-1 md:order-0">
+            <FormField name="equipmentPpm" v-slot="{ componentField, errorMessage }">
+              <FormItem>
+                <FormLabel>PPM</FormLabel>
+                <FormControl>
+                  <Input type="number" v-bind="componentField" disabled />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
         </div>
       </div>
 
       <div>
         <h4 class="text-base font-semibold mb-4 border-b pb-2">누적 및 운영 정보</h4>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField name="operatingDate" v-slot="{ componentField, errorMessage }">
-            <FormItem>
-              <FormLabel>누적 가동시간</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="componentField" disabled />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div class="order-1 md:order-0">
+            <FormField name="operatingDate" v-slot="{ componentField, errorMessage }">
+              <FormItem>
+                <FormLabel>누적 가동시간</FormLabel>
+                <FormControl>
+                  <Input type="number" v-bind="componentField" disabled />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
 
-          <FormField name="maintenanceHistory" v-slot="{ componentField, errorMessage }">
-            <FormItem>
-              <FormLabel>유지 보수이력</FormLabel>
-              <FormControl>
-                <Input type="text" v-bind="componentField" disabled />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+          <div class="order-1 md:order-0">
+            <FormField name="maintenanceHistory" v-slot="{ componentField, errorMessage }">
+              <FormItem>
+                <FormLabel>유지 보수이력</FormLabel>
+                <FormControl>
+                  <Input type="text" v-bind="componentField" disabled />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
 
-          <FormField name="totalCount" v-slot="{ componentField, errorMessage }">
-            <FormItem>
-              <FormLabel>누적 투입수량</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="componentField" disabled />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+          <div class="order-1 md:order-0">
+            <FormField name="totalCount" v-slot="{ componentField, errorMessage }">
+              <FormItem>
+                <FormLabel>누적 투입수량</FormLabel>
+                <FormControl>
+                  <Input type="number" v-bind="componentField" disabled />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
 
-          <FormField name="defectiveCount" v-slot="{ componentField, errorMessage }">
-            <FormItem>
-              <FormLabel>누적 불량수량</FormLabel>
-              <FormControl>
-                <Input type="number" v-bind="componentField" disabled />
-                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
-              </FormControl>
-            </FormItem>
-          </FormField>
+          <div class="order-1 md:order-0">
+            <FormField name="defectiveCount" v-slot="{ componentField, errorMessage }">
+              <FormItem>
+                <FormLabel>누적 불량수량</FormLabel>
+                <FormControl>
+                  <Input type="number" v-bind="componentField" disabled />
+                  <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
         </div>
       </div>
     </form>
@@ -202,8 +223,6 @@ import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompl
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { canView } from '@/utils/canView';
 import getAccumulatedHours from '@/utils/getAccumulatedHours';
 
