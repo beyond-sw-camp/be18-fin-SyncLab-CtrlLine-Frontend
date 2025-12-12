@@ -10,7 +10,7 @@ export default function useGetLotList(initialFilters = {}, initialPage = 1) {
   const pageSize = ref(10);
   // Keep server-side default ordering (createdAt DESC) by matching Spring's expected
   // `property,direction` format without stray spaces.
-  const fixedSort = ['createdAt,desc'];
+  const fixedSort = ['createdAt, desc'];
 
   const filters = reactive({
     lotNo: initialFilters.lotNo ?? '',
