@@ -49,7 +49,7 @@
         <TableBody v-else>
           <TableRow>
             <TableCell colspan="6" class="text-center py-10 text-gray-500">
-              조회된 Lot No. 데이터가 없습니다.
+              검색 결과가 없습니다.
             </TableCell>
           </TableRow>
         </TableBody>

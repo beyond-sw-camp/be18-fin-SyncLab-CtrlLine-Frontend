@@ -51,6 +51,11 @@
               {{ formatNullable(defective.productionPerformanceDocNo) }}
             </TableCell>
           </TableRow>
+          <TableRow v-if="defectiveList.content.length === 0">
+            <TableCell colspan="7" class="text-center py-10 text-gray-500">
+              검색 결과가 없습니다.
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
     </div>

@@ -281,7 +281,7 @@
 
         <TableBody v-if="!hasSearched">
           <TableRow>
-            <TableCell colspan="9" class="text-center py-10 text-sm text-gray-400">
+            <TableCell colspan="9" class="text-center py-10 text-sm text-gray-500">
               필터를 설정한 뒤 조회 버튼을 눌러주세요.
             </TableCell>
           </TableRow>
