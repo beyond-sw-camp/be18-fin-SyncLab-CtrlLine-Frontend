@@ -320,24 +320,25 @@
           </div>
         </div>
         <ItemTable :itemDetail="itemDetail" />
+
+        <OptimizeSchedule
+          v-if="isAdmin"
+          :lineCode="form.values.lineCode"
+          :productionPlanId="productionPlanDetail.id"
+        />
       </fieldset>
-      <OptimizeSchedule
-        v-if="isAdmin"
-        :lineCode="form.values.lineCode"
-        :productionPlanId="productionPlanDetail.id"
-      />
-      <ScheduleData
-        mode="detail"
+      <UpdateScheduleData
+        v-if="productionPlanDetail && selectedFactoryId"
         :key="form.values.lineCode"
         :productionPlanDetail="productionPlanDetail"
         :factoryId="selectedFactoryId"
         :factoryCode="form.values.factoryCode"
         :lineCode="form.values.lineCode"
-        @updateStartEndTime="onStartTimeEndTimeChanged"
         :draftStartTime="form.values.startTime"
         :draftEndTime="form.values.endTime"
         :draftItem="itemDetail"
         :draftQty="form.values.plannedQty"
+        @updateStartEndTime="onStartTimeEndTimeChanged"
       />
     </form>
   </div>
@@ -384,7 +385,7 @@ import { PRODUCTION_PLAN_STATUS } from '@/constants/enumLabels';
 import ConfirmScheduleModal from '@/pages/production-management/production-plan/ConfirmScheduleModal.vue';
 import ItemTable from '@/pages/production-management/production-plan/ItemTable.vue';
 import OptimizeSchedule from '@/pages/production-management/production-plan/OptimizeSchedule.vue';
-import ScheduleData from '@/pages/production-management/production-plan/ScheduleData.vue';
+import UpdateScheduleData from '@/pages/production-management/production-plan/UpdateScheduleData.vue';
 import { useUserStore } from '@/stores/useUserStore';
 import formatDate from '@/utils/formatDate';
 

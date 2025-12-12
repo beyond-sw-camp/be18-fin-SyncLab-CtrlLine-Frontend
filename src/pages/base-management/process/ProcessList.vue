@@ -18,17 +18,17 @@
               class="text-center whitespace-nowrap overflow-hidden w-10"
               @click.stop
             >
-              <Checkbox
+              <!-- <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
                 class="size-4 border-[1.5px]"
-              />
+              /> -->
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">공정코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">공정명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">담당부서</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">담당자</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead>
+            <!-- <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead> -->
           </TableRow>
         </TableHeader>
 
@@ -44,14 +44,14 @@
               class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
               @click.stop
             >
-              <Checkbox
+              <!-- <Checkbox
                 class="size-4 border-[1.5px]"
                 :modelValue="selectedRows.some(r => r.id === process.processId)"
                 @update:modelValue="
                   checked =>
                     toggleRow(checked, { id: process.processId, isActive: process.isActive })
                 "
-              />
+              /> -->
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ process.processCode }}
@@ -65,7 +65,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ process.userName }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden">
+            <!-- <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
                 class="w-[50px] mx-auto"
                 :class="
@@ -76,7 +76,7 @@
               >
                 {{ process.isActive ? '사용' : '미사용' }}
               </Badge>
-            </TableCell>
+            </TableCell> -->
           </TableRow>
           <TableRow v-if="processList.content.length === 0">
             <TableCell colspan="6" class="text-center py-10 text-gray-500">
@@ -91,13 +91,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetProcessList from '@/apis/query-hooks/process/useGetProcessList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+// import { Badge } from '@/components/ui/badge';
+// import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -128,31 +128,31 @@ const onReset = () => {
   selectedRows.value = [];
 };
 
-const allRows = computed(
-  () =>
-    processList.value?.content?.map(process => ({
-      id: process.processId,
-      isActive: process.isActive,
-    })) ?? [],
-);
+// const allRows = computed(
+//   () =>
+//     processList.value?.content?.map(process => ({
+//       id: process.processId,
+//       isActive: process.isActive,
+//     })) ?? [],
+// );
 
-const isAllChecked = computed(
-  () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
-);
+// const isAllChecked = computed(
+//   () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
+// );
 
-const toggleAll = checked => {
-  selectedRows.value = checked ? [...allRows.value] : [];
-};
+// const toggleAll = checked => {
+//   selectedRows.value = checked ? [...allRows.value] : [];
+// };
 
-const toggleRow = (checked, row) => {
-  if (checked) {
-    if (!selectedRows.value.find(r => r.id === row.id)) {
-      selectedRows.value.push(row);
-    }
-  } else {
-    selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
-  }
-};
+// const toggleRow = (checked, row) => {
+//   if (checked) {
+//     if (!selectedRows.value.find(r => r.id === row.id)) {
+//       selectedRows.value.push(row);
+//     }
+//   } else {
+//     selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
+//   }
+// };
 
 const { data: processList, page, filters } = useGetProcessList(initialFilters);
 

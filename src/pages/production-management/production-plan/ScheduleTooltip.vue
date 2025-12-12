@@ -7,7 +7,10 @@
     @mousedown.stop
   >
     <div
-      class="text-lg font-semibold text-blue-600 underline cursor-pointer"
+      :class="[
+        'text-lg font-semibold',
+        Number(tooltip.data.Id) ? 'text-blue-600 underline cursor-pointer' : '',
+      ]"
       @click="openDetailPage"
     >
       {{ tooltip.data.Subject }}
@@ -77,7 +80,7 @@ function handleGlobalClick(e) {
 
 function openDetailPage() {
   const id = props.tooltip.data.Id;
-  if (!id) return;
+  if (!id || !Number(id)) return;
 
   window.open(`/production-management/production-plans/${id}`, '_blank');
 }

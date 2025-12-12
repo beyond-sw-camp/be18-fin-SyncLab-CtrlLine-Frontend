@@ -1,5 +1,5 @@
 <template>
-    <section class="space-y-6">
+  <section class="space-y-6">
     <header class="flex items-center justify-between pb-4">
       <div>
         <h3 class="text-2xl font-semibold text-gray-900">불량 현황</h3>
@@ -25,8 +25,9 @@
           </AccordionTrigger>
         </div>
 
-        <AccordionContent class="mt-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <AccordionContent class="p-4 border-t-2 border-b-2 my-3">
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <FilterInput label="전표 번호" v-model="filterForm.productionPerformanceDocNo" />
             <FilterInput
               label="시작 일자"
               type="date"
@@ -45,50 +46,120 @@
               placeholder="연도. 월. 일."
               v-model="filterForm.dueDate"
             />
-            <FilterInput
-              label="생산 공장"
-              placeholder="공장 코드 검색"
-              v-model="filterForm.factoryCode"
-              search-icon
-            />
-            <FilterInput
-              label="생산 라인"
-              placeholder="라인 코드 검색"
-              v-model="filterForm.lineCode"
-              search-icon
-            />
-            <FilterInput
-              label="품목 ID"
-              placeholder="품목 ID 또는 코드"
-              v-model="filterForm.itemId"
-              search-icon
-            />
-            <FilterInput
-              label="생산 담당자"
-              placeholder="사번 검색"
-              v-model="filterForm.productionManagerNo"
-              search-icon
-            />
-            <FilterInput
-              label="영업 담당자"
-              placeholder="사번 검색"
-              v-model="filterForm.salesManagerNo"
-              search-icon
-            />
-            <FilterInput
-              label="전표 번호"
-              placeholder="전표 번호"
-              v-model="filterForm.productionPerformanceDocNo"
-              search-icon
-            />
+            <FilterSelect label="공장" v-model="filterForm.factoryCode" :options="factoryOptions" />
+            <FilterSelect label="라인" v-model="filterForm.lineCode" :options="lineOptions" />
+            <div class="flex flex-col gap-1">
+              <Label class="text-xs">품목</Label>
+              <CreateAutoCompleteSelect
+                label="품목"
+                :value="filterForm.itemCode"
+                :setValue="setItemCodeFilter"
+                :fetchList="() => useGetItemList({ isActive: true })"
+                keyField="itemCode"
+                nameField="itemName"
+                :fields="[
+                  'itemCode',
+                  'itemName',
+                  'itemSpecification',
+                  'itemUnit',
+                  'itemStatus',
+                  'isActive',
+                ]"
+                :tableHeaders="['품목코드', '품목명', '규격', '단위', '품목구분', '사용여부']"
+                :emitFullItem="true"
+                @selectedFullItem="onItemSelected"
+                @clear="onItemCleared"
+                class="h-7 placeholder:text-xs text-xs"
+                inputClass="h-7 text-xs placeholder:text-xs"
+                iconClass="!w-3 !h-3"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label class="text-xs">생산 담당자</Label>
+              <CreateAutoCompleteSelect
+                label="생산 담당자"
+                :value="filterForm.productionManagerNo"
+                :setValue="setProductionManagerFilter"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                keyField="empNo"
+                nameField="userName"
+                :fields="[
+                  'empNo',
+                  'userName',
+                  'userEmail',
+                  'userDepartment',
+                  'userPhoneNumber',
+                  'userStatus',
+                  'userRole',
+                ]"
+                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                :emitFullItem="true"
+                @selectedFullItem="onProductionManagerSelected"
+                @clear="onProductionManagerCleared"
+                class="h-7 placeholder:text-xs text-xs"
+                inputClass="h-7 text-xs placeholder:text-xs"
+                iconClass="!w-3 !h-3"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <Label class="text-xs">영업 담당자</Label>
+              <CreateAutoCompleteSelect
+                label="영업 담당자"
+                :value="filterForm.salesManagerNo"
+                :setValue="setSalesManagerFilter"
+                :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+                keyField="empNo"
+                nameField="userName"
+                :fields="[
+                  'empNo',
+                  'userName',
+                  'userEmail',
+                  'userDepartment',
+                  'userPhoneNumber',
+                  'userStatus',
+                  'userRole',
+                ]"
+                :tableHeaders="['사번', '사원명', '이메일', '부서', '연락처', '상태', '권한']"
+                :emitFullItem="true"
+                @selectedFullItem="onSalesManagerSelected"
+                @clear="onSalesManagerCleared"
+                class="h-7 placeholder:text-xs text-xs"
+                inputClass="h-7 text-xs placeholder:text-xs"
+                iconClass="!w-3 !h-3"
+              />
+            </div>
+            <div>
+              <Label class="text-xs">불량률 (%)</Label>
+              <div class="flex flex-wrap gap-1 mt-1 items-center">
+                <FilterInput
+                  type="number"
+                  placeholder="최소"
+                  v-model="filterForm.minDefectiveRate"
+                  class="flex-1 min-w-[160px]"
+                />
+                <span class="block text-gray-400 w-full lg:w-fit text-center">~</span>
+                <FilterInput
+                  type="number"
+                  placeholder="최대"
+                  v-model="filterForm.maxDefectiveRate"
+                  class="flex-1 min-w-[160px]"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="flex justify-end mt-4 gap-2">
-            <Button variant="outline" class="rounded-full px-6" @click="resetFilters">
+            <Button
+              variant="outline"
+              size="xs"
+              class="text-sm font-normal px-6"
+              @click="resetFilters"
+            >
               초기화
             </Button>
             <Button
-              class="rounded-full bg-[#5B6D4C] px-6 py-2 text-white hover:bg-[#4C5C3F]"
+              size="xs"
+              class="bg-primary text-white text-sm font-normal px-6"
               :disabled="isApplying"
               @click="applyFilters"
             >
@@ -184,7 +255,9 @@
       <Table class="w-full min-w-[920px] table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[160px]">
+            <TableHead
+              class="sticky left-0 z-10 min-w-28 bg-white shadow-md text-center whitespace-nowrap overflow-hidden"
+            >
               전표번호
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-[150px]">
@@ -193,24 +266,18 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-[180px]">
               품목명
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              공장
-            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-[140px]">
               라인
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              불량률
-            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 불량률 (%)</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
               생산 담당자
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
               영업 담당자
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              비고
-            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 비고 </TableHead>
           </TableRow>
         </TableHeader>
 
@@ -237,7 +304,10 @@
             class="text-center transition-all border-b border-dotted border-gray-300 hover:bg-gray-50"
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
-              <button class="text-[#2765C4] underline-offset-2 hover:underline" @click="goToDefectiveDetail(record)">
+              <button
+                class="text-[#2765C4] underline-offset-2 hover:underline"
+                @click="goToDefectiveDetail(record)"
+              >
                 {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
               </button>
             </TableCell>
@@ -253,7 +323,9 @@
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ record.lineName }}
             </TableCell>
-            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[#5B6D4C]">
+            <TableCell
+              class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-semibold text-[#5B6D4C]"
+            >
               {{ formatPercent(record.defectiveTotalRate) }}
             </TableCell>
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
@@ -289,7 +361,13 @@ import { toast } from 'vue-sonner';
 
 import { getDefectiveAll, getDefectiveDetail } from '@/apis/query-functions/defective';
 import { getProductionPerformanceList } from '@/apis/query-functions/productionPerformance';
+import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
+import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
+import useGetLineList from '@/apis/query-hooks/line/useGetLineList';
+import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
+import CreateAutoCompleteSelect from '@/components/auto-complete/CreateAutoCompleteSelect.vue';
 import FilterInput from '@/components/filter/FilterInput.vue';
+import FilterSelect from '@/components/filter/FilterSelect.vue';
 import {
   Accordion,
   AccordionContent,
@@ -305,6 +383,7 @@ import {
   ChartTooltipContent,
   componentToString,
 } from '@/components/ui/chart';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -323,12 +402,59 @@ const filterForm = reactive({
   fromDate: '',
   toDate: '',
   dueDate: '',
-  factoryCode: '',
-  lineCode: '',
+  factoryCode: null,
+  lineCode: null,
   itemId: '',
+  itemCode: '',
   productionManagerNo: '',
+  productionManagerName: '',
   salesManagerNo: '',
+  salesManagerName: '',
   productionPerformanceDocNo: '',
+  minDefectiveRate: '',
+  maxDefectiveRate: '',
+});
+
+const selectedFactoryId = ref(null);
+const selectedItemId = ref(null);
+
+const { data: factoryList } = useGetFactoryList();
+const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
+
+const factoryOptions = computed(() => {
+  const entries = factoryList.value?.content ?? [];
+  if (!entries.length) {
+    return [{ value: null, label: '전체', id: null }];
+  }
+
+  return [
+    { value: null, label: '전체', id: null },
+    ...entries.map(factory => ({
+      value: factory.factoryCode,
+      label: factory.factoryName,
+      id: factory.factoryId,
+    })),
+  ];
+});
+
+const lineOptions = computed(() => {
+  const entries = lineList.value?.content ?? [];
+  if (!entries.length) return [{ value: null, label: '전체' }];
+
+  const unique = new Map();
+  entries.forEach(line => {
+    if (!unique.has(line.lineCode)) {
+      unique.set(line.lineCode, line);
+    }
+  });
+
+  return [
+    { value: null, label: '전체' },
+    ...Array.from(unique.values()).map(line => ({
+      value: line.lineCode,
+      label: `${line.lineName} (${line.lineCode})`,
+    })),
+  ];
 });
 
 const activeFilters = reactive({
@@ -341,7 +467,87 @@ const activeFilters = reactive({
   productionManagerNo: '',
   salesManagerNo: '',
   productionPerformanceDocNo: '',
+  minDefectiveRate: '',
+  maxDefectiveRate: '',
 });
+
+const onItemSelected = item => {
+  filterForm.itemId = item?.id ?? '';
+  filterForm.itemCode = item?.itemCode ? String(item.itemCode) : '';
+  selectedItemId.value = item?.id ?? null;
+};
+
+const onItemCleared = () => {
+  filterForm.itemId = '';
+  filterForm.itemCode = '';
+  selectedItemId.value = null;
+};
+
+const setItemCodeFilter = newCode => {
+  filterForm.itemCode = newCode ? String(newCode) : '';
+  if (!newCode) {
+    filterForm.itemId = '';
+    selectedItemId.value = null;
+  }
+};
+
+const onProductionManagerSelected = manager => {
+  filterForm.productionManagerName = manager?.userName ?? '';
+  filterForm.productionManagerNo = manager?.empNo ? String(manager.empNo) : '';
+};
+
+const onProductionManagerCleared = () => {
+  filterForm.productionManagerName = '';
+  filterForm.productionManagerNo = '';
+};
+
+const setProductionManagerFilter = newValue => {
+  filterForm.productionManagerNo = newValue ? String(newValue) : '';
+  if (!newValue) {
+    filterForm.productionManagerName = '';
+  }
+};
+
+const onSalesManagerSelected = manager => {
+  filterForm.salesManagerName = manager?.userName ?? '';
+  filterForm.salesManagerNo = manager?.empNo ? String(manager.empNo) : '';
+};
+
+const onSalesManagerCleared = () => {
+  filterForm.salesManagerName = '';
+  filterForm.salesManagerNo = '';
+};
+
+const setSalesManagerFilter = newValue => {
+  filterForm.salesManagerNo = newValue ? String(newValue) : '';
+  if (!newValue) {
+    filterForm.salesManagerName = '';
+  }
+};
+
+const updateSelectedFactoryId = code => {
+  const match = factoryList.value?.content?.find(factory => factory.factoryCode === code);
+  selectedFactoryId.value = match?.factoryId ?? null;
+};
+
+watch(
+  () => filterForm.factoryCode,
+  (newCode, oldCode) => {
+    updateSelectedFactoryId(newCode);
+    if (oldCode !== undefined && newCode !== oldCode) {
+      filterForm.lineCode = null;
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  factoryList,
+  () => {
+    updateSelectedFactoryId(filterForm.factoryCode);
+  },
+  { deep: true },
+);
 
 const queryParams = computed(() =>
   buildQueryObject({
@@ -354,6 +560,8 @@ const queryParams = computed(() =>
     productionManagerNo: activeFilters.productionManagerNo,
     salesManagerNo: activeFilters.salesManagerNo,
     productionPerformanceDocNo: activeFilters.productionPerformanceDocNo,
+    minDefectiveRate: activeFilters.minDefectiveRate,
+    maxDefectiveRate: activeFilters.maxDefectiveRate,
   }),
 );
 
@@ -445,9 +653,14 @@ watch(
 );
 
 const sanitizeNumber = value => {
-  if (!value) return '';
+  if (value === null || value === undefined || value === '') return '';
   const num = Number(value);
   return Number.isNaN(num) ? '' : num;
+};
+
+const sanitizeString = value => {
+  if (typeof value !== 'string') return '';
+  return value.trim();
 };
 
 const resetFilters = () => {
@@ -455,13 +668,20 @@ const resetFilters = () => {
     fromDate: '',
     toDate: '',
     dueDate: '',
-    factoryCode: '',
-    lineCode: '',
+    factoryCode: null,
+    lineCode: null,
     itemId: '',
+    itemCode: '',
     productionManagerNo: '',
+    productionManagerName: '',
     salesManagerNo: '',
+    salesManagerName: '',
     productionPerformanceDocNo: '',
+    minDefectiveRate: '',
+    maxDefectiveRate: '',
   });
+  selectedFactoryId.value = null;
+  selectedItemId.value = null;
 };
 
 const applyFilters = async () => {
@@ -474,12 +694,14 @@ const applyFilters = async () => {
       fromDate: filterForm.fromDate || '',
       toDate: filterForm.toDate || '',
       dueDate: filterForm.dueDate || '',
-      factoryCode: filterForm.factoryCode.trim(),
-      lineCode: filterForm.lineCode.trim(),
+      factoryCode: sanitizeString(filterForm.factoryCode ?? ''),
+      lineCode: sanitizeString(filterForm.lineCode ?? ''),
       itemId: sanitizeNumber(filterForm.itemId),
       productionManagerNo: filterForm.productionManagerNo.trim(),
       salesManagerNo: filterForm.salesManagerNo.trim(),
       productionPerformanceDocNo: filterForm.productionPerformanceDocNo.trim(),
+      minDefectiveRate: sanitizeNumber(filterForm.minDefectiveRate),
+      maxDefectiveRate: sanitizeNumber(filterForm.maxDefectiveRate),
     });
 
     hasSearched.value = true;
@@ -498,7 +720,7 @@ const formatPercent = value => {
   if (Number.isNaN(numeric)) return String(value);
 
   const display = numeric > 1 ? numeric : numeric * 100; // API가 비율(0~1) 또는 %값 모두 대비
-  return `${display.toFixed(1)}%`;
+  return `${display.toFixed(1)}`;
 };
 
 const escapeCsv = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
@@ -789,5 +1011,4 @@ const chartsVisible = computed(() => hasSearched.value && chartRecords.value.len
   background-color: #ffffff;
   outline: none;
 }
-
 </style>

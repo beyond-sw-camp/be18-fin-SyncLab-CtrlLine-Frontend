@@ -11,11 +11,11 @@
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">Lot No.</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">품목 코드</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">품목코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">생산수량</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">불량수량</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">불량률</TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden">불량률 (%)</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -158,7 +158,7 @@ const formatRate = value => {
   if (value === null || value === undefined) return '-';
   const num = Number(value);
   if (Number.isNaN(num)) return value;
-  return `${num.toFixed(2)}%`;
+  return `${num.toFixed(2)}`;
 };
 
 const calculateDefectiveRate = lot => {

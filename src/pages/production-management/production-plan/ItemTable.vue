@@ -5,7 +5,7 @@
         <TableHead class="text-center">품목코드</TableHead>
         <TableHead class="text-center">품목명</TableHead>
         <TableHead class="text-center">규격</TableHead>
-        <TableHead class="text-center">생산계획수량</TableHead>
+        <TableHead class="text-center">계획수량</TableHead>
         <TableHead class="text-center">단위</TableHead>
       </TableRow>
     </TableHeader>

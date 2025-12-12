@@ -90,7 +90,10 @@
         <Table class="w-full">
           <TableHeader class="border-b-2 border-primary">
             <TableRow>
-              <TableHead class="text-center whitespace-nowrap overflow-hidden">전표번호</TableHead>
+              <TableHead
+                class="sticky left-0 z-10 min-w-28 bg-white shadow-md text-center whitespace-nowrap overflow-hidden"
+                >전표번호</TableHead
+              >
               <TableHead class="text-center whitespace-nowrap overflow-hidden">공장명</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">라인명</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>

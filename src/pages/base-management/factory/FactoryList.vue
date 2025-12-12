@@ -14,7 +14,7 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden">공장명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">담당부서</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">담당자</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead>
+            <!-- <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead> -->
           </TableRow>
         </TableHeader>
 
@@ -37,7 +37,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ factory.name }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden">
+            <!-- <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
                 class="w-[50px]"
                 :class="
@@ -48,7 +48,7 @@
               >
                 {{ factory.isActive ? '사용' : '미사용' }}
               </Badge>
-            </TableCell>
+            </TableCell> -->
           </TableRow>
         </TableBody>
       </Table>
@@ -62,7 +62,7 @@ import { useRouter } from 'vue-router';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList.js';
 import BasePagination from '@/components/pagination/BasePagination.vue';
-import { Badge } from '@/components/ui/badge';
+// import { Badge } from '@/components/ui/badge';
 import {
   Table,
   TableBody,

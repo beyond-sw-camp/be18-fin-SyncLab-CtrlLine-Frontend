@@ -1,11 +1,16 @@
 <template>
   <div>
     <Label :for="label" class="text-xs">{{ label }}</Label>
-    <div :class="['relative', searchIcon ? 'filter-input-wrapper' : '']">
-      <Search v-if="searchIcon" class="filter-icon" />
+    <div :class="['relative mt-1', searchIcon ? 'filter-input-wrapper' : '']">
+      <span
+        v-if="searchIcon"
+        class="filter-icon flex h-5 w-5 items-center justify-center text-gray-400"
+      >
+        <SearchIcon class="w-4 h-4" />
+      </span>
       <Input
-        class="w-full border rounded-lg px-3 py-2 mt-1 h-7 text-xs"
-        :class="searchIcon ? 'pl-9' : ''"
+        class="w-full border rounded-lg px-3 py-2 h-7 text-xs"
+        :class="searchIcon ? 'pr-9' : ''"
         :id="label"
         :type="type"
         :placeholder="placeholder"
@@ -17,7 +22,7 @@
 </template>
 
 <script setup>
-import { Search } from 'lucide-vue-next';
+import { SearchIcon } from 'lucide-vue-next';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -48,10 +53,9 @@ defineEmits(['update:modelValue']);
 
 .filter-icon {
   position: absolute;
-  left: 0.75rem;
+  right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
   pointer-events: none;
 }
 </style>

@@ -28,7 +28,7 @@
               <TableRow>
                 <TableHead class="w-[100px] text-center">ID</TableHead>
                 <TableHead class="text-center">새 종료 시각</TableHead>
-                <TableHead class="text-center">납기일</TableHead>
+                <TableHead class="text-center">납기일자</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
