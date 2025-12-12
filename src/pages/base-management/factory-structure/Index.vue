@@ -30,6 +30,7 @@
             placeholder="라인/설비/공정 검색"
             class="w-full"
           />
+          <Search class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
 
           <div
             v-if="searchQuery && searchResults.length"
@@ -186,6 +187,7 @@ import {
   Boxes,
   Droplet,
   Puzzle,
+  Search,
   ShieldCheck,
   Sparkles,
   Zap,
