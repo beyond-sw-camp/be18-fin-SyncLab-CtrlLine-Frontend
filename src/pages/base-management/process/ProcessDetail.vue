@@ -76,7 +76,7 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="isActive">
+          <!-- <FormField v-slot="{ componentField, errorMessage }" name="isActive">
             <FormItem>
               <FormLabel>공정 사용여부</FormLabel>
               <FormControl>
@@ -94,7 +94,7 @@
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
-          </FormField>
+          </FormField> -->
         </div>
       </fieldset>
       <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">

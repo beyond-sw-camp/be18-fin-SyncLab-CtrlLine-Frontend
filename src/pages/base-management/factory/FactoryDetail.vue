@@ -66,7 +66,7 @@
           </FormField>
         </div>
 
-        <div class="order-1 md:order-0">
+        <!-- <div class="order-1 md:order-0">
           <FormField v-slot="{ componentField, errorMessage }" name="isActive">
             <FormItem>
               <FormLabel>공장 사용여부</FormLabel>
@@ -86,7 +86,7 @@
               </FormControl>
             </FormItem>
           </FormField>
-        </div>
+        </div> -->
       </div>
     </Form>
   </div>
