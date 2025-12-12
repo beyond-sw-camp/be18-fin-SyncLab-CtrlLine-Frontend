@@ -1,24 +1,46 @@
 <template>
   <section class="space-y-6">
     <div class="flex flex-col gap-4">
-      <Tabs v-if="factories.length" v-model="selectedFactoryCode" class="w-full lg:w-fit">
-        <TabsList class="flex-wrap justify-start gap-2">
-          <TabsTrigger
-            v-for="factory in factories"
-            :key="factory.factoryCode"
-            :value="factory.factoryCode"
-            class="min-w-28"
-          >
-            {{ factory.factoryName }}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div class="w-full md:flex-1">
+          <Tabs v-if="factories.length" v-model="selectedFactoryCode" class="w-full md:w-auto">
+            <TabsList class="flex-wrap justify-start gap-2">
+              <TabsTrigger
+                v-for="factory in factories"
+                :key="factory.factoryCode"
+                :value="factory.factoryCode"
+                class="min-w-28"
+              >
+                {{ factory.factoryName }}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-      <div
-        v-else
-        class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500"
-      >
-        공장 목록을 불러오는 중입니다...
+          <div
+            v-else
+            class="rounded-lg border border-dashed border-gray-300 p-3 text-center text-sm text-gray-500"
+          >
+            공장 목록을 불러오는 중입니다...
+          </div>
+        </div>
+
+        <div class="relative w-full md:w-80">
+          <Input
+            v-model="searchQuery"
+            placeholder="라인/설비/공정 검색"
+            class="w-full"
+            @keyup.enter="handleSearch"
+          />
+          <button
+            type="button"
+            class="absolute right-2 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full bg-primary/90 p-2 text-white shadow-md transition hover:bg-primary"
+            @click="handleSearch"
+            :disabled="!searchQuery.trim()"
+          >
+            <Search class="size-4" />
+          </button>
+          <p v-if="searchFeedback" class="mt-1 text-xs text-red-500">{{ searchFeedback }}</p>
+        </div>
       </div>
 
       <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -31,6 +53,8 @@
                 v-for="line in lineStructures"
                 :key="line.lineCode"
                 class="line-floor-plan"
+                :class="{ 'line-floor-plan--highlight': line.lineCode === highlightedLineCode }"
+                :ref="el => registerLineRef(line.lineCode, el)"
                 :data-type="line.type"
               >
                 <header class="line-floor-plan__header">
@@ -58,7 +82,7 @@
                             :data-active="
                               (equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)
                             "
-                            @click.stop="openEquipmentModal(equipment)"
+                            @click.stop="openEquipmentModal(line, equipment)"
                           >
                             <component
                               :is="equipment.icon"
@@ -101,11 +125,34 @@
                 </DialogDescription>
               </DialogHeader>
 
-              <div class="mt-4 space-y-3" v-if="activeEquipment?.processes?.length">
+              <div
+                class="mt-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-600"
+                v-if="activeEquipmentCode"
+              >
+                설비코드:
+                <span class="font-mono font-semibold text-gray-800">{{ activeEquipmentCode }}</span>
+              </div>
+
+              <div class="mt-4 space-y-3" v-if="modalProcesses.length">
                 <p class="text-sm font-semibold text-gray-700">주요 공정</p>
                 <ul class="equipment-process-list">
-                  <li v-for="step in activeEquipment.processes" :key="step.name">
-                    <p class="font-medium text-gray-900">{{ step.name }}</p>
+                  <li
+                    v-for="step in modalProcesses"
+                    :key="step.name"
+                    :class="{
+                      'equipment-process-list__item--highlight':
+                        step.code === highlightedProcessCode,
+                    }"
+                  >
+                    <p class="font-medium text-gray-900">
+                      {{ step.name }}
+                      <span
+                        v-if="step.code"
+                        class="ml-2 rounded bg-gray-100 px-2 py-0.5 text-[11px] font-mono text-gray-600"
+                      >
+                        {{ step.code }}
+                      </span>
+                    </p>
                     <p class="text-sm text-gray-500">{{ step.desc }}</p>
                   </li>
                 </ul>
@@ -124,11 +171,12 @@ import {
   Boxes,
   Droplet,
   Puzzle,
+  Search,
   ShieldCheck,
   Sparkles,
   Zap,
 } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
@@ -139,77 +187,97 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+const LINE_TYPE_ORDER = ['CL', 'PL', 'CP'];
+const EQUIPMENT_UNITS_PER_LINE = 2;
+const EQUIPMENT_PREFIX_MAP = {
+  'Tray Dry Cleaning Unit': 'TCP',
+  'Electrode Unit': 'EU',
+  'Assembly Unit': 'AU',
+  'Formation Unit': 'FAU',
+  'Module & Pack Unit': 'MAP',
+  'Cell Cleaning Unit': 'CCP',
+  'Final Inspection Unit': 'FIP',
+};
 
 const EQUIPMENT_GROUPS = [
   {
     label: 'Tray Dry Cleaning Unit',
     icon: Sparkles,
+    codePrefix: 'TCP',
     processes: [
-      { name: 'Tray Loading System', desc: '빈 트레이 투입 공정' },
-      { name: 'Dry Cleaning Process', desc: '에어 블로우 · 정전기 제거' },
-      { name: 'Static Neutralizer', desc: '이온 발생기로 정전기 중화' },
-      { name: 'Tray Buffer Conveyor', desc: '세정 완료 트레이 대기' },
+      { name: 'Tray Loading System', prCode: 'PR001', desc: '빈 트레이 투입 공정' },
+      { name: 'Dry Cleaning Process', prCode: 'PR002', desc: '에어 블로우 · 정전기 제거' },
+      { name: 'Static Neutralizer', prCode: 'PR003', desc: '이온 발생기로 정전기 중화' },
+      { name: 'Tray Buffer Conveyor', prCode: 'PR004', desc: '세정 완료 트레이 대기' },
     ],
   },
   {
     label: 'Electrode Unit',
     icon: Zap,
+    codePrefix: 'EU',
     processes: [
-      { name: 'Mixing Process', desc: '슬러리 혼합 공정' },
-      { name: 'Coating Process', desc: '슬러리 도포 공정' },
-      { name: 'Drying Oven Process', desc: '건조 공정' },
-      { name: 'Calender Press Process', desc: '압연 공정' },
-      { name: 'Slitting Process', desc: '전극 절단 공정' },
-      { name: 'Tray Loading Process', desc: '전극 적재 공정' },
+      { name: 'Slurry Mixing Process', prCode: 'PR001', desc: '슬러리 혼합 공정' },
+      { name: 'Slurry Coating Process', prCode: 'PR002', desc: '슬러리 도포 공정' },
+      { name: 'Drying Oven Process', prCode: 'PR003', desc: '건조 공정' },
+      { name: 'Calender Press Process', prCode: 'PR004', desc: '압연 공정' },
+      { name: 'Slitting Process', prCode: 'PR005', desc: '전극 절단 공정' },
+      { name: 'Tray Loading Process', prCode: 'PR006', desc: '전극 적재 공정' },
     ],
   },
   {
     label: 'Assembly Unit',
     icon: Puzzle,
+    codePrefix: 'AU',
     processes: [
-      { name: 'Notching Process', desc: '셀 시트 절단 공정' },
-      { name: 'Stacking / Winding Process', desc: '적층 · 권취 공정' },
-      { name: 'Tab Welding Process', desc: '탭 용접 공정' },
-      { name: 'Cell Enclosing Process', desc: '봉입 공정' },
-      { name: 'Electrolyte Filling Process', desc: '전해액 주입 공정' },
+      { name: 'Notching Process', prCode: 'PR001', desc: '셀 시트 절단 공정' },
+      { name: 'Stacking / Winding Process', prCode: 'PR002', desc: '적층 · 권취 공정' },
+      { name: 'Tab Welding Process', prCode: 'PR003', desc: '탭 용접 공정' },
+      { name: 'Cell Enclosing Process', prCode: 'PR004', desc: '봉입 공정' },
+      { name: 'Electrolyte Filling Process', prCode: 'PR005', desc: '전해액 주입 공정' },
     ],
   },
   {
     label: 'Formation Unit',
     icon: BatteryCharging,
+    codePrefix: 'FAU',
     processes: [
-      { name: 'Formation Rack', desc: '충방전 공정' },
-      { name: 'Aging Chamber', desc: 'Aging 보관' },
+      { name: 'Formation Rack', prCode: 'PR001', desc: '충방전 공정' },
+      { name: 'Aging Chamber', prCode: 'PR002', desc: 'Aging 보관' },
     ],
   },
   {
     label: 'Module & Pack Unit',
     icon: Boxes,
+    codePrefix: 'MAP',
     processes: [
-      { name: 'Cell Sorting Process', desc: '셀 분류 공정' },
-      { name: 'Module Assembly Process', desc: '모듈 조립 공정' },
-      { name: 'BMS Test Process', desc: '관리시스템 검사 공정' },
+      { name: 'Cell Sorting Process', prCode: 'PR001', desc: '셀 분류 공정' },
+      { name: 'Module Assembly Process', prCode: 'PR002', desc: '모듈 조립 공정' },
+      { name: 'BMS Test Process', prCode: 'PR003', desc: '관리시스템 검사 공정' },
     ],
   },
   {
     label: 'Cell Cleaning Unit',
     icon: Droplet,
+    codePrefix: 'CCP',
     processes: [
-      { name: 'Unloading Station', desc: '모듈 완료 셀 분리 공정' },
-      { name: 'Ultrasonic Washer', desc: '초음파 세정 공정' },
-      { name: 'Drying Chamber', desc: '건조 공정' },
-      { name: 'Surface Vision Process', desc: '세정 품질 검사 공정' },
+      { name: 'Unloading Station', prCode: 'PR001', desc: '모듈 완료 셀 분리 공정' },
+      { name: 'Ultrasonic Washer', prCode: 'PR002', desc: '초음파 세정 공정' },
+      { name: 'Drying Chamber', prCode: 'PR003', desc: '건조 공정' },
+      { name: 'Surface Vision Check Process', prCode: 'PR004', desc: '세정 품질 검사 공정' },
     ],
   },
   {
     label: 'Final Inspection Unit',
     icon: ShieldCheck,
+    codePrefix: 'FIP',
     processes: [
-      { name: 'Final Inspection Process', desc: '최종 검사 공정' },
-      { name: 'BMS Test Process', desc: '관리시스템 검사 공정' },
-      { name: 'Tray Return Conveyor', desc: '트레이 회수 · 세정 루프' },
+      { name: 'Final Inspection Process', prCode: 'PR001', desc: '최종 검사 공정' },
+      { name: 'BMS Test Process', prCode: 'PR002', desc: '관리시스템 검사 공정' },
+      { name: 'Tray Return Conveyor', prCode: 'PR003', desc: '트레이 회수 · 세정 루프' },
     ],
   },
 ];
@@ -224,19 +292,21 @@ const EQUIPMENT_LAYOUT = EQUIPMENT_GROUPS.flatMap((group, groupIndex) =>
       label: group.label,
       icon: group.icon,
       processes: group.processes,
+      codePrefix: group.codePrefix,
       position,
       gridColumn: `${position === 'top' ? baseColumn : baseColumn + 1}`,
       gridRow: position === 'top' ? '1' : '2',
       lineTypes: ['CL', 'PL', 'CP'],
+      unitIndex: offset,
     };
   }),
 );
 
 const tooltipDescription = label => {
   const descriptions = {
-    'Tray Dry Cleaning Unit': '트레이 재사용 전 Dry Cleaning 및 버퍼 라인',
-    'Electrode Unit': '전극 시트를 생산하고 트레이에 적재하는 공정',
-    'Assembly Unit': '셀을 조립하고 전해액을 주입하는 공정',
+    'Tray Dry Cleaning Unit': '트레이 재사용 전 Dry Cleaning 및 버퍼 대기',
+    'Electrode Unit': '전극 시트를 생산하고 트레이에 적재',
+    'Assembly Unit': '셀을 조립하고 전해액을 주입',
     'Formation Unit': '충방전 및 Aging으로 셀을 활성화',
     'Module & Pack Unit': '셀을 모듈 · 팩 단계로 조립',
     'Cell Cleaning Unit': '완성 셀을 세정하고 품질을 확인',
@@ -272,6 +342,11 @@ const FALLBACK_FACTORIES = [
 const { data: factoryList } = useGetFactoryList();
 const route = useRoute();
 const router = useRouter();
+const searchQuery = ref('');
+const searchFeedback = ref('');
+const highlightedLineCode = ref('');
+const highlightedProcessCode = ref('');
+const lineRefs = ref({});
 
 const factories = computed(() => {
   const remote = factoryList.value?.content ?? [];
@@ -323,19 +398,232 @@ const lineStructures = computed(() => {
     instanceIndex: 0,
     displayLabel: line.lineName,
     equipments: [],
+    factoryCode: factoryCode ?? selectedFactoryCode.value ?? 'F0001',
   }));
 });
+const lineStructuresDetailed = computed(() => {
+  return lineStructures.value.map(line => {
+    const equipments = EQUIPMENT_LAYOUT.filter(eq =>
+      (eq.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type),
+    ).map(eq => {
+      const equipmentCode = buildEquipmentCode(line, eq);
+      const processes = eq.processes.map(process => ({
+        ...process,
+        code: buildProcessCode(line, eq, process),
+      }));
+
+      return {
+        ...eq,
+        equipmentCode,
+        processes,
+      };
+    });
+
+    return {
+      ...line,
+      equipments,
+    };
+  });
+});
+
+const registerLineRef = (code, el) => {
+  if (el) {
+    lineRefs.value[code] = el;
+  } else {
+    delete lineRefs.value[code];
+  }
+};
+
+const scrollToLine = code => {
+  nextTick(() => {
+    const el = lineRefs.value[code];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+};
 const isEquipmentModalOpen = ref(false);
 const activeEquipment = ref(null);
+const activeLine = ref(null);
 
-const openEquipmentModal = equipment => {
+const openEquipmentModal = (line, equipment, options = {}) => {
+  activeLine.value = line;
   activeEquipment.value = equipment;
+  highlightedProcessCode.value = options.processCode ?? null;
+  if (options.fromSearch) {
+    highlightedLineCode.value = line.lineCode;
+  }
   isEquipmentModalOpen.value = true;
 };
 
 const closeEquipmentModal = () => {
   isEquipmentModalOpen.value = false;
+  activeEquipment.value = null;
+  activeLine.value = null;
+  highlightedProcessCode.value = null;
 };
+
+const modalProcesses = computed(() => {
+  if (!activeEquipment.value || !activeLine.value) return [];
+
+  return activeEquipment.value.processes.map(process => ({
+    ...process,
+    code: buildProcessCode(activeLine.value, activeEquipment.value, process),
+  }));
+});
+
+const activeEquipmentCode = computed(() => {
+  if (!activeEquipment.value || !activeLine.value) return null;
+  return buildEquipmentCode(activeLine.value, activeEquipment.value);
+});
+
+const buildProcessCode = (line, equipment, process) => {
+  const equipmentCode = buildEquipmentCode(line, equipment);
+  if (!equipmentCode) return null;
+
+  const prCode = process.prCode ?? 'PR000';
+  return `${equipmentCode}-${prCode}`;
+};
+
+const buildEquipmentCode = (line, equipment) => {
+  const factoryCode = line.factoryCode ?? selectedFactoryCode.value ?? 'F0001';
+  const factoryNumber = extractNumber(factoryCode);
+  const lineType = line.type ?? '';
+  const lineTypeIndex = LINE_TYPE_ORDER.indexOf(lineType);
+  if (factoryNumber <= 0 || lineTypeIndex === -1) return null;
+
+  const lineNumber = extractNumber(line.lineCode) || lineTypeIndex + 1;
+  const prefix = equipment.codePrefix ?? EQUIPMENT_PREFIX_MAP[equipment.label];
+  if (!prefix) return null;
+
+  const sequence =
+    (factoryNumber - 1) * LINE_TYPE_ORDER.length * EQUIPMENT_UNITS_PER_LINE +
+    lineTypeIndex * EQUIPMENT_UNITS_PER_LINE +
+    (equipment.unitIndex ?? 0) +
+    1;
+
+  const equipmentCode = `${prefix}${sequence.toString().padStart(3, '0')}`;
+  return `F${factoryNumber}-${lineType}${lineNumber}-${equipmentCode}`;
+};
+
+const extractNumber = value => {
+  const matched = String(value ?? '').match(/(\d+)/);
+  return matched ? parseInt(matched[1], 10) : 0;
+};
+
+const MAX_SEARCH_RESULTS = 12;
+const searchResults = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return [];
+
+  const results = [];
+  const matchesQuery = (...fields) => {
+    return fields.some(field => {
+      if (!field) return false;
+      return String(field).toLowerCase().includes(query);
+    });
+  };
+
+  lineStructuresDetailed.value.forEach(line => {
+    if (matchesQuery(line.displayLabel, line.lineCode)) {
+      results.push({
+        id: `line-${line.lineCode}`,
+        type: 'line',
+        name: line.displayLabel,
+        code: line.lineCode,
+        lineName: line.displayLabel,
+        lineCode: line.lineCode,
+        lineRef: line,
+      });
+    }
+
+    line.equipments.forEach(eq => {
+      if (matchesQuery(eq.label, eq.equipmentCode)) {
+        results.push({
+          id: `equipment-${line.lineCode}-${eq.label}-${eq.equipmentCode}`,
+          type: 'equipment',
+          name: eq.label,
+          code: eq.equipmentCode,
+          lineName: line.displayLabel,
+          lineCode: line.lineCode,
+          equipmentName: eq.label,
+          equipmentCode: eq.equipmentCode,
+          lineRef: line,
+          equipmentRef: eq,
+        });
+      }
+
+      eq.processes.forEach(proc => {
+        if (matchesQuery(proc.name, proc.code)) {
+          results.push({
+            id: `process-${line.lineCode}-${proc.code}`,
+            type: 'process',
+            name: proc.name,
+            code: proc.code,
+            lineName: line.displayLabel,
+            lineCode: line.lineCode,
+            equipmentName: eq.label,
+            equipmentCode: eq.equipmentCode,
+            processCode: proc.code,
+            lineRef: line,
+            equipmentRef: eq,
+          });
+        }
+      });
+    });
+  });
+
+  return results.slice(0, MAX_SEARCH_RESULTS);
+});
+
+const handleSearch = () => {
+  const query = searchQuery.value.trim();
+  if (!query) {
+    searchFeedback.value = '검색어를 입력해 주세요.';
+    return;
+  }
+
+  const result = searchResults.value[0];
+  if (!result) {
+    searchFeedback.value = '검색 결과가 없습니다.';
+    return;
+  }
+
+  searchFeedback.value = '';
+
+  if (result.type === 'line') {
+    highlightedLineCode.value = result.lineCode ?? '';
+    highlightedProcessCode.value = null;
+    scrollToLine(result.lineCode);
+    return;
+  }
+
+  const line =
+    result.lineRef ??
+    lineStructuresDetailed.value.find(target => target.lineCode === result.lineCode);
+  const equipment =
+    result.equipmentRef ?? line?.equipments?.find(eq => eq.equipmentCode === result.equipmentCode);
+
+  if (line && equipment) {
+    openEquipmentModal(line, equipment, {
+      processCode: result.processCode ?? null,
+      fromSearch: true,
+    });
+  } else {
+    searchFeedback.value = '검색 결과를 표시할 수 없습니다.';
+  }
+};
+
+watch(searchQuery, value => {
+  if (!value) {
+    searchFeedback.value = '';
+    highlightedLineCode.value = '';
+    highlightedProcessCode.value = null;
+  } else {
+    highlightedLineCode.value = '';
+    highlightedProcessCode.value = null;
+  }
+});
 </script>
 
 <style scoped>
@@ -363,6 +651,11 @@ const closeEquipmentModal = () => {
   background: #fff;
   box-shadow: 0 20px 35px rgba(15, 23, 42, 0.08);
   overflow: hidden;
+}
+
+.line-floor-plan--highlight {
+  border: 3px solid rgba(45, 115, 90, 0.8);
+  box-shadow: 0 25px 45px rgba(45, 115, 90, 0.25);
 }
 
 .line-floor-plan__header {
@@ -499,6 +792,21 @@ const closeEquipmentModal = () => {
   justify-content: center;
   font-weight: 600;
   box-shadow: 0 4px 10px rgba(16, 24, 40, 0.1);
+}
+
+.equipment-process-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.equipment-process-list__item--highlight {
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(45, 115, 90, 0.12);
 }
 
 .equipment-icon {
