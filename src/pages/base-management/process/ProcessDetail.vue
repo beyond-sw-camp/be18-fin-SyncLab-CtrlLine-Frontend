@@ -12,6 +12,16 @@
     >
       <fieldset :disabled="!isAdmin">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField v-slot="{ componentField, errorMessage }" name="equipmentCode">
+            <FormItem>
+              <FormLabel>설비코드</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" autocomplete="equipment-code" disabled />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
           <FormField v-slot="{ componentField, errorMessage }" name="processCode">
             <FormItem>
               <FormLabel>공정코드</FormLabel>
@@ -131,6 +141,7 @@ import { canView } from '@/utils/canView';
 
 const formSchema = toTypedSchema(
   z.object({
+    equipmentCode: z.string().optional(),
     processCode: z.string().optional(),
     processName: z.string().optional(),
     empNo: z.string({ required_error: '담당자는 필수입니다.' }).min(1, '담당자는 필수입니다.'),
@@ -181,6 +192,7 @@ watch(
     if (!val) return;
 
     form.setValues({
+      equipmentCode: processDetail.value.equipmentCode,
       processCode: processDetail.value.processCode,
       processName: processDetail.value.processName,
       userDepartment: processDetail.value.userDepartment,
