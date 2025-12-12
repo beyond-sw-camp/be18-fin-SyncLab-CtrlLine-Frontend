@@ -212,45 +212,6 @@ function onEventRendered(args) {
   }
 }
 
-// function onEventRendered(args) {
-//   const ev = args.data;
-//   const el = args.element;
-
-//   // 공통적으로 먼저 초기화
-//   el.classList.remove('event-current', 'event-draft', 'event-draggable', 'event-locked');
-
-//   if (ev.Id === 'draft-modified') {
-//     el.style.setProperty('background-color', 'var(--primary)', 'important');
-//     el.style.setProperty('border-color', 'var(--primary)', 'important');
-//     el.style.setProperty('color', 'white', 'important');
-//     el.classList.add('event-draft', 'event-draggable');
-//     return;
-//   }
-
-//   // 👉 이번 상세 조회와 관련된 일정
-//   if (props.productionPlanDetail.id && ev.Id === props.productionPlanDetail.id) {
-//     el.style.setProperty('background-color', DETAIL_HIGHLIGHT.background, 'important');
-//     el.style.setProperty('border-color', DETAIL_HIGHLIGHT.border, 'important');
-//     el.style.setProperty('color', DETAIL_HIGHLIGHT.text, 'important');
-//     el.classList.add('event-current', 'event-draggable');
-//     return;
-//   }
-
-//   const color = STATUS_COLORS[ev.Status];
-//   if (color) {
-//     el.style.setProperty('background-color', color.background, 'important');
-//     el.style.setProperty('border-color', color.border, 'important');
-//     el.style.setProperty('color', color.text, 'important');
-//   }
-
-//   // 상태에 따라 편집 가능/불가 구분 (예: CONFIRMED는 잠금)
-//   if (ev.Status === 'CONFIRMED') {
-//     el.classList.add('event-locked');
-//   } else {
-//     el.classList.add('event-draggable');
-//   }
-// }
-
 const { data: lineListSchedule } = useGetLineList({
   factoryId: computed(() => props.factoryId),
 });
@@ -375,6 +336,7 @@ const availableEventSettings = computed(() => ({
 
 const beforeDragEvents = ref([]); // drag 시작 직전의 selectedEvents 스냅샷
 const beforeDragMoved = ref(null); // 어떤 이벤트를 움직였는지 저장
+const DRAG_ORDER_EPSILON_MS = 1000; // 드래그 순서 보정용 (1초)
 
 function onSelectedDragStart(args) {
   const ev = args.data;
@@ -470,10 +432,10 @@ function onSelectedDragStop(args) {
 
     if (movedStart > originalStart) {
       // 뒤로 이동
-      dropTime = new Date(dropTime.getTime() + 1000);
+      dropTime = new Date(dropTime.getTime() + DRAG_ORDER_EPSILON_MS);
     } else if (movedStart < originalStart) {
       // 앞으로 이동
-      dropTime = new Date(dropTime.getTime() - 1000);
+      dropTime = new Date(dropTime.getTime() - DRAG_ORDER_EPSILON_MS);
     }
   }
 
@@ -549,16 +511,15 @@ function onSelectedDragStop(args) {
   if (finalMoved && beforeInfo && beforeInfo.id === moved.Id) {
     const originalStart = beforeInfo.start;
     const finalStart = new Date(finalMoved.StartTime);
-    const delta = 1000; // 1초
 
     if (finalStart > originalStart) {
-      // 뒤로 이동 → +1초
-      finalMoved.StartTime = new Date(finalStart.getTime() + delta);
-      finalMoved.EndTime = new Date(finalMoved.EndTime.getTime() + delta);
+      // 뒤로 이동
+      finalMoved.StartTime = new Date(finalStart.getTime() + DRAG_ORDER_EPSILON_MS);
+      finalMoved.EndTime = new Date(finalMoved.EndTime.getTime() + DRAG_ORDER_EPSILON_MS);
     } else if (finalStart < originalStart) {
-      // 앞으로 이동 → -1초
-      finalMoved.StartTime = new Date(finalStart.getTime() - delta);
-      finalMoved.EndTime = new Date(finalMoved.EndTime.getTime() - delta);
+      // 앞으로 이동
+      finalMoved.StartTime = new Date(finalStart.getTime() - DRAG_ORDER_EPSILON_MS);
+      finalMoved.EndTime = new Date(finalMoved.EndTime.getTime() - DRAG_ORDER_EPSILON_MS);
     }
 
     merged = merged.map(ev => (ev.Id === finalMoved.Id ? { ...finalMoved } : ev));

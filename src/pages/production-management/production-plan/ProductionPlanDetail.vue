@@ -627,8 +627,8 @@ const handleConfirmUpdate = () => {
   updateProductionPlan(previewKey.value, {
     onSuccess: () => {
       showConfirmationModal.value = false;
+      // router.push('/production-management/production-plans');
       toast.success('생산 계획이 최종 수정되었습니다.');
-
       router.go(0);
     },
     onError: () => {
