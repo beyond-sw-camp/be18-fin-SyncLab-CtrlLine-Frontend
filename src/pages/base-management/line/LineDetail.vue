@@ -150,8 +150,8 @@ import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/for
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { canView } from '@/utils/canView';
 import ManageItemLineDialog from '@/pages/base-management/line/ManageItemLineDialog.vue';
+import { canView } from '@/utils/canView';
 
 const formSchema = toTypedSchema(
   z.object({
