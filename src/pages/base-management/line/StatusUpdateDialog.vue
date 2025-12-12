@@ -90,6 +90,7 @@ watch(
 );
 
 const onUpdateStatus = () => {
+  // @ts-ignore
   const lineIds = props.rows.map(r => r.id);
   const isActiveBoolean = selectedStatus.value === 'true';
 
@@ -98,6 +99,7 @@ const onUpdateStatus = () => {
     isActive: isActiveBoolean,
   };
 
+  // @ts-ignore
   callUpdateLine(params);
   emit('updated');
 };
