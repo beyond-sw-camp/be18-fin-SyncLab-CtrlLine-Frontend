@@ -511,12 +511,6 @@ const extractNumber = value => {
   return matched ? parseInt(matched[1], 10) : 0;
 };
 
-const SEARCH_LABELS = {
-  line: '라인',
-  equipment: '설비',
-  process: '공정',
-};
-
 const MAX_SEARCH_RESULTS = 12;
 const searchResults = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
