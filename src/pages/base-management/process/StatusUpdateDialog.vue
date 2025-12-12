@@ -1,9 +1,9 @@
 <template>
   <Dialog>
     <DialogTrigger as-child>
-      <Button size="sm" class="cursor-pointer w-[90px]" :disabled="!canEdit" v-if="isAdmin">
+      <!-- <Button size="sm" class="cursor-pointer w-[90px]" :disabled="!canEdit" v-if="isAdmin">
         사용여부 변경
-      </Button>
+      </Button> -->
     </DialogTrigger>
     <DialogContent class="rounded-2xl p-6 sm:max-w-[400px]">
       <DialogHeader>
@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 import useUpdateProcessStatusList from '@/apis/query-hooks/process/useUpdateProcessStatusList';
 import { Button } from '@/components/ui/button';
@@ -56,7 +56,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { canView } from '@/utils/canView';
+// import { canView } from '@/utils/canView';
 
 const props = defineProps({
   rows: {
@@ -68,17 +68,17 @@ const props = defineProps({
 const emit = defineEmits(['updated']);
 const selectedStatus = ref(null);
 const { mutate: callUpdateProcess } = useUpdateProcessStatusList();
-const isAdmin = canView(['ADMIN']);
+// const isAdmin = canView(['ADMIN']);
 
-const canEdit = computed(() => {
-  if (props.rows.length === 0) return false;
+// const canEdit = computed(() => {
+//   if (props.rows.length === 0) return false;
 
-  const first = props.rows[0].isActive;
+//   const first = props.rows[0].isActive;
 
-  const isSameState = props.rows.every(row => row.isActive === first);
+//   const isSameState = props.rows.every(row => row.isActive === first);
 
-  return isSameState;
-});
+//   return isSameState;
+// });
 
 watch(
   () => props.rows,
@@ -89,6 +89,7 @@ watch(
 );
 
 const onUpdateStatus = () => {
+  // @ts-ignore
   const processIds = props.rows.map(r => r.id);
   const isActiveBoolean = selectedStatus.value == 'true';
 
@@ -97,6 +98,7 @@ const onUpdateStatus = () => {
     isActive: isActiveBoolean,
   };
 
+  // @ts-ignore
   callUpdateProcess(params);
   emit('updated');
 };

@@ -19,11 +19,7 @@
               >
                 전표번호
               </TableHead>
-              <TableHead
-                class="sticky left-28 z-10 bg-white shadow-md text-center whitespace-nowrap overflow-hidden"
-              >
-                상태
-              </TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden"> 상태 </TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장명 </TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden"> 라인명 </TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목명 </TableHead>

@@ -83,13 +83,7 @@
                   <SelectValue placeholder="품목구분을 선택하세요." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem
-                    v-for="(label, value) in ITEM_STATUS_LABELS"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
-                  </SelectItem>
+                  <SelectItem key="FINISHED_PRODUCT" value="FINISHED_PRODUCT"> 완제품 </SelectItem>
                 </SelectContent>
               </Select>
               <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -150,7 +144,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { ITEM_STATUS_LABELS } from '@/constants/enumLabels';
 
 const { mutate: createItem } = useCreateItem();
 const formSchema = toTypedSchema(
@@ -158,7 +151,7 @@ const formSchema = toTypedSchema(
     itemCode: z
       .string({ required_error: '품목코드는 필수입니다. ex) CELL-C-12345-ABC-31.0' })
       .nonempty('품목코드는 필수입니다.')
-      .regex(/^CELL-/i, "품목코드는 'CELL-'로 시작해야 합니다."),
+      .regex(/^(CELL|PACK)-/i, "품목코드는 'CELL- 또는 PACK-'로 시작해야 합니다."),
     itemName: z
       .string({ required_error: '품목명은 필수입니다. ex) 원형 셀 12345 31.0Ah (ABC)' })
       .nonempty('품목명은 필수입니다.'),
@@ -184,6 +177,7 @@ const onSubmit = values => {
     itemStatus: values.itemStatus,
     isActive: values.isActive === 'true',
   };
+  // @ts-ignore
   createItem(params);
   // updateFactoryStatus(params);
 };

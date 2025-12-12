@@ -18,18 +18,18 @@
               @click.stop
               v-if="isAdmin"
             >
-              <Checkbox
+              <!-- <Checkbox
                 :modelValue="isAllChecked"
                 @update:modelValue="toggleAll"
                 class="size-4 border-[1.5px]"
-              />
+              /> -->
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">설비코드</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">설비명</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">설비유형</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">담당부서</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">담당자</TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead>
+            <!-- <TableHead class="text-center whitespace-nowrap overflow-hidden">사용여부</TableHead> -->
           </TableRow>
         </TableHeader>
 
@@ -45,14 +45,14 @@
               class="py-3 whitespace-nowrap overflow-hidden text-ellipsis flex justify-center"
               @click.stop
             >
-              <Checkbox
+              <!-- <Checkbox
                 class="size-4 border-[1.5px]"
                 :modelValue="selectedRows.some(r => r.id === equipment.equipmentId)"
                 @update:modelValue="
                   checked =>
                     toggleRow(checked, { id: equipment.equipmentId, isActive: equipment.isActive })
                 "
-              />
+              /> -->
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ equipment.equipmentCode }}
@@ -69,7 +69,7 @@
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
               {{ equipment.userName }}
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden">
+            <!-- <TableCell class="whitespace-nowrap overflow-hidden">
               <Badge
                 class="w-[50px] mx-auto"
                 :class="
@@ -80,7 +80,7 @@
               >
                 {{ equipment.isActive ? '사용' : '미사용' }}
               </Badge>
-            </TableCell>
+            </TableCell> -->
           </TableRow>
           <TableRow v-if="equipmentList.content.length === 0">
             <TableCell colspan="7" class="text-center py-10 text-gray-500">
@@ -95,13 +95,13 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetEquipmentList from '@/apis/query-hooks/equipment/useGetEquipmentList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+// import { Badge } from '@/components/ui/badge';
+// import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -133,32 +133,32 @@ const onReset = () => {
   selectedRows.value = [];
 };
 
-const allRows = computed(
-  () =>
-    equipmentList.value?.content?.map(equipment => ({
-      id: equipment.equipmentId,
-      isActive: equipment.isActive,
-    })) ?? [],
-);
+// const allRows = computed(
+//   () =>
+//     equipmentList.value?.content?.map(equipment => ({
+//       id: equipment.equipmentId,
+//       isActive: equipment.isActive,
+//     })) ?? [],
+// );
 
-const isAllChecked = computed(
-  () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
-);
+// const isAllChecked = computed(
+//   () => selectedRows.value.length > 0 && selectedRows.value.length === allRows.value.length,
+// );
 
-// 전체 선택/해제
-const toggleAll = checked => {
-  selectedRows.value = checked ? [...allRows.value] : [];
-};
+// // 전체 선택/해제
+// const toggleAll = checked => {
+//   selectedRows.value = checked ? [...allRows.value] : [];
+// };
 
-const toggleRow = (checked, row) => {
-  if (checked) {
-    if (!selectedRows.value.find(r => r.id === row.id)) {
-      selectedRows.value.push(row);
-    }
-  } else {
-    selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
-  }
-};
+// const toggleRow = (checked, row) => {
+//   if (checked) {
+//     if (!selectedRows.value.find(r => r.id === row.id)) {
+//       selectedRows.value.push(row);
+//     }
+//   } else {
+//     selectedRows.value = selectedRows.value.filter(r => r.id !== row.id);
+//   }
+// };
 
 const { data: equipmentList, page, filters } = useGetEquipmentList(initialFilters);
 

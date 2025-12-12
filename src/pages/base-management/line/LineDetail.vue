@@ -88,7 +88,7 @@
             </FormField>
           </div>
 
-          <div class="order-7 md:order-0">
+          <!-- <div class="order-7 md:order-0">
             <FormField v-slot="{ componentField, errorMessage }" name="isActive">
               <FormItem>
                 <FormLabel>라인 사용여부</FormLabel>
@@ -108,16 +108,13 @@
                 </FormControl>
               </FormItem>
             </FormField>
-          </div>
+          </div> -->
         </div>
       </fieldset>
 
       <!--담당자 MANAGER 권한 이상 부터 가능하다~ -->
       <div class="mt-8 pt-6 border-t" v-if="isAdmin">
-        <ManageItemLineDialog
-          v-if="lineDetail?.lineCode"
-          :line-code="lineDetail.lineCode"
-        />
+        <ManageItemLineDialog v-if="lineDetail?.lineCode" :line-code="lineDetail.lineCode" />
       </div>
 
       <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
@@ -148,8 +145,8 @@ import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompl
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+// import { Label } from '@/components/ui/label';
+// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import ManageItemLineDialog from '@/pages/base-management/line/ManageItemLineDialog.vue';
 import { canView } from '@/utils/canView';
 
