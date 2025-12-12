@@ -17,10 +17,9 @@
       </Button>
       <Button
         v-if="canEdit"
-        type="button"
+        type="submit"
         form="productionPlanUpdateForm"
         class="bg-primary text-white hover:bg-primary-600 cursor-pointer w-[60px]"
-        @click="onSubmit"
         size="sm"
       >
         Save
@@ -343,9 +342,8 @@
     </form>
   </div>
   <ConfirmScheduleModal
-    v-if="showConfirmationModal"
     :visible="showConfirmationModal"
-    :affected-plans-data="affectedPlansData"
+    :affected-plans-data="affectedPlansData ?? { affectedPlans: [], dueDateExceededPlans: [] }"
     @confirm="handleConfirmUpdate"
     @cancel="handleCancelUpdate"
   />
@@ -367,6 +365,7 @@ import useCreateProductionPlanEndTime from '@/apis/query-hooks/production-plan/u
 import useDeleteProductionPlan from '@/apis/query-hooks/production-plan/useDeleteProductionPlan';
 import useGetProductionPlan from '@/apis/query-hooks/production-plan/useGetProductionPlan';
 import useGetProductionPlanBoundary from '@/apis/query-hooks/production-plan/useGetProductionPlanBoundary';
+import useUpdateProductionPlanPreview from '@/apis/query-hooks/production-plan/useGetProductionPlanPreview';
 import useUpdateProductionPlan from '@/apis/query-hooks/production-plan/useUpdateProductionPlan';
 import useGetUserList from '@/apis/query-hooks/user/useGetUserList';
 import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompleteSelect.vue';
@@ -511,6 +510,9 @@ const shouldDisableStatus = value => {
 const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 const { mutate: updateProductionPlan } = useUpdateProductionPlan(route.params.productionPlanId);
+const { mutate: updateProductionPlanPreview } = useUpdateProductionPlanPreview(
+  route.params.productionPlanId,
+);
 const { mutate: updateEndTime } = useCreateProductionPlanEndTime();
 const { data: boundaryData } = useGetProductionPlanBoundary({
   factoryCode: computed(() => factoryDetail.value?.factoryCode),
@@ -518,8 +520,10 @@ const { data: boundaryData } = useGetProductionPlanBoundary({
 });
 
 const router = useRouter();
+
 const showConfirmationModal = ref(false);
 const affectedPlansData = ref(null);
+const previewKey = ref(null); // previewKey 저장
 
 function onFactorySelected(factoryCode) {
   const selected = factoryList.value?.content?.find(f => f.factoryCode === factoryCode);
@@ -605,22 +609,37 @@ const onSubmit = form.handleSubmit(values => {
     dueDate: values.dueDate,
   };
 
-  updateProductionPlan(params, {
+  updateProductionPlanPreview(params, {
     onSuccess: data => {
       affectedPlansData.value = data;
+      previewKey.value = data.previewKey;
       showConfirmationModal.value = true;
     },
   });
 });
 
 const handleConfirmUpdate = () => {
-  showConfirmationModal.value = false; // 모달 닫기
-  toast.success('생산계획을 수정하고 일정을 확정했습니다.'); // 최종 성공 토스트
-  router.push('/production-management/production-plans'); // 최종 리다이렉트
+  if (!previewKey.value) {
+    toast.error('처리할 preview 정보가 부족합니다.');
+    return;
+  }
+
+  updateProductionPlan(previewKey.value, {
+    onSuccess: () => {
+      showConfirmationModal.value = false;
+      // router.push('/production-management/production-plans');
+      toast.success('생산 계획이 최종 수정되었습니다.');
+      router.go(0);
+    },
+    onError: () => {
+      toast.error('최종 저장 중 오류가 발생했습니다.');
+    },
+  });
 };
 
 const handleCancelUpdate = () => {
   showConfirmationModal.value = false;
+  previewKey.value = null;
 };
 
 const debouncedUpdateEndTime = useDebounceFn(({ startTime, plannedQty, lineCode }) => {
@@ -636,8 +655,14 @@ const debouncedUpdateEndTime = useDebounceFn(({ startTime, plannedQty, lineCode 
   );
 }, 400);
 
+const currentStatus = computed(() => productionPlanDetail.value?.status);
+
 watch([() => form.values.startTime, () => form.values.plannedQty], ([startTime, plannedQty]) => {
   const formattedStartTime = formatDate(startTime, 'local-datetime');
+
+  if (['COMPLETED', 'RUNNING'].includes(currentStatus.value)) {
+    return;
+  }
 
   if (!startTime || !plannedQty || !lineDetail.value?.lineCode || !formattedStartTime) return;
 

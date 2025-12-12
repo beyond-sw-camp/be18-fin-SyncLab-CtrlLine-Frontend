@@ -63,7 +63,13 @@
               label="생산 담당자"
               :value="localFilters.productionManagerNo"
               :setValue="setProducerManagerFilter"
-              :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+              :fetchList="
+                () =>
+                  useGetUserList({
+                    userStatus: 'ACTIVE',
+                    userDepartment: '생산',
+                  })
+              "
               keyField="empNo"
               nameField="userName"
               :fields="[
@@ -93,7 +99,13 @@
               label="영업 담당자"
               :value="localFilters.salesManagerNo"
               :setValue="setSalesManagerFilter"
-              :fetchList="() => useGetUserList({ userStatus: 'ACTIVE' })"
+              :fetchList="
+                () =>
+                  useGetUserList({
+                    userStatus: 'ACTIVE',
+                    userDepartment: '영업',
+                  })
+              "
               keyField="empNo"
               nameField="userName"
               :fields="[

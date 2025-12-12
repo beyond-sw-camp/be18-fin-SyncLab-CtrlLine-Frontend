@@ -44,8 +44,19 @@ export async function getProductionPlanBoundary(params) {
   return data.data;
 }
 
-export async function updateProductionPlan(productionPlanId, params) {
-  const { data } = await apiClient.patch(`/production-plans/${productionPlanId}`, params);
+export async function updateProductionPlanPreview(productionPlanId, params) {
+  const { data } = await apiClient.post(
+    `/production-plans/update/${productionPlanId}/preview`,
+    params,
+  );
+  return data.data;
+}
+
+export async function updateProductionPlan(params) {
+  console.log(params);
+  const { data } = await apiClient.patch(`/production-plans/update/commit`, {
+    previewKey: params,
+  });
   return data.data;
 }
 
