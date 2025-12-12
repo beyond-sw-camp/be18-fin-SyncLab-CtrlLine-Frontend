@@ -1,24 +1,70 @@
 <template>
   <section class="space-y-6">
     <div class="flex flex-col gap-4">
-      <Tabs v-if="factories.length" v-model="selectedFactoryCode" class="w-full lg:w-fit">
-        <TabsList class="flex-wrap justify-start gap-2">
-          <TabsTrigger
-            v-for="factory in factories"
-            :key="factory.factoryCode"
-            :value="factory.factoryCode"
-            class="min-w-28"
-          >
-            {{ factory.factoryName }}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div class="w-full md:flex-1">
+          <Tabs v-if="factories.length" v-model="selectedFactoryCode" class="w-full md:w-auto">
+            <TabsList class="flex-wrap justify-start gap-2">
+              <TabsTrigger
+                v-for="factory in factories"
+                :key="factory.factoryCode"
+                :value="factory.factoryCode"
+                class="min-w-28"
+              >
+                {{ factory.factoryName }}
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-      <div
-        v-else
-        class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500"
-      >
-        공장 목록을 불러오는 중입니다...
+          <div
+            v-else
+            class="rounded-lg border border-dashed border-gray-300 p-3 text-center text-sm text-gray-500"
+          >
+            공장 목록을 불러오는 중입니다...
+          </div>
+        </div>
+
+        <div class="relative w-full md:w-80">
+          <Input
+            v-model="searchQuery"
+            placeholder="라인/설비/공정 검색"
+            class="w-full"
+          />
+
+          <div
+            v-if="searchQuery && searchResults.length"
+            class="absolute right-0 z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl"
+          >
+            <div
+              v-for="result in searchResults"
+              :key="result.id"
+              class="border-b border-gray-100 px-3 py-2 text-sm last:border-b-0"
+            >
+              <div class="flex items-center justify-between">
+                <span class="font-medium text-gray-900">{{ result.name }}</span>
+                <span
+                  class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-600"
+                >
+                  {{ SEARCH_LABELS[result.type] }}
+                </span>
+              </div>
+              <p class="font-mono text-xs text-gray-500" v-if="result.code">{{ result.code }}</p>
+              <p class="text-xs text-gray-500" v-if="result.lineName">
+                라인: {{ result.lineName }} <span v-if="result.lineCode">({{ result.lineCode }})</span>
+              </p>
+              <p class="text-xs text-gray-500" v-if="result.equipmentName">
+                설비: {{ result.equipmentName }}
+              </p>
+            </div>
+          </div>
+
+          <div
+            v-else-if="searchQuery && !searchResults.length"
+            class="absolute right-0 z-20 mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-500 shadow-xl"
+          >
+            검색 결과가 없습니다.
+          </div>
+        </div>
       </div>
 
       <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -155,6 +201,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -271,9 +318,9 @@ const EQUIPMENT_LAYOUT = EQUIPMENT_GROUPS.flatMap((group, groupIndex) =>
 
 const tooltipDescription = label => {
   const descriptions = {
-    'Tray Dry Cleaning Unit': '트레이 재사용 전 Dry Cleaning 및 버퍼 라인',
-    'Electrode Unit': '전극 시트를 생산하고 트레이에 적재하는 공정',
-    'Assembly Unit': '셀을 조립하고 전해액을 주입하는 공정',
+    'Tray Dry Cleaning Unit': '트레이 재사용 전 Dry Cleaning 및 버퍼 대기',
+    'Electrode Unit': '전극 시트를 생산하고 트레이에 적재',
+    'Assembly Unit': '셀을 조립하고 전해액을 주입',
     'Formation Unit': '충방전 및 Aging으로 셀을 활성화',
     'Module & Pack Unit': '셀을 모듈 · 팩 단계로 조립',
     'Cell Cleaning Unit': '완성 셀을 세정하고 품질을 확인',
@@ -309,6 +356,7 @@ const FALLBACK_FACTORIES = [
 const { data: factoryList } = useGetFactoryList();
 const route = useRoute();
 const router = useRouter();
+const searchQuery = ref('');
 
 const factories = computed(() => {
   const remote = factoryList.value?.content ?? [];
@@ -362,6 +410,30 @@ const lineStructures = computed(() => {
     equipments: [],
     factoryCode: factoryCode ?? selectedFactoryCode.value ?? 'F0001',
   }));
+});
+const lineStructuresDetailed = computed(() => {
+  return lineStructures.value.map(line => {
+    const equipments = EQUIPMENT_LAYOUT.filter(eq =>
+      (eq.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type),
+    ).map(eq => {
+      const equipmentCode = buildEquipmentCode(line, eq);
+      const processes = eq.processes.map(process => ({
+        ...process,
+        code: buildProcessCode(line, eq, process),
+      }));
+
+      return {
+        ...eq,
+        equipmentCode,
+        processes,
+      };
+    });
+
+    return {
+      ...line,
+      equipments,
+    };
+  });
 });
 const isEquipmentModalOpen = ref(false);
 const activeEquipment = ref(null);
@@ -426,6 +498,68 @@ const extractNumber = value => {
   const matched = String(value ?? '').match(/(\d+)/);
   return matched ? parseInt(matched[1], 10) : 0;
 };
+
+const SEARCH_LABELS = {
+  line: '라인',
+  equipment: '설비',
+  process: '공정',
+};
+
+const MAX_SEARCH_RESULTS = 12;
+const searchResults = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return [];
+
+  const results = [];
+  const matchesQuery = (...fields) => {
+    return fields.some(field => {
+      if (!field) return false;
+      return String(field).toLowerCase().includes(query);
+    });
+  };
+
+  lineStructuresDetailed.value.forEach(line => {
+    if (matchesQuery(line.displayLabel, line.lineCode)) {
+      results.push({
+        id: `line-${line.lineCode}`,
+        type: 'line',
+        name: line.displayLabel,
+        code: line.lineCode,
+        lineName: line.displayLabel,
+        lineCode: line.lineCode,
+      });
+    }
+
+    line.equipments.forEach(eq => {
+      if (matchesQuery(eq.label, eq.equipmentCode)) {
+        results.push({
+          id: `equipment-${line.lineCode}-${eq.label}-${eq.equipmentCode}`,
+          type: 'equipment',
+          name: eq.label,
+          code: eq.equipmentCode,
+          lineName: line.displayLabel,
+          lineCode: line.lineCode,
+        });
+      }
+
+      eq.processes.forEach(proc => {
+        if (matchesQuery(proc.name, proc.code)) {
+          results.push({
+            id: `process-${line.lineCode}-${proc.code}`,
+            type: 'process',
+            name: proc.name,
+            code: proc.code,
+            lineName: line.displayLabel,
+            lineCode: line.lineCode,
+            equipmentName: eq.label,
+          });
+        }
+      });
+    });
+  });
+
+  return results.slice(0, MAX_SEARCH_RESULTS);
+});
 </script>
 
 <style scoped>
