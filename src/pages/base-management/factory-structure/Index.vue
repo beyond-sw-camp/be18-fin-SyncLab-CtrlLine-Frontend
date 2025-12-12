@@ -660,7 +660,7 @@ watch(searchQuery, value => {
 }
 
 .line-floor-plan--highlight {
-  border: 2px solid rgba(45, 115, 90, 0.8);
+  border: 3px solid rgba(45, 115, 90, 0.8);
   box-shadow: 0 25px 45px rgba(45, 115, 90, 0.25);
 }
 
