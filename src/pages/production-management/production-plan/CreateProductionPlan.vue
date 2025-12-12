@@ -36,7 +36,7 @@
         <div class="order-1 md:order-0">
           <FormField v-slot="{ componentField, errorMessage }" name="factoryCode">
             <FormItem>
-              <FormLabel>공장명</FormLabel>
+              <FormLabel>공장</FormLabel>
               <FormControl>
                 <Select v-bind="componentField" @update:modelValue="onFactorySelected">
                   <SelectTrigger class="w-full truncate min-w-0">
@@ -80,11 +80,11 @@
         <div class="order-7 md:order-0">
           <FormField name="productionManagerNo" v-slot="{ value, setValue, errorMessage }">
             <FormItem class="w-full">
-              <FormLabel>생산담당자</FormLabel>
+              <FormLabel>생산 담당자</FormLabel>
               <FormControl class="w-full min-w-0">
                 <CreateAutoCompleteSelect
                   :key="`autocomplete-${'productionManagerNo'}`"
-                  label="생산담당자"
+                  label="생산 담당자"
                   :value="value"
                   :setValue="setValue"
                   :fetchList="
@@ -117,12 +117,12 @@
         <div class="order-2 md:order-0">
           <FormField name="itemCode" v-slot="{ value, setValue, errorMessage }">
             <FormItem>
-              <FormLabel>품목명</FormLabel>
+              <FormLabel>품목</FormLabel>
               <FormControl class="w-full min-w-0">
                 <div v-if="selectedFactoryId">
                   <CreateAutoCompleteSelect
                     :key="`autocomplete-${'itemCode'}`"
-                    label="품목명"
+                    label="품목"
                     :value="value"
                     :setValue="setValue"
                     :fetchList="() => useGetItemList({ isActive: true })"
@@ -158,7 +158,7 @@
         <div class="order-5 md:order-0">
           <FormField v-slot="{ componentField, errorMessage }" name="startTime">
             <FormItem class="w-full">
-              <FormLabel>생산시작시간</FormLabel>
+              <FormLabel>생산 시작 시각</FormLabel>
               <FormControl>
                 <Input type="datetime-local" v-bind="componentField" disabled class="text-sm" />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -170,11 +170,11 @@
         <div class="order-8 md:order-0">
           <FormField name="salesManagerNo" v-slot="{ value, setValue, errorMessage }">
             <FormItem class="w-full">
-              <FormLabel>영업담당자</FormLabel>
+              <FormLabel>영업 담당자</FormLabel>
               <FormControl class="w-full min-w-0">
                 <CreateAutoCompleteSelect
                   :key="`autocomplete-${'salesManagerNo'}`"
-                  label="영업담당자"
+                  label="영업 담당자"
                   :value="value"
                   :setValue="setValue"
                   :fetchList="
@@ -207,7 +207,7 @@
         <div class="order-3 md:order-0">
           <FormField v-slot="{ componentField, errorMessage }" name="lineCode">
             <FormItem>
-              <FormLabel>라인명</FormLabel>
+              <FormLabel>라인</FormLabel>
               <FormControl>
                 <Select
                   v-if="selectedFactoryId && selectedItemId"
@@ -251,7 +251,7 @@
         <div class="order-6 md:order-0">
           <FormField v-slot="{ componentField, errorMessage }" name="endTime">
             <FormItem>
-              <FormLabel>생산종료시간</FormLabel>
+              <FormLabel>생산 종료 시각</FormLabel>
               <FormControl class="w-full">
                 <Input type="datetime-local" v-bind="componentField" disabled class="text-sm" />
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
@@ -350,22 +350,20 @@ import formatDate from '@/utils/formatDate';
 
 const formSchema = toTypedSchema(
   z.object({
-    factoryCode: z
-      .string({ required_error: '공장명은 필수입니다.' })
-      .min(1, '공장명은 필수입니다.'),
+    factoryCode: z.string({ required_error: '공장은 필수입니다.' }).min(1, '공장은 필수입니다.'),
     dueDate: z.string({ required_error: '납기일자는 필수입니다.' }),
     productionManagerNo: z
-      .string({ required_error: '생산담당자는 필수입니다.' })
-      .min(1, '생산담당자는 필수입니다.'),
-    itemCode: z.string({ required_error: '품목명은 필수입니다.' }).min(1, '품목명은 필수입니다.'),
-    salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }),
-    lineCode: z.string({ required_error: '라인명은 필수입니다.' }).min(1, '라인명은 필수입니다.'),
+      .string({ required_error: '생산 담당자는 필수입니다.' })
+      .min(1, '생산 담당자는 필수입니다.'),
+    itemCode: z.string({ required_error: '품목은 필수입니다.' }).min(1, '품목은 필수입니다.'),
+    salesManagerNo: z.string({ required_error: '영업 담당자는 필수입니다.' }),
+    lineCode: z.string({ required_error: '라인은 필수입니다.' }).min(1, '라인은 필수입니다.'),
     status: z.string({ required_error: '상태는 필수입니다.' }),
     startTime: z.string().optional(),
     endTime: z.string().optional(),
     plannedQty: z.coerce
-      .number({ required_error: '생산계획수량은 필수입니다.' })
-      .positive('생산계획수량은 1 이상이어야 합니다.'),
+      .number({ required_error: '계획수량은 필수입니다.' })
+      .positive('계획수량은 1 이상이어야 합니다.'),
     isEmergent: z.boolean().optional(),
     remark: z.string().optional(),
   }),
