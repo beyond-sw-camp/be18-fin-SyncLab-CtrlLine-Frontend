@@ -29,42 +29,17 @@
             v-model="searchQuery"
             placeholder="라인/설비/공정 검색"
             class="w-full"
+            @keyup.enter="handleSearch"
           />
-          <Search class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-
-          <div
-            v-if="searchQuery && searchResults.length"
-            class="absolute right-0 z-20 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl"
+          <button
+            type="button"
+            class="absolute right-2 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full bg-primary/90 p-2 text-white shadow-md transition hover:bg-primary"
+            @click="handleSearch"
+            :disabled="!searchQuery.trim()"
           >
-            <div
-              v-for="result in searchResults"
-              :key="result.id"
-              class="border-b border-gray-100 px-3 py-2 text-sm last:border-b-0"
-            >
-              <div class="flex items-center justify-between">
-                <span class="font-medium text-gray-900">{{ result.name }}</span>
-                <span
-                  class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-600"
-                >
-                  {{ SEARCH_LABELS[result.type] }}
-                </span>
-              </div>
-              <p class="font-mono text-xs text-gray-500" v-if="result.code">{{ result.code }}</p>
-              <p class="text-xs text-gray-500" v-if="result.lineName">
-                라인: {{ result.lineName }} <span v-if="result.lineCode">({{ result.lineCode }})</span>
-              </p>
-              <p class="text-xs text-gray-500" v-if="result.equipmentName">
-                설비: {{ result.equipmentName }}
-              </p>
-            </div>
-          </div>
-
-          <div
-            v-else-if="searchQuery && !searchResults.length"
-            class="absolute right-0 z-20 mt-2 w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-500 shadow-xl"
-          >
-            검색 결과가 없습니다.
-          </div>
+            <Search class="size-4" />
+          </button>
+          <p v-if="searchFeedback" class="mt-1 text-xs text-red-500">{{ searchFeedback }}</p>
         </div>
       </div>
 
@@ -78,6 +53,8 @@
                 v-for="line in lineStructures"
                 :key="line.lineCode"
                 class="line-floor-plan"
+                :class="{ 'line-floor-plan--highlight': line.lineCode === highlightedLineCode }"
+                :ref="el => registerLineRef(line.lineCode, el)"
                 :data-type="line.type"
               >
                 <header class="line-floor-plan__header">
@@ -159,7 +136,11 @@
               <div class="mt-4 space-y-3" v-if="modalProcesses.length">
                 <p class="text-sm font-semibold text-gray-700">주요 공정</p>
                 <ul class="equipment-process-list">
-                  <li v-for="step in modalProcesses" :key="step.name">
+                  <li
+                    v-for="step in modalProcesses"
+                    :key="step.name"
+                    :class="{ 'equipment-process-list__item--highlight': step.code === highlightedProcessCode }"
+                  >
                     <p class="font-medium text-gray-900">
                       {{ step.name }}
                       <span
@@ -178,6 +159,7 @@
         </div>
       </div>
     </div>
+
   </section>
 </template>
 
@@ -192,7 +174,7 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-vue-next';
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import useGetFactoryList from '@/apis/query-hooks/factory/useGetFactoryList';
@@ -359,6 +341,10 @@ const { data: factoryList } = useGetFactoryList();
 const route = useRoute();
 const router = useRouter();
 const searchQuery = ref('');
+const searchFeedback = ref('');
+const highlightedLineCode = ref('');
+const highlightedProcessCode = ref('');
+const lineRefs = ref({});
 
 const factories = computed(() => {
   const remote = factoryList.value?.content ?? [];
@@ -437,13 +423,34 @@ const lineStructuresDetailed = computed(() => {
     };
   });
 });
+
+const registerLineRef = (code, el) => {
+  if (el) {
+    lineRefs.value[code] = el;
+  } else {
+    delete lineRefs.value[code];
+  }
+};
+
+const scrollToLine = code => {
+  nextTick(() => {
+    const el = lineRefs.value[code];
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+};
 const isEquipmentModalOpen = ref(false);
 const activeEquipment = ref(null);
 const activeLine = ref(null);
 
-const openEquipmentModal = (line, equipment) => {
+const openEquipmentModal = (line, equipment, options = {}) => {
   activeLine.value = line;
   activeEquipment.value = equipment;
+  highlightedProcessCode.value = options.processCode ?? null;
+  if (options.fromSearch) {
+    highlightedLineCode.value = line.lineCode;
+  }
   isEquipmentModalOpen.value = true;
 };
 
@@ -451,6 +458,7 @@ const closeEquipmentModal = () => {
   isEquipmentModalOpen.value = false;
   activeEquipment.value = null;
   activeLine.value = null;
+  highlightedProcessCode.value = null;
 };
 
 const modalProcesses = computed(() => {
@@ -529,6 +537,7 @@ const searchResults = computed(() => {
         code: line.lineCode,
         lineName: line.displayLabel,
         lineCode: line.lineCode,
+        lineRef: line,
       });
     }
 
@@ -541,6 +550,10 @@ const searchResults = computed(() => {
           code: eq.equipmentCode,
           lineName: line.displayLabel,
           lineCode: line.lineCode,
+          equipmentName: eq.label,
+          equipmentCode: eq.equipmentCode,
+          lineRef: line,
+          equipmentRef: eq,
         });
       }
 
@@ -554,6 +567,10 @@ const searchResults = computed(() => {
             lineName: line.displayLabel,
             lineCode: line.lineCode,
             equipmentName: eq.label,
+            equipmentCode: eq.equipmentCode,
+            processCode: proc.code,
+            lineRef: line,
+            equipmentRef: eq,
           });
         }
       });
@@ -561,6 +578,50 @@ const searchResults = computed(() => {
   });
 
   return results.slice(0, MAX_SEARCH_RESULTS);
+});
+
+const handleSearch = () => {
+  const query = searchQuery.value.trim();
+  if (!query) {
+    searchFeedback.value = '검색어를 입력해 주세요.';
+    return;
+  }
+
+  const result = searchResults.value[0];
+  if (!result) {
+    searchFeedback.value = '검색 결과가 없습니다.';
+    return;
+  }
+
+  searchFeedback.value = '';
+
+  if (result.type === 'line') {
+    highlightedLineCode.value = result.lineCode ?? '';
+    highlightedProcessCode.value = null;
+    scrollToLine(result.lineCode);
+    return;
+  }
+
+  const line =
+    result.lineRef ?? lineStructuresDetailed.value.find(target => target.lineCode === result.lineCode);
+  const equipment =
+    result.equipmentRef ??
+    line?.equipments?.find(eq => eq.equipmentCode === result.equipmentCode);
+
+  if (line && equipment) {
+    openEquipmentModal(line, equipment, {
+      processCode: result.processCode ?? null,
+      fromSearch: true,
+    });
+  } else {
+    searchFeedback.value = '검색 결과를 표시할 수 없습니다.';
+  }
+};
+
+watch(searchQuery, value => {
+  if (!value) {
+    searchFeedback.value = '';
+  }
 });
 </script>
 
@@ -589,6 +650,11 @@ const searchResults = computed(() => {
   background: #fff;
   box-shadow: 0 20px 35px rgba(15, 23, 42, 0.08);
   overflow: hidden;
+}
+
+.line-floor-plan--highlight {
+  border-color: rgba(45, 115, 90, 0.6);
+  box-shadow: 0 25px 45px rgba(45, 115, 90, 0.25);
 }
 
 .line-floor-plan__header {
@@ -725,6 +791,21 @@ const searchResults = computed(() => {
   justify-content: center;
   font-weight: 600;
   box-shadow: 0 4px 10px rgba(16, 24, 40, 0.1);
+}
+
+.equipment-process-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.equipment-process-list__item--highlight {
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(45, 115, 90, 0.12);
 }
 
 .equipment-icon {
