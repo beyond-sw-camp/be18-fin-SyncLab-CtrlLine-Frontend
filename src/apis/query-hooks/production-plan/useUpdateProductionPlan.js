@@ -7,7 +7,7 @@ export default function useUpdateProductionPlan(productionPlanId) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: params => updateProductionPlan(productionPlanId, params),
+    mutationFn: params => updateProductionPlan(params),
     onSuccess: data => {
       toast.success('생산계획을 수정했습니다.');
       queryClient.invalidateQueries({ queryKey: ['productionPlan', productionPlanId] });

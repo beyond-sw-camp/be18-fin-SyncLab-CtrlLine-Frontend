@@ -1,10 +1,17 @@
 <template>
-  <Dialog :open="visible" @update:open="$emit('cancel')">
+  <Dialog
+    :open="visible"
+    @update:open="
+      open => {
+        if (!open) $emit('cancel');
+      }
+    "
+  >
     <DialogContent class="max-w-4xl max-h-[90vh] overflow-y-auto">
       <DialogHeader>
-        <DialogTitle class="text-xl font-bold">생산 계획 조정 결과 확인 </DialogTitle>
+        <DialogTitle class="text-xl font-bold">생산계획 조정 결과 확인 </DialogTitle>
         <DialogDescription>
-          생산 계획 변경으로 인해 기존 일정의 시작 시간이 조정되었습니다. 아래 목록을 확인하시고,
+          생산계획 변경으로 인해 기존 일정의 시작 시간이 조정되었습니다. 아래 목록을 확인하시고,
           납기일자 초과 건에 대해 유의해주세요.
         </DialogDescription>
       </DialogHeader>
@@ -105,13 +112,10 @@ import {
 import formatDate from '@/utils/formatDate';
 
 const props = defineProps({
-  visible: {
-    type: Boolean,
-    required: true,
-  },
+  visible: { type: Boolean, required: true },
   affectedPlansData: {
     type: Object,
-    required: true,
+    required: false,
     default: () => ({ affectedPlans: [], dueDateExceededPlans: [] }),
   },
 });
