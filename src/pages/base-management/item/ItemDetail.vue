@@ -19,7 +19,7 @@
                 >품목코드
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+                    <TooltipTrigger @click.prevent.stop><InfoIcon :size="15" /></TooltipTrigger>
                     <TooltipContent side="top">
                       <p>품목 코드 수정 시, 품목명과 규격을 수정해주세요.</p>
                     </TooltipContent>
@@ -39,7 +39,7 @@
                 >품목명
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+                    <TooltipTrigger @click.prevent.stop><InfoIcon :size="15" /></TooltipTrigger>
                     <TooltipContent side="top">
                       <p>품목 코드와 유사하게 품목명을 수정해주세요.</p>
                     </TooltipContent>
@@ -59,7 +59,7 @@
                 >규격
                 <TooltipProvider>
                   <Tooltip>
-                    <TooltipTrigger><InfoIcon :size="15" /></TooltipTrigger>
+                    <TooltipTrigger @click.prevent.stop><InfoIcon :size="15" /></TooltipTrigger>
                     <TooltipContent side="top">
                       <p>품목 코드에 작성한 규격으로 수정해주세요.</p>
                     </TooltipContent>

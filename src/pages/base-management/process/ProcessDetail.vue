@@ -12,6 +12,16 @@
     >
       <fieldset :disabled="!isAdmin">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField v-slot="{ componentField, errorMessage }" name="equipmentCode">
+            <FormItem>
+              <FormLabel>설비코드</FormLabel>
+              <FormControl>
+                <Input type="text" v-bind="componentField" autocomplete="equipment-code" disabled />
+                <p class="text-red-500 text-xs">{{ errorMessage }}</p>
+              </FormControl>
+            </FormItem>
+          </FormField>
+
           <FormField v-slot="{ componentField, errorMessage }" name="processCode">
             <FormItem>
               <FormLabel>공정코드</FormLabel>
@@ -37,6 +47,7 @@
               <FormLabel>담당자</FormLabel>
               <FormControl>
                 <UpdateAutoCompleteSelect
+                  class="cursor-pointer"
                   :key="`empNo-${processDetail.empNo}`"
                   label="담당자"
                   :value="value"
@@ -75,25 +86,25 @@
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField, errorMessage }" name="isActive">
+          <!-- <FormField v-slot="{ componentField, errorMessage }" name="isActive">
             <FormItem>
               <FormLabel>공정 사용여부</FormLabel>
               <FormControl>
                 <RadioGroup v-bind="componentField" class="flex">
                   <div class="flex items-center space-x-2">
-                    <RadioGroupItem value="true" id="r1" />
-                    <Label for="r1" class="font-normal">공정 사용</Label>
+                    <RadioGroupItem value="true" id="r1" class="cursor-pointer" />
+                    <Label for="r1" class="font-normal cursor-pointer">공정 사용</Label>
                   </div>
 
                   <div class="flex items-center space-x-2">
-                    <RadioGroupItem value="false" id="r2" />
-                    <Label for="r2" class="font-normal">공정 미사용</Label>
+                    <RadioGroupItem value="false" id="r2" class="cursor-pointer" />
+                    <Label for="r2" class="font-normal cursor-pointer">공정 미사용</Label>
                   </div>
                 </RadioGroup>
                 <p class="text-red-500 text-xs">{{ errorMessage }}</p>
               </FormControl>
             </FormItem>
-          </FormField>
+          </FormField> -->
         </div>
       </fieldset>
       <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
@@ -124,12 +135,13 @@ import UpdateAutoCompleteSelect from '@/components/auto-complete/UpdateAutoCompl
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+// import { Label } from '@/components/ui/label';
+// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { canView } from '@/utils/canView';
 
 const formSchema = toTypedSchema(
   z.object({
+    equipmentCode: z.string().optional(),
     processCode: z.string().optional(),
     processName: z.string().optional(),
     empNo: z.string({ required_error: '담당자는 필수입니다.' }).min(1, '담당자는 필수입니다.'),
@@ -180,6 +192,7 @@ watch(
     if (!val) return;
 
     form.setValues({
+      equipmentCode: processDetail.value.equipmentCode,
       processCode: processDetail.value.processCode,
       processName: processDetail.value.processName,
       userDepartment: processDetail.value.userDepartment,

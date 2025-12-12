@@ -255,7 +255,9 @@
       <Table class="w-full min-w-[920px] table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden w-[160px]">
+            <TableHead
+              class="sticky left-0 z-10 min-w-28 bg-white shadow-md text-center whitespace-nowrap overflow-hidden"
+            >
               전표번호
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-[150px]">
@@ -268,7 +270,7 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-[140px]">
               라인
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 불량률 </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 불량률 (%)</TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
               생산 담당자
             </TableHead>
@@ -718,7 +720,7 @@ const formatPercent = value => {
   if (Number.isNaN(numeric)) return String(value);
 
   const display = numeric > 1 ? numeric : numeric * 100; // API가 비율(0~1) 또는 %값 모두 대비
-  return `${display.toFixed(1)}%`;
+  return `${display.toFixed(1)}`;
 };
 
 const escapeCsv = value => `"${String(value ?? '').replace(/"/g, '""')}"`;

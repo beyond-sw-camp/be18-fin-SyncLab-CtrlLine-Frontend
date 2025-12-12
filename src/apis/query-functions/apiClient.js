@@ -61,9 +61,12 @@ apiClient.interceptors.response.use(
 
         authStore.clearAuth();
         userStore.clearUser();
-        await router.push('/login');
+        await router.push({
+          path: '/login',
+          query: { redirect: router.currentRoute.value.fullPath },
+        });
 
-        return Promise.reject(refreshError);
+        return Promise.reject(error.response);
       }
     }
     return Promise.reject(error);

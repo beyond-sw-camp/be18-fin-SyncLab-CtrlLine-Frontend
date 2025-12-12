@@ -185,8 +185,10 @@
               class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
             >
               <button
-                class="text-[#1e6c20] underline-offset-2 hover:underline text-sm p-0 text-left"
-                @click="openPlanDocNoNewTab(productionPerformanceDetail.productionPlanId)"
+                class="text-[#1e6c20] underline-offset-2 hover:underline text-sm p-0 text-left cursor-pointer"
+                @click.stop.prevent="
+                  openPlanDocNoNewTab(productionPerformanceDetail.productionPlanId)
+                "
               >
                 {{ componentField.modelValue }}
               </button>
@@ -201,8 +203,8 @@
               class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
             >
               <button
-                class="text-[#1e6c20] underline-offset-2 hover:underline text-sm p-0 text-left"
-                @click="openLotNoNewTab(productionPerformanceDetail.lotId)"
+                class="text-[#1e6c20] underline-offset-2 hover:underline text-sm p-0 text-left cursor-pointer"
+                @click.stop.prevent="openLotNoNewTab(productionPerformanceDetail.lotId)"
               >
                 {{ componentField.modelValue }}
               </button>
@@ -217,8 +219,8 @@
               class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
             >
               <button
-                class="text-[#1e6c20] underline-offset-2 hover:underline text-sm p-0 text-left"
-                @click="openDefNewTab(productionPerformanceDetail.defectiveId)"
+                class="text-[#1e6c20] underline-offset-2 hover:underline text-sm p-0 text-left cursor-pointer"
+                @click.stop.prevent="openDefNewTab(productionPerformanceDetail.defectiveId)"
               >
                 {{ componentField.modelValue }}
               </button>

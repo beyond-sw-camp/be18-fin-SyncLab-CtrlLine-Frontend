@@ -43,14 +43,12 @@
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 공장명 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 품목명 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              생산담당자
+              생산 담당자
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              영업담당자
+              영업 담당자
             </TableHead>
-            <TableHead class="text-center whitespace-nowrap overflow-hidden">
-              생산계획수량
-            </TableHead>
+            <TableHead class="text-center whitespace-nowrap overflow-hidden"> 계획수량 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 납기일자 </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden"> 비고 </TableHead>
           </TableRow>

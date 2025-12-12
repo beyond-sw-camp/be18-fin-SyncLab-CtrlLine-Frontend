@@ -113,6 +113,7 @@ const applyFilters = () => {
 const resetFilters = () => {
   // 초기화하고 바로 조회
   Object.assign(localFilters, {
+    userName: null,
     userDepartment: null,
     userStatus: null,
     userRole: null,

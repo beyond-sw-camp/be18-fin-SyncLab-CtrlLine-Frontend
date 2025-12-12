@@ -165,7 +165,7 @@ function formatRate(value) {
   if (value === null || value === undefined) return '-';
   const num = Number(value);
   if (Number.isNaN(num)) return value;
-  return `${num.toFixed(2)}%`;
+  return `${num.toFixed(2)}`;
 }
 
 function displayValue(value) {
@@ -177,9 +177,9 @@ const basicFields = computed(() => {
   const detail = lotDetail.value ?? {};
   return [
     { label: 'Lot No.', value: detail.lotNo },
-    { label: '공장 코드', value: detail.factoryCode },
-    { label: '라인 코드', value: detail.lineCode },
-    { label: '생산담당자 사번', value: detail.productionManagerNo },
+    { label: '공장', value: detail.factoryCode },
+    { label: '라인', value: detail.lineCode },
+    { label: '생산 담당자', value: detail.productionManagerNo },
     { label: '실적 전표번호', value: detail.productionPerformanceDocNo },
     {
       label: '상태',
@@ -195,12 +195,12 @@ const basicFields = computed(() => {
 const quantityFields = computed(() => {
   const detail = lotDetail.value ?? {};
   return [
-    { label: '품목 코드', value: detail.itemCode },
+    { label: '품목코드', value: detail.itemCode },
     { label: '품목명', value: detail.itemName },
-    { label: '투입 수량', value: formatNumber(detail.lotQty) },
-    { label: '생산 수량', value: formatNumber(detail.performanceQty) },
-    { label: '불량 수량', value: formatNumber(detail.defectiveQty) },
-    { label: '불량률', value: formatRate(calculateDefectiveRate(detail)) },
+    { label: '투입수량', value: formatNumber(detail.lotQty) },
+    { label: '생산수량', value: formatNumber(detail.performanceQty) },
+    { label: '불량수량', value: formatNumber(detail.defectiveQty) },
+    { label: '불량률 (%)', value: formatRate(calculateDefectiveRate(detail)) },
   ];
 });
 
