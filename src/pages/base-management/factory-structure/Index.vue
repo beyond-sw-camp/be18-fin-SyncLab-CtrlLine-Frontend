@@ -58,7 +58,7 @@
                             :data-active="
                               (equipment.lineTypes ?? ['CL', 'PL', 'CP']).includes(line.type)
                             "
-                            @click.stop="openEquipmentModal(equipment)"
+                            @click.stop="openEquipmentModal(line, equipment)"
                           >
                             <component
                               :is="equipment.icon"
@@ -101,11 +101,19 @@
                 </DialogDescription>
               </DialogHeader>
 
-              <div class="mt-4 space-y-3" v-if="activeEquipment?.processes?.length">
+              <div class="mt-4 space-y-3" v-if="modalProcesses.length">
                 <p class="text-sm font-semibold text-gray-700">주요 공정</p>
                 <ul class="equipment-process-list">
-                  <li v-for="step in activeEquipment.processes" :key="step.name">
-                    <p class="font-medium text-gray-900">{{ step.name }}</p>
+                  <li v-for="step in modalProcesses" :key="step.name">
+                    <p class="font-medium text-gray-900">
+                      {{ step.name }}
+                      <span
+                        v-if="step.code"
+                        class="ml-2 rounded bg-gray-100 px-2 py-0.5 text-[11px] font-mono text-gray-600"
+                      >
+                        {{ step.code }}
+                      </span>
+                    </p>
                     <p class="text-sm text-gray-500">{{ step.desc }}</p>
                   </li>
                 </ul>
@@ -142,74 +150,93 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
+const LINE_TYPE_ORDER = ['CL', 'PL', 'CP'];
+const EQUIPMENT_UNITS_PER_LINE = 2;
+const EQUIPMENT_PREFIX_MAP = {
+  'Tray Dry Cleaning Unit': 'TCP',
+  'Electrode Unit': 'EU',
+  'Assembly Unit': 'AU',
+  'Formation Unit': 'FAU',
+  'Module & Pack Unit': 'MAP',
+  'Cell Cleaning Unit': 'CCP',
+  'Final Inspection Unit': 'FIP',
+};
+
 const EQUIPMENT_GROUPS = [
   {
     label: 'Tray Dry Cleaning Unit',
     icon: Sparkles,
+    codePrefix: 'TCP',
     processes: [
-      { name: 'Tray Loading System', desc: '빈 트레이 투입 공정' },
-      { name: 'Dry Cleaning Process', desc: '에어 블로우 · 정전기 제거' },
-      { name: 'Static Neutralizer', desc: '이온 발생기로 정전기 중화' },
-      { name: 'Tray Buffer Conveyor', desc: '세정 완료 트레이 대기' },
+      { name: 'Tray Loading System', prCode: 'PR001', desc: '빈 트레이 투입 공정' },
+      { name: 'Dry Cleaning Process', prCode: 'PR002', desc: '에어 블로우 · 정전기 제거' },
+      { name: 'Static Neutralizer', prCode: 'PR003', desc: '이온 발생기로 정전기 중화' },
+      { name: 'Tray Buffer Conveyor', prCode: 'PR004', desc: '세정 완료 트레이 대기' },
     ],
   },
   {
     label: 'Electrode Unit',
     icon: Zap,
+    codePrefix: 'EU',
     processes: [
-      { name: 'Mixing Process', desc: '슬러리 혼합 공정' },
-      { name: 'Coating Process', desc: '슬러리 도포 공정' },
-      { name: 'Drying Oven Process', desc: '건조 공정' },
-      { name: 'Calender Press Process', desc: '압연 공정' },
-      { name: 'Slitting Process', desc: '전극 절단 공정' },
-      { name: 'Tray Loading Process', desc: '전극 적재 공정' },
+      { name: 'Slurry Mixing Process', prCode: 'PR001', desc: '슬러리 혼합 공정' },
+      { name: 'Slurry Coating Process', prCode: 'PR002', desc: '슬러리 도포 공정' },
+      { name: 'Drying Oven Process', prCode: 'PR003', desc: '건조 공정' },
+      { name: 'Calender Press Process', prCode: 'PR004', desc: '압연 공정' },
+      { name: 'Slitting Process', prCode: 'PR005', desc: '전극 절단 공정' },
+      { name: 'Tray Loading Process', prCode: 'PR006', desc: '전극 적재 공정' },
     ],
   },
   {
     label: 'Assembly Unit',
     icon: Puzzle,
+    codePrefix: 'AU',
     processes: [
-      { name: 'Notching Process', desc: '셀 시트 절단 공정' },
-      { name: 'Stacking / Winding Process', desc: '적층 · 권취 공정' },
-      { name: 'Tab Welding Process', desc: '탭 용접 공정' },
-      { name: 'Cell Enclosing Process', desc: '봉입 공정' },
-      { name: 'Electrolyte Filling Process', desc: '전해액 주입 공정' },
+      { name: 'Notching Process', prCode: 'PR001', desc: '셀 시트 절단 공정' },
+      { name: 'Stacking / Winding Process', prCode: 'PR002', desc: '적층 · 권취 공정' },
+      { name: 'Tab Welding Process', prCode: 'PR003', desc: '탭 용접 공정' },
+      { name: 'Cell Enclosing Process', prCode: 'PR004', desc: '봉입 공정' },
+      { name: 'Electrolyte Filling Process', prCode: 'PR005', desc: '전해액 주입 공정' },
     ],
   },
   {
     label: 'Formation Unit',
     icon: BatteryCharging,
+    codePrefix: 'FAU',
     processes: [
-      { name: 'Formation Rack', desc: '충방전 공정' },
-      { name: 'Aging Chamber', desc: 'Aging 보관' },
+      { name: 'Formation Rack', prCode: 'PR001', desc: '충방전 공정' },
+      { name: 'Aging Chamber', prCode: 'PR002', desc: 'Aging 보관' },
     ],
   },
   {
     label: 'Module & Pack Unit',
     icon: Boxes,
+    codePrefix: 'MAP',
     processes: [
-      { name: 'Cell Sorting Process', desc: '셀 분류 공정' },
-      { name: 'Module Assembly Process', desc: '모듈 조립 공정' },
-      { name: 'BMS Test Process', desc: '관리시스템 검사 공정' },
+      { name: 'Cell Sorting Process', prCode: 'PR001', desc: '셀 분류 공정' },
+      { name: 'Module Assembly Process', prCode: 'PR002', desc: '모듈 조립 공정' },
+      { name: 'BMS Test Process', prCode: 'PR003', desc: '관리시스템 검사 공정' },
     ],
   },
   {
     label: 'Cell Cleaning Unit',
     icon: Droplet,
+    codePrefix: 'CCP',
     processes: [
-      { name: 'Unloading Station', desc: '모듈 완료 셀 분리 공정' },
-      { name: 'Ultrasonic Washer', desc: '초음파 세정 공정' },
-      { name: 'Drying Chamber', desc: '건조 공정' },
-      { name: 'Surface Vision Process', desc: '세정 품질 검사 공정' },
+      { name: 'Unloading Station', prCode: 'PR001', desc: '모듈 완료 셀 분리 공정' },
+      { name: 'Ultrasonic Washer', prCode: 'PR002', desc: '초음파 세정 공정' },
+      { name: 'Drying Chamber', prCode: 'PR003', desc: '건조 공정' },
+      { name: 'Surface Vision Check Process', prCode: 'PR004', desc: '세정 품질 검사 공정' },
     ],
   },
   {
     label: 'Final Inspection Unit',
     icon: ShieldCheck,
+    codePrefix: 'FIP',
     processes: [
-      { name: 'Final Inspection Process', desc: '최종 검사 공정' },
-      { name: 'BMS Test Process', desc: '관리시스템 검사 공정' },
-      { name: 'Tray Return Conveyor', desc: '트레이 회수 · 세정 루프' },
+      { name: 'Final Inspection Process', prCode: 'PR001', desc: '최종 검사 공정' },
+      { name: 'BMS Test Process', prCode: 'PR002', desc: '관리시스템 검사 공정' },
+      { name: 'Tray Return Conveyor', prCode: 'PR003', desc: '트레이 회수 · 세정 루프' },
     ],
   },
 ];
@@ -224,10 +251,12 @@ const EQUIPMENT_LAYOUT = EQUIPMENT_GROUPS.flatMap((group, groupIndex) =>
       label: group.label,
       icon: group.icon,
       processes: group.processes,
+      codePrefix: group.codePrefix,
       position,
       gridColumn: `${position === 'top' ? baseColumn : baseColumn + 1}`,
       gridRow: position === 'top' ? '1' : '2',
       lineTypes: ['CL', 'PL', 'CP'],
+      unitIndex: offset,
     };
   }),
 );
@@ -323,18 +352,60 @@ const lineStructures = computed(() => {
     instanceIndex: 0,
     displayLabel: line.lineName,
     equipments: [],
+    factoryCode: factoryCode ?? selectedFactoryCode.value ?? 'F0001',
   }));
 });
 const isEquipmentModalOpen = ref(false);
 const activeEquipment = ref(null);
+const activeLine = ref(null);
 
-const openEquipmentModal = equipment => {
+const openEquipmentModal = (line, equipment) => {
+  activeLine.value = line;
   activeEquipment.value = equipment;
   isEquipmentModalOpen.value = true;
 };
 
 const closeEquipmentModal = () => {
   isEquipmentModalOpen.value = false;
+  activeEquipment.value = null;
+  activeLine.value = null;
+};
+
+const modalProcesses = computed(() => {
+  if (!activeEquipment.value || !activeLine.value) return [];
+
+  return activeEquipment.value.processes.map(process => ({
+    ...process,
+    code: buildProcessCode(activeLine.value, activeEquipment.value, process),
+  }));
+});
+
+const buildProcessCode = (line, equipment, process) => {
+  const factoryCode = line.factoryCode ?? selectedFactoryCode.value ?? 'F0001';
+  const factoryNumber = extractNumber(factoryCode);
+  const lineType = line.type ?? '';
+  const lineTypeIndex = LINE_TYPE_ORDER.indexOf(lineType);
+  if (factoryNumber <= 0 || lineTypeIndex === -1) return null;
+
+  const lineNumber = extractNumber(line.lineCode) || lineTypeIndex + 1;
+  const prefix = equipment.codePrefix ?? EQUIPMENT_PREFIX_MAP[equipment.label];
+  if (!prefix) return null;
+
+  const sequence =
+    (factoryNumber - 1) * LINE_TYPE_ORDER.length * EQUIPMENT_UNITS_PER_LINE +
+    lineTypeIndex * EQUIPMENT_UNITS_PER_LINE +
+    (equipment.unitIndex ?? 0) +
+    1;
+
+  const equipmentCode = `${prefix}${sequence.toString().padStart(3, '0')}`;
+  const prCode = process.prCode ?? 'PR000';
+
+  return `F${factoryNumber}-${lineType}${lineNumber}-${equipmentCode}-${prCode}`;
+};
+
+const extractNumber = value => {
+  const matched = String(value ?? '').match(/(\d+)/);
+  return matched ? parseInt(matched[1], 10) : 0;
 };
 </script>
 
