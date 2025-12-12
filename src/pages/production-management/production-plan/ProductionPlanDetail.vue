@@ -636,8 +636,14 @@ const debouncedUpdateEndTime = useDebounceFn(({ startTime, plannedQty, lineCode 
   );
 }, 400);
 
+const currentStatus = computed(() => productionPlanDetail.value?.status);
+
 watch([() => form.values.startTime, () => form.values.plannedQty], ([startTime, plannedQty]) => {
   const formattedStartTime = formatDate(startTime, 'local-datetime');
+
+  if (['COMPLETED', 'RUNNING'].includes(currentStatus.value)) {
+    return;
+  }
 
   if (!startTime || !plannedQty || !lineDetail.value?.lineCode || !formattedStartTime) return;
 
