@@ -623,6 +623,11 @@ const handleSearch = () => {
 watch(searchQuery, value => {
   if (!value) {
     searchFeedback.value = '';
+    highlightedLineCode.value = '';
+    highlightedProcessCode.value = null;
+  } else {
+    highlightedLineCode.value = '';
+    highlightedProcessCode.value = null;
   }
 });
 </script>
