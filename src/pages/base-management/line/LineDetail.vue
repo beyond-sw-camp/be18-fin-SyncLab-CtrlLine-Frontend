@@ -113,10 +113,11 @@
       </fieldset>
 
       <!--담당자 MANAGER 권한 이상 부터 가능하다~ -->
-      <div class="mt-8 pt-6 border-t">
-        <Button v-if="isAdmin" size="sm" class="bg-[#6B8865] hover:bg-[#485945]">
-          생산 가능 품목 등록
-        </Button>
+      <div class="mt-8 pt-6 border-t" v-if="isAdmin">
+        <ManageItemLineDialog
+          v-if="lineDetail?.lineCode"
+          :line-code="lineDetail.lineCode"
+        />
       </div>
 
       <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
@@ -149,6 +150,7 @@ import { FormControl, FormField, FormItem, FormLabel } from '@/components/ui/for
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import ManageItemLineDialog from '@/pages/base-management/line/ManageItemLineDialog.vue';
 import { canView } from '@/utils/canView';
 
 const formSchema = toTypedSchema(
