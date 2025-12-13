@@ -30,9 +30,9 @@ export const POSITION_LABELS = {
 };
 
 export const ITEM_STATUS_LABELS = {
-  RAW_MATERIAL: '원재료',
-  SUB_MATERIAL: '부재료',
-  SEMI_FINISHED_PRODUCT: '반제품',
+  // RAW_MATERIAL: '원재료',
+  // SUB_MATERIAL: '부재료',
+  // SEMI_FINISHED_PRODUCT: '반제품',
   FINISHED_PRODUCT: '완제품',
 };
 

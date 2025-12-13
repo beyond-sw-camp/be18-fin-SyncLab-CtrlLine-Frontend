@@ -54,7 +54,7 @@
                 "
               /> -->
             </TableCell>
-            <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">
+            <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
               {{ equipment.equipmentCode }}
             </TableCell>
             <TableCell class="whitespace-nowrap overflow-hidden text-ellipsis">

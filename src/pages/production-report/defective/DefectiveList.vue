@@ -255,9 +255,7 @@
       <Table class="w-full min-w-[920px] table-fixed">
         <TableHeader class="border-b-2 border-primary">
           <TableRow>
-            <TableHead
-              class="sticky left-0 z-10 min-w-28 bg-white shadow-md text-center whitespace-nowrap overflow-hidden"
-            >
+            <TableHead class="shadow-md text-center whitespace-nowrap overflow-hidden">
               전표번호
             </TableHead>
             <TableHead class="text-center whitespace-nowrap overflow-hidden w-[150px]">
@@ -305,7 +303,7 @@
           >
             <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis font-medium">
               <button
-                class="text-[#2765C4] underline-offset-2 hover:underline"
+                class="text-blue-600 underline-offset-2 hover:underline cursor-pointer"
                 @click="goToDefectiveDetail(record)"
               >
                 {{ record.productionPerformanceDocNo || record.defectiveDocNo }}
@@ -822,7 +820,13 @@ const goToDefectiveDetail = record => {
     toast.error('불량 상세 ID를 찾을 수 없습니다.');
     return;
   }
-  router.push({ name: 'DefectiveDetail', params: { planDefectiveId: planId } });
+
+  const route = router.resolve({
+    name: 'DefectiveDetail',
+    params: { planDefectiveId: planId },
+  });
+
+  window.open(route.href, '_blank');
 };
 
 const CHART_COLORS = ['#5B6D4C', '#7F9C7A', '#AFC49A', '#D7E0C7', '#F1F3EA', '#94A57B'];

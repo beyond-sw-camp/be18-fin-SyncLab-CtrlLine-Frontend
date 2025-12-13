@@ -1,8 +1,9 @@
 name: prod deploy
 on:
-  push:
+  pull_request:
     branches:
       - main
+    types: [opened, synchronize, reopened]
 
 jobs:
   deployment:
@@ -22,11 +23,13 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.KIMEODML_GITHUB_KEY }}
         with:
-          source-directory: "output"
+          source-directory: 'output'
           destination-github-username: kimeodml
           destination-repository-name: be18-fin-SyncLab-CtrlLine-Frontend
           user-email: ${{ secrets.KIMEODML_ACCOUNT_EMAIL }}
-          commit-message: ${{ github.event.commits[0].message }}
+          commit-message: |
+            deploy: PR #${{ github.event.pull_request.number }}
+            ${{ github.event.pull_request.title }}
           target-branch: main
       - name: Test get variable exported by push-to-another-repository
         run: echo $DESTINATION_CLONED_DIRECTORY

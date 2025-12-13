@@ -1,4 +1,3 @@
-// eslint-disable-next-line import-x/no-unresolved
 import path from 'node:path';
 
 import tailwindcss from '@tailwindcss/vite';
@@ -12,6 +11,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [vue(), tailwindcss(), svgLoader()],
+    esbuild: {
+      drop: ['console', 'debugger'],
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

@@ -14,7 +14,7 @@
       </div>
 
       <!-- 고정 상태 표시 -->
-      <span :class="isPinned ? 'text-blue-300' : ''">
+      <span @click.stop="togglePin" :class="isPinned ? 'text-emerald-200' : ''">
         {{ showChildren ? '▾' : '▸' }}
       </span>
     </div>
@@ -30,11 +30,12 @@
 
 <script setup>
 import { ChartGanttIcon, FolderKanban, SheetIcon } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import SidebarLink from '@/components/sidebar/SidebarLink.vue';
 import SidebarSub from '@/components/sidebar/SidebarSub.vue';
+import { useSidebarStore } from '@/stores/useSidebarStore';
 import { useUserStore } from '@/stores/useUserStore';
 
 const props = defineProps({
@@ -45,21 +46,21 @@ const props = defineProps({
 });
 
 const route = useRoute();
-const isPinned = ref(false);
 const userStore = useUserStore();
+const sidebarStore = useSidebarStore();
 
-// 현재 경로가 이 그룹에 속하는지
-const isActiveGroup = computed(() => route.path.startsWith(`/${props.groupKey}/`));
+const isActiveGroup = computed(() => route.path.startsWith(`/${props.groupKey}`));
 
-const showChildren = computed(() => isPinned.value || isActiveGroup.value);
+const isPinned = computed(() => sidebarStore.pinnedGroupKeys.has(props.groupKey));
+
+const showChildren = computed(
+  () => isPinned.value || isActiveGroup.value || sidebarStore.openGroupKeys.has(props.groupKey),
+);
 
 const filteredChildren = computed(() => {
   const role = userStore.userRole;
-
   return props.children.filter(child => {
-    // admin 속성이 true인 경우에만 필터링
-    if (child.admin && role !== 'ADMIN') return false;
-
+    if (child.role === 'ADMIN' && role !== 'ADMIN') return false;
     return true;
   });
 });
@@ -71,7 +72,11 @@ const ICON_COMPONENTS = {
 };
 
 function handleClick() {
-  isPinned.value = !isPinned.value;
+  sidebarStore.toggleGroupOpen(props.groupKey);
+}
+
+function togglePin() {
+  sidebarStore.toggleGroupPin(props.groupKey);
 }
 </script>
 

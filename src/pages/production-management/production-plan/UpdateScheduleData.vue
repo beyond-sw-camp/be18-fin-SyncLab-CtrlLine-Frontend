@@ -73,6 +73,7 @@
       </p>
       <ejs-schedule
         v-if="availableLineResource.length > 0"
+        class="available-schedule"
         ref="availableScheduleRef"
         :selectedDate="selectedDateAvailable"
         width="100%"
@@ -80,7 +81,7 @@
         :current-view="'TimelineDay'"
         :eventSettings="availableEventSettings"
         :popupOpen="onPopupOpen"
-        :dragStop="onAvailableDragStop"
+        :dragStart="onAvailableDragStart"
         :group="groupOptions"
         :resources="availableLineResource"
         :created="onAvailableCreated"
@@ -89,7 +90,6 @@
         :eventClick="onEventClick"
       />
     </div>
-
     <ScheduleTooltip v-if="tooltip.show" :tooltip="tooltip" @close="tooltip.show = false" />
   </div>
 </template>
@@ -189,6 +189,21 @@ const draftEvent = computed(() => {
 
 function onEventRendered(args) {
   const ev = args.data;
+  const el = args.element;
+
+  el.classList.remove('pp-draggable', 'pp-readonly', 'pp-available');
+
+  const isAvailableSchedule = el.closest('.available-schedule');
+
+  console.log(isAvailableSchedule);
+
+  if (isAvailableSchedule) {
+    el.classList.add('pp-available');
+  } else if (canDragEvent(ev)) {
+    el.classList.add('pp-draggable');
+  } else {
+    el.classList.add('pp-readonly');
+  }
 
   if (ev.Id === 'draft-modified') {
     args.element.style.setProperty('background-color', 'var(--primary)', 'important');
@@ -338,8 +353,61 @@ const beforeDragEvents = ref([]); // drag 시작 직전의 selectedEvents 스냅
 const beforeDragMoved = ref(null); // 어떤 이벤트를 움직였는지 저장
 const DRAG_ORDER_EPSILON_MS = 1000; // 드래그 순서 보정용 (1초)
 
+function isDetailTargetEvent(ev) {
+  if (ev.Id === 'draft-modified') return true;
+  return String(ev.Id) === String(props.productionPlanDetail?.id);
+}
+
+function canDragEvent(ev) {
+  const role = userStore.userRole;
+  const status = ev.Status;
+
+  // 상세 조회와 일치하는 일정은지 확인
+  if (!isDetailTargetEvent(ev)) {
+    return false;
+  }
+
+  if (['RUNNING', 'COMPLETED', 'RETURNED'].includes(status)) {
+    return false;
+  }
+
+  // ADMIN 규칙
+  if (role === 'ADMIN') {
+    return ['PENDING', 'CONFIRMED'].includes(status);
+  }
+
+  // MANAGER 규칙
+  if (role === 'MANAGER') {
+    if (status !== 'PENDING') return false;
+
+    const myEmpNo = userStore.empNo;
+    const managerNo = props.productionPlanDetail?.productionManagerNo;
+
+    return String(myEmpNo) === String(managerNo);
+  }
+
+  // 그 외 권한
+  return false;
+}
+
 function onSelectedDragStart(args) {
   const ev = args.data;
+  if (!canDragEvent(ev)) {
+    args.cancel = true;
+
+    // 상황별 안내 메시지
+    const status = ev.Status;
+    const role = userStore.userRole;
+
+    if (['RUNNING', 'COMPLETED'].includes(status)) {
+      toast.info('진행 중이거나 완료된 일정은 이동할 수 없습니다.');
+    } else if (role === 'MANAGER') {
+      toast.info('담당자 본인만 PENDING 일정을 이동할 수 있습니다.');
+    } else {
+      toast.info('해당 일정은 이동할 수 없습니다.');
+    }
+    return;
+  }
 
   // 드래그 시작 시 전체 스냅샷 저장
   beforeDragEvents.value = selectedEvents.value.map(e => ({
@@ -542,7 +610,7 @@ const selectedScheduleRef = ref(null);
 const availableScheduleRef = ref(null);
 
 // 하단 스케줄에서 드래그는 아직 사용 안 함 → 전부 취소
-function onAvailableDragStop(args) {
+function onAvailableDragStart(args) {
   args.cancel = true;
 }
 
@@ -634,5 +702,23 @@ function onPopupOpen(args) {
   font-size: 8px;
   width: 20px;
   height: 30px;
+}
+
+/* 선택 가능한 라인 조회 전용 */
+.available-schedule .e-appointment,
+.available-schedule .e-appointment * {
+  cursor: not-allowed !important;
+}
+
+/* 선택한 라인 - 드래그 불가 */
+.pp-readonly,
+.pp-readonly * {
+  cursor: not-allowed !important;
+}
+
+/* 선택한 라인 - 드래그 가능 */
+.pp-draggable,
+.pp-draggable * {
+  cursor: grab !important;
 }
 </style>

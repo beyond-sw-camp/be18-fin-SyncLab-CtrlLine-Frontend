@@ -2,6 +2,9 @@
   <div class="relative">
     <div>
       <Badge variant="secondary" class="mb-4">선택 라인</Badge>
+      <p class="text-gray-500 text-xs pl-1 pb-2">
+        등록할 때는 드래그하여 일정을 수정할 수 없습니다.
+      </p>
       <ejs-schedule
         class="time-scale"
         :timeScale="optimizedTimeScaleOptions"
@@ -25,6 +28,9 @@
 
     <div>
       <Badge variant="secondary" class="mb-4 mt-6">선택 가능한 라인</Badge>
+      <p class="text-gray-500 text-xs pl-1 pb-2">
+        조회 전용 일정입니다. 드래그하여 이동할 수 없습니다.
+      </p>
       <ejs-schedule
         v-if="availableLineResource.length > 0"
         ref="availableScheduleRef"

@@ -92,27 +92,28 @@
             <TableRow>
               <TableHead
                 class="sticky left-0 z-10 min-w-28 bg-white shadow-md text-center whitespace-nowrap overflow-hidden"
-                >전표번호</TableHead
               >
+                전표번호
+              </TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">공장명</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">라인명</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">품목명</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">품목코드</TableHead>
-              <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산 계획번호</TableHead
-              >
-              <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산 담당자</TableHead
-              >
-              <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >영업 담당자</TableHead
-              >
-              <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산 시작 시각</TableHead
-              >
-              <TableHead class="text-center whitespace-nowrap overflow-hidden"
-                >생산 종료 시각</TableHead
-              >
+              <TableHead class="text-center whitespace-nowrap overflow-hidden">
+                생산 계획번호
+              </TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden">
+                생산 담당자
+              </TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden">
+                영업 담당자
+              </TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden">
+                생산 시작 시각
+              </TableHead>
+              <TableHead class="text-center whitespace-nowrap overflow-hidden">
+                생산 종료 시각
+              </TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">실적수량</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">불량수량</TableHead>
               <TableHead class="text-center whitespace-nowrap overflow-hidden">불량률</TableHead>
@@ -125,9 +126,17 @@
               :key="index"
               class="text-center transition-all border-b border-dotted border-gray-300"
             >
-              <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">{{
-                row.documentNo
-              }}</TableCell>
+              <TableCell
+                class="sticky left-0 z-10 min-w-28 bg-white py-3 whitespace-nowrap overflow-hidden text-ellipsis"
+              >
+                <button
+                  type="button"
+                  @click="goToProductionPerformanceDetail(row.id)"
+                  class="text-blue-600 underline-offset-2 hover:underline cursor-pointer"
+                >
+                  {{ row.documentNo }}
+                </button>
+              </TableCell>
               <TableCell class="py-3 whitespace-nowrap overflow-hidden text-ellipsis">
                 {{ row.factoryName ?? '-' }}
               </TableCell>
@@ -372,6 +381,15 @@ const pickFilterDate = keys => {
   return null;
 };
 
+function goToProductionPerformanceDetail(performanceId) {
+  const route = router.resolve({
+    name: 'ProductionPerformanceDetail',
+    params: { id: performanceId },
+  });
+
+  window.open(route.href, '_blank');
+}
+
 const filterDateRange = computed(() => {
   const start = pickFilterDate([
     'startDateTimeStart',
@@ -572,8 +590,8 @@ const exportCsv = () => {
     '품목명',
     '품목코드',
     '생산계획번호',
-    '생산담당자',
-    '영업담당자',
+    '생산 담당자',
+    '영업 담당자',
     '생산시작시간',
     '생산종료시간',
     '실적수량',

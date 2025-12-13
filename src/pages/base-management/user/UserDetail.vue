@@ -345,7 +345,10 @@ const route = useRoute();
 
 const { data: userDetail } = useGetUser(route.params.userId);
 const { mutate: updateUser } = useUpdateUser(route.params.userId);
-const isResigned = computed(() => userDetail.value.userStatus === 'RESIGNED');
+const isResigned = computed(() => {
+  return userDetail.value && userDetail.value.userStatus === 'RESIGNED';
+});
+
 const isEditable = computed(() => {
   return canView(['ADMIN']) && !isResigned.value;
 });

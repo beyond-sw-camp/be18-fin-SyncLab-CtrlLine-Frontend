@@ -4,12 +4,10 @@
       class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-muted/30 px-4 py-3"
     >
       <div class="space-y-1">
-        <p class="text-xs uppercase tracking-wide text-muted-foreground">
-          RUNNING 라인 진행률
-        </p>
+        <p class="text-xs uppercase tracking-wide text-muted-foreground">RUNNING 라인 진행률</p>
         <p class="text-sm font-semibold text-foreground">
-          {{ productionProgressSummary.measuredCount }} / {{ productionProgressSummary.runningCount }}개
-          라인
+          {{ productionProgressSummary.measuredCount }} /
+          {{ productionProgressSummary.runningCount }}개 라인
         </p>
         <div class="text-xs text-muted-foreground flex flex-wrap gap-2">
           <span>계획 전표:</span>
@@ -27,9 +25,7 @@
         <ProductionProgress :value="productionProgressSummary.percent" />
       </div>
       <div class="text-right space-y-1">
-        <p class="text-xs uppercase tracking-wide text-muted-foreground">
-          생산량 합계
-        </p>
+        <p class="text-xs uppercase tracking-wide text-muted-foreground">생산량 합계</p>
         <p class="text-lg font-semibold text-foreground">
           {{ productionProgressSummary.produced.toLocaleString() }}
           <span class="text-xs text-muted-foreground">
@@ -56,11 +52,15 @@
   <div class="grid gap-4 pt-4">
     <LineEquipmentStatus :lines="lines" :status-map="equipmentStatuses" />
 
-    <div class="flex flex-wrap items-center justify-between gap-3 text-xs font-medium text-muted-foreground">
+    <div
+      class="flex flex-wrap items-center justify-between gap-3 text-xs font-medium text-muted-foreground"
+    >
       <div class="flex items-center gap-2">
         <span>품목</span>
         <Select v-model="selectedItem">
-          <SelectTrigger class="h-8 w-[180px] rounded-full border bg-background px-3 text-xs font-medium">
+          <SelectTrigger
+            class="h-8 w-[180px] rounded-full border bg-background px-3 text-xs font-medium"
+          >
             <SelectValue placeholder="전체 품목" />
           </SelectTrigger>
           <SelectContent>
@@ -79,7 +79,11 @@
             size="sm"
             variant="ghost"
             class="rounded-full px-3 py-1 text-xs font-medium transition"
-            :class="chartGranularity === option.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'"
+            :class="
+              chartGranularity === option.value
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            "
             @click="chartGranularity = option.value"
           >
             {{ option.label }}
@@ -107,9 +111,15 @@ import useGetFactoryLinesWithEquipments from '@/apis/query-hooks/factory/useGetF
 import useGetProductionPerformanceAll from '@/apis/query-hooks/production-performance/useGetProductionPerformanceAll';
 import useGetLineProductionProgress from '@/apis/query-hooks/production-progress/useGetLineProductionProgress';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import useEquipmentStatusFeed from '@/composables/useEquipmentStatusFeed';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PIE_CHART_CONFIG } from '@/constants/chartConfig';
+import useEquipmentStatusFeed from '@/hooks/useEquipmentStatusFeed';
 import ChartNgType from '@/pages/dashboard/ChartNgType.vue';
 import DefectRateChart from '@/pages/dashboard/DefectRateChart.vue';
 import LineEquipmentStatus from '@/pages/dashboard/LineEquipmentStatus.vue';
@@ -225,7 +235,8 @@ const lines = computed(() => ({
   lines: factoryLines.value ?? [],
 }));
 
-const getRecordItemCode = record => record?.itemCode || record?.item?.itemCode || record?.itemId || null;
+const getRecordItemCode = record =>
+  record?.itemCode || record?.item?.itemCode || record?.itemId || null;
 const getRecordItemLabel = record => {
   const code = getRecordItemCode(record);
   if (!code) return null;
@@ -337,9 +348,7 @@ const productionProgressSummary = computed(() => {
       ? Math.min(100, Math.max(0, Number(((totals.produced / totals.target) * 100).toFixed(1))))
       : 0;
 
-  const documents = Array.from(
-    new Set(entries.map(entry => entry.orderNo).filter(Boolean)),
-  );
+  const documents = Array.from(new Set(entries.map(entry => entry.orderNo).filter(Boolean)));
 
   return {
     available: runningSet.size > 0 && totals.target > 0,
