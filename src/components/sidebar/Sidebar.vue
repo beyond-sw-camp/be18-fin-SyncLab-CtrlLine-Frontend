@@ -14,7 +14,7 @@
       </RouterLink>
       <SidebarGroup title="기초 관리" group-key="base-management" :children="baseManagement" />
       <SidebarGroup
-        title="생산계획 관리"
+        title="생산 관리"
         group-key="production-management"
         :children="productionManagement"
       />
@@ -27,9 +27,28 @@
 </template>
 
 <script setup>
-import { RouterLink } from 'vue-router';
+import { watch } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
 
 import SidebarGroup from '@/components/sidebar/SidebarGroup.vue';
 import { baseManagement, productionManagement, productionReport } from '@/constants/category';
+import { useSidebarStore } from '@/stores/useSidebarStore';
+
+const route = useRoute();
+const sidebarStore = useSidebarStore();
+
+function getTopKey(path) {
+  // /production-report/defectives -> production-report
+  return path.split('/')[1] || null;
+}
+
+watch(
+  () => route.path,
+  path => {
+    sidebarStore.syncRoute(getTopKey(path));
+  },
+  { immediate: true },
+);
 </script>
+
 <style></style>

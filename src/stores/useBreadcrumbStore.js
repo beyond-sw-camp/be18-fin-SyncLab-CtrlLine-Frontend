@@ -13,7 +13,7 @@ export const useBreadcrumbStore = defineStore('breadcrumb', {
 
       const allGroups = [
         { label: '기초 관리', children: baseManagement },
-        { label: '생산계획 관리', children: productionManagement },
+        { label: '생산 관리', children: productionManagement },
         { label: '출력물', children: productionReport },
       ];
 

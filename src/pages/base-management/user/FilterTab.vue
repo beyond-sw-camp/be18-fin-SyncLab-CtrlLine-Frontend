@@ -26,24 +26,10 @@
           <FilterSelect
             label="상태"
             v-model="localFilters.userStatus"
-            :options="[
-              { value: null, label: '전체' },
-              { value: 'ACTIVE', label: '재직' },
-              { value: 'LEAVE', label: '휴직' },
-              { value: 'RESIGNED', label: '퇴사' },
-            ]"
+            :options="userStatusOptions"
           />
 
-          <FilterSelect
-            label="권한"
-            v-model="localFilters.userRole"
-            :options="[
-              { value: null, label: '전체' },
-              { value: 'USER', label: '유저' },
-              { value: 'MANAGER', label: '매니저' },
-              { value: 'ADMIN', label: '관리자' },
-            ]"
-          />
+          <FilterSelect label="권한" v-model="localFilters.userRole" :options="userRoleOptions" />
         </div>
 
         <div class="flex justify-end mt-4 gap-2">
@@ -80,7 +66,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { DEPARTMENT_LABELS } from '@/constants/enumLabels';
+import { DEPARTMENT_LABELS, EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 import { canView } from '@/utils/canView';
 
 const emit = defineEmits(['search']);
@@ -93,6 +79,28 @@ const localFilters = reactive({
   userPhoneNumber: '',
   userStatus: null,
   userRole: null,
+});
+
+const userStatusOptions = computed(() => {
+  const options = Object.entries(EMPLOYMENT_STATUS_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
+
+  options.unshift({ value: null, label: '전체' });
+
+  return options;
+});
+
+const userRoleOptions = computed(() => {
+  const options = Object.entries(ROLE_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
+
+  options.unshift({ value: null, label: '전체' });
+
+  return options;
 });
 
 const departmentOptions = computed(() => {

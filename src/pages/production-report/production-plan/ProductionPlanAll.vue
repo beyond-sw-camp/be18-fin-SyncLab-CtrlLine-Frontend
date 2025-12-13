@@ -56,7 +56,13 @@
               <TableCell
                 class="sticky left-0 z-10 min-w-28 bg-white py-3 whitespace-nowrap overflow-hidden text-ellipsis"
               >
-                {{ productionPlan.documentNo }}
+                <button
+                  class="text-blue-600 underline-offset-2 hover:underline cursor-pointer"
+                  type="button"
+                  @click="goToProductionPlanDetail(productionPlan.id)"
+                >
+                  {{ productionPlan.documentNo }}
+                </button>
               </TableCell>
               <TableCell class="sticky left-28 z-10 bg-white whitespace-nowrap overflow-hidden">
                 <Badge class="w-[87px]" :class="STATUS_CLASSES[productionPlan.status]">
@@ -173,6 +179,15 @@ const syncQuery = () => {
   router.replace({ query });
 };
 
+function goToProductionPlanDetail(planId) {
+  const route = router.resolve({
+    name: 'ProductionPlanDetail',
+    params: { productionPlanId: planId },
+  });
+
+  window.open(route.href, '_blank');
+}
+
 const exportCsv = () => {
   if (!productionPlanAll.value || productionPlanAll.value.length === 0) {
     return;
@@ -190,8 +205,8 @@ const exportCsv = () => {
     '납기일자',
     '생산시작시간',
     '생산종료시간',
-    '생산담당자',
-    '영업담당자',
+    '생산 담당자',
+    '영업 담당자',
   ];
 
   // CSV 데이터

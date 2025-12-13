@@ -71,6 +71,10 @@
                   {{ ROLE_LABELS[item.userRole] }}
                 </template>
 
+                <template v-else-if="field === 'itemStatus'">
+                  {{ ITEM_STATUS_LABELS[item.itemStatus] }}
+                </template>
+
                 <template v-else>
                   {{ item[field] }}
                 </template>
@@ -106,7 +110,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { EMPLOYMENT_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
+import { EMPLOYMENT_STATUS_LABELS, ITEM_STATUS_LABELS, ROLE_LABELS } from '@/constants/enumLabels';
 import withObjectParticle from '@/utils/withObjectParticle';
 
 const props = defineProps({
