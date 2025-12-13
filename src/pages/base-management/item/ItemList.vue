@@ -4,6 +4,12 @@
 
     <div class="flex gap-2">
       <StatusUpdateDialog :rows="selectedRows" @updated="onReset" />
+
+      <RouterLink to="/base-management/items/new">
+        <Button size="sm" class="cursor-pointer w-[70px]">
+          New <ChevronRightIcon class="ml-1" />
+        </Button>
+      </RouterLink>
     </div>
   </div>
 
@@ -95,12 +101,14 @@
 </template>
 
 <script setup>
+import { ChevronRightIcon } from 'lucide-vue-next';
 import { watch, ref, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, RouterLink } from 'vue-router';
 
 import useGetItemList from '@/apis/query-hooks/item/useGetItemList';
 import BasePagination from '@/components/pagination/BasePagination.vue';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
