@@ -14,7 +14,7 @@
       </RouterLink>
       <SidebarGroup title="기초 관리" group-key="base-management" :children="baseManagement" />
       <SidebarGroup
-        title="생산계획 관리"
+        title="생산 관리"
         group-key="production-management"
         :children="productionManagement"
       />

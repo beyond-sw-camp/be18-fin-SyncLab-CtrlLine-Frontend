@@ -60,7 +60,7 @@ const showChildren = computed(
 const filteredChildren = computed(() => {
   const role = userStore.userRole;
   return props.children.filter(child => {
-    if (child.admin && role !== 'ADMIN') return false;
+    if (child.role === 'ADMIN' && role !== 'ADMIN') return false;
     return true;
   });
 });
