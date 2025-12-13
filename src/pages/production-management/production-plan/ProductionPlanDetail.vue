@@ -390,20 +390,18 @@ import formatDate from '@/utils/formatDate';
 
 const formSchema = toTypedSchema(
   z.object({
-    factoryCode: z
-      .string({ required_error: '공장명은 필수입니다.' })
-      .min(1, '공장명은 필수입니다.'),
+    factoryCode: z.string({ required_error: '공장은 필수입니다.' }).min(1, '공장은 필수입니다.'),
     dueDate: z.string({ required_error: '납기일자는 필수입니다.' }),
     productionManagerNo: z
-      .string({ required_error: '생산담당자는 필수입니다.' })
-      .min(1, '생산담당자는 필수입니다.'),
-    itemCode: z.string({ required_error: '품목명은 필수입니다.' }).min(1, '품목명은 필수입니다.'),
-    salesManagerNo: z.string({ required_error: '영업담당자는 필수입니다.' }),
-    lineCode: z.string({ required_error: '라인명은 필수입니다.' }).min(1, '라인명은 필수입니다.'),
+      .string({ required_error: '생산 담당자는 필수입니다.' })
+      .min(1, '생산 담당자는 필수입니다.'),
+    itemCode: z.string({ required_error: '품목은 필수입니다.' }).min(1, '품목은 필수입니다.'),
+    salesManagerNo: z.string({ required_error: '영업 담당자는 필수입니다.' }),
+    lineCode: z.string({ required_error: '라인은 필수입니다.' }).min(1, '라인은 필수입니다.'),
     status: z.string({ required_error: '상태는 필수입니다.' }),
     plannedQty: z.coerce
-      .number({ required_error: '생산계획수량은 필수입니다.' })
-      .positive('생산계획수량은 1 이상이어야 합니다.'),
+      .number({ required_error: '계획수량은 필수입니다.' })
+      .positive('계획수량은 1 이상이어야 합니다.'),
     remark: z.string().optional(),
     startTime: z.string().optional(),
     endTime: z.string().optional(),
@@ -706,7 +704,7 @@ watch(
     lineDetail.value = {
       lineCode: val.lineCode,
       lineName: val.lineName,
-      userName: val.productionManagerName, // 생산담당자명 표시
+      userName: val.productionManagerName, // 생산 담당자명 표시
     };
   },
   { immediate: true },
