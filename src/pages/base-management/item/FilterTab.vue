@@ -18,13 +18,7 @@
           <FilterSelect
             label="품목구분"
             v-model="localFilters.itemStatus"
-            :options="[
-              { value: null, label: '전체' },
-              { value: 'RAW_MATERIAL', label: '원재료' },
-              { value: 'AUXILIARY_MATERIAL', label: '부재료' },
-              { value: 'SEMI_FINISHED_PRODUCT', label: '반제품' },
-              { value: 'FINISHED_PRODUCT', label: '완제품' },
-            ]"
+            :options="itemStatusOptions"
           />
           <FilterSelect
             label="사용여부"
@@ -60,7 +54,7 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { computed, reactive, watch } from 'vue';
 
 import FilterInput from '@/components/filter/FilterInput.vue';
 import FilterSelect from '@/components/filter/FilterSelect.vue';
@@ -71,6 +65,7 @@ import {
   AccordionContent,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { ITEM_STATUS_LABELS } from '@/constants/enumLabels';
 
 const props = defineProps({
   filters: { type: Object, required: true },
@@ -94,6 +89,17 @@ watch(
   },
   { deep: true },
 );
+
+const itemStatusOptions = computed(() => {
+  const options = Object.entries(ITEM_STATUS_LABELS).map(([value, label]) => ({
+    value,
+    label,
+  }));
+
+  options.unshift({ value: null, label: '전체' });
+
+  return options;
+});
 
 const applyFilters = () => {
   emit('search', { ...localFilters });
