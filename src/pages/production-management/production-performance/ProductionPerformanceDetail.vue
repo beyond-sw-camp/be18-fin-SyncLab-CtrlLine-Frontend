@@ -185,55 +185,59 @@
             </FormField>
           </div>
 
-          <FormField name="productionPlanDocumentNo" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>생산계획 전표번호</FormLabel>
-              <div
-                class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
-              >
-                <button
-                  class="text-primary underline-offset-2 hover:underline text-sm p-0 text-left cursor-pointer"
-                  @click.stop.prevent="
-                    openPlanDocNoNewTab(productionPerformanceDetail.productionPlanId)
-                  "
+          <div class="pointer-events-auto">
+            <FormField name="productionPlanDocumentNo" v-slot="{ componentField }">
+              <FormItem>
+                <FormLabel>생산계획 전표번호</FormLabel>
+                <div
+                  class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
                 >
-                  {{ componentField.modelValue }}
-                </button>
-              </div>
-            </FormItem>
-          </FormField>
-
-          <FormField name="lotNo" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>Lot No.</FormLabel>
-              <div
-                class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
-              >
-                <button
-                  class="text-primary underline-offset-2 hover:underline text-sm p-0 text-left cursor-pointer"
-                  @click.stop.prevent="openLotNoNewTab(productionPerformanceDetail.lotId)"
+                  <button
+                    class="text-primary underline-offset-2 hover:underline text-sm p-0 text-left cursor-pointer"
+                    @click.stop.prevent="
+                      openPlanDocNoNewTab(productionPerformanceDetail.productionPlanId)
+                    "
+                  >
+                    {{ componentField.modelValue }}
+                  </button>
+                </div>
+              </FormItem>
+            </FormField>
+          </div>
+          <div class="pointer-events-auto">
+            <FormField name="lotNo" v-slot="{ componentField }">
+              <FormItem>
+                <FormLabel>Lot No.</FormLabel>
+                <div
+                  class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
                 >
-                  {{ componentField.modelValue }}
-                </button>
-              </div>
-            </FormItem>
-          </FormField>
-
-          <FormField name="defectiveDocumentNo" v-slot="{ componentField }">
-            <FormItem>
-              <FormLabel>불량 전표번호</FormLabel>
-              <div
-                class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
-              >
-                <button
-                  class="text-primary underline-offset-2 hover:underline text-sm p-0 text-left cursor-pointer"
-                  @click.stop.prevent="openDefNewTab(productionPerformanceDetail.defectiveId)"
+                  <button
+                    class="text-primary underline-offset-2 hover:underline text-sm p-0 text-left cursor-pointer"
+                    @click.stop.prevent="openLotNoNewTab(productionPerformanceDetail.lotId)"
+                  >
+                    {{ componentField.modelValue }}
+                  </button>
+                </div>
+              </FormItem>
+            </FormField>
+          </div>
+          <div class="pointer-events-auto">
+            <FormField name="defectiveDocumentNo" v-slot="{ componentField }">
+              <FormItem>
+                <FormLabel>불량 전표번호</FormLabel>
+                <div
+                  class="border rounded-md px-3 py-2 h-10 w-full bg-gray-50 text-sm flex items-center"
                 >
-                  {{ componentField.modelValue }}
-                </button>
-              </div>
-            </FormItem>
-          </FormField>
+                  <button
+                    class="text-primary underline-offset-2 hover:underline text-sm p-0 text-left cursor-pointer"
+                    @click.stop.prevent="openDefNewTab(productionPerformanceDetail.defectiveId)"
+                  >
+                    {{ componentField.modelValue }}
+                  </button>
+                </div>
+              </FormItem>
+            </FormField>
+          </div>
         </div>
 
         <div class="mt-6 border-t pt-4">
