@@ -175,7 +175,7 @@ const onSubmit = values => {
     itemSpecification: values.itemSpecification,
     itemUnit: values.itemUnit,
     itemStatus: values.itemStatus,
-    isActive: values.isActive === 'true',
+    isActive: true,
   };
   // @ts-ignore
   createItem(params);

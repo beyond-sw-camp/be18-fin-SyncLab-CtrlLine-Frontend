@@ -90,7 +90,7 @@
       </div>
     </Form>
   </div>
-  <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
+  <!-- <div class="flex justify-end pt-6 pb-5" v-if="isAdmin">
     <Button
       type="submit"
       form="factoryUpdateForm"
@@ -98,7 +98,7 @@
     >
       Save
     </Button>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
@@ -106,23 +106,24 @@ import { useRoute } from 'vue-router';
 
 import useGetFactory from '@/apis/query-hooks/factory/useGetFactory.js';
 import useUpdateFactoryStatus from '@/apis/query-hooks/factory/useUpdateFactoryStatus';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 // import { Label } from '@/components/ui/label';
 // import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { canView } from '@/utils/canView';
+// import { canView } from '@/utils/canView';
 
 const route = useRoute();
 
 const { data: factoryDetail } = useGetFactory(route.params.factoryCode);
 const { mutate: updateFactoryStatus } = useUpdateFactoryStatus(route.params.factoryCode);
-const isAdmin = canView(['ADMIN']);
+// const isAdmin = canView(['ADMIN']);
 
 const onSubmit = values => {
   const params = {
     isActive: values.isActive === 'true',
   };
+  // @ts-ignore
   updateFactoryStatus(params);
 };
 </script>

@@ -37,7 +37,7 @@
         </ul>
       </div>
 
-      <Input type="text" v-bind="componentField" class="w-28 bg-gray-100 text-sm" />
+      <Input type="text" v-bind="componentField" class="w-28 bg-gray-100 text-sm" readonly />
     </div>
 
     <SelectModal

@@ -93,6 +93,7 @@
                 </FormItem>
               </FormField>
             </div>
+
             <div class="order-1 md:order-0">
               <FormField v-slot="{ componentField, errorMessage }" name="userDepartment">
                 <FormItem>
