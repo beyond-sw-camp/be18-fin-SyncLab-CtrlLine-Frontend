@@ -38,7 +38,7 @@
           </NavigationMenuItem>
           <NavigationMenuItem>
             <Button
-              class="cursor-pointer hover:bg-[#800020] transition-colors"
+              class="cursor-pointer hover:bg-[#a00b30] transition-colors"
               @click="logoutAndClear"
             >
               <LogOutIcon />
