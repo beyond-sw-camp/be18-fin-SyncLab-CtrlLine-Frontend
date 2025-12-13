@@ -593,6 +593,10 @@ watch(
   },
 );
 
+function hasScheduleImpact(data) {
+  return (data?.affectedPlans?.length ?? 0) > 0 || (data?.dueDateExceededPlans?.length ?? 0) > 0;
+}
+
 const onSubmit = form.handleSubmit(values => {
   const params = {
     status: values.status,
@@ -609,9 +613,24 @@ const onSubmit = form.handleSubmit(values => {
 
   updateProductionPlanPreview(params, {
     onSuccess: data => {
-      affectedPlansData.value = data;
       previewKey.value = data.previewKey;
-      showConfirmationModal.value = true;
+
+      if (hasScheduleImpact(data)) {
+        affectedPlansData.value = data;
+        showConfirmationModal.value = true;
+        return;
+      }
+
+      // 영향 없음 → 바로 최종 저장
+      updateProductionPlan(data.previewKey, {
+        onSuccess: () => {
+          toast.success('생산 계획이 수정되었습니다.');
+          router.go(0);
+        },
+        onError: () => {
+          toast.error('최종 저장 중 오류가 발생했습니다.');
+        },
+      });
     },
   });
 });
@@ -626,7 +645,7 @@ const handleConfirmUpdate = () => {
     onSuccess: () => {
       showConfirmationModal.value = false;
       // router.push('/production-management/production-plans');
-      toast.success('생산 계획이 최종 수정되었습니다.');
+      toast.success('생산계획이 최종 수정되었습니다.');
       router.go(0);
     },
     onError: () => {
