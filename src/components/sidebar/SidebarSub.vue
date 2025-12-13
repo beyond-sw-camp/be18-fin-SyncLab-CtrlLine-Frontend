@@ -13,7 +13,7 @@
         {{ label }}
       </span>
       <!-- 고정 상태 표시 -->
-      <span :class="isPinned ? 'text-emerald-200' : ''">
+      <span @click.stop="togglePin" :class="isPinned ? 'text-emerald-200' : ''">
         {{ showChildren ? '▾' : '▸' }}
       </span>
     </div>
@@ -42,10 +42,11 @@ import {
   SquareChartGanttIcon,
   UsersIcon,
 } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import SidebarLink from '@/components/sidebar/SidebarLink.vue';
+import { useSidebarStore } from '@/stores/useSidebarStore';
 import { useUserStore } from '@/stores/useUserStore';
 
 const props = defineProps({
@@ -54,24 +55,28 @@ const props = defineProps({
   children: Array,
 });
 
-const userStore = useUserStore();
 const route = useRoute();
-const isPinned = ref(false);
+const userStore = useUserStore();
+const sidebarStore = useSidebarStore();
+
+const subKey = `sub:${props.label}`;
+
+const isActiveSub = computed(() => props.children?.some(c => route.path.startsWith(c.to)));
+
+const isPinned = computed(() => sidebarStore.pinnedSubKeys.has(subKey));
+
+const showChildren = computed(
+  () => isPinned.value || isActiveSub.value || sidebarStore.openSubKeys.has(subKey),
+);
 
 const filteredChildren = computed(() => {
   const role = userStore.userRole;
-
   return props.children.filter(child => {
     if (child.to?.includes(':')) return false;
     if (child.role && child.role !== role) return false;
     return true;
   });
 });
-
-// 이 서브 메뉴 하위 경로가 현재 경로인지
-const isActiveSub = computed(() => props.children?.some(c => route.path.startsWith(c.to)));
-
-const showChildren = computed(() => isPinned.value || isActiveSub.value);
 
 const ICON_COMPONENTS = {
   UsersIcon,
@@ -87,7 +92,11 @@ const ICON_COMPONENTS = {
 };
 
 function handleClick() {
-  isPinned.value = !isPinned.value;
+  sidebarStore.toggleSubOpen(subKey);
+}
+
+function togglePin() {
+  sidebarStore.toggleSubPin(subKey);
 }
 </script>
 
