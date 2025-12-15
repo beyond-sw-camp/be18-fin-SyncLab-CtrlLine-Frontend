@@ -145,12 +145,15 @@ const route = useRoute();
 const router = useRouter();
 
 const initialFilters = {
-  factoryName: '',
-  lineName: '',
-  salesManagerName: '',
-  productionManagerName: '',
+  factoryCode: '',
+  lineCode: '',
+  salesManagerNo: '',
+  // salesManagerName: '',
+  productionManagerNo: '',
+  // productionManagerName: '',
   itemCode: '',
-  dueDate: null,
+  dueDateFrom: null,
+  dueDateTo: null,
   startTime: null,
   endTime: null,
 };
