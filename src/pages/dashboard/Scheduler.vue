@@ -168,8 +168,8 @@ function onPopupOpen(args) {
 /* 스크롤바 지정 */
 .e-schedule .e-content-wrap::-webkit-scrollbar,
 .e-schedule::-webkit-scrollbar {
-  width: 2px; /* 원하는 너비로 설정하여 얇게 만듭니다. */
-  height: 2px;
+  width: 5px;
+  height: 5px;
 }
 
 .e-schedule .e-content-wrap::-webkit-scrollbar-thumb,

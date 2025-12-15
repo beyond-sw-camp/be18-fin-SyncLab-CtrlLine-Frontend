@@ -1,9 +1,8 @@
 name: prod deploy
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types: [opened, synchronize, reopened]
 
 jobs:
   deployment:
