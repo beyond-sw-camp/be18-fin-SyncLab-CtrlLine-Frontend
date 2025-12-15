@@ -9,7 +9,7 @@
 
       <AccordionContent class="p-4 border-b-2 border-t-2 my-3">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FilterSelect label="공장" v-model="localFilters.factoryName" :options="factoryOptions" />
+          <FilterSelect label="공장" v-model="localFilters.factoryCode" :options="factoryOptions" />
 
           <div>
             <Label class="text-xs">납기일자</Label>
@@ -196,7 +196,7 @@ const props = defineProps({
   filters: { type: Object, required: true },
 });
 
-const emit = defineEmits(['search']);
+const emit = defineEmits(['search', 'reset']);
 
 const localFilters = reactive({
   factoryCode: props.filters.factoryCode ?? null,
@@ -253,13 +253,14 @@ const { data: factoryList } = useGetFactoryList();
 const { data: lineList } = useGetLineList({ factoryId: selectedFactoryId, itemId: selectedItemId });
 
 const factoryOptions = computed(() => {
-  if (!factoryList.value || !factoryList.value.content)
+  if (!factoryList.value || !factoryList.value.content) {
     return [{ value: null, label: '전체', id: null }];
+  }
 
   return [
     { value: null, label: '전체', id: null },
     ...factoryList.value.content.map(factory => ({
-      value: factory.factoryName,
+      value: factory.factoryCode,
       label: factory.factoryName,
       id: factory.factoryId,
     })),
@@ -270,6 +271,8 @@ const lineOptions = computed(() => {
   if (!lineList.value || !lineList.value.content) {
     return [{ value: null, label: '전체' }];
   }
+
+  console.log('line', lineList);
 
   const entries = lineList.value.content;
   const relevantLines = entries;
@@ -314,6 +317,7 @@ const applyFilters = () => {
 const resetFilters = () => {
   Object.assign(localFilters, {
     factoryName: null,
+    factoryCode: null,
     lineName: '',
     lineCode: null,
     salesManagerName: '',
@@ -330,7 +334,7 @@ const resetFilters = () => {
   selectedFactoryId.value = null;
   selectedItemId.value = null;
 
-  emit('search', { ...localFilters });
+  emit('reset', { ...localFilters });
 };
 
 watch(
@@ -339,6 +343,18 @@ watch(
     Object.assign(localFilters, newVal);
   },
   { deep: true },
+);
+
+watch(
+  () => localFilters.factoryCode,
+  (newCode, oldCode) => {
+    const match = factoryList.value?.content?.find(factory => factory.factoryCode === newCode);
+    selectedFactoryId.value = match?.factoryId ?? null;
+    if (newCode !== oldCode) {
+      localFilters.lineCode = null;
+    }
+  },
+  { immediate: true },
 );
 </script>
 
