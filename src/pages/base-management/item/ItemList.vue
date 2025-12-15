@@ -5,7 +5,7 @@
     <div class="flex gap-2">
       <StatusUpdateDialog :rows="selectedRows" @updated="onReset" />
 
-      <RouterLink to="/base-management/items/new">
+      <RouterLink to="/base-management/items/new" v-if="isAdmin">
         <Button size="sm" class="cursor-pointer w-[70px]">
           New <ChevronRightIcon class="ml-1" />
         </Button>
