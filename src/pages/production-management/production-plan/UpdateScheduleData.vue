@@ -653,8 +653,8 @@ function onPopupOpen(args) {
 /* 스크롤바 얇게 */
 .e-schedule .e-content-wrap::-webkit-scrollbar,
 .e-schedule::-webkit-scrollbar {
-  width: 2px;
-  height: 2px;
+  width: 5px;
+  height: 5px;
 }
 
 .e-schedule .e-content-wrap::-webkit-scrollbar-thumb,
