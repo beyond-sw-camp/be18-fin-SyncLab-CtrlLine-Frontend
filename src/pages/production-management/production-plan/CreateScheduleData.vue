@@ -226,7 +226,7 @@ const makeEvent = ev => {
     Id: ev.id,
     Subject: ev.documentNo,
     StartTime: new Date(ev.startTime),
-    EndTime: new Date(ev.endTime),
+    EndTime: new Date(ev.actualEndTime ?? ev.endTime),
     LineCode: ev.lineCode,
     ItemName: ev.itemName,
     ItemQty: ev.plannedQty,
